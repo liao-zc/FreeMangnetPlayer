@@ -236,6 +236,8 @@ class PlayerActivity : ComponentActivity() {
                 // The player reads the same file as libtorrent's disk writer.
                 // Use the OS cache rather than a separate native write cache.
                 options.settingsPack.cacheSize(0)
+                options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
+                options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
                 val engine = TorrentSession(options)
                 engine.listener = createTorrentListener()
                 withContext(Dispatchers.Main) { session = engine }
@@ -328,11 +330,13 @@ class PlayerActivity : ComponentActivity() {
 
     private fun fetchVerifiedMetadata(hash: String): ByteArray? = runCatching {
         runOnUiThread { statusText = "正在查询元数据缓存；将校验内容是否与磁力哈希一致…" }
-        val connection = java.net.URL("https://itorrents.org/torrent/${hash.uppercase()}.torrent")
+        val connection = java.net.URL("https://itorrents.net/torrent/${hash.uppercase()}.torrent")
             .openConnection() as java.net.HttpURLConnection
         try {
             connection.connectTimeout = 6000
             connection.readTimeout = 6000
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36")
+            if (connection.responseCode != 200) throw java.io.IOException("Metadata cache HTTP ${connection.responseCode}")
             val bytes = connection.inputStream.use { input ->
                 val output = java.io.ByteArrayOutputStream()
                 val buffer = ByteArray(8192)
@@ -352,7 +356,7 @@ class PlayerActivity : ComponentActivity() {
                 info.bencode()
             }
         } finally { connection.disconnect() }
-    }.getOrNull()
+    }.onFailure { android.util.Log.w("TorrentMetadata", "Metadata cache failed for $hash", it) }.getOrNull()
 
     private fun hasPlaybackBuffer(state: TorrentSessionStatus): Boolean {
         val buffer = state.torrentSessionBuffer
