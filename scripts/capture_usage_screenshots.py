@@ -57,7 +57,7 @@ def main() -> None:
     find_and_tap("设置")
     time.sleep(1)
     screenshot("03-engine-settings.png")
-    find_and_tap("完成")
+    adb("shell", "input", "tap", "770", "1345")\n    time.sleep(1)
     find_and_tap("搜索")
     time.sleep(10)
     screenshot("04-in-app-results.png")
