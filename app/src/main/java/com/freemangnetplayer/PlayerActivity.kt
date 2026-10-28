@@ -26,6 +26,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.datasource.DataSource
 import androidx.media3.ui.PlayerView
 import com.frostwire.jlibtorrent.TorrentHandle
 import com.frostwire.jlibtorrent.TorrentInfo
@@ -58,6 +60,7 @@ class PlayerActivity : ComponentActivity() {
     private var playbackActive by mutableStateOf(false)
     private var playbackSpeed by mutableFloatStateOf(1f)
     private var resumeOnReady = false
+    private var playbackResumePosition = 0L
 
     private var statusText by mutableStateOf("正在准备磁力任务…")
     private var progressValue by mutableFloatStateOf(0f)
@@ -409,7 +412,9 @@ class PlayerActivity : ComponentActivity() {
             playbackAttemptBytes = bytesAtAttempt
             currentUri = uri
             player?.release()
-            val newPlayer = ExoPlayer.Builder(this).build()
+            val newPlayer = ExoPlayer.Builder(this)
+                .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource { torrentHandle } }))
+                .build()
             newPlayer.addListener(object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     playbackActive = isPlaying
@@ -422,12 +427,14 @@ class PlayerActivity : ComponentActivity() {
 
                 override fun onPlayerError(error: PlaybackException) {
                     playbackActive = false
+                    playbackResumePosition = newPlayer.currentPosition
                     statusText = "播放器暂时无法读取已缓存片段，下载仍会继续：${error.errorCodeName}"
                     player = null
                     newPlayer.release()
                 }
             })
             newPlayer.setMediaItem(MediaItem.fromUri(uri))
+            newPlayer.seekTo(playbackResumePosition)
             newPlayer.prepare()
             newPlayer.setPlaybackSpeed(playbackSpeed)
             newPlayer.playWhenReady = autoPlay
@@ -461,6 +468,7 @@ class PlayerActivity : ComponentActivity() {
         session?.listener = null
         val closing = session
         session = null
+        torrentHandle = null
         Thread { runCatching { closing?.stop() } }.start()
         player?.release()
         player = null

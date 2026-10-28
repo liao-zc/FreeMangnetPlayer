@@ -60,12 +60,16 @@ def main():
     report.append({"check": "empty-search-return", "passed": True})
 
     fixture = json.loads(Path("fixture.json").read_text())
-    launch(magnet=fixture["magnet"], mode="download")
+    launch(magnet=fixture["magnet"], mode="play")
     require_visible("返回搜索")
     screenshot("14-metadata-progress.png")
     state = wait_for(lambda s: s.get("metadata") and s.get("files"))
     require_visible("真实文件列表", fixture["file"])
     screenshot("15-real-file-list.png")
+    streaming = wait_for(lambda s: s.get("playing") and 0 < s.get("downloaded", 0) < s.get("total", 0), 45)
+    screenshot("20-real-stream-before-complete.png")
+    report.append({"check": "real-stream-before-download-complete", "passed": True, "state": streaming})
+    find_and_tap("下载")
     state = wait_for(lambda s: s.get("total", 0) > 0 and s.get("downloaded", 0) >= s["total"])
     target = f"/sdcard/Android/data/{PACKAGE}/files/Movies/FreeMangnetPlayer/{fixture['file']}"
     actual = adb("shell", "sha256sum", target).split()[0]

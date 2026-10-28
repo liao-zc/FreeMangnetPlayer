@@ -30,7 +30,7 @@ lt.add_files(storage, str(VIDEO))
 creator = lt.create_torrent(storage, 32 * 1024)
 lt.set_piece_hashes(creator, str(ROOT))
 info = lt.torrent_info(creator.generate())
-session = lt.session({"listen_interfaces": "0.0.0.0:6881", "enable_dht": False,
+session = lt.session({"listen_interfaces": "0.0.0.0:6881", "upload_rate_limit": max(16 * 1024, VIDEO.stat().st_size // 30), "enable_dht": False,
                       "enable_lsd": False, "enable_upnp": False, "enable_natpmp": False})
 handle = session.add_torrent({"ti": info, "save_path": str(ROOT.resolve())})
 handle.resume()
