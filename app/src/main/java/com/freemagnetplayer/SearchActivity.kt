@@ -43,5 +43,6 @@ class SearchActivity : ComponentActivity() {
                 }; loadUrl(url)
             }}, modifier=Modifier.fillMaxSize())
         } } }
+    }
     override fun onBackPressed(){ finish() }
 }
