@@ -26,7 +26,7 @@ FreeMangnetPlayer 是 Android 个人磁力搜索、解析、下载和播放应�
 | 只保留 6 个内置引擎及一个自定义项 | 搜索菜单固定显示指定 6 个引擎和自定义入口 | 模拟器 UI dump 检查 6 个引擎名称；截图 `03-engine-settings.png` |
 | 修复首页白屏 | 启动时直接显示搜索首页；WebView 仅在用户开始搜索后创建 | 模拟器冷启动后检查搜索框、磁力链接输入与解析按钮、播放/下载/收藏入口可见；截图 `01-home-keyword.png` |
 | 搜索结果独立页面和返回 | 搜索后切到“搜索结果”；页面按钮与系统返回键都回首页 | 模拟器 UI dump 检查结果页与返回控件；截图 `04-in-app-results.png`、`07-search-no-result.png` |
-| 磁力解析入口 | 首页输入框验证 BTIH 格式并打开解析页 | 自动化粘贴虚构 BTIH 并检查解析页；截图 `05-magnet-pasted.png`、`06-torrent-progress.png`。虚构哈希不代表种子可用 |
+| 磁力解析入口 | 首页输入框验证 BTIH 格式并打开解析页 | 自动化检查首页输入框，并用 Android magnet 深链验证解析页入口；截图 `05-magnet-entry.png`、`06-torrent-progress.png`。虚构哈希不代表种子可用 |
 | 播放、下载、收藏列表 | 底部四个入口均有独立列表；播放记录和收藏本地保存 | 模拟器逐一打开并检查列表标题；截图 `08-playback-list.png`、`09-download-list.png`、`10-favorites-list.png` |
 | 倍速和前进/后退 | 播放器在可播放缓冲建立后提供 15 秒 seek 与 6 档倍速 | 源码实现检查；需可播放种子的实机操作验证，当前没有将虚构种子冒充播放成功 |
 | 手机、平板、电视 | Android API 24+，Compose 响应式布局与可聚焦控件 | 当前自动化使用手机尺寸；平板和 Android TV 仍需对应设备实测 |
@@ -43,7 +43,7 @@ FreeMangnetPlayer 是 Android 个人磁力搜索、解析、下载和播放应�
 ![输入关键词](docs/screenshots/02-keyword-entered.png)
 ![6 个搜索引擎与自定义设置](docs/screenshots/03-engine-settings.png)
 ![独立搜索结果页](docs/screenshots/04-in-app-results.png)
-![首页粘贴 magnet](docs/screenshots/05-magnet-pasted.png)
+![首页磁力解析输入框](docs/screenshots/05-magnet-entry.png)
 ![磁力解析状态](docs/screenshots/06-torrent-progress.png)
 ![搜索无结果与返回操作](docs/screenshots/07-search-no-result.png)
 ![播放列表](docs/screenshots/08-playback-list.png)

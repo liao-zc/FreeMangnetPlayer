@@ -97,12 +97,10 @@ def main() -> None:
     find_and_tap("搜索")
 
     find_and_tap("magnet 链接")
-    adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567")
-    time.sleep(2)
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
-    time.sleep(1)
-    screenshot("05-magnet-pasted.png")
-    find_and_tap("解析资源")
+    screenshot("05-magnet-entry.png")
+    test_magnet = "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"
+    adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", test_magnet, "-n", f"{PACKAGE}/.MainActivity")
     time.sleep(5)
     require_visible("正在解析磁力资源", "正在连接种子")
     screenshot("06-torrent-progress.png")
