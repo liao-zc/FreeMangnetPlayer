@@ -20,8 +20,9 @@ def screenshot(name: str) -> None:
 
 
 def find_and_tap(label: str) -> None:
-    adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
-    tree = ET.fromstring(adb("shell", "cat", "/sdcard/window.xml"))
+    dump = adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
+    xml = adb("shell", "cat", "/sdcard/window.xml")
+    tree = ET.fromstring(xml)
     candidates = []
     for node in tree.iter("node"):
         values = (node.get("text", ""), node.get("content-desc", ""), node.get("hintText", ""))
@@ -34,7 +35,8 @@ def find_and_tap(label: str) -> None:
         if x2 > x1 and y2 > y1:
             candidates.append((any(value != label for value in values), (x2 - x1) * (y2 - y1), x1, y1, x2, y2))
     if not candidates:
-        raise RuntimeError(f"Could not find UI element: {label}")
+        visible = [node.get("text", "") for node in tree.iter("node") if node.get("text")]
+        raise RuntimeError(f"Could not find UI element: {label}; visible text: {visible}; dump: {dump}")
     _, _, x1, y1, x2, y2 = min(candidates)
     adb("shell", "input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
     time.sleep(1)
@@ -57,8 +59,8 @@ def main() -> None:
     find_and_tap("设置")
     time.sleep(1)
     screenshot("03-engine-settings.png")
-    adb("shell", "input", "tap", "770", "1345")
-    time.sleep(1)
+    find_and_tap("聚合吧")
+    find_and_tap("完成")
     find_and_tap("搜索")
     time.sleep(10)
     screenshot("04-in-app-results.png")
