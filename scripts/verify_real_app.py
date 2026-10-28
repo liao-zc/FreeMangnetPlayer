@@ -7,6 +7,8 @@ import time
 from pathlib import Path
 from capture_usage_screenshots import adb, screenshot, require_visible, find_and_tap, PACKAGE, OUT
 
+from magnet_hash import canonical_hash
+
 report = []
 
 
@@ -139,7 +141,7 @@ def verify_engines():
         require_visible("搜索结果", "返回")
         state = diagnostic("search")
         screenshot(f"engine-{i}-app.png")
-        hashes = sorted(set(r["magnet"].split("btih:", 1)[1][:40].lower() for r in state.get("results", [])))
+        hashes = sorted(set(h for h in (canonical_hash(r["magnet"]) for r in state.get("results", [])) if h))
         report.append({"check": "engine-comparison", "engine": reference["engine"], "browser": reference,
                        "app": state, "app_hashes": hashes, "equal": not reference["error"] and hashes == reference["hashes"]})
         find_and_tap("返回")

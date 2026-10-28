@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 from urllib.parse import quote, urljoin, urlparse
 from playwright.sync_api import sync_playwright
+from magnet_hash import canonical_hash
 
 QUERY = "哪吒"
 ENGINES = [
@@ -29,6 +30,14 @@ with sync_playwright() as pw:
         try:
             response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
             row["http_status"] = response.status if response else None
+            row["http_attempts"] = [row["http_status"]]
+            for retry in range(2):
+                if not response or response.status != 403:
+                    break
+                page.wait_for_timeout(2000)
+                response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                row["http_status"] = response.status if response else None
+                row["http_attempts"].append(row["http_status"])
             if response and response.status >= 400:
                 raise RuntimeError(f"Website returned HTTP {response.status}")
             page.wait_for_timeout(4000)
@@ -60,13 +69,15 @@ with sync_playwright() as pw:
                         row["detail_pages"].append(link)
                 except Exception as error:
                     row.setdefault("detail_errors", []).append(str(error))
-            row["hashes"] = sorted(set(re.findall(r"(?i)magnet:\?[^\s\"'<>]*?xt=urn:btih:([a-f0-9]{40})", "\n".join(texts))))
-            row["hashes"] = sorted(set(h.lower() for h in row["hashes"]))
+            magnets = re.findall(r"(?i)magnet:\?[^\s\"'<>]+", "\n".join(texts))
+            row["hashes"] = sorted(set(h for h in map(canonical_hash, magnets) if h))
             row["page_title"] = page.title()
             row["final_url"] = page.url
         except Exception as error:
             row["error"] = str(error)
             try:
+                row["final_url"] = page.url
+                (OUT / f"browser-{index}.html").write_text(page.content(), encoding="utf-8")
                 page.screenshot(path=str(OUT / f"browser-{index}.png"))
             except Exception:
                 pass
