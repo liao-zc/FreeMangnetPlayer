@@ -22,6 +22,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Check repository source encoding
+        run: python3 scripts/check_repository.py
       - name: Build APK
         run: gradle --no-daemon assembleDebug
       - name: Name APK
