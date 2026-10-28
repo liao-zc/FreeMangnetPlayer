@@ -6,6 +6,7 @@ import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -39,6 +40,9 @@ class PlayerActivity : ComponentActivity() {
     private var currentUri: Uri? = null
     private var currentSource: String = ""
     private var downloadMode = false
+    private var metadataReady by mutableStateOf(false)
+    private var previewRequested = false
+    private var autoplayRequested = false
     private var playbackAttemptBytes = -1L
 
     private var statusText by mutableStateOf("正在准备磁力任务…")
@@ -55,41 +59,79 @@ class PlayerActivity : ComponentActivity() {
         val title = intent.getStringExtra("title").orEmpty()
 
         setContent {
-            MaterialTheme(colorScheme = darkColorScheme(
-                primary = Color(0xFF44D7B6), background = Color(0xFF101419), surface = Color(0xFF191F26)
+            MaterialTheme(colorScheme = lightColorScheme(
+                primary = Color(0xFF087F79), secondary = Color(0xFF344AB8), background = Color(0xFFF3F8FA)
             )) {
-                Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(title.ifBlank { if (downloadMode) "下载与缓存" else "磁力播放" }, style = MaterialTheme.typography.titleLarge)
-                    Text(statusText, style = MaterialTheme.typography.bodyMedium)
-                    LinearProgressIndicator(progress = { progressValue.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-                    Text("${(progressValue * 100).toInt()}%  ·  ${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}")
-                    Text("${formatBytes(downloadRate.toLong())}/秒  ·  连接到 $peerCount 个做种者")
+                Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+                        TextButton(onClick = { finish() }) { Text("‹  返回") }
+                        Text(title.ifBlank { "资源解析" }, Modifier.weight(1f), maxLines = 1, style = MaterialTheme.typography.titleLarge)
+                    }
 
-                    if (!downloadMode || player != null) {
+                    Card(
+                        Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color.White)
+                    ) {
+                        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text(if (metadataReady) "资源解析完成" else "正在解析磁力资源", style = MaterialTheme.typography.titleLarge)
+                            Text(statusText, style = MaterialTheme.typography.bodyMedium)
+                            LinearProgressIndicator(progress = { progressValue.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
+                            Text("${(progressValue * 100).toInt()}%  ·  ${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}")
+                            Text("${formatBytes(downloadRate.toLong())}/秒  ·  连接到 $peerCount 个做种者", style = MaterialTheme.typography.bodySmall)
+                            Text(currentSource.take(150), maxLines = 2, style = MaterialTheme.typography.bodySmall, color = Color(0xFF087F79))
+                        }
+                    }
+
+                    if (!metadataReady && (statusText.contains("失败") || statusText.contains("无效"))) {
+                        Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(18.dp)) {
+                            Column(Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                                Text("资源解析失败", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
+                                Spacer(Modifier.height(10.dp))
+                                Text(statusText)
+                            }
+                        }
+                    } else if (!metadataReady) {
+                        Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(18.dp)) {
+                            Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                                CircularProgressIndicator()
+                                Spacer(Modifier.height(16.dp))
+                                Text("正在连接种子并读取文件列表…")
+                                Spacer(Modifier.height(6.dp))
+                                Text("资源信息取决于种子节点是否在线。", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    } else if (player != null) {
                         AndroidView(
                             factory = { context -> PlayerView(context).apply { useController = true; player = this@PlayerActivity.player } },
                             update = { it.player = player },
                             modifier = Modifier.fillMaxWidth().weight(1f)
                         )
                     } else {
-                        Card(Modifier.fillMaxWidth().weight(1f)) {
-                            Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.Center) {
-                                Text("下载任务在应用内运行", style = MaterialTheme.typography.titleMedium)
-                                Spacer(Modifier.height(8.dp))
-                                Text("已选择种子中的最大文件。请保持此页面打开；当前版本不支持退出应用后的后台续传。")
+                        Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(18.dp), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color(0xFFE4F2F1))) {
+                            Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                                Text("▣", style = MaterialTheme.typography.displayLarge, color = Color(0xFF087F79))
+                                Spacer(Modifier.height(10.dp))
+                                Text(currentUri?.lastPathSegment ?: title.ifBlank { "视频资源已就绪" }, maxLines = 2, style = MaterialTheme.typography.titleMedium)
+                                Spacer(Modifier.height(6.dp))
+                                Text("选择预览、下载或播放", style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
 
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        OutlinedButton(onClick = { togglePause() }, modifier = Modifier.weight(1f)) { Text("暂停 / 继续") }
-                        if (currentUri != null) {
-                            Button(onClick = { startPlayback(currentUri!!, downloadedBytes) }, modifier = Modifier.weight(1f)) {
-                                Text(if (progressValue >= 1f) "播放已下载文件" else "尝试播放")
-                            }
+                    if (metadataReady) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { requestPlayback(autoPlay = false) }, modifier = Modifier.weight(1f)) { Text("预览") }
+                            OutlinedButton(onClick = {
+                                downloadMode = true
+                                statusText = "下载与缓存进行中；保持任务页面打开。"
+                            }, modifier = Modifier.weight(1f)) { Text("下载") }
+                            Button(onClick = { requestPlayback(autoPlay = true) }, modifier = Modifier.weight(1f)) { Text("▶ 播放") }
                         }
+                    } else if (downloadMode) {
+                        OutlinedButton(onClick = { togglePause() }, modifier = Modifier.fillMaxWidth()) { Text("暂停 / 继续下载") }
                     }
-                    TextButton(onClick = { finish() }) { Text("返回搜索") }
+                    if (downloadMode) Text("下载任务在应用内运行；当前版本不支持退出应用后的后台续传。", style = MaterialTheme.typography.bodySmall)
                 }
             }
         }
@@ -129,14 +171,17 @@ class PlayerActivity : ComponentActivity() {
 
     private fun createTorrentListener() = object : TorrentSessionListener {
         override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子已连接，正在读取文件信息…")
-        override fun onMetadataReceived(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "已获取文件信息，开始缓存…")
+        override fun onMetadataReceived(handle: TorrentHandle, state: TorrentSessionStatus) {
+            runOnUiThread { metadataReady = true }
+            updateFrom(state, "已获取文件信息，开始缓存…")
+        }
         override fun onPieceFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
             updateFrom(state, if (downloadMode) "正在下载并缓存…" else "正在缓冲，准备播放…")
-            if (!downloadMode && hasPlaybackBuffer(state)) startPlayback(state.videoFileUri, state.bytesDownloaded)
+            if (previewRequested && hasPlaybackBuffer(state)) startPlayback(state.videoFileUri, state.bytesDownloaded, autoplayRequested)
         }
         override fun onTorrentFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
             updateFrom(state, "下载完成，文件已保存在应用 Movies 目录")
-            if (!downloadMode) startPlayback(state.videoFileUri, state.bytesDownloaded)
+            if (previewRequested) startPlayback(state.videoFileUri, state.bytesDownloaded, autoplayRequested)
         }
         override fun onTorrentError(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子任务失败：${state.state}")
         override fun onMetadataFailed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "无法读取种子元数据。请尝试其他资源或检查做种者是否在线。")
@@ -166,7 +211,21 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
-    private fun startPlayback(uri: Uri, bytesAtAttempt: Long) {
+    private fun requestPlayback(autoPlay: Boolean) {
+        autoplayRequested = autoPlay
+        if (player != null) {
+            if (autoPlay) player?.play() else player?.pause()
+            statusText = if (autoPlay) "正在播放…" else "预览已暂停；点击播放继续。"
+            return
+        }
+        previewRequested = true
+        statusText = if (autoPlay) "正在等待可播放缓存…" else "正在准备预览画面…"
+        currentUri?.let { uri ->
+            if (downloadedBytes > 0) startPlayback(uri, downloadedBytes, autoPlay)
+        }
+    }
+
+    private fun startPlayback(uri: Uri, bytesAtAttempt: Long, autoPlay: Boolean) {
         if (uri == Uri.EMPTY) return
         runOnUiThread {
             if (bytesAtAttempt >= 0 && playbackAttemptBytes >= 0 && bytesAtAttempt - playbackAttemptBytes < 2L * 1024 * 1024) return@runOnUiThread
@@ -181,9 +240,9 @@ class PlayerActivity : ComponentActivity() {
             })
             newPlayer.setMediaItem(MediaItem.fromUri(uri))
             newPlayer.prepare()
-            newPlayer.playWhenReady = true
+            newPlayer.playWhenReady = autoPlay
             player = newPlayer
-            statusText = if (progressValue >= 1f) "下载完成，正在播放" else "正在播放，下载仍在继续…"
+            statusText = if (autoPlay) "正在播放，下载仍会继续…" else "预览已就绪，点击播放开始播放。"
         }
     }
 

@@ -10,6 +10,8 @@ import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlinx.coroutines.delay
 
 private data class SearchResult(val title: String, val source: String)
 
@@ -35,10 +38,17 @@ class SearchActivity : ComponentActivity() {
         val providerName = intent.getStringExtra("providerName").orEmpty()
 
         setContent {
-            MaterialTheme(colorScheme = darkColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF44D7B6))) {
+            MaterialTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF087F79), background = androidx.compose.ui.graphics.Color(0xFFF3F8FA))) {
                 var showLinkDialog by remember { mutableStateOf(false) }
+                var showSitePage by remember { mutableStateOf(false) }
+                var searchTimedOut by remember { mutableStateOf(false) }
                 var manualLink by remember { mutableStateOf("") }
                 var linkError by remember { mutableStateOf("") }
+
+                LaunchedEffect(query, url) {
+                    delay(18_000)
+                    if (results.isEmpty()) searchTimedOut = true
+                }
 
                 if (showLinkDialog) {
                     AlertDialog(
@@ -75,34 +85,51 @@ class SearchActivity : ComponentActivity() {
                     )
                 }
 
-                Column(Modifier.fillMaxSize().padding(12.dp)) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Column(Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 10.dp)) {
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                         TextButton(onClick = { finish() }) { Text("返回") }
-                        Text("$providerName · $query", Modifier.padding(top = 14.dp).weight(1f), maxLines = 1)
-                        TextButton(onClick = { showLinkDialog = true }) { Text("粘贴磁力") }
+                        Column(Modifier.weight(1f)) {
+                            Text("搜索结果", style = MaterialTheme.typography.titleLarge)
+                            Text("$providerName · $query", style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                        }
+                        TextButton(onClick = { showSitePage = !showSitePage }) { Text(if (showSitePage) "资源列表" else "网页备用") }
                     }
-                    if (results.isNotEmpty()) {
-                        Text("应用内识别到的磁力资源", style = MaterialTheme.typography.titleMedium)
-                        LazyColumn(Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
+                    Spacer(Modifier.height(8.dp))
+                    if (results.isNotEmpty() && !showSitePage) {
+                        Text("找到 ${results.size} 个磁力资源 · 点选后自动解析", style = MaterialTheme.typography.bodyMedium)
+                        LazyColumn(Modifier.fillMaxWidth().weight(1f)) {
                             items(results, key = { it.source }) { item ->
-                                Card(Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                                    Column(Modifier.fillMaxWidth().padding(12.dp)) {
+                                Card(
+                                    Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable { openTorrent(item) },
+                                    shape = RoundedCornerShape(14.dp),
+                                    colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.White)
+                                ) {
+                                    Column(Modifier.fillMaxWidth().padding(14.dp)) {
                                         Text(item.title, maxLines = 2, style = MaterialTheme.typography.bodyMedium)
                                         Spacer(Modifier.height(8.dp))
-                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                            Button(onClick = { openTorrent(item, "play") }) { Text("播放") }
-                                            OutlinedButton(onClick = { openTorrent(item, "download") }) { Text("下载 / 缓存") }
-                                        }
+                                        Text(item.source, maxLines = 3, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.primary)
+                                        Spacer(Modifier.height(6.dp))
+                                        Text("点选此资源开始解析  ›", style = MaterialTheme.typography.labelMedium, color = androidx.compose.ui.graphics.Color.Gray)
                                     }
                                 }
                             }
                         }
-                        HorizontalDivider()
-                    } else {
-                        Text("网页结果会在本页显示；识别到磁力链接后可直接播放或下载。", style = MaterialTheme.typography.bodySmall)
+                    } else if (!showSitePage) {
+                        Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = androidx.compose.ui.graphics.Color.White)) {
+                            Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                                if (!searchTimedOut) CircularProgressIndicator()
+                                Spacer(Modifier.height(14.dp))
+                                Text(if (searchTimedOut) "没有提取到可识别的磁力链接" else "正在从搜索页面提取磁力链接…")
+                                Spacer(Modifier.height(6.dp))
+                                Text("搜索引擎可能需要验证，或没有公开磁力地址。", style = MaterialTheme.typography.bodySmall)
+                                Spacer(Modifier.height(12.dp))
+                                OutlinedButton(onClick = { showSitePage = true }) { Text("打开网页备用") }
+                                OutlinedButton(onClick = { showLinkDialog = true }) { Text("手动粘贴磁力") }
+                            }
+                        }
                     }
                     AndroidView(
-                        modifier = Modifier.fillMaxSize().weight(1f),
+                        modifier = if (showSitePage) Modifier.fillMaxSize().weight(1f) else Modifier.size(1.dp),
                         factory = { context ->
                             WebView(context).apply {
                                 searchWebView = this
@@ -149,7 +176,7 @@ class SearchActivity : ComponentActivity() {
         if (value.startsWith("http://", true) || value.startsWith("https://", true)) {
             val path = value.substringBefore('?').substringBefore('#')
             if (path.endsWith(".torrent", true)) {
-                openTorrent(SearchResult(path.substringAfterLast('/'), value), "download")
+                openTorrent(SearchResult(path.substringAfterLast('/'), value))
                 return true
             }
             return false // Keep all web navigation in this WebView.
@@ -191,11 +218,11 @@ class SearchActivity : ComponentActivity() {
         results.add(0, SearchResult(title.ifBlank { "磁力资源" }, normalized))
     }
 
-    private fun openTorrent(result: SearchResult, mode: String) {
+    private fun openTorrent(result: SearchResult) {
         startActivity(Intent(this, PlayerActivity::class.java)
             .putExtra("source", result.source)
             .putExtra("title", result.title)
-            .putExtra("mode", mode))
+            .putExtra("mode", "parse"))
     }
 
     inner class ResultBridge {

@@ -50,28 +50,28 @@ def main() -> None:
     time.sleep(3)
     screenshot("01-home-keyword.png")
 
-    find_and_tap("输入关键词")
+    find_and_tap("搜索影片或资源名称")
     adb("shell", "input", "text", "Big%ssBuck%ssBunny")
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     time.sleep(1)
     screenshot("02-keyword-entered.png")
 
-    find_and_tap("设置")
+    find_and_tap("⋮")
     time.sleep(1)
     screenshot("03-engine-settings.png")
-    find_and_tap("聚合吧")
-    find_and_tap("完成")
+    adb("shell", "input", "keyevent", "KEYCODE_BACK")
     find_and_tap("搜索")
     time.sleep(10)
     screenshot("04-in-app-results.png")
 
-    find_and_tap("粘贴磁力")
+    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    time.sleep(1)
+    find_and_tap("输入磁力链接")
+    adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567")
     time.sleep(1)
     screenshot("05-add-magnet-dialog.png")
-
-    adb("shell", "am", "force-stop", PACKAGE)
-    adb("shell", "am", "start", "-W", "-a", "android.intent.action.VIEW", "-d", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", "-n", f"{PACKAGE}/.MainActivity")
-    time.sleep(3)
+    find_and_tap("解析")
+    time.sleep(5)
     screenshot("06-torrent-progress.png")
 
 
