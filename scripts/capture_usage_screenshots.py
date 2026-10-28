@@ -61,7 +61,7 @@ def main() -> None:
     adb("shell", "am", "force-stop", PACKAGE)
     adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.MainActivity")
     time.sleep(7)
-    require_visible("磁力搜索结果", "粘贴磁力链接", "解析资源", "搜索", "播放", "下载", "收藏")
+    require_visible("输入影片或资源名称", "粘贴磁力链接", "解析资源", "搜索", "播放", "下载", "收藏")
     screenshot("01-home-keyword.png")
 
     find_and_tap("输入影片或资源名称")
