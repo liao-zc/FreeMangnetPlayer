@@ -59,7 +59,9 @@
 浏览器与 APP 实际搜索同一个“哪吒”。资源结果的“解析 / 播放”会进入资源解析；“下载 / 缓存”建立任务。结果列表保留在 APP 内部，不跳到外部浏览器。
 
 ![磁力狗浏览器结果](screenshots/browser-1.png)
-![磁力狗 APP 搜索结果](screenshots/engine-1-app.png)
+![磁力狗 APP 搜索结果：真实资源标题及磁力](screenshots/24-search-resource-titles.png)
+
+资源标题修复已在 APP 中单独重测：[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40698545407)，[原始标题及磁力 JSON](evidence/search-titles.json)。确认搜索结果标题显示真实资源名称，不再把 magnet URI 当标题。
 
 ### dobt：为什么还不能通过
 
