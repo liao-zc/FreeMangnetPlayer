@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -35,10 +36,50 @@ class SearchActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme(colorScheme = darkColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF44D7B6))) {
+                var showLinkDialog by remember { mutableStateOf(false) }
+                var manualLink by remember { mutableStateOf("") }
+                var linkError by remember { mutableStateOf("") }
+
+                if (showLinkDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showLinkDialog = false },
+                        title = { Text("添加磁力资源") },
+                        text = {
+                            Column {
+                                Text("粘贴 magnet 链接或 .torrent 文件地址。")
+                                Spacer(Modifier.height(8.dp))
+                                OutlinedTextField(
+                                    value = manualLink,
+                                    onValueChange = { manualLink = it; linkError = "" },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    label = { Text("磁力链接或种子文件 URL") }
+                                )
+                                if (linkError.isNotBlank()) Text(linkError, color = MaterialTheme.colorScheme.error)
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                val value = manualLink.trim().replace("&amp;", "&", ignoreCase = true)
+                                val magnet = value.startsWith("magnet:?", true) && Regex("(?i)(?:[?&])xt=urn:btih:").containsMatchIn(value)
+                                val torrent = (value.startsWith("http://", true) || value.startsWith("https://", true)) && value.substringBefore('?').endsWith(".torrent", true)
+                                if (magnet || torrent) {
+                                    addResult("手动添加的资源", value)
+                                    manualLink = ""
+                                    showLinkDialog = false
+                                } else {
+                                    linkError = "链接格式无效，请检查后重试。"
+                                }
+                            }) { Text("添加") }
+                        },
+                        dismissButton = { TextButton(onClick = { showLinkDialog = false }) { Text("取消") } }
+                    )
+                }
+
                 Column(Modifier.fillMaxSize().padding(12.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         TextButton(onClick = { finish() }) { Text("返回") }
-                        Text("$providerName · $query", Modifier.padding(top = 14.dp), maxLines = 1)
+                        Text("$providerName · $query", Modifier.padding(top = 14.dp).weight(1f), maxLines = 1)
+                        TextButton(onClick = { showLinkDialog = true }) { Text("粘贴磁力") }
                     }
                     if (results.isNotEmpty()) {
                         Text("应用内识别到的磁力资源", style = MaterialTheme.typography.titleMedium)
