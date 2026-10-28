@@ -9,6 +9,7 @@ import struct
 import subprocess
 import threading
 import time
+import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -17,9 +18,10 @@ import libtorrent as lt
 ROOT = Path("fixture-data")
 ROOT.mkdir(exist_ok=True)
 VIDEO = ROOT / "BigBuckBunny-CCBY.mp4"
+source = ROOT / "bunny-trailer.mp4"
+urllib.request.urlretrieve("https://media.w3.org/2010/05/bunny/trailer.mp4", source)
 subprocess.run([
-    "ffmpeg", "-y", "-ss", "30", "-i",
-    "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "ffmpeg", "-y", "-ss", "5", "-i", str(source),
     "-t", "45", "-vf", "scale=320:-2", "-c:v", "libx264", "-preset", "ultrafast",
     "-an", "-movflags", "+faststart", str(VIDEO),
 ], check=True)

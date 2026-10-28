@@ -359,6 +359,12 @@ class MainActivity : ComponentActivity() {
                                         override fun onPageFinished(view: WebView?, url: String?) {
                                             super.onPageFinished(view, url)
                                             if (generation != searchTrigger) return
+                                            // Perform the same ordinary confirmation click as the
+                                            // independent browser test. Interactive challenges stay
+                                            // accessible through the native browser dialog.
+                                            view?.evaluateJavascript("(function(){var b=document.querySelector('.challenge-c');if(b){b.click();return true}return false})()") { value ->
+                                                if (value == "true" && generation == searchTrigger) searchMessage = "网站要求确认访问，正在等待验证返回…"
+                                            }
                                             // Wrapper sites host the actual search page in an iframe.
                                             view?.evaluateJavascript("JSON.stringify(Array.from(document.querySelectorAll('iframe[src]')).map(x=>x.src).find(x=>/^https?:/.test(x))||'')") { value ->
                                                 val frame = runCatching { JSONArray("[$value]").optString(0) }.getOrDefault("")
@@ -390,6 +396,12 @@ class MainActivity : ComponentActivity() {
                                                 }
                                             }
                                         }
+                                        override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, response: android.webkit.WebResourceResponse?) {
+                                            if (request?.isForMainFrame == true && generation == searchTrigger) {
+                                                searchState = "error"
+                                                searchMessage = "网站返回 HTTP ${response?.statusCode}，并非没有资源。可查看网页或更换引擎。"
+                                            }
+                                        }
                                     }
                                     loadUrl(searchPageUrl)
                                 }
@@ -413,7 +425,9 @@ class MainActivity : ComponentActivity() {
                                             webViewClient = object : WebViewClient() {
                                                 override fun onPageFinished(view: WebView?, url: String?) {
                                                     scanForMagnets(view, activeQuery)
-                                                    if (searchNeedsFormSubmit) { searchNeedsFormSubmit = false; injectSearch(view, activeQuery) }
+                                                    if (searchNeedsFormSubmit) view?.evaluateJavascript("Boolean(document.querySelector('input[type=search],input[type=text]'))") { present ->
+                                                        if (present == "true") { searchNeedsFormSubmit = false; injectSearch(view, activeQuery) }
+                                                    }
                                                 }
                                             }
                                             loadUrl(currentSearchUrl)

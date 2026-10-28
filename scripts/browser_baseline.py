@@ -24,7 +24,10 @@ with sync_playwright() as pw:
         page = context.new_page()
         row = {"engine": name, "query": QUERY, "url": url, "hashes": [], "detail_pages": [], "error": ""}
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            response = page.goto(url, wait_until="domcontentloaded", timeout=30000)
+            row["http_status"] = response.status if response else None
+            if response and response.status >= 400:
+                raise RuntimeError(f"Website returned HTTP {response.status}")
             page.wait_for_timeout(4000)
             challenge = page.locator(".challenge-c")
             if challenge.count():

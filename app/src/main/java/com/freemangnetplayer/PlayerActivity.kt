@@ -339,7 +339,12 @@ class PlayerActivity : ComponentActivity() {
                 output.toByteArray()
             }
             val info = TorrentInfo.bdecode(bytes)
-            if (!info.infoHash().toString().equals(hash, true)) null else info.bencode()
+            if (!info.infoHash().toString().equals(hash, true)) null else {
+                info.addTracker("udp://tracker.opentrackr.org:1337/announce", 0)
+                info.addTracker("https://tracker.tamersunion.org:443/announce", 0)
+                info.addTracker("udp://open.stealth.si:80/announce", 0)
+                info.bencode()
+            }
         } finally { connection.disconnect() }
     }.getOrNull()
 
