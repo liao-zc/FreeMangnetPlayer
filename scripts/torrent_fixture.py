@@ -27,9 +27,14 @@ subprocess.run([
 ], check=True)
 storage = lt.file_storage()
 lt.add_files(storage, str(VIDEO))
-creator = lt.create_torrent(storage, 32 * 1024)
+creator = lt.create_torrent(storage, 32 * 1024, lt.create_torrent.v1_only)
 lt.set_piece_hashes(creator, str(ROOT))
-info = lt.torrent_info(creator.generate())
+generated = creator.generate()
+info = lt.torrent_info(generated)
+# libtorrent 2.x info_hash() may return a truncated v2 SHA256 even for hybrids.
+# A btih magnet must contain the SHA1 of the canonical v1 info dictionary.
+v1_hash = hashlib.sha1(lt.bencode(generated[b"info"])).hexdigest()
+assert str(info.info_hashes().v1) == v1_hash
 session = lt.session({"listen_interfaces": "0.0.0.0:6881", "upload_rate_limit": max(16 * 1024, VIDEO.stat().st_size // 30), "enable_dht": False,
                       "enable_lsd": False, "enable_upnp": False, "enable_natpmp": False})
 handle = session.add_torrent({"ti": info, "save_path": str(ROOT.resolve())})
@@ -39,7 +44,7 @@ while not handle.status().is_seeding:
     if time.time() > deadline:
         raise RuntimeError("Fixture did not become a real seed")
     time.sleep(0.5)
-magnet = f"magnet:?xt=urn:btih:{info.info_hash()}&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce"
+magnet = f"magnet:?xt=urn:btih:{v1_hash}&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce"
 Path("fixture.json").write_text(json.dumps({"magnet": magnet, "file": VIDEO.name,
     "sha256": hashlib.sha256(VIDEO.read_bytes()).hexdigest(), "size": VIDEO.stat().st_size}), encoding="utf-8")
 
