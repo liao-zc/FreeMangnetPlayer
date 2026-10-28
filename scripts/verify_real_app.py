@@ -1,5 +1,6 @@
 import hashlib
 import json
+import os
 import shlex
 import subprocess
 import time
@@ -41,6 +42,9 @@ def main():
     adb("wait-for-device")
     adb("install", "-r", "app/build/outputs/apk/debug/app-debug.apk")
     adb("shell", "wm", "size", "1080x2400")
+    if os.environ.get("FMP_TEST_MODE") == "user-resources":
+        verify_user_resources()
+        return
     launch()
     require_visible("粘贴磁力链接", "解析资源", "播放", "下载", "收藏")
     screenshot("11-fixed-home.png")
@@ -123,6 +127,51 @@ def main():
         screenshot(f"{name}-actual.png")
         report.append({"check": name, "state": state, "metadata_received": state.get("metadata", False)})
     (OUT / "verification.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def verify_user_resources():
+    for name, value in [
+        ("user-hash", "magnet:?xt=urn:btih:784036B1EA2AAE7E8A89E1A87E09D77589A90B1&#x30;**"),
+        ("screenshot-hash", "magnet:?xt=urn:btih:b1b8a1f2edd3b93fbbaacde08635bd143ebf8308")]:
+        launch()
+        find_and_tap("磁力链接输入框")
+        adb("shell", "input", "text", shlex.quote(value))
+        adb("shell", "input", "keyevent", "KEYCODE_BACK")
+        screenshot(f"{name}-pasted.png")
+        find_and_tap("解析资源")
+        time.sleep(5)
+        require_visible("返回搜索")
+        deadline = time.time() + 180
+        requested = False
+        row = {"check": name, "input_path": "actual text field and parse button", "input": value}
+        while time.time() < deadline:
+            state = diagnostic("torrent")
+            if state.get("metadata") and not requested:
+                screenshot(f"{name}-files.png")
+                find_and_tap("收藏")
+                find_and_tap("下载")
+                find_and_tap("▶ 播放")
+                requested = True
+            if state.get("playing"):
+                find_and_tap("前进 15 秒")
+                try:
+                    state = wait_for(lambda s: s.get("playing") and s.get("position", 0) >= 14000, 45)
+                except RuntimeError:
+                    state = diagnostic("torrent")
+                screenshot(f"{name}-film.png")
+                break
+            time.sleep(2)
+        state = diagnostic("torrent")
+        screenshot(f"{name}-final.png")
+        row.update({"state": state, "metadata_received": state.get("metadata", False),
+                    "actual_playing": state.get("playing", False), "downloaded_bytes": state.get("downloaded", 0)})
+        report.append(row)
+        (OUT / "verification.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+        find_and_tap("返回搜索")
+        if requested:
+            find_and_tap("收藏")
+            require_visible("磁力资源")
+            screenshot(f"{name}-favorite.png")
 
 
 if __name__ == "__main__":

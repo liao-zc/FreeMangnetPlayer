@@ -7,6 +7,12 @@ on:
       - "scripts/capture_usage_screenshots.py"
       - ".github/workflows/capture-screenshots.yml"
   workflow_dispatch:
+    inputs:
+      mode:
+        description: Test scope
+        default: full
+        type: choice
+        options: [full, user-resources]
 permissions:
   contents: write
 jobs:
@@ -29,6 +35,7 @@ jobs:
       - name: Build app
         run: gradle --no-daemon assembleDebug
       - name: Prepare real BitTorrent seed and browser baseline
+        if: inputs.mode != 'user-resources'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y python3-libtorrent ffmpeg
@@ -44,6 +51,8 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - name: Run app in Android emulator and capture UI
+        env:
+          FMP_TEST_MODE: ${{ inputs.mode || 'full' }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -55,6 +64,7 @@ jobs:
           disable-animations: true
           script: /usr/bin/python3 scripts/verify_real_app.py
       - name: Commit screenshots to docs
+        if: inputs.mode != 'user-resources'
         run: |
           # Keep previous screenshots as historical evidence.
           mkdir -p docs/screenshots
