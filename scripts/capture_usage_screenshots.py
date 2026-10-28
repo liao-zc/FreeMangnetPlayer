@@ -104,7 +104,7 @@ def main() -> None:
     screenshot("05-magnet-pasted.png")
     find_and_tap("解析资源")
     time.sleep(5)
-    require_visible("资源解析", "正在连接种子")
+    require_visible("正在解析磁力资源", "正在连接种子")
     screenshot("06-torrent-progress.png")
 
 
