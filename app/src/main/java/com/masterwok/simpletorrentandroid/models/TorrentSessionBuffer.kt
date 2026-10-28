@@ -17,7 +17,7 @@ class TorrentSessionBuffer constructor(
     /**
      * The total number of pieces.
      */
-    val pieceCount = if (startIndex == 0 && endIndex == 0) 0 else (endIndex - startIndex) + 1
+    val pieceCount = (endIndex - startIndex + 1).coerceAtLeast(0)
 
     /**
      * The number of pieces downloaded.
@@ -42,7 +42,7 @@ class TorrentSessionBuffer constructor(
     /**
      * The index of the tail of the buffer.
      */
-    var bufferTailIndex = if (bufferSize == 0) endIndex else startIndex + bufferSize - 1
+    var bufferTailIndex = if (bufferSize == 0) endIndex else minOf(endIndex, startIndex + bufferSize - 1)
         @Synchronized
         get() = field
         private set(value) {
@@ -70,7 +70,7 @@ class TorrentSessionBuffer constructor(
      * Check if piece at [index] is downloaded.
      */
     @Synchronized
-    fun isPieceDownloaded(index: Int) = pieceDownloadStates[index]
+    fun isPieceDownloaded(index: Int) = pieceDownloadStates.getOrNull(index - startIndex) == true
 
     @Synchronized
     override fun toString(): String = "Total Pieces: $pieceCount" +
@@ -85,12 +85,13 @@ class TorrentSessionBuffer constructor(
 
     @Synchronized
     internal fun setPieceDownloaded(index: Int): Boolean {
+        if (index !in startIndex..endIndex) return true
         // Ignore if less than head or already downloaded.
         if (index < bufferHeadIndex || isPieceDownloaded(index)) {
             return true
         }
 
-        pieceDownloadStates[index] = true
+        pieceDownloadStates[index - startIndex] = true
         lastDownloadedPieceIndex = index
         downloadedPieceCount++
 
@@ -98,8 +99,8 @@ class TorrentSessionBuffer constructor(
         if (index == bufferHeadIndex) {
             bufferHeadIndex = index
 
-            while (bufferHeadIndex < pieceDownloadStates.size
-                    && pieceDownloadStates[bufferHeadIndex]) {
+            while (bufferHeadIndex <= endIndex
+                    && pieceDownloadStates[bufferHeadIndex - startIndex]) {
                 bufferHeadIndex++
                 bufferTailIndex++
             }
