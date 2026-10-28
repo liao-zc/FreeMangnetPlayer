@@ -4,9 +4,9 @@ import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-
 OUT = Path("manual-shots")
 OUT.mkdir(exist_ok=True)
+PACKAGE = "com.freemangnetplayer"
 
 
 def adb(*args: str) -> str:
@@ -31,53 +31,46 @@ def find_and_tap(label: str) -> None:
         if not match:
             continue
         x1, y1, x2, y2 = map(int, match.groups())
-        if x2 <= x1 or y2 <= y1:
-            continue
-        exact = any(value == label for value in values)
-        candidates.append((not exact, (x2 - x1) * (y2 - y1), x1, y1, x2, y2))
-    if candidates:
-        _, _, x1, y1, x2, y2 = min(candidates)
-        adb("shell", "input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
-        time.sleep(1)
-        return
-    visible = [(n.get("text", ""), n.get("content-desc", ""), n.get("hintText", ""), n.get("bounds", "")) for n in tree.iter("node")]
-    print(f"Visible accessibility nodes: {visible!r}")
-    raise RuntimeError(f"Could not find visible UI element containing: {label}")
+        if x2 > x1 and y2 > y1:
+            candidates.append((any(value != label for value in values), (x2 - x1) * (y2 - y1), x1, y1, x2, y2))
+    if not candidates:
+        raise RuntimeError(f"Could not find UI element: {label}")
+    _, _, x1, y1, x2, y2 = min(candidates)
+    adb("shell", "input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
+    time.sleep(1)
 
 
 def main() -> None:
     adb("wait-for-device")
     adb("install", "-r", "app/build/outputs/apk/debug/app-debug.apk")
     adb("shell", "wm", "size", "1080x2400")
-    adb("shell", "am", "start", "-W", "-n", "com.freemangnetplayer/.MainActivity")
+    adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.MainActivity")
     time.sleep(3)
-    screenshot("00-home-debug.png")
+    screenshot("01-home-keyword.png")
 
-    # Select a listed search source and show the app's search screen.
-    find_and_tap("juhebd.com")
-    screenshot("01-home-and-source.png")
-
-    # Enter a public-domain demo title, then capture before searching.
-    find_and_tap("关键词")
+    find_and_tap("输入关键词")
     adb("shell", "input", "text", "Big%ssBuck%ssBunny")
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     time.sleep(1)
     screenshot("02-keyword-entered.png")
-    find_and_tap("搜索")
-    time.sleep(8)
-    screenshot("03-search-page.png")
 
-    # Return to the app, enter a clearly synthetic magnet URI, and show the input.
-    adb("shell", "input", "keyevent", "KEYCODE_BACK")
-    time.sleep(2)
-    find_and_tap("粘贴 magnet 链接")
-    adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567&dn=Demo")
-    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    find_and_tap("设置")
     time.sleep(1)
-    screenshot("04-magnet-entered.png")
-    find_and_tap("解析并播放")
-    time.sleep(2)
-    screenshot("05-player-opening.png")
+    screenshot("03-engine-settings.png")
+    find_and_tap("完成")
+    find_and_tap("搜索")
+    time.sleep(10)
+    screenshot("04-in-app-results.png")
+
+    adb("shell", "am", "force-stop", PACKAGE)
+    adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.PlayerActivity", "--es", "source", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", "--es", "mode", "download", "--es", "title", "Demo torrent (synthetic)")
+    time.sleep(3)
+    screenshot("05-download-progress.png")
+
+    adb("shell", "am", "force-stop", PACKAGE)
+    adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.PlayerActivity", "--es", "source", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", "--es", "mode", "play", "--es", "title", "Demo torrent (synthetic)")
+    time.sleep(3)
+    screenshot("06-player.png")
 
 
 if __name__ == "__main__":
