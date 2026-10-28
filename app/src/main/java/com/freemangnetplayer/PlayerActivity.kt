@@ -1,4 +1,4 @@
-package com.freemagnetplayer
+﻿package com.freemangnetplayer
 
 import android.net.Uri
 import android.os.Bundle
@@ -26,16 +26,16 @@ class PlayerActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) { super.onCreate(savedInstanceState)
         val root=FrameLayout(this); playerView=PlayerView(this); root.addView(playerView,FrameLayout.LayoutParams(-1,-1)); setContentView(root)
         val uri= intent.data?.takeIf { it.scheme=="magnet" }?.toString() ?: intent.getStringExtra("magnet")
-        if(uri.isNullOrBlank()){Toast.makeText(this,"没有收到有效磁力链接",Toast.LENGTH_LONG).show();finish();return}
+        if(uri.isNullOrBlank()){Toast.makeText(this,"娌℃湁鏀跺埌鏈夋晥纾佸姏閾炬帴",Toast.LENGTH_LONG).show();finish();return}
         val folder=File(getExternalFilesDir(Environment.DIRECTORY_MOVIES),"FreeMangnetPlayer").apply{mkdirs()}
         val engine=TorrentSession(TorrentSessionOptions(downloadLocation=folder,onlyDownloadLargestFile=true,shouldStream=true,streamBufferSize=24))
         session=engine
         engine.listener=object:TorrentSessionListener {
             override fun onPieceFinished(h:TorrentHandle,s:TorrentSessionStatus) { openVideo(s.videoFileUri) }
-            override fun onAddTorrent(h:TorrentHandle,s:TorrentSessionStatus) { runOnUiThread { Toast.makeText(this@PlayerActivity,"种子已加入，正在获取文件信息",Toast.LENGTH_SHORT).show() } }
-            override fun onTorrentError(h:TorrentHandle,s:TorrentSessionStatus) { showError("种子错误：${s.state}") }
+            override fun onAddTorrent(h:TorrentHandle,s:TorrentSessionStatus) { runOnUiThread { Toast.makeText(this@PlayerActivity,"绉嶅瓙宸插姞鍏ワ紝姝ｅ湪鑾峰彇鏂囦欢淇℃伅",Toast.LENGTH_SHORT).show() } }
+            override fun onTorrentError(h:TorrentHandle,s:TorrentSessionStatus) { showError("绉嶅瓙閿欒锛?{s.state}") }
             override fun onTorrentFinished(h:TorrentHandle,s:TorrentSessionStatus) { openVideo(s.videoFileUri) }
-            override fun onMetadataFailed(h:TorrentHandle,s:TorrentSessionStatus) { showError("无法获取种子文件信息") }
+            override fun onMetadataFailed(h:TorrentHandle,s:TorrentSessionStatus) { showError("鏃犳硶鑾峰彇绉嶅瓙鏂囦欢淇℃伅") }
             override fun onMetadataReceived(h:TorrentHandle,s:TorrentSessionStatus) { }
             override fun onTorrentDeleteFailed(h:TorrentHandle,s:TorrentSessionStatus) { }
             override fun onTorrentPaused(h:TorrentHandle,s:TorrentSessionStatus) { }
@@ -44,7 +44,7 @@ class PlayerActivity : ComponentActivity() {
             override fun onTorrentResumed(h:TorrentHandle,s:TorrentSessionStatus) { }
             override fun onBlockUploaded(h:TorrentHandle,s:TorrentSessionStatus) { }
         }
-        lifecycleScope.launch(Dispatchers.IO){ try { engine.start(this@PlayerActivity,Uri.parse(uri)) } catch(e:Exception){showError("启动下载失败：${e.localizedMessage}")} }
+        lifecycleScope.launch(Dispatchers.IO){ try { engine.start(this@PlayerActivity,Uri.parse(uri)) } catch(e:Exception){showError("鍚姩涓嬭浇澶辫触锛?{e.localizedMessage}")} }
     }
     private fun openVideo(uri:Uri){ runOnUiThread { if(player!=null)return@runOnUiThread
         player=ExoPlayer.Builder(this).build().also { it.setMediaItem(MediaItem.fromUri(uri));it.prepare();it.playWhenReady=true;playerView.player=it }

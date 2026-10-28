@@ -24,13 +24,15 @@ jobs:
           gradle-version: '8.9'
       - name: Build APK
         run: gradle --no-daemon assembleDebug
+      - name: Name APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}.apk
       - name: Publish GitHub release APK
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" app/build/outputs/apk/debug/app-debug.apk --generate-notes --title "FreeMangnetPlayer ${GITHUB_REF_NAME}"
+        run: gh release create "${GITHUB_REF_NAME}" "app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}.apk" --generate-notes --title "FreeMangnetPlayer ${GITHUB_REF_NAME}"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FreeMangnetPlayer-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: FreeMangnetPlayer-${{ github.ref_name }}
+          path: app/build/outputs/apk/debug/FreeMangnetPlayer-${{ github.ref_name }}.apk

@@ -49,7 +49,7 @@ def main() -> None:
     adb("wait-for-device")
     adb("install", "-r", "app/build/outputs/apk/debug/app-debug.apk")
     adb("shell", "wm", "size", "1080x2400")
-    adb("shell", "am", "start", "-W", "-n", "com.freemagnetplayer/.MainActivity")
+    adb("shell", "am", "start", "-W", "-n", "com.freemangnetplayer/.MainActivity")
     time.sleep(3)
     screenshot("00-home-debug.png")
 
