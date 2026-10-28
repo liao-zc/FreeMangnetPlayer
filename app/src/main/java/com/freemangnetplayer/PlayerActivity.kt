@@ -30,6 +30,7 @@ import com.masterwok.simpletorrentandroid.contracts.TorrentSessionListener
 import com.masterwok.simpletorrentandroid.models.TorrentSessionStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class PlayerActivity : ComponentActivity() {
@@ -49,8 +50,7 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        currentSource = intent.getStringExtra("source")
-            ?: intent.data?.toString().orEmpty()
+        currentSource = intent.getStringExtra("source") ?: intent.data?.toString().orEmpty()
         downloadMode = intent.getStringExtra("mode") == "download"
         val title = intent.getStringExtra("title").orEmpty()
 
@@ -93,7 +93,6 @@ class PlayerActivity : ComponentActivity() {
                 }
             }
         }
-
         startTorrent(currentSource)
     }
 
@@ -106,44 +105,47 @@ class PlayerActivity : ComponentActivity() {
             return
         }
 
-        val folder = File(getExternalFilesDir(Environment.DIRECTORY_MOVIES), "FreeMangnetPlayer").apply { mkdirs() }
-        val engine = TorrentSession(TorrentSessionOptions(
-            downloadLocation = folder,
-            onlyDownloadLargestFile = true,
-            shouldStream = !downloadMode,
-            streamBufferSize = 12,
-            enableLogging = true
-        ))
-        session = engine
         statusText = if (downloadMode) "正在连接并下载…" else "正在连接种子、获取文件信息…"
-        engine.listener = object : TorrentSessionListener {
-            override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子已连接，正在读取文件信息…")
-            override fun onMetadataReceived(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "已获取文件信息，开始缓存…")
-            override fun onPieceFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
-                updateFrom(state, if (downloadMode) "正在下载并缓存…" else "正在缓冲，准备播放…")
-                if (!downloadMode && hasPlaybackBuffer(state)) startPlayback(state.videoFileUri, state.bytesDownloaded)
-            }
-            override fun onTorrentFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
-                updateFrom(state, "下载完成，文件已保存在应用 Movies 目录")
-                if (!downloadMode) startPlayback(state.videoFileUri, state.bytesDownloaded)
-            }
-            override fun onTorrentError(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子任务失败：${state.state}")
-            override fun onMetadataFailed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "无法读取种子元数据。请尝试其他资源或检查做种者是否在线。")
-            override fun onTorrentDeleteFailed(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-            override fun onTorrentPaused(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "下载已暂停")
-            override fun onTorrentDeleted(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-            override fun onTorrentRemoved(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-            override fun onTorrentResumed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "下载已继续…")
-            override fun onBlockUploaded(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-        }
-
         lifecycleScope.launch(Dispatchers.IO) {
             try {
+                // SessionManager loads libtorrent JNI. Initialize it off the UI thread so the
+                // activity can render progress and errors even when native startup is slow.
+                val folder = File(getExternalFilesDir(Environment.DIRECTORY_MOVIES), "FreeMangnetPlayer").apply { mkdirs() }
+                val engine = TorrentSession(TorrentSessionOptions(
+                    downloadLocation = folder,
+                    onlyDownloadLargestFile = true,
+                    shouldStream = !downloadMode,
+                    streamBufferSize = 12,
+                    enableLogging = true
+                ))
+                engine.listener = createTorrentListener()
+                withContext(Dispatchers.Main) { session = engine }
                 engine.start(this@PlayerActivity, Uri.parse(source))
             } catch (error: Exception) {
                 runOnUiThread { statusText = "启动失败：${error.localizedMessage ?: error.javaClass.simpleName}" }
             }
         }
+    }
+
+    private fun createTorrentListener() = object : TorrentSessionListener {
+        override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子已连接，正在读取文件信息…")
+        override fun onMetadataReceived(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "已获取文件信息，开始缓存…")
+        override fun onPieceFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
+            updateFrom(state, if (downloadMode) "正在下载并缓存…" else "正在缓冲，准备播放…")
+            if (!downloadMode && hasPlaybackBuffer(state)) startPlayback(state.videoFileUri, state.bytesDownloaded)
+        }
+        override fun onTorrentFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
+            updateFrom(state, "下载完成，文件已保存在应用 Movies 目录")
+            if (!downloadMode) startPlayback(state.videoFileUri, state.bytesDownloaded)
+        }
+        override fun onTorrentError(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子任务失败：${state.state}")
+        override fun onMetadataFailed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "无法读取种子元数据。请尝试其他资源或检查做种者是否在线。")
+        override fun onTorrentDeleteFailed(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
+        override fun onTorrentPaused(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "下载已暂停")
+        override fun onTorrentDeleted(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
+        override fun onTorrentRemoved(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
+        override fun onTorrentResumed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "下载已继续…")
+        override fun onBlockUploaded(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
     }
 
     private fun hasPlaybackBuffer(state: TorrentSessionStatus): Boolean {
