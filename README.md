@@ -19,7 +19,7 @@ FreeMangnetPlayer 是 Android 个人磁力搜索、解析、下载和播放应�
 
 ## 逐项验证记录
 
-检查记录：APK 构建工作流[通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40666895385)；Android 模拟器与截图工作流[通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40669314916)。模拟器验证的是页面及操作入口；播放器真实播放、下载完成和倍速 seek 需要可连接且含视频的在线种子，自动化未伪造此结果。
+检查记录：v0.1.8 APK 与发布工作流[通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40671688632)；Android 模拟器与截图工作流[通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40669314916)。模拟器验证的是页面及操作入口；播放器真实播放、下载完成和倍速 seek 需要可连接且含视频的在线种子，自动化未伪造此结果。
 
 | 要求 | 当前实现 | 自动验证方式 / 结果 |
 | --- | --- | --- |

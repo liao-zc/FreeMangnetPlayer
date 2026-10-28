@@ -50,7 +50,7 @@
 
 ## 6. 验证限制与环境说明
 
-本机没有 Java、Android SDK 或 adb；GitHub Actions APK 构建[已通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40666895385)，Android 模拟器与截图检查[已通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40669314916)。自动键盘输入不能可靠填写完整磁力 URI，因此磁力输入表单做了可见性检查，解析页通过 Android `VIEW magnet:` 深链打开；剪贴板粘贴加点击按钮的组合尚未在模拟器端到端验证。
+本机没有 Java、Android SDK 或 adb；v0.1.8 APK 构建与发布[已通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40671688632)，Android 模拟器与截图检查[已通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40669314916)。自动键盘输入不能可靠填写完整磁力 URI，因此磁力输入表单做了可见性检查，解析页通过 Android `VIEW magnet:` 深链打开；剪贴板粘贴加点击按钮的组合尚未在模拟器端到端验证。
 
 成功显示解析页只代表 APP 接受了 BTIH 格式。获取文件列表需要 DHT/tracker 网络及在线做种者；播放、下载是否成功还依赖种子内视频和可用网络。当前没有可靠在线种子实测报告，不应将示例截图理解为真实影片画面或下载完成。
 
