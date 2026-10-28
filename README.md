@@ -2,7 +2,7 @@
 
 FreeMangnetPlayer 是 Android 个人磁力搜索、解析、下载和播放应用。首页保留关键词搜索、搜索引擎配置、磁力链接解析，以及播放、下载、收藏列表。输入关键词后会进入独立搜索结果页；页面内可返回，Android 系统返回键也可返回首页。
 
-**APK 下载：**[GitHub Releases](https://github.com/liao-zc/FreeMangnetPlayer/releases)
+**APK 下载：**[FreeMangnetPlayer v0.1.8](https://github.com/liao-zc/FreeMangnetPlayer/releases/latest/download/FreeMangnetPlayer-v0.1.8.apk)（发布工作流完成后可下载）
 
 ## 搜索引擎
 
@@ -19,25 +19,27 @@ FreeMangnetPlayer 是 Android 个人磁力搜索、解析、下载和播放应�
 
 ## 逐项验证记录
 
-以下为当前代码对应的验证计划。推送后 GitHub Actions 会构建 APK，并在 Android 模拟器启动应用、检查可见控件、生成界面截图；播放器真实播放、下载完成和倍速 seek 需要可连接且含视频的在线种子，截图自动化不伪造此结果。
+检查记录：APK 构建工作流[通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40666895385)；Android 模拟器与截图工作流[通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40669314916)。模拟器验证的是页面及操作入口；播放器真实播放、下载完成和倍速 seek 需要可连接且含视频的在线种子，自动化未伪造此结果。
 
 | 要求 | 当前实现 | 自动验证方式 / 结果 |
 | --- | --- | --- |
-| 只保留 6 个内置引擎及一个自定义项 | 搜索菜单固定显示指定 6 个引擎和自定义入口 | 模拟器 UI dump 检查 6 个引擎名称；截图 `03-engine-settings.png` |
-| 修复首页白屏 | 启动时直接显示搜索首页；WebView 仅在用户开始搜索后创建 | 模拟器冷启动后检查搜索框、磁力链接输入与解析按钮、播放/下载/收藏入口可见；截图 `01-home-keyword.png` |
-| 搜索结果独立页面和返回 | 搜索后切到“搜索结果”；页面按钮与系统返回键都回首页 | 模拟器 UI dump 检查结果页与返回控件；截图 `04-in-app-results.png`、`07-search-no-result.png` |
-| 磁力解析入口 | 首页输入框验证 BTIH 格式并打开解析页 | 自动化检查首页输入框，并用 Android magnet 深链验证解析页入口；截图 `05-magnet-entry.png`、`06-torrent-progress.png`。虚构哈希不代表种子可用 |
-| 播放、下载、收藏列表 | 底部四个入口均有独立列表；播放记录和收藏本地保存 | 模拟器逐一打开并检查列表标题；截图 `08-playback-list.png`、`09-download-list.png`、`10-favorites-list.png` |
-| 倍速和前进/后退 | 播放器在可播放缓冲建立后提供 15 秒 seek 与 6 档倍速 | 源码实现检查；需可播放种子的实机操作验证，当前没有将虚构种子冒充播放成功 |
-| 手机、平板、电视 | Android API 24+，Compose 响应式布局与可聚焦控件 | 当前自动化使用手机尺寸；平板和 Android TV 仍需对应设备实测 |
+| 只保留 6 个内置引擎及一个自定义项 | 搜索菜单固定显示指定 6 个引擎和自定义入口 | **通过**：模拟器 UI dump 逐项检查名称；截图 `03-engine-settings.png` |
+| 修复首页白屏 | 启动时直接显示搜索首页；WebView 仅在用户开始搜索后创建 | **通过**：模拟器冷启动后检查搜索框、磁力输入和解析按钮、播放/下载/收藏入口可见；截图 `01-home-keyword.png` |
+| 搜索结果独立页面和返回 | 搜索后切到“搜索结果”；页面按钮与系统返回键都回首页 | **通过**：UI dump 检查结果页标题和返回按钮；超时后检查返回首页按钮；截图 `04-in-app-results.png`、`07-search-no-result.png` |
+| 磁力解析入口 | 首页输入框验证 BTIH 格式并打开解析页 | **入口通过**：模拟器检查首页输入框，并用 Android magnet 深链打开解析页；截图 `05-magnet-entry.png`、`06-torrent-progress.png`。未验证真实种子可用性 |
+| 播放、下载、收藏列表 | 底部四个入口均有独立列表；播放记录和收藏本地保存 | **页面检查通过**：模拟器逐一打开并检查三个列表标题；截图 `08-playback-list.png`、`09-download-list.png`、`10-favorites-list.png`。空列表截图不证明数据持久化往返 |
+| 倍速和前进/后退 | 播放器在可播放缓冲建立后提供 15 秒 seek 与 6 档倍速 | **代码检查通过，运行未验证**：需可播放种子的实机操作验证；当前未将虚构种子冒充播放成功 |
+| 手机、平板、电视 | Android API 24+，Compose 响应式布局与可聚焦控件 | **手机模拟器通过**（API 28）；平板和 Android TV 仍需对应设备实测 |
 
 ### 验证边界
 
-当前会话没有可用的本机 Java、Android SDK 或 adb，因此我不能在本机声称构建或模拟器操作已通过。下方截图会由仓库 GitHub Actions 实际构建并运行模拟器后更新。用户提供的 magnet 字符串经过规范化后可以提取 BTIH，但仍需在线 tracker/DHT 与做种者才能取得文件列表；解析、播放及下载闭环尚未由有效在线种子验证。
+本机没有 Java、Android SDK 或 adb；构建和模拟器实测由上方通过的 GitHub Actions 执行。用户提供的 magnet 字符串经过规范化后可提取 BTIH，但仍需在线 tracker/DHT 与做种者才能取得文件列表；解析、播放及下载闭环尚未由有效在线种子验证。
 
 ## 实际界面截图
 
 以下 PNG 是 Android 模拟器中的应用实际截图。搜索及磁力解析流程的示例关键词/哈希用于界面演示，不代表搜索结果或磁力种子可用。
+
+完整逐项说明见[中文界面使用说明](docs/usage-zh.md)。
 
 ![首页](docs/screenshots/01-home-keyword.png)
 ![输入关键词](docs/screenshots/02-keyword-entered.png)
@@ -52,7 +54,7 @@ FreeMangnetPlayer 是 Android 个人磁力搜索、解析、下载和播放应�
 
 ## 构建
 
-使用 Android Studio（JDK 17、Android SDK 35）打开项目，或执行 `gradlew.bat assembleDebug`。推送到 main 后会触发 APK 构建和模拟器截图工作流；GitHub Actions 通过后可在 Releases 页面下载 APK。
+使用 Android Studio（JDK 17、Android SDK 35）打开项目，或执行 `gradlew.bat assembleDebug`。v0.1.8 标签触发 GitHub Release，APK 与同版本命名的源码包会随构建发布。
 
 ## 第三方依赖
 
