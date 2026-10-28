@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -31,6 +32,7 @@ import com.masterwok.simpletorrentandroid.contracts.TorrentSessionListener
 import com.masterwok.simpletorrentandroid.models.TorrentSessionStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -44,6 +46,8 @@ class PlayerActivity : ComponentActivity() {
     private var previewRequested = false
     private var autoplayRequested = false
     private var playbackAttemptBytes = -1L
+    private var connectionTimedOut by mutableStateOf(false)
+    private var favoriteSaved by mutableStateOf(false)
 
     private var statusText by mutableStateOf("正在准备磁力任务…")
     private var progressValue by mutableFloatStateOf(0f)
@@ -64,8 +68,23 @@ class PlayerActivity : ComponentActivity() {
             )) {
                 Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                        TextButton(onClick = { finish() }) { Text("‹  返回") }
+                        Button(onClick = { finish() }, modifier = Modifier.height(54.dp)) { Text("返回搜索") }
                         Text(title.ifBlank { "资源解析" }, Modifier.weight(1f), maxLines = 1, style = MaterialTheme.typography.titleLarge)
+                        OutlinedButton(
+                            onClick = {
+                                LibraryStore.addFavorite(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource)
+                                favoriteSaved = true
+                            },
+                            modifier = Modifier.height(54.dp)
+                        ) { Text(if (favoriteSaved) "已收藏" else "收藏") }
+                    }
+
+                    LaunchedEffect(currentSource) {
+                        delay(45_000)
+                        if (!metadataReady) {
+                            connectionTimedOut = true
+                            statusText = "45 秒内未取得种子元数据。请确认链接、网络及做种者状态。"
+                        }
                     }
 
                     Card(
@@ -83,12 +102,14 @@ class PlayerActivity : ComponentActivity() {
                         }
                     }
 
-                    if (!metadataReady && (statusText.contains("失败") || statusText.contains("无效"))) {
+                    if (!metadataReady && (connectionTimedOut || statusText.contains("失败") || statusText.contains("无效"))) {
                         Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(18.dp)) {
                             Column(Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                                Text("资源解析失败", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
+                                Text(if (connectionTimedOut) "连接未成功" else "资源解析失败", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
                                 Spacer(Modifier.height(10.dp))
                                 Text(statusText)
+                                Spacer(Modifier.height(16.dp))
+                                Button(onClick = { finish() }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("返回搜索结果") }
                             }
                         }
                     } else if (!metadataReady) {
@@ -125,6 +146,7 @@ class PlayerActivity : ComponentActivity() {
                             OutlinedButton(onClick = {
                                 downloadMode = true
                                 statusText = "下载与缓存进行中；保持任务页面打开。"
+                                LibraryStore.updateDownload(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource, statusText, downloadedBytes, totalBytes)
                             }, modifier = Modifier.weight(1f)) { Text("下载") }
                             Button(onClick = { requestPlayback(autoPlay = true) }, modifier = Modifier.weight(1f)) { Text("▶ 播放") }
                         }
@@ -148,6 +170,7 @@ class PlayerActivity : ComponentActivity() {
         }
 
         statusText = if (downloadMode) "正在连接并下载…" else "正在连接种子、获取文件信息…"
+        if (downloadMode) LibraryStore.updateDownload(this, intent.getStringExtra("title").orEmpty(), source, statusText)
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 // SessionManager loads libtorrent JNI. Initialize it off the UI thread so the
@@ -158,7 +181,10 @@ class PlayerActivity : ComponentActivity() {
                     onlyDownloadLargestFile = true,
                     shouldStream = !downloadMode,
                     streamBufferSize = 12,
-                    enableLogging = true
+                    enableLogging = true,
+                    // Do not wait forever for a fixed DHT node count before announcing to trackers.
+                    // The upstream wrapper blocks inside start() when this threshold is not reached.
+                    dhtNodeMinimum = 0
                 ))
                 engine.listener = createTorrentListener()
                 withContext(Dispatchers.Main) { session = engine }
@@ -208,6 +234,16 @@ class PlayerActivity : ComponentActivity() {
             downloadRate = state.downloadRate.coerceAtLeast(0)
             peerCount = state.seederCount.coerceAtLeast(0)
             if (state.videoFileUri != Uri.EMPTY) currentUri = state.videoFileUri
+            if (downloadMode) {
+                LibraryStore.updateDownload(
+                    this@PlayerActivity,
+                    intent.getStringExtra("title").orEmpty(),
+                    currentSource,
+                    message,
+                    state.bytesDownloaded,
+                    state.bytesWanted
+                )
+            }
         }
     }
 

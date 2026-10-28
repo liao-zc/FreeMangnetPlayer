@@ -1,60 +1,40 @@
 # FreeMangnetPlayer
 
-FreeMangnetPlayer 是供个人使用的 Android 磁力链接搜索、下载与播放应用。搜索使用一个关键词输入框；搜索引擎在“设置”中选择，网址不显示在首页。
+FreeMangnetPlayer 是个人使用的 Android 磁力搜索、下载与播放应用。关键词搜索结果显示在首页的“磁力搜索结果”区域；从右上角菜单选择搜索引擎。首页也可直接粘贴 magnet 链接并解析。
 
-**下载：**[GitHub Releases](https://github.com/liao-zc/FreeMangnetPlayer/releases)，新版 APK 名称为 `FreeMangnetPlayer-版本号.apk`。
+**下载：**[GitHub Releases](https://github.com/liao-zc/FreeMangnetPlayer/releases)
 
-文档直达：[详细使用说明](https://github.com/liao-zc/FreeMangnetPlayer/blob/main/docs/usage-zh.md) · [第三方依赖说明](https://github.com/liao-zc/FreeMangnetPlayer/blob/main/THIRD_PARTY_NOTICES.md)。
+## 使用流程
 
-## 操作说明（应用实际截图）
+1. 在顶部大号搜索框输入关键词，点击“搜索”。搜索结果留在首页；每条识别到的磁力链接提供“解析 / 播放”和“下载 / 缓存”。
+2. 搜索站点没有公开 magnet 链接时，页面会给出状态、返回和“打开搜索网站”按钮；不会一直留在空白页。可在网站复制 magnet 链接后粘贴到首页输入框。
+3. 解析页面会在 45 秒未取得种子元数据时显示超时原因和大号返回按钮。获取元数据后可预览、下载或播放。
+4. 播放页可将当前资源加入“收藏”。底部“下载”和“收藏”入口分别显示已开始的下载任务和已收藏资源。
 
-### 1. 输入关键词并搜索
+## 当前范围和实测情况
 
-首页只显示关键词输入框和搜索按钮。搜索来源可在右上角“设置”中选择，设置中展示引擎名称，不需要输入网址。
+- 面向 Android 7.0 及以上手机、平板和 Android TV。首页搜索框、搜索、引擎菜单和返回按钮均已加大；底部只保留有实际页面的搜索、下载和收藏入口。
+- 搜索结果提取依赖搜索站点公开磁力 URI。搜索结果只给影片标题、普通详情页或被验证码拦截时，应用无法凭空生成 magnet 链接。
+- 本次开发环境实际查询了“哪吒”：聚合吧（juhebd.com）返回了多条标题结果，但页面中没有 magnet URI；磁力狗原地址（cld123.com）在当前网络环境无法连接。因此这次**没有完成磁力狗磁力结果、真实种子解析、播放和下载的闭环验证**，不会把空列表或虚构种子描述成成功。
+- 磁力连接不再等待固定数量的 DHT 节点后才加入任务；无可连接的 tracker / DHT 节点或没有做种者时仍可能无法取得种子文件列表。超时页面会允许用户立即返回。
+- 下载任务及收藏条目保存在本机应用数据中。当前下载实现依赖播放/任务页面存活，不提供可靠的退出应用后后台续传；卸载或清除应用数据会清除收藏和任务记录。
+- 播放器目前自动选择种子中的最大文件。只下载和播放你有权使用的内容。
 
-![关键词搜索首页](docs/screenshots/01-home-keyword.png)
+## 实际界面截图
 
-![输入关键词](docs/screenshots/02-keyword-entered.png)
+截图由 GitHub Actions Android 模拟器流程生成，展示当前应用界面；磁力链接截图使用虚构信息，仅展示交互，不代表资源能连接。
 
-### 2. 在应用内查看搜索结果
-
-搜索网站在应用内页面打开，网页跳转不会交给外部浏览器。页面里的磁力链接会被识别并加入页面上方的资源列表；也可以点“粘贴磁力”手动添加链接。此次模拟器未能加载出第三方站点结果，资源列表不伪造结果。
-
-![搜索引擎设置](docs/screenshots/03-engine-settings.png)
-
-![应用内搜索结果](docs/screenshots/04-in-app-results.png)
-
-### 3. 直接播放或下载
-
-每条识别到或手动添加的磁力资源提供“播放”和“下载 / 缓存”操作。播放页面显示连接、缓存进度、速度和做种者数量；下载完成后可从该页面播放已缓存的视频。
-
-![手动添加磁力链接](docs/screenshots/05-add-magnet-dialog.png)
-
-![下载与缓存进度](docs/screenshots/06-torrent-progress.png)
-
-演示截图可能使用虚构磁力链接，仅表示界面状态，不代表该资源可用。资源播放和下载需要种子有可连接的做种者，且视频编码受设备支持。
-
-## 当前版本范围
-
-- 支持 Android 7.0（API 24）及以上，面向手机、平板和 Android TV；电视遥控器可操作焦点，文字搜索需设备输入法。
-- 内置搜索来源可在设置中选择。搜索页面由第三方网站提供，站点改版、验证码或网络限制都可能影响结果；磁力结果识别取决于网站把链接暴露在页面中。
-- 当前每个种子自动选择最大文件；暂不提供种子内部文件选择、后台下载服务、退出应用后的续传或下载任务库。
-- 下载保存在应用专属 Movies 目录。卸载应用或清除应用数据会删除这些文件。
-- 只下载和播放你有权使用的内容，并遵守搜索网站条款及适用法律。
+![首页](docs/screenshots/01-home-keyword.png)
+![关键词](docs/screenshots/02-keyword-entered.png)
+![搜索引擎菜单](docs/screenshots/03-engine-settings.png)
+![首页内搜索状态](docs/screenshots/04-in-app-results.png)
+![粘贴磁力](docs/screenshots/05-magnet-pasted.png)
+![解析状态](docs/screenshots/06-torrent-progress.png)
 
 ## 构建
 
-使用 Android Studio（JDK 17、Android SDK 35）打开项目，或运行 `gradlew.bat assembleDebug`。本地调试包位于 `app/build/outputs/apk/debug/app-debug.apk`；版本标签会触发 GitHub Actions 云端构建并发布命名 APK。
+使用 Android Studio（JDK 17、Android SDK 35）打开项目，或执行 `gradlew.bat assembleDebug`。发布标签会触发 GitHub Actions 构建 APK 和命名源码压缩包。
 
-## 可复用开源项目
+## 第三方依赖
 
-| 方向 | 仓库 | 说明 |
-| --- | --- | --- |
-| 当前 MVP 磁力引擎 | [simple-torrent-android](https://github.com/masterwok/simple-torrent-android) | MIT；此项目当前使用，仓库已标记弃用，且只取最大文件。 |
-| BitTorrent 引擎 | [frostwire-jlibtorrent](https://github.com/frostwire/frostwire-jlibtorrent) | MIT Java/JNI 封装，可作为后续替换方案，需处理 Android ABI。 |
-| 完整客户端参考 | [LibreTorrent](https://github.com/proninyaroslav/libretorrent) | 成熟 Android 客户端，GPL-3.0；复用代码需遵守 GPL。 |
-| Android TV 参考 | [FongMi/TV](https://github.com/FongMi/TV) | TV 导航和播放参考，不含 BitTorrent 引擎，GPL-3.0。 |
-| 网盘资源管理参考 | [CloudSaver](https://github.com/jiangrui1994/CloudSaver) | 相邻领域项目，不是可直接嵌入的磁力组件。 |
-| 影视资源聚合参考 | [Selene](https://github.com/MoonTechLab/Selene) | 相邻领域项目；复用前需核实仓库当前许可证。 |
-
-原始应用代码采用 MIT。第三方组件遵循各自许可证，详情见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+应用使用 simple-torrent-android / FrostWire jlibtorrent 和 AndroidX / Media3；许可证及来源见 [第三方依赖说明](THIRD_PARTY_NOTICES.md)。
