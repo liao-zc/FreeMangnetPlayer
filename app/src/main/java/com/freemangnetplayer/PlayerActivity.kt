@@ -28,6 +28,7 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import com.frostwire.jlibtorrent.TorrentHandle
+import com.frostwire.jlibtorrent.TorrentInfo
 import com.frostwire.jlibtorrent.swig.settings_pack
 import com.masterwok.simpletorrentandroid.TorrentSession
 import com.masterwok.simpletorrentandroid.TorrentSessionOptions
@@ -232,7 +233,14 @@ class PlayerActivity : ComponentActivity() {
                 val engine = TorrentSession(options)
                 engine.listener = createTorrentListener()
                 withContext(Dispatchers.Main) { session = engine }
-                engine.start(this@PlayerActivity, Uri.parse(source))
+                val hash = Regex("(?i)xt=urn:btih:([0-9a-f]{40})").find(source)?.groupValues?.get(1)
+                val cache = hash?.let { File(filesDir, "${it.lowercase()}.torrent") }
+                val metadata = cache?.takeIf { it.exists() }?.readBytes()
+                    ?: if (!raw.contains("&tr=", true) && hash != null) fetchVerifiedMetadata(hash) else null
+                if (metadata != null) {
+                    cache?.writeBytes(metadata)
+                    engine.start(metadata)
+                } else engine.start(this@PlayerActivity, Uri.parse(source))
                 while (engine.isRunning) {
                     delay(1000)
                     val handle = torrentHandle ?: continue
@@ -267,14 +275,11 @@ class PlayerActivity : ComponentActivity() {
             handle.forceReannounce()
             handle.forceDHTAnnounce()
             updateFrom(state, "任务已添加，正在发现节点并获取元数据…")
+            if (handle.torrentFile() != null) publishMetadata(handle)
         }
         override fun onMetadataReceived(handle: TorrentHandle, state: TorrentSessionStatus) {
-            val files = handle.torrentFile()?.files()
-            val actualFiles = if (files == null) emptyList() else (0 until files.numFiles()).map { ResourceFile(files.filePath(it), files.fileSize(it)) }
+            publishMetadata(handle)
             runOnUiThread {
-                metadataReady = true
-                connectionTimedOut = false
-                resourceFiles = actualFiles
                 if (resumeOnReady) {
                     previewRequested = true
                     autoplayRequested = true
@@ -300,6 +305,43 @@ class PlayerActivity : ComponentActivity() {
         override fun onTorrentResumed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "下载已继续…")
         override fun onBlockUploaded(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
     }
+
+    private fun publishMetadata(handle: TorrentHandle) {
+        val info = handle.torrentFile() ?: return
+        val files = info.files()
+        val actual = (0 until files.numFiles()).map { ResourceFile(files.filePath(it), files.fileSize(it)) }
+        File(filesDir, "${info.infoHash().toString().lowercase()}.torrent").writeBytes(info.bencode())
+        runOnUiThread {
+            resourceFiles = actual
+            metadataReady = true
+            connectionTimedOut = false
+            if (resumeOnReady) { previewRequested = true; autoplayRequested = true }
+            statusText = "已取得并校验元数据；正在连接节点缓存视频…"
+        }
+    }
+
+    private fun fetchVerifiedMetadata(hash: String): ByteArray? = runCatching {
+        runOnUiThread { statusText = "正在查询元数据缓存；将校验内容是否与磁力哈希一致…" }
+        val connection = java.net.URL("https://itorrents.org/torrent/${hash.uppercase()}.torrent")
+            .openConnection() as java.net.HttpURLConnection
+        try {
+            connection.connectTimeout = 6000
+            connection.readTimeout = 6000
+            val bytes = connection.inputStream.use { input ->
+                val output = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    if (output.size() + count > 2 * 1024 * 1024) return@runCatching null
+                    output.write(buffer, 0, count)
+                }
+                output.toByteArray()
+            }
+            val info = TorrentInfo.bdecode(bytes)
+            if (!info.infoHash().toString().equals(hash, true)) null else info.bencode()
+        } finally { connection.disconnect() }
+    }.getOrNull()
 
     private fun hasPlaybackBuffer(state: TorrentSessionStatus): Boolean {
         val buffer = state.torrentSessionBuffer
