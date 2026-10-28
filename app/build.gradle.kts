@@ -7,6 +7,19 @@ android { namespace = "com.freemangnetplayer"; compileSdk = 35
     kotlinOptions { jvmTarget = "17" }
 }
 
+// The wrapper's 2018 native dependency pauses the session on Android 11+
+// when SELinux rejects its netlink route socket. Upgrade Java and every ABI
+// together; mixing JNI and Java versions is unsupported.
+configurations.configureEach {
+    resolutionStrategy.force(
+        "com.frostwire:jlibtorrent:1.2.19.0",
+        "com.frostwire:jlibtorrent-android-arm:1.2.19.0",
+        "com.frostwire:jlibtorrent-android-arm64:1.2.19.0",
+        "com.frostwire:jlibtorrent-android-x86:1.2.19.0",
+        "com.frostwire:jlibtorrent-android-x86_64:1.2.19.0"
+    )
+}
+
 dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
     implementation("androidx.activity:activity-compose:1.10.0")
