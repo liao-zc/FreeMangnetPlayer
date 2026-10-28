@@ -80,4 +80,6 @@ print("Real seed and HTTP tracker ready", flush=True)
 while True:
     for alert in session.pop_alerts():
         print(alert, flush=True)
+    state = handle.status()
+    print(f"Seed: peers={state.num_peers} upload={state.upload_rate} uploaded={state.total_upload}", flush=True)
     time.sleep(2)

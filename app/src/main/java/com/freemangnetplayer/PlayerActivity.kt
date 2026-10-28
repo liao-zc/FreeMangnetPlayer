@@ -237,6 +237,9 @@ class PlayerActivity : ComponentActivity() {
                 // The player reads the same file as libtorrent's disk writer.
                 // Use the OS cache rather than a separate native write cache.
                 options.settingsPack.cacheSize(0)
+                // Some NATs establish uTP handshakes but stall before TCP fallback.
+                // DHT and inbound uTP remain enabled.
+                options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
                 options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
                 options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
                 val engine = TorrentSession(options)
