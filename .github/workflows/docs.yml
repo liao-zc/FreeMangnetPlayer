@@ -1,0 +1,25 @@
+name: Check readable documentation
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate UTF-8 and local screenshot links
+        run: python3 scripts/check_docs.py
+      - name: Verify GitHub Markdown rendering
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          for filename in ['README.md', 'docs/usage-zh.md']:
+              payload = {'text': Path(filename).read_text(encoding='utf-8'), 'mode': 'gfm', 'context': '${{ github.repository }}'}
+              result = subprocess.run(['gh', 'api', 'markdown', '--input', '-'], input=json.dumps(payload), text=True, capture_output=True, check=True)
+              assert '<h1' in result.stdout, filename
+              assert 'E-SafeNet' not in result.stdout, filename
+              print('GitHub rendered:', filename)
+          PY

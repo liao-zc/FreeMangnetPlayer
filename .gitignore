@@ -5,3 +5,8 @@ local.properties
 .DS_Store
 *.iml
 dist/
+__pycache__/
+manual-shots/
+fixture-data/
+fixture.json
+fixture.log
