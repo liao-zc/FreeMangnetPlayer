@@ -1,0 +1,62 @@
+{
+  "run": "40695622711",
+  "source_commit": "f10c81b",
+  "checks": [
+    {
+      "check": "empty-search-return",
+      "passed": true
+    },
+    {
+      "check": "real-stream-before-download-complete",
+      "passed": true,
+      "state": {
+        "source": "magnet:?xt=urn:btih:926acd867439ceb3315f3f73a7700026560a7e07&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce",
+        "metadata": true,
+        "peers": 1,
+        "downloaded": 655360,
+        "total": 1612714,
+        "files": [
+          {
+            "path": "BigBuckBunny-CCBY.mp4",
+            "size": 1612714
+          }
+        ],
+        "playing": true,
+        "position": 176,
+        "speed": 1,
+        "status": "正在缓冲，准备播放…"
+      }
+    },
+    {
+      "check": "real-metadata-download",
+      "passed": true,
+      "state": {
+        "source": "magnet:?xt=urn:btih:926acd867439ceb3315f3f73a7700026560a7e07&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce",
+        "metadata": true,
+        "peers": 0,
+        "downloaded": 1612714,
+        "total": 1612714,
+        "files": [
+          {
+            "path": "BigBuckBunny-CCBY.mp4",
+            "size": 1612714
+          }
+        ],
+        "playing": true,
+        "position": 19186,
+        "speed": 1,
+        "status": "下载完成，文件已保存在应用 Movies 目录"
+      },
+      "sha256": "0b3d4cff51f4e0962fc11e0abb704e459d3c932fa8e0ec2f47aae19e0ce655b0",
+      "fixture": "Blender CC BY Big Buck Bunny clip"
+    },
+    {
+      "check": "real-play-speed-seek",
+      "passed": true
+    },
+    {
+      "check": "favorite-cold-restart",
+      "passed": true
+    }
+  ]
+}

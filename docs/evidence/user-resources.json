@@ -1,0 +1,47 @@
+[
+  {
+    "check": "user-hash",
+    "input_path": "actual text field and parse button",
+    "input": "magnet:?xt=urn:btih:784036B1EA2AAE7E8A89E1A87E09D77589A90B1&#x30;**",
+    "state": {
+      "source": "magnet:?xt=urn:btih:784036B1EA2AAE7E8A89E1A87E09D77589A90B10",
+      "metadata": true,
+      "peers": 0,
+      "downloaded": 0,
+      "total": 537348214,
+      "files": [
+        {
+          "path": "[ARR] Nezha Conquers the Dragon King (哪吒闹海)(1979) [7EA85BB1].mkv",
+          "size": 537348214
+        }
+      ],
+      "playing": false,
+      "position": 0,
+      "speed": 1,
+      "status": "正在等待可播放缓存…"
+    },
+    "metadata_received": true,
+    "actual_playing": false,
+    "downloaded_bytes": 0
+  },
+  {
+    "check": "screenshot-hash",
+    "input_path": "actual text field and parse button",
+    "input": "magnet:?xt=urn:btih:b1b8a1f2edd3b93fbbaacde08635bd143ebf8308",
+    "state": {
+      "source": "magnet:?xt=urn:btih:b1b8a1f2edd3b93fbbaacde08635bd143ebf8308",
+      "metadata": false,
+      "peers": 0,
+      "downloaded": 0,
+      "total": 0,
+      "files": [],
+      "playing": false,
+      "position": 0,
+      "speed": 1,
+      "status": "45 秒内未取得种子元数据。请确认链接、网络及做种者状态。"
+    },
+    "metadata_received": false,
+    "actual_playing": false,
+    "downloaded_bytes": 0
+  }
+]
