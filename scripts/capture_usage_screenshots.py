@@ -67,7 +67,7 @@ def main() -> None:
 
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     time.sleep(2)
-    find_and_tap("磁力链接输入框")
+    find_and_tap("磁力链接")
     adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567")
     time.sleep(2)
     adb("shell", "input", "keyevent", "KEYCODE_BACK")

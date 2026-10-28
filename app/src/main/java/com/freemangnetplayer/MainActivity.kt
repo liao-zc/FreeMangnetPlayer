@@ -180,6 +180,7 @@ class MainActivity : ComponentActivity() {
                                 onValueChange = { magnet = it; error = "" },
                                 modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp).focusRequester(magnetFocus)
                                     .semantics { contentDescription = "磁力链接输入框" },
+                                label = { Text("磁力链接") },
                                 placeholder = { Text("输入磁力链接…") },
                                 shape = RoundedCornerShape(16.dp)
                             )
