@@ -367,7 +367,7 @@ class MainActivity : ComponentActivity() {
                                                 if (value == "true" && generation == searchTrigger) searchMessage = "网站要求确认访问，正在等待验证返回…"
                                             }
                                             // Wrapper sites host the actual search page in an iframe.
-                                            view?.evaluateJavascript("JSON.stringify(Array.from(document.querySelectorAll('iframe[src]')).map(x=>x.src).find(x=>/^https?:/.test(x))||'')") { value ->
+                                            if (activeProvider == builtInProviders[1].name) view?.evaluateJavascript("JSON.stringify(Array.from(document.querySelectorAll('iframe[src]')).map(x=>x.src).find(x=>/^https?:/.test(x))||'')") { value ->
                                                 val frame = runCatching { JSONArray("[$value]").optString(0) }.getOrDefault("")
                                                 if (generation == searchTrigger && frame.isNotBlank() && frame != url) {
                                                     firstPageLoad = true
