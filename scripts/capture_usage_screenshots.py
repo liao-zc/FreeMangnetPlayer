@@ -47,13 +47,14 @@ def main() -> None:
     adb("install", "-r", "app/build/outputs/apk/debug/app-debug.apk")
     adb("shell", "wm", "size", "1080x2400")
     adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.MainActivity")
-    time.sleep(3)
+    time.sleep(7)
     screenshot("01-home-keyword.png")
 
     find_and_tap("搜索影片或资源名称")
     adb("shell", "input", "text", "Big%ssBuck%ssBunny")
+    time.sleep(2)
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
-    time.sleep(1)
+    time.sleep(2)
     screenshot("02-keyword-entered.png")
 
     find_and_tap("⋮")
@@ -61,18 +62,37 @@ def main() -> None:
     screenshot("03-engine-settings.png")
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     find_and_tap("搜索")
-    time.sleep(10)
+    time.sleep(20)
+
+    if not find_results_present():
+        find_and_tap("手动粘贴磁力")
+        find_and_tap("磁力链接或种子文件 URL")
+        adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567")
+        find_and_tap("添加")
     screenshot("04-in-app-results.png")
 
+    find_and_tap("点选此资源开始解析")
+    time.sleep(5)
+    screenshot("06-torrent-progress.png")
+
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
-    time.sleep(1)
+    adb("shell", "input", "keyevent", "KEYCODE_BACK")
+    time.sleep(2)
     find_and_tap("输入磁力链接")
     adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567")
+    time.sleep(2)
+    adb("shell", "input", "keyevent", "KEYCODE_BACK")
     time.sleep(1)
     screenshot("05-add-magnet-dialog.png")
     find_and_tap("解析")
     time.sleep(5)
     screenshot("06-torrent-progress.png")
+
+
+def find_results_present() -> bool:
+    adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
+    xml = adb("shell", "cat", "/sdcard/window.xml")
+    return "点选此资源开始解析" in xml
 
 
 if __name__ == "__main__":
