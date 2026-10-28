@@ -15,15 +15,17 @@
     window.FreeMagnetResults.onResults(JSON.stringify([{ title: label || clean(name) || clean(fallback) || '磁力资源', source: uri }]));
   }
   function parse(doc, fallback) {
-    doc.querySelectorAll('a[href], [data-magnet]').forEach(a => {
+    Array.from(doc.querySelectorAll('a[href], [data-magnet]')).forEach(a => {
       const href = a.getAttribute('data-magnet') || a.getAttribute('href') || '';
       if (/^magnet:/i.test(href)) emit(href, a.title || a.textContent, fallback);
     });
     const html = doc.documentElement ? doc.documentElement.outerHTML : '';
-    for (const m of html.matchAll(/magnet:\?[^"'<>\s]+/ig)) emit(m[0], '', fallback);
+    const pattern = /magnet:\?[^"'<>\s]+/ig;
+    let match;
+    while ((match = pattern.exec(html)) !== null) emit(match[0], '', fallback);
   }
   let running = false;
-  window.__fmpScan = async function () {
+  window.__fmpScan = function () {
     parse(document, document.title);
     if (running || !query) return;
     running = true;
@@ -37,21 +39,22 @@
         } catch (_) { return false; }
       });
       // Process all matching detail links in small batches; no fixed result truncation.
-      for (let i = 0; i < candidates.length; i += 4) {
-        await Promise.all(candidates.slice(i, i + 4).map(async a => {
+      function batch(i) {
+        if (i >= candidates.length) { running = false; return; }
+        Promise.all(candidates.slice(i, i + 4).map(a => {
           visited.add(a.href);
-          try {
-            const response = await fetch(a.href, {credentials: 'include'});
-            if (!response.ok) return;
-            const html = await response.text();
-            parse(new DOMParser().parseFromString(html, 'text/html'), a.title || a.textContent);
-          } catch (_) { visited.delete(a.href); }
-        }));
+          return fetch(a.href, {credentials: 'include'}).then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.text();
+          }).then(html => parse(new DOMParser().parseFromString(html, 'text/html'), a.title || a.textContent))
+            .catch(() => visited.delete(a.href));
+        })).then(() => batch(i + 4));
       }
-    } finally { running = false; }
+      batch(0);
+    } catch (_) { running = false; }
   };
   window.__fmpScan();
   const observer = new MutationObserver(() => window.__fmpScan());
-  observer.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'data-magnet']});
+  if (document.documentElement) observer.observe(document.documentElement, {childList: true, subtree: true, attributes: true, attributeFilter: ['href', 'data-magnet']});
   setTimeout(() => observer.disconnect(), 40000);
 })();
