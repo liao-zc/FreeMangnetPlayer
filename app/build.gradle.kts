@@ -34,5 +34,11 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:1.5.1")
     implementation("androidx.media3:media3-ui:1.5.1")
     implementation("androidx.webkit:webkit:1.12.1")
-    implementation("com.github.masterwok:simple-torrent-android:0.5.0")
+    // The small MIT session bridge is included as source so handle ownership
+    // and native compatibility fixes can be reviewed and compiled together.
+    implementation("com.frostwire:jlibtorrent:1.2.19.0")
+    implementation("com.frostwire:jlibtorrent-android-arm:1.2.19.0")
+    implementation("com.frostwire:jlibtorrent-android-arm64:1.2.19.0")
+    implementation("com.frostwire:jlibtorrent-android-x86:1.2.19.0")
+    implementation("com.frostwire:jlibtorrent-android-x86_64:1.2.19.0")
 }

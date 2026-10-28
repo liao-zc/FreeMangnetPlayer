@@ -274,7 +274,7 @@ class PlayerActivity : ComponentActivity() {
 
     private fun createTorrentListener() = object : TorrentSessionListener {
         override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) {
-            torrentHandle = handle
+            torrentHandle = session?.retainHandle(handle)
             handle.forceReannounce()
             handle.forceDHTAnnounce()
             updateFrom(state, "任务已添加，正在发现节点并获取元数据…")
