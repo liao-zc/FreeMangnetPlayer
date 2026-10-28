@@ -20,7 +20,7 @@ class SearchActivity : ComponentActivity() {
         var autoSearchStarted=false
         setContent { MaterialTheme { Column(Modifier.fillMaxSize()) {
             Row(Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                Button(onClick={finish()}) { Text("Back") }; Text("Search page: click a magnet link to open it",Modifier.padding(top=14.dp))
+                Button(onClick={finish()}) { Text("返回") }; Text("搜索页：点击磁力链接即可解析",Modifier.padding(top=14.dp))
             }
             AndroidView(factory={ctx -> WebView(ctx).apply {
                 settings.javaScriptEnabled=true; settings.domStorageEnabled=true; settings.userAgentString="Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36"
