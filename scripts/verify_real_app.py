@@ -48,6 +48,16 @@ def main():
     if os.environ.get("FMP_TEST_MODE") == "user-resources":
         verify_user_resources()
         return
+    if os.environ.get("FMP_TEST_MODE") == "titles":
+        launch("哪吒", "clg.im")
+        time.sleep(42)
+        state = diagnostic("search")
+        rows = state.get("results", [])
+        if not rows or any(r.get("title", "").lower().startswith("magnet:") for r in rows):
+            raise RuntimeError("Search must show resource titles rather than magnet URIs")
+        screenshot("24-search-resource-titles.png")
+        report.append({"check": "search-resource-titles", "passed": True, "state": state})
+        return
     if os.environ.get("FMP_TEST_MODE") == "engines":
         verify_engines()
         return

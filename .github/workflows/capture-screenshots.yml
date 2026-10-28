@@ -12,7 +12,7 @@ on:
         description: Test scope
         default: full
         type: choice
-        options: [full, user-resources, engines]
+        options: [full, user-resources, engines, titles]
 permissions:
   contents: write
 jobs:
@@ -35,7 +35,7 @@ jobs:
       - name: Build app
         run: gradle --no-daemon assembleDebug
       - name: Prepare real BitTorrent seed and browser baseline
-        if: inputs.mode != 'user-resources'
+        if: inputs.mode != 'user-resources' && inputs.mode != 'titles'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y python3-libtorrent ffmpeg
