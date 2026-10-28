@@ -37,6 +37,11 @@ v1_hash = hashlib.sha1(lt.bencode(generated[b"info"])).hexdigest()
 assert str(info.info_hashes().v1) == v1_hash
 session = lt.session({"listen_interfaces": "0.0.0.0:6881", "upload_rate_limit": max(16 * 1024, VIDEO.stat().st_size // 30), "enable_dht": False,
                       "enable_lsd": False, "enable_upnp": False, "enable_natpmp": False})
+# Local peers normally bypass the global rate class. Apply the global class
+# to the emulator too, so playback can be checked during a real partial transfer.
+classes = lt.ip_filter()
+classes.add_rule("0.0.0.0", "255.255.255.255", 1)
+session.set_peer_class_filter(classes)
 handle = session.add_torrent({"ti": info, "save_path": str(ROOT.resolve())})
 handle.resume()
 deadline = time.time() + 60

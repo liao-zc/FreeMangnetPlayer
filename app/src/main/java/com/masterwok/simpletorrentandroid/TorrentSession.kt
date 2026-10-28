@@ -153,8 +153,13 @@ open class TorrentSession(
         magnetUri = Uri.parse(URLDecoder.decode(torrentHandle.makeMagnetUri(), "utf-8"))
 
         if (torrentSessionOptions.onlyDownloadLargestFile) {
-            torrentHandle.ignoreAllFiles()
-            torrentHandle.prioritizeLargestFile(Priority.NORMAL)
+            // Set priorities atomically. A separate "ignore every file" call
+            // briefly makes the torrent finished, disconnects its seed, and
+            // can trigger playback before any video bytes have arrived.
+            val selected = torrentHandle.getLargestFileIndex()
+            torrentHandle.prioritizeFiles(Array(torrentHandle.torrentFile().numFiles()) {
+                if (it == selected) Priority.NORMAL else Priority.IGNORE
+            })
         }
 
         val largestFileIndex = torrentHandle.getLargestFileIndex()

@@ -233,6 +233,9 @@ class PlayerActivity : ComponentActivity() {
                 )
                 options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(),
                     "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881,dht.libtorrent.org:25401")
+                // The player reads the same file as libtorrent's disk writer.
+                // Use the OS cache rather than a separate native write cache.
+                options.settingsPack.cacheSize(0)
                 val engine = TorrentSession(options)
                 engine.listener = createTorrentListener()
                 withContext(Dispatchers.Main) { session = engine }
@@ -248,7 +251,7 @@ class PlayerActivity : ComponentActivity() {
                     delay(1000)
                     val handle = torrentHandle ?: continue
                     if (!handle.isValid) continue
-                    val native = handle.status()
+                    val native = handle.status(TorrentHandle.QUERY_ACCURATE_DOWNLOAD_COUNTERS)
                     runOnUiThread {
                         peerCount = native.numPeers()
                         downloadRate = native.downloadRate()
