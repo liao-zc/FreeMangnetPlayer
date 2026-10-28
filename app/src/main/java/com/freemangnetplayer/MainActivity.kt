@@ -41,6 +41,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -84,6 +86,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()?.let(::normalizeMagnetUri)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val debug = applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0
+        val requestedEngine = if (debug) intent.getStringExtra("test-engine") else null
+        val requestedQuery = if (debug) intent.getStringExtra("test-query") else null
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(
                 primary = teal,
@@ -93,14 +98,14 @@ class MainActivity : ComponentActivity() {
                 onBackground = ink,
                 onSurface = ink
             )) {
-                var keyword by remember { mutableStateOf("") }
+                var keyword by remember { mutableStateOf(requestedQuery.orEmpty()) }
                 var magnet by remember { mutableStateOf("") }
                 var selectedTab by remember { mutableStateOf("搜索") }
                 var showEngineMenu by remember { mutableStateOf(false) }
                 var showCustomDialog by remember { mutableStateOf(false) }
                 var customName by remember { mutableStateOf(prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索") }
                 var customUrl by remember { mutableStateOf(prefs.getString("custom-url", "") ?: "") }
-                val storedSearchName = prefs.getString("search-name", null)
+                val storedSearchName = requestedEngine ?: prefs.getString("search-name", null)
                 val storedProvider = builtInProviders.firstOrNull { it.name == storedSearchName }
                 val storedCustomIsValid = storedSearchName == customName && customUrl.startsWith("https://") ||
                     storedSearchName == customName && customUrl.startsWith("http://")
@@ -110,6 +115,7 @@ class MainActivity : ComponentActivity() {
                 var searchState by remember { mutableStateOf("idle") }
                 var searchMessage by remember { mutableStateOf("") }
                 var searchTrigger by remember { mutableIntStateOf(0) }
+                var showSearchBrowser by remember { mutableStateOf(false) }
                 var currentSearchUrl by remember { mutableStateOf("") }
                 val results = remember { mutableStateListOf<MagnetResult>() }
                 val downloads = remember { mutableStateListOf<LibraryEntry>() }
@@ -141,10 +147,10 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(searchTrigger) {
                     if (searchTrigger == 0) return@LaunchedEffect
-                    delay(25_000)
+                    delay(40_000)
                     if (searchState == "loading") {
                         searchState = "timeout"
-                        searchMessage = "搜索超过 25 秒仍未返回。你可以重试或打开搜索网站继续查找。"
+                        searchMessage = "40 秒内未提取到磁力链接。可在应用内查看网页，完成验证或检查该网站是否提供磁力下载。"
                     }
                 }
 
@@ -169,6 +175,16 @@ class MainActivity : ComponentActivity() {
                     searchPageUrl = currentSearchUrl
                     firstPageLoad = true
                     searchTrigger++
+                }
+
+                LaunchedEffect(Unit) { if (!requestedQuery.isNullOrBlank()) beginSearch() }
+                LaunchedEffect(searchState, results.size) {
+                    if (debug && searchTrigger > 0) {
+                        val rows = JSONArray()
+                        results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet)) }
+                        java.io.File(filesDir, "search-check.json").writeText(JSONObject().put("engine", activeProvider)
+                            .put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
+                    }
                 }
 
                 if (showCustomDialog) {
@@ -238,11 +254,10 @@ class MainActivity : ComponentActivity() {
                                 state = searchState,
                                 message = searchMessage,
                                 results = results,
-                                onBack = { selectedTab = "搜索" },
+                                onBack = { magnetWebView?.stopLoading(); selectedTab = "搜索" },
                                 onRetry = ::beginSearch,
                                 onOpenWeb = {
-                                    val url = currentSearchUrl.ifBlank { selectedUrl }
-                                    runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                                    showSearchBrowser = true
                                 },
                                 onCancel = {
                                     searchState = "idle"
@@ -303,14 +318,18 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        if (searchTrigger > 0) AndroidView(
-                            modifier = Modifier.size(1.dp),
+                        if (searchTrigger > 0 && !showSearchBrowser) key(searchTrigger) { AndroidView(
+                            // A real viewport is required for form detection. Keep the renderer
+                            // outside the content area, transparent, and out of accessibility.
+                            modifier = Modifier.offset(x = (-10000).dp).size(360.dp, 640.dp).alpha(0f),
                             factory = { context ->
+                                val generation = searchTrigger
                                 WebView(context).apply {
+                                    importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                                     magnetWebView = this
                                     searchBridge = MagnetSearchBridge { title, link ->
                                         runOnUiThread {
-                                            if (results.size < 60 && results.none { it.magnet == link }) {
+                                            if (generation == searchTrigger && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
                                                 results.add(MagnetResult(title.ifBlank { magnetTitle(link) }, link))
                                                 searchState = "results"
                                                 searchMessage = ""
@@ -321,9 +340,7 @@ class MainActivity : ComponentActivity() {
                                     settings.domStorageEnabled = true
                                     settings.javaScriptCanOpenWindowsAutomatically = false
                                     settings.setSupportMultipleWindows(false)
-                                    settings.loadsImagesAutomatically = false
-                                    settings.blockNetworkImage = true
-                                    settings.userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/124.0 Mobile Safari/537.36"
+                                    settings.loadsImagesAutomatically = true
                                     addJavascriptInterface(searchBridge!!, "FreeMagnetResults")
                                     webChromeClient = WebChromeClient()
                                     webViewClient = object : WebViewClient() {
@@ -341,13 +358,26 @@ class MainActivity : ComponentActivity() {
 
                                         override fun onPageFinished(view: WebView?, url: String?) {
                                             super.onPageFinished(view, url)
+                                            if (generation != searchTrigger) return
+                                            // Wrapper sites host the actual search page in an iframe.
+                                            view?.evaluateJavascript("JSON.stringify(Array.from(document.querySelectorAll('iframe[src]')).map(x=>x.src).find(x=>/^https?:/.test(x))||'')") { value ->
+                                                val frame = runCatching { JSONArray("[$value]").optString(0) }.getOrDefault("")
+                                                if (generation == searchTrigger && frame.isNotBlank() && frame != url) {
+                                                    firstPageLoad = true
+                                                    searchNeedsFormSubmit = true
+                                                    view.loadUrl(frame)
+                                                }
+                                            }
                                             scanForMagnets(view, activeQuery)
                                             if (firstPageLoad && searchNeedsFormSubmit) {
-                                                firstPageLoad = false
-                                                injectSearch(view, activeQuery)
+                                                view?.evaluateJavascript("Boolean(document.querySelector('input[type=search],input[type=text]'))") { value ->
+                                                    if (value == "true" && generation == searchTrigger) {
+                                                        firstPageLoad = false
+                                                        injectSearch(view, activeQuery)
+                                                    }
+                                                }
                                             } else if (searchState == "loading") {
-                                                searchState = "empty"
-                                                searchMessage = "页面已返回，但暂未提取到 magnet 链接。"
+                                                searchMessage = "网页已加载，正在读取搜索结果和详情中的磁力链接…"
                                             }
                                         }
 
@@ -361,16 +391,38 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
                                     }
+                                    loadUrl(searchPageUrl)
+                                }
+                            },
+                            onRelease = { if (magnetWebView === it) magnetWebView = null; it.stopLoading(); it.removeJavascriptInterface("FreeMagnetResults"); it.destroy() }
+                        ) }
+
+                        if (showSearchBrowser) Dialog(onDismissRequest = { showSearchBrowser = false }) {
+                            Surface(Modifier.fillMaxSize().safeDrawingPadding(), color = Color.White) {
+                                Column {
+                                    Button(onClick = { showSearchBrowser = false }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("关闭网页并返回搜索结果") }
+                                    Text("可在此完成网站验证；磁力链接仍由应用提取。", Modifier.padding(8.dp))
+                                    AndroidView(factory = { context ->
+                                        WebView(context).apply {
+                                            settings.javaScriptEnabled = true
+                                            settings.domStorageEnabled = true
+                                            addJavascriptInterface(MagnetSearchBridge { title, link -> runOnUiThread {
+                                                if (results.none { it.magnet == link }) results.add(MagnetResult(title, link))
+                                                searchState = "results"
+                                            } }, "FreeMagnetResults")
+                                            webViewClient = object : WebViewClient() {
+                                                override fun onPageFinished(view: WebView?, url: String?) {
+                                                    scanForMagnets(view, activeQuery)
+                                                    if (searchNeedsFormSubmit) { searchNeedsFormSubmit = false; injectSearch(view, activeQuery) }
+                                                }
+                                            }
+                                            loadUrl(currentSearchUrl)
+                                        }
+                                    }, modifier = Modifier.weight(1f).fillMaxWidth(), onRelease = { it.destroy() })
                                 }
                             }
-                        )
-
-                        LaunchedEffect(searchTrigger) {
-                            if (searchTrigger == 0) return@LaunchedEffect
-                            delay(100)
-                            magnetWebView?.stopLoading()
-                            magnetWebView?.loadUrl(searchPageUrl)
                         }
+
                     }
                 }
 
@@ -390,7 +442,7 @@ class MainActivity : ComponentActivity() {
 
     private fun scanForMagnets(view: WebView?, query: String) {
         val quotedQuery = JSONObject.quote(query)
-        val script = """(function(){try{var query=$quotedQuery;function decode(s){var x=document.createElement('textarea');x.innerHTML=s||'';return x.value.replace(/&amp;/g,'&').trim()}function clean(s){s=(s||'').replace(/\s+/g,' ').trim();return /^(下载|磁力|magnet|复制|播放)(链接)?$/i.test(s)?'':s}function emit(u,t,f){u=decode(u);if(!/^magnet:\?/i.test(u))return;var dn=/(?:[?&])dn=([^&]+)/i.exec(u),name='';if(dn){try{name=decodeURIComponent(dn[1].replace(/\+/g,'%20'))}catch(e){name=dn[1]}}var title=clean(t)||clean(name)||clean(f)||'磁力资源';window.FreeMagnetResults.onResults(JSON.stringify([{title:title,source:u}]))}function parse(doc,fallback){var html=doc.documentElement?doc.documentElement.outerHTML:'',re=/magnet:\?[^\"'<>\s]+/ig,m;while((m=re.exec(html))!==null){var raw=m[0],a=[...doc.querySelectorAll('a[href],[data-magnet]')].find(function(x){return (x.getAttribute('href')||x.getAttribute('data-magnet')||'').indexOf(raw)>=0});var label=a?(a.innerText||a.title||''):'';if(!label&&a&&a.parentElement)label=a.parentElement.innerText||'';emit(raw,label,fallback)}doc.querySelectorAll('a[href^=\"magnet:\"],a[href^=\"MAGNET:\"],[data-magnet]').forEach(function(a){var label=a.innerText||a.title||'';if(!label&&a.parentElement)label=a.parentElement.innerText||'';emit(a.getAttribute('data-magnet')||a.getAttribute('href')||'',label,fallback)})}function scan(){parse(document,'');if(query.length<2)return;if(!window.__magnetCrawled)window.__magnetCrawled=new Set();var links=[...document.querySelectorAll('a[href]')].filter(function(a){try{var u=new URL(a.href,location.href),card=a.closest('article,li,.item,.video-item,.module-item,.movie-item,.post'),text=((a.innerText||a.title||'')+' '+(card?card.innerText:'')).replace(/\s+/g,' ');if(u.origin!==location.origin||u.href===location.href||window.__magnetCrawled.has(u.href)||text.toLowerCase().indexOf(query.toLowerCase())<0)return false;window.__magnetCrawled.add(u.href);return true}catch(e){return false}}).slice(0,12);links.forEach(function(a){var card=a.closest('article,li,.item,.video-item,.module-item,.movie-item,.post'),title=clean(a.innerText||a.title||'')||(card?clean(card.innerText):'');fetch(a.href,{credentials:'include'}).then(function(r){return r.text()}).then(function(t){parse(new DOMParser().parseFromString(t,'text/html'),title)}).catch(function(){})})}scan();if(!window.__magnetWatcher){window.__magnetWatcher=new MutationObserver(scan);window.__magnetWatcher.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['href','data-magnet']});setTimeout(function(){window.__magnetWatcher.disconnect();window.__magnetWatcher=null},30000)}}catch(e){}})()"""
+        val script = assets.open("magnet-search.js").bufferedReader().use { it.readText() }.replace("__QUERY_JSON__", quotedQuery)
         view?.evaluateJavascript(script, null)
     }
     private fun openTorrent(item: MagnetResult, mode: String) {
@@ -557,7 +609,7 @@ private fun SearchResultsScreen(
                 }
                 Spacer(Modifier.height(14.dp))
                 Button(onClick = onRetry, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("重试搜索") }
-                OutlinedButton(onClick = onOpenWeb, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("打开搜索网站") }
+                OutlinedButton(onClick = onOpenWeb, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("应用内查看搜索网页 / 验证") }
                 OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("返回首页") }
             }
         }
@@ -630,7 +682,7 @@ private fun magnetTitle(magnet: String): String = runCatching {
     if (dn.isNullOrBlank()) "磁力资源" else java.net.URLDecoder.decode(dn, "UTF-8")
 }.getOrDefault("磁力资源")
 
-private fun normalizeMagnetUri(raw: String): String? = runCatching {
+internal fun normalizeMagnetUri(raw: String): String? = runCatching {
     val decoded = Regex("&#(?:x([0-9a-fA-F]+)|(\\d+));", RegexOption.IGNORE_CASE).replace(raw.trim().replace("&amp;", "&", true)) { match ->
         val code = match.groups[1]?.value?.toInt(16) ?: match.groups[2]?.value?.toInt() ?: return@replace match.value
         code.toChar().toString()
