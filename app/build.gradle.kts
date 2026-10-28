@@ -5,6 +5,7 @@ android { namespace = "com.freemangnetplayer"; compileSdk = 35
     buildFeatures { compose = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }
+    sourceSets.getByName("main").assets.srcDir("../third-party")
 }
 
 // The wrapper's 2018 native dependency pauses the session on Android 11+

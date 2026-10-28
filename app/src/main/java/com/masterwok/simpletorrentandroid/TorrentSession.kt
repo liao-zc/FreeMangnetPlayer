@@ -307,6 +307,8 @@ open class TorrentSession(
         val connection = (torrentUrl.openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             instanceFollowRedirects = true
+            connectTimeout = 10_000
+            readTimeout = 10_000
         }
 
         connection.connect()
@@ -335,10 +337,8 @@ open class TorrentSession(
             , downloadLocation: File
             , torrentUri: Uri
     ) {
-        val bytes = context
-                .contentResolver
-                .openInputStream(torrentUri)
-                .readBytes()
+        val bytes = context.contentResolver.openInputStream(torrentUri)?.use { it.readBytes() }
+                ?: throw java.io.IOException("Cannot open torrent URI")
 
         sessionManager.download(
                 TorrentInfo.bdecode(bytes)

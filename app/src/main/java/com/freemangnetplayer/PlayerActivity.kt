@@ -465,6 +465,10 @@ class PlayerActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
+        if (downloadMode && (totalBytes == 0L || downloadedBytes < totalBytes)) {
+            LibraryStore.updateDownload(this, intent.getStringExtra("title").orEmpty(), currentSource,
+                "已暂停：离开任务页，已下载缓存保留", downloadedBytes, totalBytes)
+        }
         session?.listener = null
         val closing = session
         session = null
