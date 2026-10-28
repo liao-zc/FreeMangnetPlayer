@@ -33,3 +33,8 @@ Android API 24+；本轮运行测试为 API 35 手机模拟器，平板和电视
 JDK 17、Android SDK 35、Gradle 8.9，执行 `gradle assembleDebug`。下载内核使用 jlibtorrent 1.2.19.0，播放器使用 AndroidX Media3；内置的 simple-torrent-android 包装器保留 MIT 许可并修复原生句柄和分片索引问题。[第三方许可](third-party/simple-torrent-android-LICENSE.txt)。
 
 GitHub CI 校验 Git 对象无透明加密内容、源码 UTF-8、Markdown 图片路径及 GitHub 渲染。截图与原始测试 JSON 随报告上传，离线 HTML 可下载后直接阅读。
+## 最终复测与安装
+
+[最终完整复测工作流通过](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40698533089)，[原始运行记录](docs/evidence/final-run.json)。dobt 访问失败及指定哪吒资源没有传输节点仍是未通过项，详见报告。
+
+v0.1.8 与 v0.1.9 的 APK 签名不同，不能直接覆盖安装；卸载旧版会删除收藏和缓存，请先自行记录重要磁力信息。当前包仍采用 CI 调试签名。
