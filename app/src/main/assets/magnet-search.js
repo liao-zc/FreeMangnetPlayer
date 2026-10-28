@@ -31,8 +31,7 @@
       const candidates = Array.from(document.querySelectorAll('a[href]')).filter(a => {
         try {
           const url = new URL(a.href, location.href);
-          const card = a.closest('article,li,.item,.video-item,.module-item,.movie-item,.post');
-          const text = clean((a.textContent || a.title || '') + ' ' + (card ? card.textContent : ''));
+          const text = clean(a.textContent || a.title || '');
           return /^https?:/.test(url.protocol) && url.origin === location.origin && url.href !== location.href &&
             !visited.has(url.href) && text.includes(query);
         } catch (_) { return false; }

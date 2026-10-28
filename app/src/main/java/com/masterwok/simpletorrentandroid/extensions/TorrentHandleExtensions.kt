@@ -106,5 +106,4 @@ internal fun TorrentHandle.setPiecePriorities(
         , endIndex: Int
 ) = (startIndex..endIndex).forEach {
     piecePriority(it, Priority.SEVEN)
-    setPieceDeadline(it, 1000)
 }

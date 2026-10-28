@@ -71,6 +71,7 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        File(filesDir, "torrent-check.json").delete()
         currentSource = intent.getStringExtra("source") ?: intent.data?.toString().orEmpty()
         downloadMode = intent.getStringExtra("mode") == "download"
         resumeOnReady = intent.getStringExtra("mode") == "play"

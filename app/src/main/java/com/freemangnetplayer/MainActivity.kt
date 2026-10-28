@@ -340,17 +340,31 @@ class MainActivity : ComponentActivity() {
                                     settings.domStorageEnabled = true
                                     settings.javaScriptCanOpenWindowsAutomatically = false
                                     settings.setSupportMultipleWindows(false)
-                                    settings.loadsImagesAutomatically = true
+                                    settings.loadsImagesAutomatically = false
                                     settings.userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
                                     addJavascriptInterface(searchBridge!!, "FreeMagnetResults")
-                                    webChromeClient = WebChromeClient()
+                                    webChromeClient = object : WebChromeClient() {
+                                        override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                                            if (newProgress >= 30 && generation == searchTrigger) {
+                                                scanForMagnets(view, activeQuery)
+                                                if (firstPageLoad && searchNeedsFormSubmit) {
+                                                    view?.evaluateJavascript("Boolean(document.querySelector('input[type=search],input[type=text]'))") { value ->
+                                                        if (value == "true" && firstPageLoad && generation == searchTrigger) {
+                                                            firstPageLoad = false
+                                                            injectSearch(view, activeQuery)
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                     webViewClient = object : WebViewClient() {
                                         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
                                             val url = request.url.toString()
                                             if (url.startsWith("magnet:", true)) {
                                                 val normalized = normalizeMagnetUri(url)
                                                 if (normalized != null) {
-                                                    runOnUiThread { openTorrent(MagnetResult(magnetTitle(normalized), normalized), "parse") }
+                                                    searchBridge?.onResults(org.json.JSONArray().put(org.json.JSONObject().put("title", magnetTitle(normalized)).put("source", normalized)).toString())
                                                 }
                                                 return true
                                             }

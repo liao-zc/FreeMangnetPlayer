@@ -36,7 +36,7 @@ with sync_playwright() as pw:
             if challenge.count():
                 challenge.first.click()
                 page.wait_for_timeout(5000)
-            if len(page.frames) > 1:
+            if index == 2 and len(page.frames) > 1:
                 frame_url = next((f.url for f in page.frames[1:] if f.url.startswith("http")), "")
                 if frame_url:
                     page.goto(frame_url, wait_until="domcontentloaded", timeout=30000)

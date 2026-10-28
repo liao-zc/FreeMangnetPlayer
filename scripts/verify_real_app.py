@@ -12,6 +12,7 @@ report = []
 
 def launch(query=None, engine=None, magnet=None, mode="parse"):
     adb("shell", "am", "force-stop", PACKAGE)
+    adb("shell", "run-as", PACKAGE, "rm", "-f", "files/torrent-check.json", "files/search-check.json")
     args = ["am", "start", "-W", "-n", f"{PACKAGE}/.MainActivity"]
     if query:
         args += ["--es", "test-query", shlex.quote(query), "--es", "test-engine", shlex.quote(engine)]
@@ -44,6 +45,9 @@ def main():
     adb("shell", "wm", "size", "1080x2400")
     if os.environ.get("FMP_TEST_MODE") == "user-resources":
         verify_user_resources()
+        return
+    if os.environ.get("FMP_TEST_MODE") == "engines":
+        verify_engines()
         return
     launch()
     require_visible("粘贴磁力链接", "解析资源", "播放", "下载", "收藏")
@@ -81,6 +85,8 @@ def main():
         raise RuntimeError("Downloaded video SHA256 differs from the real seed")
     screenshot("16-real-download.png")
     report.append({"check": "real-metadata-download", "passed": True, "state": state, "sha256": actual, "fixture": "Blender CC BY Big Buck Bunny clip"})
+    for _ in range(3):
+        find_and_tap("后退 15 秒")
     find_and_tap("收藏")
     find_and_tap("▶ 播放")
     state = wait_for(lambda s: s.get("playing"), 45)
@@ -105,6 +111,20 @@ def main():
     require_visible("磁力资源")
     report.append({"check": "favorite-cold-restart", "passed": True})
 
+    verify_engines()
+
+    for name, magnet in [
+        ("user-hash", "magnet:?xt=urn:btih:784036B1EA2AAE7E8A89E1A87E09D77589A90B10"),
+        ("screenshot-hash", "magnet:?xt=urn:btih:b1b8a1f2edd3b93fbbaacde08635bd143ebf8308")]:
+        launch(magnet=magnet)
+        time.sleep(90)
+        state = diagnostic("torrent")
+        screenshot(f"{name}-actual.png")
+        report.append({"check": name, "state": state, "metadata_received": state.get("metadata", False)})
+    (OUT / "verification.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def verify_engines():
     baseline = json.loads((OUT / "browser-baseline.json").read_text())
     for i, reference in enumerate(baseline, 1):
         launch("哪吒", reference["engine"])
@@ -117,16 +137,6 @@ def main():
                        "app": state, "app_hashes": hashes, "equal": not reference["error"] and hashes == reference["hashes"]})
         find_and_tap("返回")
         require_visible("粘贴磁力链接")
-
-    for name, magnet in [
-        ("user-hash", "magnet:?xt=urn:btih:784036B1EA2AAE7E8A89E1A87E09D77589A90B10"),
-        ("screenshot-hash", "magnet:?xt=urn:btih:b1b8a1f2edd3b93fbbaacde08635bd143ebf8308")]:
-        launch(magnet=magnet)
-        time.sleep(90)
-        state = diagnostic("torrent")
-        screenshot(f"{name}-actual.png")
-        report.append({"check": name, "state": state, "metadata_received": state.get("metadata", False)})
-    (OUT / "verification.json").write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def verify_user_resources():

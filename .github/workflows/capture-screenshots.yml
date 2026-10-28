@@ -12,7 +12,7 @@ on:
         description: Test scope
         default: full
         type: choice
-        options: [full, user-resources]
+        options: [full, user-resources, engines]
 permissions:
   contents: write
 jobs:
@@ -79,4 +79,6 @@ jobs:
         if: always()
         with:
           name: FreeMangnetPlayer-usage-screenshots
-          path: manual-shots/
+          path: |
+            manual-shots/
+            fixture.log
