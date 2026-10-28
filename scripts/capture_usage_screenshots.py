@@ -40,6 +40,8 @@ def find_and_tap(label: str) -> None:
         adb("shell", "input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
         time.sleep(1)
         return
+    visible = [(n.get("text", ""), n.get("content-desc", ""), n.get("hintText", ""), n.get("bounds", "")) for n in tree.iter("node")]
+    print(f"Visible accessibility nodes: {visible!r}")
     raise RuntimeError(f"Could not find visible UI element containing: {label}")
 
 
@@ -49,6 +51,7 @@ def main() -> None:
     adb("shell", "wm", "size", "1080x2400")
     adb("shell", "am", "start", "-W", "-n", "com.freemagnetplayer/.MainActivity")
     time.sleep(3)
+    screenshot("00-home-debug.png")
 
     # Select a listed search source and show the app's search screen.
     find_and_tap("juhebd.com")
