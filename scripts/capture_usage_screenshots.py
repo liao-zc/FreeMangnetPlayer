@@ -63,14 +63,9 @@ def main() -> None:
     screenshot("04-in-app-results.png")
 
     adb("shell", "am", "force-stop", PACKAGE)
-    adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.PlayerActivity", "--es", "source", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", "--es", "mode", "download", "--es", "title", "Demo torrent (synthetic)")
+    adb("shell", "am", "start", "-W", "-a", "android.intent.action.VIEW", "-d", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", "-n", f"{PACKAGE}/.MainActivity")
     time.sleep(3)
-    screenshot("05-download-progress.png")
-
-    adb("shell", "am", "force-stop", PACKAGE)
-    adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.PlayerActivity", "--es", "source", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", "--es", "mode", "play", "--es", "title", "Demo torrent (synthetic)")
-    time.sleep(3)
-    screenshot("06-player.png")
+    screenshot("05-torrent-progress.png")
 
 
 if __name__ == "__main__":
