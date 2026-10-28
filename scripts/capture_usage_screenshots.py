@@ -64,6 +64,7 @@ def main() -> None:
     find_and_tap("执行关键词搜索")
     time.sleep(27)
     screenshot("04-in-app-results.png")
+    find_and_tap("返回搜索")
 
     find_and_tap("magnet 链接")
     adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567")
