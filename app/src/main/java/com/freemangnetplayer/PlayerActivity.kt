@@ -48,6 +48,7 @@ class PlayerActivity : ComponentActivity() {
     private var playbackAttemptBytes = -1L
     private var connectionTimedOut by mutableStateOf(false)
     private var favoriteSaved by mutableStateOf(false)
+    private var playbackActive by mutableStateOf(false)
 
     private var statusText by mutableStateOf("正在准备磁力任务…")
     private var progressValue by mutableFloatStateOf(0f)
@@ -70,13 +71,15 @@ class PlayerActivity : ComponentActivity() {
                     Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                         Button(onClick = { finish() }, modifier = Modifier.height(54.dp)) { Text("返回搜索") }
                         Text(title.ifBlank { "资源解析" }, Modifier.weight(1f), maxLines = 1, style = MaterialTheme.typography.titleLarge)
-                        OutlinedButton(
-                            onClick = {
-                                LibraryStore.addFavorite(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource)
-                                favoriteSaved = true
-                            },
-                            modifier = Modifier.height(54.dp)
-                        ) { Text(if (favoriteSaved) "已收藏" else "收藏") }
+                        if (playbackActive) {
+                            OutlinedButton(
+                                onClick = {
+                                    LibraryStore.addFavorite(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource)
+                                    favoriteSaved = true
+                                },
+                                modifier = Modifier.height(54.dp)
+                            ) { Text(if (favoriteSaved) "已收藏" else "收藏当前播放") }
+                        }
                     }
 
                     LaunchedEffect(currentSource) {
@@ -270,7 +273,12 @@ class PlayerActivity : ComponentActivity() {
             player?.release()
             val newPlayer = ExoPlayer.Builder(this).build()
             newPlayer.addListener(object : Player.Listener {
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    playbackActive = isPlaying
+                }
+
                 override fun onPlayerError(error: PlaybackException) {
+                    playbackActive = false
                     statusText = "播放器暂时无法读取已缓存片段，下载仍会继续：${error.errorCodeName}"
                 }
             })
