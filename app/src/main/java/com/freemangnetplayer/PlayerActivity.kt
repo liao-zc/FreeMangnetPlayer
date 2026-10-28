@@ -306,7 +306,11 @@ class PlayerActivity : ComponentActivity() {
             newPlayer.addListener(object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     playbackActive = isPlaying
-                    if (isPlaying) LibraryStore.addPlayback(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource)
+                    if (isPlaying) LibraryStore.addPlayback(
+                        this@PlayerActivity,
+                        intent.getStringExtra("title").orEmpty().ifBlank { "磁力资源" },
+                        currentSource
+                    )
                 }
 
                 override fun onPlayerError(error: PlaybackException) {
