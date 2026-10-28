@@ -341,6 +341,7 @@ class MainActivity : ComponentActivity() {
                                     settings.javaScriptCanOpenWindowsAutomatically = false
                                     settings.setSupportMultipleWindows(false)
                                     settings.loadsImagesAutomatically = true
+                                    settings.userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
                                     addJavascriptInterface(searchBridge!!, "FreeMagnetResults")
                                     webChromeClient = WebChromeClient()
                                     webViewClient = object : WebViewClient() {
@@ -418,6 +419,7 @@ class MainActivity : ComponentActivity() {
                                         WebView(context).apply {
                                             settings.javaScriptEnabled = true
                                             settings.domStorageEnabled = true
+                                            settings.userAgentString = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36"
                                             addJavascriptInterface(MagnetSearchBridge { title, link -> runOnUiThread {
                                                 if (results.none { it.magnet == link }) results.add(MagnetResult(title, link))
                                                 searchState = "results"

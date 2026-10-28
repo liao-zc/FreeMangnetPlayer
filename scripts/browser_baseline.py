@@ -19,7 +19,10 @@ OUT.mkdir(exist_ok=True)
 baseline = []
 with sync_playwright() as pw:
     browser = pw.chromium.launch(headless=True)
-    context = browser.new_context(viewport={"width": 1080, "height": 1600})
+    # Use a normal mobile browser UA, matching the app. HeadlessChrome's default
+    # UA triggers access blocks that a user's ordinary browser does not see.
+    context = browser.new_context(viewport={"width": 360, "height": 800}, device_scale_factor=3, is_mobile=True,
+        user_agent="Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36")
     for index, (name, url, form) in enumerate(ENGINES, 1):
         page = context.new_page()
         row = {"engine": name, "query": QUERY, "url": url, "hashes": [], "detail_pages": [], "error": ""}
