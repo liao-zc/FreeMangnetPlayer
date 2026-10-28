@@ -24,6 +24,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -176,7 +178,8 @@ class MainActivity : ComponentActivity() {
                             OutlinedTextField(
                                 value = magnet,
                                 onValueChange = { magnet = it; error = "" },
-                                modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp).focusRequester(magnetFocus),
+                                modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp).focusRequester(magnetFocus)
+                                    .semantics { contentDescription = "磁力链接输入框" },
                                 placeholder = { Text("输入磁力链接…") },
                                 shape = RoundedCornerShape(16.dp)
                             )
