@@ -1,70 +1,60 @@
 # FreeMangnetPlayer
 
-FreeMangnetPlayer 是供个人使用的 Android 磁力链接搜索、下载与播放 MVP。打开本页即可查看操作说明和应用截图，无需跳转文档。
+FreeMangnetPlayer 是供个人使用的 Android 磁力链接搜索、下载与播放应用。搜索使用一个关键词输入框；搜索引擎在“设置”中选择，网址不显示在首页。
 
-文档直达： [详细使用说明](https://github.com/liao-zc/FreeMangnetPlayer/blob/main/docs/usage-zh.md) · [第三方依赖说明](https://github.com/liao-zc/FreeMangnetPlayer/blob/main/THIRD_PARTY_NOTICES.md)。
+**下载：**[GitHub Releases](https://github.com/liao-zc/FreeMangnetPlayer/releases)，新版 APK 名称为 `FreeMangnetPlayer-版本号.apk`。
 
-**下载：**[GitHub Releases](https://github.com/liao-zc/FreeMangnetPlayer/releases)。当前版本 v0.1.2 构建完成后，可下载 `FreeMangnetPlayer-v0.1.2.apk`。
+文档直达：[详细使用说明](https://github.com/liao-zc/FreeMangnetPlayer/blob/main/docs/usage-zh.md) · [第三方依赖说明](https://github.com/liao-zc/FreeMangnetPlayer/blob/main/THIRD_PARTY_NOTICES.md)。
 
-## 操作说明（配有应用实际截图）
+## 操作说明（应用实际截图）
 
-### 1. 打开应用并选择搜索站点
+### 1. 输入关键词并搜索
 
-进入首页后，点选内置搜索来源切换站点；也可以在“自定义搜索网站”输入其他搜索网站的首页地址。当前预置六个站点。站点本身由第三方提供，可能因改版、网络或验证码无法正常访问。
+首页只显示关键词输入框和搜索按钮。搜索来源可在右上角“设置”中选择，设置中展示引擎名称，不需要输入网址。
 
-![首页和搜索来源](docs/screenshots/01-home-and-source.png)
-
-### 2. 输入关键词
-
-在“关键词”输入框键入要查找的名称。示例使用公有领域动画《Big Buck Bunny》。
+![关键词搜索首页](docs/screenshots/01-home-keyword.png)
 
 ![输入关键词](docs/screenshots/02-keyword-entered.png)
 
-### 3. 打开站内搜索
+### 2. 在应用内查看搜索结果
 
-点击“搜索”后，应用会在内置浏览器打开所选网站，并尝试将关键词填入页面搜索框。如果网站页面变化或自动填入失败，请在网页中手动输入并搜索。截图为真实运行画面；本次运行环境没有加载出第三方站点结果，因此页面内容区为空。
+搜索网站在应用内页面打开，网页跳转不会交给外部浏览器。页面里的磁力链接会被识别并加入页面上方的资源列表；也可以点“粘贴磁力”手动添加链接。此次模拟器未能加载出第三方站点结果，资源列表不伪造结果。
 
-![站内搜索页面](docs/screenshots/03-search-page.png)
+![搜索引擎设置](docs/screenshots/03-engine-settings.png)
 
-网页搜索结果出现 magnet 链接时，点击链接即可返回应用并解析。搜索内容由第三方网站提供，请自行确认内容及下载权限。
+![应用内搜索结果](docs/screenshots/04-in-app-results.png)
 
-### 4. 手动粘贴磁力链接
+### 3. 直接播放或下载
 
-也可以回到应用首页，将完整的 `magnet:?` 链接粘贴到“磁力链接”输入框。
+每条识别到或手动添加的磁力资源提供“播放”和“下载 / 缓存”操作。播放页面显示连接、缓存进度、速度和做种者数量；下载完成后可从该页面播放已缓存的视频。
 
-![粘贴磁力链接](docs/screenshots/04-magnet-entered.png)
+![手动添加磁力链接](docs/screenshots/05-add-magnet-dialog.png)
 
-此图中的链接是虚构示例，只用于展示输入位置，不会解析出真实种子内容。
+![下载与缓存进度](docs/screenshots/06-torrent-progress.png)
 
-### 5. 解析、缓存并播放
-
-点击“解析并播放 / 下载”后，应用获取种子信息并下载最大的视频文件；收到首批数据后尝试启动播放器。下载内容保存在应用专属 Movies 目录。实际能否播放取决于种子健康度、网络、视频编码和设备支持。
-
-![播放器启动界面](docs/screenshots/05-player-opening.png)
-
-截图使用虚构磁力链接，只展示播放器启动界面，不代表该示例资源可播放或下载成功。
+演示截图可能使用虚构磁力链接，仅表示界面状态，不代表该资源可用。资源播放和下载需要种子有可连接的做种者，且视频编码受设备支持。
 
 ## 当前版本范围
 
-- 支持 Android 7.0（API 24）及以上；目标设备包括普通 Android 手机、平板和电视。电视可使用遥控器焦点操作，文本输入需要输入法。
-- 支持 arm32、arm64、x86 和 x86_64 架构。
-- 当前只选择并下载种子中最大的文件；没有文件选择器、后台下载队列、续传队列或下载管理/媒体库页面。系统结束应用进程后，下载不保证继续。
-- 缓存保存在应用专属目录。卸载应用或清除应用数据会删除这些文件。
-- 搜索网站没有统一稳定 API，站点改版、验证码和网络限制都会影响搜索体验。
+- 支持 Android 7.0（API 24）及以上，面向手机、平板和 Android TV；电视遥控器可操作焦点，文字搜索需设备输入法。
+- 内置搜索来源可在设置中选择。搜索页面由第三方网站提供，站点改版、验证码或网络限制都可能影响结果；磁力结果识别取决于网站把链接暴露在页面中。
+- 当前每个种子自动选择最大文件；暂不提供种子内部文件选择、后台下载服务、退出应用后的续传或下载任务库。
+- 下载保存在应用专属 Movies 目录。卸载应用或清除应用数据会删除这些文件。
+- 只下载和播放你有权使用的内容，并遵守搜索网站条款及适用法律。
 
 ## 构建
 
-使用 Android Studio（JDK 17、Android SDK 35）打开项目，或运行 `gradlew.bat assembleDebug`。本地调试 APK 位于 `app/build/outputs/apk/debug/app-debug.apk`。推送 `v*.*.*` 格式版本标签会触发 GitHub Actions 构建并发布为 `FreeMangnetPlayer-版本号.apk`。
+使用 Android Studio（JDK 17、Android SDK 35）打开项目，或运行 `gradlew.bat assembleDebug`。本地调试包位于 `app/build/outputs/apk/debug/app-debug.apk`；版本标签会触发 GitHub Actions 云端构建并发布命名 APK。
 
 ## 可复用开源项目
 
 | 方向 | 仓库 | 说明 |
 | --- | --- | --- |
-| 当前 MVP 磁力引擎 | [simple-torrent-android](https://github.com/masterwok/simple-torrent-android) | MIT；此项目当前使用，仓库标记为弃用，且只取最大文件。 |
+| 当前 MVP 磁力引擎 | [simple-torrent-android](https://github.com/masterwok/simple-torrent-android) | MIT；此项目当前使用，仓库已标记弃用，且只取最大文件。 |
 | BitTorrent 引擎 | [frostwire-jlibtorrent](https://github.com/frostwire/frostwire-jlibtorrent) | MIT Java/JNI 封装，可作为后续替换方案，需处理 Android ABI。 |
 | 完整客户端参考 | [LibreTorrent](https://github.com/proninyaroslav/libretorrent) | 成熟 Android 客户端，GPL-3.0；复用代码需遵守 GPL。 |
 | Android TV 参考 | [FongMi/TV](https://github.com/FongMi/TV) | TV 导航和播放参考，不含 BitTorrent 引擎，GPL-3.0。 |
 | 网盘资源管理参考 | [CloudSaver](https://github.com/jiangrui1994/CloudSaver) | 相邻领域项目，不是可直接嵌入的磁力组件。 |
 | 影视资源聚合参考 | [Selene](https://github.com/MoonTechLab/Selene) | 相邻领域项目；复用前需核实仓库当前许可证。 |
 
-原始应用代码采用 MIT。第三方组件遵循各自许可证，详情见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。只搜索、下载和播放你有权使用的内容，并遵守搜索网站条款及适用法律。
+原始应用代码采用 MIT。第三方组件遵循各自许可证，详情见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

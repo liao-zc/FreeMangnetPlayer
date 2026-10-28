@@ -63,10 +63,14 @@ def main() -> None:
     time.sleep(10)
     screenshot("04-in-app-results.png")
 
+    find_and_tap("粘贴磁力")
+    time.sleep(1)
+    screenshot("05-add-magnet-dialog.png")
+
     adb("shell", "am", "force-stop", PACKAGE)
     adb("shell", "am", "start", "-W", "-a", "android.intent.action.VIEW", "-d", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567", "-n", f"{PACKAGE}/.MainActivity")
     time.sleep(3)
-    screenshot("05-torrent-progress.png")
+    screenshot("06-torrent-progress.png")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,14 @@
 name: Capture app usage screenshots
 on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "scripts/capture_usage_screenshots.py"
+      - ".github/workflows/capture-screenshots.yml"
   workflow_dispatch:
+permissions:
+  contents: write
 jobs:
   capture:
     runs-on: macos-15-intel
@@ -31,6 +39,16 @@ jobs:
           emulator-boot-timeout: 600
           disable-animations: true
           script: python3 scripts/capture_usage_screenshots.py
+      - name: Commit screenshots to docs
+        run: |
+          git rm -f docs/screenshots/*.png || true
+          mkdir -p docs/screenshots
+          cp manual-shots/*.png docs/screenshots/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots
+          git commit -m "Refresh app usage screenshots"
+          git push
       - uses: actions/upload-artifact@v4
         if: always()
         with:
