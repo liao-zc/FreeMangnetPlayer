@@ -49,6 +49,8 @@ class PlayerActivity : ComponentActivity() {
     private var connectionTimedOut by mutableStateOf(false)
     private var favoriteSaved by mutableStateOf(false)
     private var playbackActive by mutableStateOf(false)
+    private var playbackSpeed by mutableFloatStateOf(1f)
+    private var resumeOnReady = false
 
     private var statusText by mutableStateOf("正在准备磁力任务…")
     private var progressValue by mutableFloatStateOf(0f)
@@ -61,6 +63,7 @@ class PlayerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         currentSource = intent.getStringExtra("source") ?: intent.data?.toString().orEmpty()
         downloadMode = intent.getStringExtra("mode") == "download"
+        resumeOnReady = intent.getStringExtra("mode") == "play"
         val title = intent.getStringExtra("title").orEmpty()
 
         setContent {
@@ -71,14 +74,14 @@ class PlayerActivity : ComponentActivity() {
                     Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                         Button(onClick = { finish() }, modifier = Modifier.height(54.dp)) { Text("返回搜索") }
                         Text(title.ifBlank { "资源解析" }, Modifier.weight(1f), maxLines = 1, style = MaterialTheme.typography.titleLarge)
-                        if (playbackActive) {
+                        if (metadataReady || playbackActive) {
                             OutlinedButton(
                                 onClick = {
                                     LibraryStore.addFavorite(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource)
                                     favoriteSaved = true
                                 },
                                 modifier = Modifier.height(54.dp)
-                            ) { Text(if (favoriteSaved) "已收藏" else "收藏当前播放") }
+                            ) { Text(if (favoriteSaved) "已收藏" else "收藏") }
                         }
                     }
 
@@ -143,6 +146,14 @@ class PlayerActivity : ComponentActivity() {
                         }
                     }
 
+                    if (player != null) {
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            OutlinedButton(onClick = { seekBySeconds(-15) }, modifier = Modifier.weight(1f).height(50.dp)) { Text("后退 15 秒") }
+                            OutlinedButton(onClick = { seekBySeconds(15) }, modifier = Modifier.weight(1f).height(50.dp)) { Text("前进 15 秒") }
+                            OutlinedButton(onClick = { cyclePlaybackSpeed() }, modifier = Modifier.weight(1f).height(50.dp)) { Text("${playbackSpeed}×") }
+                        }
+                    }
+
                     if (metadataReady) {
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(onClick = { requestPlayback(autoPlay = false) }, modifier = Modifier.weight(1f)) { Text("预览") }
@@ -201,8 +212,15 @@ class PlayerActivity : ComponentActivity() {
     private fun createTorrentListener() = object : TorrentSessionListener {
         override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子已连接，正在读取文件信息…")
         override fun onMetadataReceived(handle: TorrentHandle, state: TorrentSessionStatus) {
-            runOnUiThread { metadataReady = true }
-            updateFrom(state, "已获取文件信息，开始缓存…")
+            runOnUiThread {
+                metadataReady = true
+                if (resumeOnReady) {
+                    previewRequested = true
+                    autoplayRequested = true
+                    statusText = "已读取文件信息，正在缓冲并继续播放…"
+                }
+            }
+            updateFrom(state, if (resumeOnReady) "已读取文件信息，正在缓冲并继续播放…" else "已获取文件信息，开始缓存…")
         }
         override fun onPieceFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
             updateFrom(state, if (downloadMode) "正在下载并缓存…" else "正在缓冲，准备播放…")
@@ -264,6 +282,19 @@ class PlayerActivity : ComponentActivity() {
         }
     }
 
+    private fun seekBySeconds(seconds: Int) {
+        val activePlayer = player ?: return
+        val target = (activePlayer.currentPosition + seconds * 1_000L).coerceAtLeast(0L)
+        activePlayer.seekTo(target)
+    }
+
+    private fun cyclePlaybackSpeed() {
+        val speeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+        val index = speeds.indexOf(playbackSpeed).coerceAtLeast(0)
+        playbackSpeed = speeds[(index + 1) % speeds.size]
+        player?.setPlaybackSpeed(playbackSpeed)
+    }
+
     private fun startPlayback(uri: Uri, bytesAtAttempt: Long, autoPlay: Boolean) {
         if (uri == Uri.EMPTY) return
         runOnUiThread {
@@ -275,6 +306,7 @@ class PlayerActivity : ComponentActivity() {
             newPlayer.addListener(object : Player.Listener {
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     playbackActive = isPlaying
+                    if (isPlaying) LibraryStore.addPlayback(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource)
                 }
 
                 override fun onPlayerError(error: PlaybackException) {

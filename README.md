@@ -1,44 +1,59 @@
 # FreeMangnetPlayer
 
-FreeMangnetPlayer 是个人使用的 Android 磁力搜索、下载与播放应用。关键词搜索结果显示在首页的“磁力搜索结果”区域；从右上角菜单选择搜索引擎。首页也可直接粘贴 magnet 链接并解析。
+FreeMangnetPlayer 是 Android 个人磁力搜索、解析、下载和播放应用。首页保留关键词搜索、搜索引擎配置、磁力链接解析，以及播放、下载、收藏列表。输入关键词后会进入独立搜索结果页；页面内可返回，Android 系统返回键也可返回首页。
 
-**下载：**[GitHub Releases](https://github.com/liao-zc/FreeMangnetPlayer/releases)
-
-## 使用流程
-
-1. 在顶部大号搜索框输入关键词，点击“搜索”。搜索结果留在首页；每条识别到的磁力链接提供“解析 / 播放”和“下载 / 缓存”。
-2. 搜索站点没有公开 magnet 链接时，页面会给出状态、返回和“打开搜索网站”按钮；不会一直留在空白页。可在网站复制 magnet 链接后粘贴到首页输入框。
-3. 解析页面会在 45 秒未取得种子元数据时显示超时原因和大号返回按钮。获取元数据后可预览、下载或播放。
-4. 播放页可将当前资源加入“收藏”。底部“下载”和“收藏”入口分别显示已开始的下载任务和已收藏资源。
+**APK 下载：**[GitHub Releases](https://github.com/liao-zc/FreeMangnetPlayer/releases)
 
 ## 搜索引擎
 
-内置引擎：clg.im、BT搜索（dobt）、BD电影首发站、Pomo、美剧粉、高清族，以及原有磁力狗、聚合吧、磁力搜索、Seedog、BT世界和影视时光。右上角菜单可切换；自定义搜索地址可用 `%s` 作为关键词占位符。
+内置引擎仅有以下 6 个：clg.im、mg.dobt.cc、BDFlixs、Pomo、MJf2020、HDZU。右上角菜单可切换引擎；菜单另有一个自定义引擎设置，可填写名称和搜索 URL。URL 可用 `%s` 作为关键词占位符；未填写占位符时应用会尝试自动填写网页搜索框。
 
-## 当前范围和实测情况
+搜索结果页列出扫描到的标题和 magnet，并提供“解析 / 播放”与“下载 / 缓存”。搜索站点没有可读 magnet 时会显示状态、重试、打开网站和返回入口。搜索抓取最多扫描 12 个同站详情页；验证码、站点改版、网络限制或详情页未包含 magnet 都会影响结果。
 
-- 面向 Android 7.0 及以上手机、平板和 Android TV。首页搜索框、搜索、引擎菜单和返回按钮均已加大；底部只保留有实际页面的搜索、下载和收藏入口。
-- 搜索结果提取依赖搜索站点公开磁力 URI。搜索结果只给影片标题、普通详情页或被验证码拦截时，应用无法凭空生成 magnet 链接。
-- 本次实际检查了新增站点：clg.im 返回验证页；mg.dobt.cc 首页未包含可直接提取的 magnet；BD电影首发站和 Pomo 可返回“哪吒”搜索结果，磁力链接位于同站详情页。应用现在会扫描搜索页并抓取最多 12 个同站结果详情页，提取磁力 URI 和文件名。网页抓取已核对到真实详情页磁力条目；尚未完成你提供的 BTIH 对应种子元数据连接、播放和下载闭环。
-- 磁力连接不再等待固定数量的 DHT 节点后才加入任务；无可连接的 tracker / DHT 节点或没有做种者时仍可能无法取得种子文件列表。超时页面会允许用户立即返回。
-- 下载任务及收藏条目保存在本机应用数据中。当前下载实现依赖播放/任务页面存活，不提供可靠的退出应用后后台续传；卸载或清除应用数据会清除收藏和任务记录。
-- 播放器目前自动选择种子中的最大文件。只下载和播放你有权使用的内容。
+## 播放与列表
+
+- 首页粘贴 magnet 后选择“解析资源”。取得种子元数据后可预览、下载或播放；应用会选择种子中的最大文件。
+- 播放器提供 15 秒前进/后退和 0.5×、0.75×、1×、1.25×、1.5×、2×倍速。播放记录写入“播放”列表。
+- 解析页可收藏资源；“下载”和“收藏”页提供重新打开及下载操作。
+- 当前下载任务依赖应用任务页面存活，不承诺退出后的后台续传。记录和应用私有目录中的缓存会在清除数据或卸载时删除。
+
+## 逐项验证记录
+
+以下为当前代码对应的验证计划。推送后 GitHub Actions 会构建 APK，并在 Android 模拟器启动应用、检查可见控件、生成界面截图；播放器真实播放、下载完成和倍速 seek 需要可连接且含视频的在线种子，截图自动化不伪造此结果。
+
+| 要求 | 当前实现 | 自动验证方式 / 结果 |
+| --- | --- | --- |
+| 只保留 6 个内置引擎及一个自定义项 | 搜索菜单固定显示指定 6 个引擎和自定义入口 | 模拟器 UI dump 检查 6 个引擎名称；截图 `03-engine-settings.png` |
+| 修复首页白屏 | 启动时直接显示搜索首页；WebView 仅在用户开始搜索后创建 | 模拟器冷启动后检查“磁力搜索结果、粘贴磁力链接、解析资源、播放、下载、收藏”可见；截图 `01-home-keyword.png` |
+| 搜索结果独立页面和返回 | 搜索后切到“搜索结果”；页面按钮与系统返回键都回首页 | 模拟器 UI dump 检查结果页与返回控件；截图 `04-in-app-results.png`、`07-search-no-result.png` |
+| 磁力解析入口 | 首页输入框验证 BTIH 格式并打开解析页 | 自动化粘贴虚构 BTIH 并检查解析页；截图 `05-magnet-pasted.png`、`06-torrent-progress.png`。虚构哈希不代表种子可用 |
+| 播放、下载、收藏列表 | 底部四个入口均有独立列表；播放记录和收藏本地保存 | 模拟器逐一打开并检查列表标题；截图 `08-playback-list.png`、`09-download-list.png`、`10-favorites-list.png` |
+| 倍速和前进/后退 | 播放器在可播放缓冲建立后提供 15 秒 seek 与 6 档倍速 | 源码实现检查；需可播放种子的实机操作验证，当前没有将虚构种子冒充播放成功 |
+| 手机、平板、电视 | Android API 24+，Compose 响应式布局与可聚焦控件 | 当前自动化使用手机尺寸；平板和 Android TV 仍需对应设备实测 |
+
+### 验证边界
+
+当前会话没有可用的本机 Java、Android SDK 或 adb，因此我不能在本机声称构建或模拟器操作已通过。下方截图会由仓库 GitHub Actions 实际构建并运行模拟器后更新。用户提供的 magnet 字符串经过规范化后可以提取 BTIH，但仍需在线 tracker/DHT 与做种者才能取得文件列表；解析、播放及下载闭环尚未由有效在线种子验证。
 
 ## 实际界面截图
 
-截图由 GitHub Actions Android 模拟器流程生成，展示当前应用界面；磁力链接截图使用虚构信息，仅展示交互，不代表资源能连接。
+以下 PNG 是 Android 模拟器中的应用实际截图。搜索及磁力解析流程的示例关键词/哈希用于界面演示，不代表搜索结果或磁力种子可用。
 
 ![首页](docs/screenshots/01-home-keyword.png)
-![关键词](docs/screenshots/02-keyword-entered.png)
-![搜索引擎菜单](docs/screenshots/03-engine-settings.png)
-![首页内搜索状态](docs/screenshots/04-in-app-results.png)
-![粘贴磁力](docs/screenshots/05-magnet-pasted.png)
-![解析状态](docs/screenshots/06-torrent-progress.png)
+![输入关键词](docs/screenshots/02-keyword-entered.png)
+![6 个搜索引擎与自定义设置](docs/screenshots/03-engine-settings.png)
+![独立搜索结果页](docs/screenshots/04-in-app-results.png)
+![首页粘贴 magnet](docs/screenshots/05-magnet-pasted.png)
+![磁力解析状态](docs/screenshots/06-torrent-progress.png)
+![搜索无结果与返回操作](docs/screenshots/07-search-no-result.png)
+![播放列表](docs/screenshots/08-playback-list.png)
+![下载列表](docs/screenshots/09-download-list.png)
+![收藏列表](docs/screenshots/10-favorites-list.png)
 
 ## 构建
 
-使用 Android Studio（JDK 17、Android SDK 35）打开项目，或执行 `gradlew.bat assembleDebug`。发布标签会触发 GitHub Actions 构建 APK 和命名源码压缩包。
+使用 Android Studio（JDK 17、Android SDK 35）打开项目，或执行 `gradlew.bat assembleDebug`。推送到 main 后会触发 APK 构建和模拟器截图工作流；GitHub Actions 通过后可在 Releases 页面下载 APK。
 
 ## 第三方依赖
 
-应用使用 simple-torrent-android / FrostWire jlibtorrent 和 AndroidX / Media3；许可证及来源见 [第三方依赖说明](THIRD_PARTY_NOTICES.md)。
+应用使用 simple-torrent-android / FrostWire jlibtorrent、AndroidX 和 Media3；许可证与来源见 [第三方依赖说明](THIRD_PARTY_NOTICES.md)。

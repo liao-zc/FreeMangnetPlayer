@@ -9,6 +9,7 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,13 +63,7 @@ private val builtInProviders = listOf(
     SearchProvider("BD电影首发站", "https://www.bdflixs.com/", "https://www.bdflixs.com/?s=%s"),
     SearchProvider("Pomo", "https://pomo.mom/", "https://pomo.mom/?keyword=%s"),
     SearchProvider("美剧粉", "https://www.mjf2020.com/", "https://www.mjf2020.com/ss/?s=%s"),
-    SearchProvider("高清族", "https://hdzu.org/", "https://hdzu.org/movie/filter?act=title&wd=%s"),
-    SearchProvider("磁力狗", "https://www.cld123.com/"),
-    SearchProvider("聚合吧", "https://www.juhebd.com/", "https://www.juhebd.com/q/index----?k=%s"),
-    SearchProvider("磁力搜索", "https://clg63.top/"),
-    SearchProvider("Seedog", "https://seedog.cc/"),
-    SearchProvider("BT世界", "https://www.btsj6.com/"),
-    SearchProvider("影视时光", "https://www.ldysg.win/")
+    SearchProvider("高清族", "https://hdzu.org/", "https://hdzu.org/movie/filter?act=title&wd=%s")
 )
 
 private val ink = Color(0xFF14202B)
@@ -104,8 +100,12 @@ class MainActivity : ComponentActivity() {
                 var showCustomDialog by remember { mutableStateOf(false) }
                 var customName by remember { mutableStateOf(prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索") }
                 var customUrl by remember { mutableStateOf(prefs.getString("custom-url", "") ?: "") }
-                var selectedName by remember { mutableStateOf(prefs.getString("search-name", builtInProviders[0].name) ?: builtInProviders[0].name) }
-                var selectedUrl by remember { mutableStateOf(prefs.getString("search-url", builtInProviders[0].homepage) ?: builtInProviders[0].homepage) }
+                val storedSearchName = prefs.getString("search-name", null)
+                val storedProvider = builtInProviders.firstOrNull { it.name == storedSearchName }
+                val storedCustomIsValid = storedSearchName == customName && customUrl.startsWith("https://") ||
+                    storedSearchName == customName && customUrl.startsWith("http://")
+                var selectedName by remember { mutableStateOf(storedProvider?.name ?: if (storedCustomIsValid) customName else builtInProviders[0].name) }
+                var selectedUrl by remember { mutableStateOf(storedProvider?.homepage ?: if (storedCustomIsValid) customUrl else builtInProviders[0].homepage) }
                 var error by remember { mutableStateOf("") }
                 var searchState by remember { mutableStateOf("idle") }
                 var searchMessage by remember { mutableStateOf("") }
@@ -114,14 +114,21 @@ class MainActivity : ComponentActivity() {
                 val results = remember { mutableStateListOf<MagnetResult>() }
                 val downloads = remember { mutableStateListOf<LibraryEntry>() }
                 val favorites = remember { mutableStateListOf<LibraryEntry>() }
+                val playbacks = remember { mutableStateListOf<LibraryEntry>() }
                 val focus = LocalFocusManager.current
                 val lifecycleOwner = LocalLifecycleOwner.current
+
+                BackHandler(enabled = selectedTab == "搜索结果") {
+                    selectedTab = "搜索"
+                }
 
                 fun reloadLibrary() {
                     downloads.clear()
                     downloads.addAll(LibraryStore.readDownloads(this@MainActivity))
                     favorites.clear()
                     favorites.addAll(LibraryStore.readFavorites(this@MainActivity))
+                    playbacks.clear()
+                    playbacks.addAll(LibraryStore.readPlaybacks(this@MainActivity))
                 }
 
                 DisposableEffect(lifecycleOwner) {
@@ -150,6 +157,7 @@ class MainActivity : ComponentActivity() {
                     focus.clearFocus()
                     error = ""
                     results.clear()
+                    selectedTab = "搜索结果"
                     searchState = "loading"
                     searchMessage = "正在连接 $selectedName…"
                     activeQuery = q
@@ -202,6 +210,12 @@ class MainActivity : ComponentActivity() {
                                 label = { Text("搜索") }
                             )
                             NavigationBarItem(
+                                selected = selectedTab == "播放",
+                                onClick = { selectedTab = "播放"; reloadLibrary() },
+                                icon = { Icon(Icons.Default.PlayArrow, contentDescription = null) },
+                                label = { Text("播放") }
+                            )
+                            NavigationBarItem(
                                 selected = selectedTab == "下载",
                                 onClick = { selectedTab = "下载"; reloadLibrary() },
                                 icon = { Icon(Icons.Default.Download, contentDescription = null) },
@@ -216,8 +230,38 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 ) { insets ->
-                    Box(Modifier.fillMaxSize().padding(insets)) {
+                    Box(Modifier.fillMaxSize().background(canvas).padding(insets)) {
                         when (selectedTab) {
+                            "搜索结果" -> SearchResultsScreen(
+                                keyword = activeQuery,
+                                engine = activeProvider,
+                                state = searchState,
+                                message = searchMessage,
+                                results = results,
+                                onBack = { selectedTab = "搜索" },
+                                onRetry = ::beginSearch,
+                                onOpenWeb = {
+                                    val url = currentSearchUrl.ifBlank { selectedUrl }
+                                    runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                                },
+                                onCancel = {
+                                    searchState = "idle"
+                                    searchMessage = ""
+                                    results.clear()
+                                    magnetWebView?.stopLoading()
+                                    selectedTab = "搜索"
+                                },
+                                onParse = { openTorrent(it, "parse") },
+                                onDownload = { openTorrent(it, "download") }
+                            )
+                            "播放" -> LibraryScreen(
+                                title = "播放列表",
+                                entries = playbacks,
+                                emptyText = "开始播放的资源会保存在这里，方便继续观看。",
+                                openLabel = "继续播放",
+                                onOpen = { openTorrent(it, "play") },
+                                onDownload = { openTorrent(it, "download") }
+                            )
                             "下载" -> LibraryScreen(
                                 title = "下载任务",
                                 entries = downloads,
@@ -228,7 +272,7 @@ class MainActivity : ComponentActivity() {
                             "收藏" -> LibraryScreen(
                                 title = "我的收藏",
                                 entries = favorites,
-                                emptyText = "播放资源时点“收藏”，下次可从这里打开。",
+                                emptyText = "完成资源解析后可收藏资源，并从这里重新打开。",
                                 onOpen = { openTorrent(it, "parse") },
                                 onDownload = { openTorrent(it, "download") }
                             )
@@ -247,21 +291,6 @@ class MainActivity : ComponentActivity() {
                                     showEngineMenu = false
                                 },
                                 onCustomEngine = { showEngineMenu = false; showCustomDialog = true },
-                                searchState = searchState,
-                                searchMessage = searchMessage,
-                                results = results,
-                                onOpenWeb = {
-                                    val url = currentSearchUrl.ifBlank { selectedUrl }
-                                    runCatching { startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
-                                },
-                                onCancelSearch = {
-                                    searchState = "idle"
-                                    searchMessage = ""
-                                    results.clear()
-                                    magnetWebView?.stopLoading()
-                                },
-                                onParse = { openTorrent(it, "parse") },
-                                onDownload = { openTorrent(it, "download") },
                                 magnet = magnet,
                                 onMagnetChange = { magnet = it; error = "" },
                                 onParseMagnet = {
@@ -274,7 +303,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        AndroidView(
+                        if (searchTrigger > 0) AndroidView(
                             modifier = Modifier.size(1.dp),
                             factory = { context ->
                                 WebView(context).apply {
@@ -350,7 +379,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        inbound?.let { openTorrent(MagnetResult(magnetTitle(it), it), "parse") }
+        inbound?.let { openTorrent(MagnetResult(magnetTitle(it), it), intent.getStringExtra("mode") ?: "parse") }
     }
 
     private fun injectSearch(view: WebView?, query: String) {
@@ -414,13 +443,6 @@ private fun SearchHome(
     builtIns: List<SearchProvider>,
     onSelectEngine: (SearchProvider) -> Unit,
     onCustomEngine: () -> Unit,
-    searchState: String,
-    searchMessage: String,
-    results: SnapshotStateList<MagnetResult>,
-    onOpenWeb: () -> Unit,
-    onCancelSearch: () -> Unit,
-    onParse: (MagnetResult) -> Unit,
-    onDownload: (MagnetResult) -> Unit,
     magnet: String,
     onMagnetChange: (String) -> Unit,
     onParseMagnet: () -> Unit,
@@ -468,39 +490,6 @@ private fun SearchHome(
         Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("磁力搜索结果", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                        Text(selectedName, color = teal, style = MaterialTheme.typography.labelLarge)
-                    }
-                    when {
-                        results.isNotEmpty() -> {
-                            Text("找到 ${results.size} 条可识别磁力链接。", style = MaterialTheme.typography.bodyMedium)
-                            results.forEach { item ->
-                                MagnetResultCard(item, onParse, onDownload)
-                            }
-                        }
-                        searchState == "loading" -> {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 3.dp)
-                                Text(searchMessage.ifBlank { "正在搜索…" }, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                            }
-                            Button(onClick = onCancelSearch, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("取消搜索，返回首页") }
-                        }
-                        searchState in listOf("empty", "timeout", "error") -> {
-                            Text(searchMessage, color = Color(0xFF4E5C65), style = MaterialTheme.typography.bodyMedium)
-                            Text("部分搜索站会拦截自动访问，或只返回详情页；可在网页中手动复制 magnet 链接。", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                OutlinedButton(onClick = onCancelSearch, modifier = Modifier.weight(1f).height(56.dp)) { Text("返回搜索") }
-                                Button(onClick = onOpenWeb, modifier = Modifier.weight(1f).height(56.dp)) { Text("打开搜索网站") }
-                            }
-                        }
-                        else -> Text("输入关键词后，搜索结果会显示在这里。", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-                    }
-                }
-            }
-
-            Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
-                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text("粘贴磁力链接", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     OutlinedTextField(
                         value = magnet,
@@ -513,6 +502,63 @@ private fun SearchHome(
                     Button(onClick = onParseMagnet, modifier = Modifier.fillMaxWidth().height(58.dp)) { Text("解析资源", style = MaterialTheme.typography.titleMedium) }
                     if (error.isNotBlank()) Text(error, color = MaterialTheme.colorScheme.error)
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SearchResultsScreen(
+    keyword: String,
+    engine: String,
+    state: String,
+    message: String,
+    results: List<MagnetResult>,
+    onBack: () -> Unit,
+    onRetry: () -> Unit,
+    onOpenWeb: () -> Unit,
+    onCancel: () -> Unit,
+    onParse: (MagnetResult) -> Unit,
+    onDownload: (MagnetResult) -> Unit
+) {
+    Column(Modifier.fillMaxSize().background(canvas).padding(horizontal = 16.dp, vertical = 10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            OutlinedButton(onClick = onBack, modifier = Modifier.height(54.dp)) { Text("‹ 返回") }
+            Column(Modifier.weight(1f)) {
+                Text("搜索结果", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text("$engine · $keyword", maxLines = 1, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        when {
+            results.isNotEmpty() -> {
+                Text("找到 ${results.size} 条可识别磁力链接", Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.bodyMedium)
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(results, key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
+                }
+            }
+            state == "loading" -> Column(
+                Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(14.dp))
+                Text(message.ifBlank { "正在搜索…" }, style = MaterialTheme.typography.bodyLarge)
+                Spacer(Modifier.height(18.dp))
+                OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("取消搜索并返回") }
+            }
+            else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
+                Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
+                    Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(if (state == "empty") "没有提取到磁力链接" else "搜索未完成", style = MaterialTheme.typography.titleLarge)
+                        Text(message.ifBlank { "搜索页面没有提供可识别的 magnet 链接。" })
+                        Text("部分站点会拦截自动访问；你也可以从网页复制 magnet 链接，再回首页粘贴解析。", style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+                Spacer(Modifier.height(14.dp))
+                Button(onClick = onRetry, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("重试搜索") }
+                OutlinedButton(onClick = onOpenWeb, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("打开搜索网站") }
+                OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("返回首页") }
             }
         }
     }
@@ -541,6 +587,8 @@ private fun LibraryScreen(
     title: String,
     entries: List<LibraryEntry>,
     emptyText: String,
+    openLabel: String = "打开",
+    downloadLabel: String = "继续下载",
     onOpen: (MagnetResult) -> Unit,
     onDownload: (MagnetResult) -> Unit
 ) {
@@ -566,8 +614,8 @@ private fun LibraryScreen(
                                 Text("${formatLibraryBytes(entry.downloadedBytes)} / ${formatLibraryBytes(entry.totalBytes)}", style = MaterialTheme.typography.labelSmall)
                             }
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                OutlinedButton(onClick = { onOpen(MagnetResult(entry.title, entry.source)) }, modifier = Modifier.weight(1f).height(50.dp)) { Text("打开") }
-                                Button(onClick = { onDownload(MagnetResult(entry.title, entry.source)) }, modifier = Modifier.weight(1f).height(50.dp)) { Text("继续下载") }
+                                OutlinedButton(onClick = { onOpen(MagnetResult(entry.title, entry.source)) }, modifier = Modifier.weight(1f).height(50.dp)) { Text(openLabel) }
+                                Button(onClick = { onDownload(MagnetResult(entry.title, entry.source)) }, modifier = Modifier.weight(1f).height(50.dp)) { Text(downloadLabel) }
                             }
                         }
                     }

@@ -16,12 +16,24 @@ object LibraryStore {
     private const val PREFS = "player-settings"
     private const val DOWNLOADS = "download-entries"
     private const val FAVORITES = "favorite-entries"
+    private const val PLAYBACKS = "playback-entries"
 
     @Synchronized
     fun readDownloads(context: Context): List<LibraryEntry> = read(context, DOWNLOADS)
 
     @Synchronized
     fun readFavorites(context: Context): List<LibraryEntry> = read(context, FAVORITES)
+
+    @Synchronized
+    fun readPlaybacks(context: Context): List<LibraryEntry> = read(context, PLAYBACKS)
+
+    @Synchronized
+    fun addPlayback(context: Context, title: String, source: String) {
+        val values = read(context, PLAYBACKS).toMutableList()
+        values.removeAll { it.source == source }
+        values.add(0, LibraryEntry(title.ifBlank { "磁力资源" }, source, "最近播放"))
+        write(context, PLAYBACKS, values.take(100))
+    }
 
     @Synchronized
     fun addFavorite(context: Context, title: String, source: String) {

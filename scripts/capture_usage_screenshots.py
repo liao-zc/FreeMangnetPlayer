@@ -19,8 +19,22 @@ def screenshot(name: str) -> None:
     print(f"Captured {OUT / name}")
 
 
+def visible_text() -> str:
+    adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
+    xml = adb("shell", "cat", "/sdcard/window.xml")
+    tree = ET.fromstring(xml)
+    return " ".join(node.get("text", "") + " " + node.get("content-desc", "") for node in tree.iter("node"))
+
+
+def require_visible(*labels: str) -> None:
+    visible = visible_text()
+    missing = [label for label in labels if label not in visible]
+    if missing:
+        raise RuntimeError(f"Expected visible app controls {missing}; UI dump was: {visible}")
+
+
 def find_and_tap(label: str) -> None:
-    dump = adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
+    adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
     xml = adb("shell", "cat", "/sdcard/window.xml")
     tree = ET.fromstring(xml)
     candidates = []
@@ -29,14 +43,12 @@ def find_and_tap(label: str) -> None:
         if not any(label in value for value in values):
             continue
         match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", node.get("bounds", ""))
-        if not match:
-            continue
-        x1, y1, x2, y2 = map(int, match.groups())
-        if x2 > x1 and y2 > y1:
-            candidates.append((not any(value == label for value in values), (x2 - x1) * (y2 - y1), x1, y1, x2, y2))
+        if match:
+            x1, y1, x2, y2 = map(int, match.groups())
+            if x2 > x1 and y2 > y1:
+                candidates.append((not any(value == label for value in values), (x2 - x1) * (y2 - y1), x1, y1, x2, y2))
     if not candidates:
-        visible = [node.get("text", "") for node in tree.iter("node") if node.get("text")]
-        raise RuntimeError(f"Could not find UI element: {label}; visible text: {visible}; dump: {dump}")
+        raise RuntimeError(f"Could not find UI element: {label}; visible text: {visible_text()}")
     _, _, x1, y1, x2, y2 = min(candidates)
     adb("shell", "input", "tap", str((x1 + x2) // 2), str((y1 + y2) // 2))
     time.sleep(1)
@@ -46,8 +58,10 @@ def main() -> None:
     adb("wait-for-device")
     adb("install", "-r", "app/build/outputs/apk/debug/app-debug.apk")
     adb("shell", "wm", "size", "1080x2400")
+    adb("shell", "am", "force-stop", PACKAGE)
     adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.MainActivity")
     time.sleep(7)
+    require_visible("磁力搜索结果", "粘贴磁力链接", "解析资源", "搜索", "播放", "下载", "收藏")
     screenshot("01-home-keyword.png")
 
     find_and_tap("输入影片或资源名称")
@@ -59,12 +73,28 @@ def main() -> None:
 
     find_and_tap("选择搜索引擎")
     time.sleep(1)
+    require_visible("clg.im", "BT搜索（dobt）", "BD电影首发站", "Pomo", "美剧粉", "高清族", "自定义搜索引擎")
     screenshot("03-engine-settings.png")
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     find_and_tap("执行关键词搜索")
-    time.sleep(27)
+    time.sleep(3)
+    require_visible("搜索结果", "返回")
     screenshot("04-in-app-results.png")
-    find_and_tap("返回搜索")
+    time.sleep(26)
+    require_visible("搜索结果")
+    screenshot("07-search-no-result.png")
+    find_and_tap("返回首页")
+
+    find_and_tap("播放")
+    require_visible("播放列表")
+    screenshot("08-playback-list.png")
+    find_and_tap("下载")
+    require_visible("下载任务")
+    screenshot("09-download-list.png")
+    find_and_tap("收藏")
+    require_visible("我的收藏")
+    screenshot("10-favorites-list.png")
+    find_and_tap("搜索")
 
     find_and_tap("magnet 链接")
     adb("shell", "input", "text", "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567")
@@ -74,6 +104,7 @@ def main() -> None:
     screenshot("05-magnet-pasted.png")
     find_and_tap("解析资源")
     time.sleep(5)
+    require_visible("资源解析", "正在连接种子")
     screenshot("06-torrent-progress.png")
 
 
