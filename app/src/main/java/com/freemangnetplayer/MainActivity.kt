@@ -56,6 +56,12 @@ private data class SearchProvider(
 private data class MagnetResult(val title: String, val magnet: String)
 
 private val builtInProviders = listOf(
+    SearchProvider("clg.im", "https://clg.im/"),
+    SearchProvider("BT搜索（dobt）", "https://mg.dobt.cc/"),
+    SearchProvider("BD电影首发站", "https://www.bdflixs.com/", "https://www.bdflixs.com/?s=%s"),
+    SearchProvider("Pomo", "https://pomo.mom/", "https://pomo.mom/?keyword=%s"),
+    SearchProvider("美剧粉", "https://www.mjf2020.com/", "https://www.mjf2020.com/ss/?s=%s"),
+    SearchProvider("高清族", "https://hdzu.org/", "https://hdzu.org/movie/filter?act=title&wd=%s"),
     SearchProvider("磁力狗", "https://www.cld123.com/"),
     SearchProvider("聚合吧", "https://www.juhebd.com/", "https://www.juhebd.com/q/index----?k=%s"),
     SearchProvider("磁力搜索", "https://clg63.top/"),
@@ -76,10 +82,11 @@ class MainActivity : ComponentActivity() {
     private var searchPageUrl = ""
     private var firstPageLoad = true
     private var searchBridge: MagnetSearchBridge? = null
+    private var searchNeedsFormSubmit = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()
+        val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()?.let(::normalizeMagnetUri)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(
@@ -148,11 +155,9 @@ class MainActivity : ComponentActivity() {
                     activeQuery = q
                     activeProvider = selectedName
                     val provider = builtInProviders.firstOrNull { it.name == selectedName }
-                    currentSearchUrl = if (provider?.queryUrl != null) {
-                        provider.queryUrl.replace("%s", URLEncoder.encode(q, "UTF-8"))
-                    } else {
-                        selectedUrl
-                    }
+                    val template = provider?.queryUrl ?: selectedUrl.takeIf { it.contains("%s") }
+                    currentSearchUrl = template?.replace("%s", URLEncoder.encode(q, "UTF-8")) ?: selectedUrl
+                    searchNeedsFormSubmit = template == null
                     searchPageUrl = currentSearchUrl
                     firstPageLoad = true
                     searchTrigger++
@@ -166,7 +171,7 @@ class MainActivity : ComponentActivity() {
                             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                                 OutlinedTextField(customName, { customName = it }, label = { Text("引擎名称") }, singleLine = true)
                                 OutlinedTextField(customUrl, { customUrl = it }, label = { Text("搜索网站地址") }, singleLine = true)
-                                Text("填写该搜索网站的首页地址。", style = MaterialTheme.typography.bodySmall)
+                                Text("填写搜索地址；用 %s 代表关键词。没有 %s 时会尝试自动填写网页搜索框。", style = MaterialTheme.typography.bodySmall)
                             }
                         },
                         confirmButton = {
@@ -261,7 +266,8 @@ class MainActivity : ComponentActivity() {
                                 onMagnetChange = { magnet = it; error = "" },
                                 onParseMagnet = {
                                     val value = magnet.trim().replace("&amp;", "&", true)
-                                    if (isMagnet(value)) openTorrent(MagnetResult(magnetTitle(value), value), "parse")
+                                    val normalized = normalizeMagnetUri(value)
+                                    if (normalized != null) openTorrent(MagnetResult(magnetTitle(normalized), normalized), "parse")
                                     else error = "请粘贴包含 btih 信息的完整 magnet 链接。"
                                 },
                                 error = error
@@ -275,7 +281,7 @@ class MainActivity : ComponentActivity() {
                                     magnetWebView = this
                                     searchBridge = MagnetSearchBridge { title, link ->
                                         runOnUiThread {
-                                            if (results.none { it.magnet == link }) {
+                                            if (results.size < 60 && results.none { it.magnet == link }) {
                                                 results.add(MagnetResult(title.ifBlank { magnetTitle(link) }, link))
                                                 searchState = "results"
                                                 searchMessage = ""
@@ -295,8 +301,8 @@ class MainActivity : ComponentActivity() {
                                         override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest): Boolean {
                                             val url = request.url.toString()
                                             if (url.startsWith("magnet:", true)) {
-                                                val normalized = url.replace("&amp;", "&", true)
-                                                if (isMagnet(normalized)) {
+                                                val normalized = normalizeMagnetUri(url)
+                                                if (normalized != null) {
                                                     runOnUiThread { openTorrent(MagnetResult(magnetTitle(normalized), normalized), "parse") }
                                                 }
                                                 return true
@@ -306,8 +312,8 @@ class MainActivity : ComponentActivity() {
 
                                         override fun onPageFinished(view: WebView?, url: String?) {
                                             super.onPageFinished(view, url)
-                                            scanForMagnets(view)
-                                            if (firstPageLoad && builtInProviders.none { it.name == activeProvider && it.queryUrl != null }) {
+                                            scanForMagnets(view, activeQuery)
+                                            if (firstPageLoad && searchNeedsFormSubmit) {
                                                 firstPageLoad = false
                                                 injectSearch(view, activeQuery)
                                             } else if (searchState == "loading") {
@@ -353,11 +359,11 @@ class MainActivity : ComponentActivity() {
         view?.evaluateJavascript(script, null)
     }
 
-    private fun scanForMagnets(view: WebView?) {
-        val script = """(function(){try{function scan(){var h=document.documentElement?document.documentElement.outerHTML:'';var rows=[];var re=/magnet:\?[^"'<>\s]+/ig;var m;while((m=re.exec(h))!==null){var u=m[0].replace(/&amp;/g,'&');try{u=decodeURIComponent(u)}catch(e){};var a=[...document.querySelectorAll('a[href]')].find(x=>(x.href||'').includes(m[0]));var t=a?(a.innerText||a.title||''):'';if(!rows.some(x=>x.source===u))rows.push({title:t,source:u});}document.querySelectorAll('a[href^=\"magnet:\"],a[href^=\"MAGNET:\"],[data-magnet]').forEach(a=>{var u=(a.getAttribute('data-magnet')||a.href||'').replace(/&amp;/g,'&');var t=(a.innerText||a.title||'').trim();if(u.toLowerCase().startsWith('magnet:')&&!rows.some(x=>x.source===u))rows.push({title:t,source:u});});window.FreeMagnetResults.onResults(JSON.stringify(rows));}scan();if(!window.__magnetWatcher){window.__magnetWatcher=new MutationObserver(scan);window.__magnetWatcher.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['href','data-magnet']});setTimeout(function(){window.__magnetWatcher.disconnect();window.__magnetWatcher=null;},30000);}}catch(e){}})()"""
+    private fun scanForMagnets(view: WebView?, query: String) {
+        val quotedQuery = JSONObject.quote(query)
+        val script = """(function(){try{var query=$quotedQuery;function decode(s){var x=document.createElement('textarea');x.innerHTML=s||'';return x.value.replace(/&amp;/g,'&').trim()}function clean(s){s=(s||'').replace(/\s+/g,' ').trim();return /^(下载|磁力|magnet|复制|播放)(链接)?$/i.test(s)?'':s}function emit(u,t,f){u=decode(u);if(!/^magnet:\?/i.test(u))return;var dn=/(?:[?&])dn=([^&]+)/i.exec(u),name='';if(dn){try{name=decodeURIComponent(dn[1].replace(/\+/g,'%20'))}catch(e){name=dn[1]}}var title=clean(t)||clean(name)||clean(f)||'磁力资源';window.FreeMagnetResults.onResults(JSON.stringify([{title:title,source:u}]))}function parse(doc,fallback){var html=doc.documentElement?doc.documentElement.outerHTML:'',re=/magnet:\?[^\"'<>\s]+/ig,m;while((m=re.exec(html))!==null){var raw=m[0],a=[...doc.querySelectorAll('a[href],[data-magnet]')].find(function(x){return (x.getAttribute('href')||x.getAttribute('data-magnet')||'').indexOf(raw)>=0});var label=a?(a.innerText||a.title||''):'';if(!label&&a&&a.parentElement)label=a.parentElement.innerText||'';emit(raw,label,fallback)}doc.querySelectorAll('a[href^=\"magnet:\"],a[href^=\"MAGNET:\"],[data-magnet]').forEach(function(a){var label=a.innerText||a.title||'';if(!label&&a.parentElement)label=a.parentElement.innerText||'';emit(a.getAttribute('data-magnet')||a.getAttribute('href')||'',label,fallback)})}function scan(){parse(document,'');if(query.length<2)return;if(!window.__magnetCrawled)window.__magnetCrawled=new Set();var links=[...document.querySelectorAll('a[href]')].filter(function(a){try{var u=new URL(a.href,location.href),card=a.closest('article,li,.item,.video-item,.module-item,.movie-item,.post'),text=((a.innerText||a.title||'')+' '+(card?card.innerText:'')).replace(/\s+/g,' ');if(u.origin!==location.origin||u.href===location.href||window.__magnetCrawled.has(u.href)||text.toLowerCase().indexOf(query.toLowerCase())<0)return false;window.__magnetCrawled.add(u.href);return true}catch(e){return false}}).slice(0,12);links.forEach(function(a){var card=a.closest('article,li,.item,.video-item,.module-item,.movie-item,.post'),title=clean(a.innerText||a.title||'')||(card?clean(card.innerText):'');fetch(a.href,{credentials:'include'}).then(function(r){return r.text()}).then(function(t){parse(new DOMParser().parseFromString(t,'text/html'),title)}).catch(function(){})})}scan();if(!window.__magnetWatcher){window.__magnetWatcher=new MutationObserver(scan);window.__magnetWatcher.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['href','data-magnet']});setTimeout(function(){window.__magnetWatcher.disconnect();window.__magnetWatcher=null},30000)}}catch(e){}})()"""
         view?.evaluateJavascript(script, null)
     }
-
     private fun openTorrent(item: MagnetResult, mode: String) {
         startActivity(Intent(this, PlayerActivity::class.java)
             .putExtra("source", item.magnet)
@@ -365,8 +371,7 @@ class MainActivity : ComponentActivity() {
             .putExtra("mode", mode))
     }
 
-    private fun isMagnet(value: String) = value.startsWith("magnet:?", true) &&
-        Regex("(?i)(?:[?&])xt=urn:btih:").containsMatchIn(value)
+    private fun isMagnet(value: String) = normalizeMagnetUri(value) != null
 
     override fun onDestroy() {
         magnetWebView?.apply {
@@ -389,8 +394,8 @@ private class MagnetSearchBridge(private val onMagnet: (String, String) -> Unit)
             val rows = JSONArray(json)
             for (i in 0 until rows.length()) {
                 val row = rows.optJSONObject(i) ?: continue
-                val link = row.optString("source").replace("&amp;", "&", true)
-                if (link.startsWith("magnet:", true) && Regex("(?i)(?:[?&])xt=urn:btih:").containsMatchIn(link)) {
+                val link = normalizeMagnetUri(row.optString("source"))
+                if (link != null) {
                     onMagnet(row.optString("title"), link)
                 }
             }
@@ -576,6 +581,18 @@ private fun magnetTitle(magnet: String): String = runCatching {
     val dn = Regex("(?:[?&])dn=([^&]+)", RegexOption.IGNORE_CASE).find(magnet)?.groupValues?.get(1)
     if (dn.isNullOrBlank()) "磁力资源" else java.net.URLDecoder.decode(dn, "UTF-8")
 }.getOrDefault("磁力资源")
+
+private fun normalizeMagnetUri(raw: String): String? = runCatching {
+    val decoded = Regex("&#(?:x([0-9a-fA-F]+)|(\\d+));", RegexOption.IGNORE_CASE).replace(raw.trim().replace("&amp;", "&", true)) { match ->
+        val code = match.groups[1]?.value?.toInt(16) ?: match.groups[2]?.value?.toInt() ?: return@replace match.value
+        code.toChar().toString()
+    }.trim().trimEnd('*', '_', ' ')
+    val match = Regex("(?i)([?&]xt=urn:btih:)([0-9a-f]{40}|[a-z2-7]{32})").find(decoded) ?: return null
+    val prefix = decoded.substring(0, match.range.first) + match.groupValues[1]
+    val suffix = decoded.substring(match.range.last + 1)
+    val validSuffix = if (suffix.startsWith("&")) suffix else ""
+    "$prefix${match.groupValues[2]}$validSuffix"
+}.getOrNull()
 
 private fun formatLibraryBytes(value: Long): String = when {
     value < 1024 -> "$value B"
