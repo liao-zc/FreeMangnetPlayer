@@ -28,8 +28,15 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     private var rendered = false
     private var output: Any? = null
     private var pendingSeek: Long? = null
+    private var playingEventAt = 0L
     private val refresh = object : Runnable {
-        override fun run() { if (!released) { invalidateState(); main.postDelayed(this, 250) } }
+        override fun run() { if (!released) {
+            if (ready && wanted && playingEventAt > 0 && android.os.SystemClock.elapsedRealtime() - playingEventAt > 10000 &&
+                decoder.videoTracksCount <= 0 && decoder.audioTracksCount <= 0) {
+                error = PlaybackException("文件没有可解码的音视频轨道", null, PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED)
+            }
+            invalidateState(); main.postDelayed(this, 250)
+        } }
     }
     init {
         val media = Media(library, stream.uri)
@@ -38,9 +45,12 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         decoder.setEventListener { event -> main.post {
             if (!released) {
                 when (event.type) {
-                    MediaPlayer.Event.Playing -> { ready = true; ended = false; decoder.setRate(speed); pendingSeek?.let { decoder.setTime(it); pendingSeek = null } }
+                    MediaPlayer.Event.Playing -> { playingEventAt = android.os.SystemClock.elapsedRealtime(); ready = true; ended = false; decoder.setRate(speed); pendingSeek?.let { decoder.setTime(it); pendingSeek = null } }
                     MediaPlayer.Event.Buffering -> ready = event.buffering >= 100f
-                    MediaPlayer.Event.EndReached -> ended = true
+                    MediaPlayer.Event.EndReached -> {
+                        if (decoder.videoTracksCount <= 0 && decoder.audioTracksCount <= 0) error = PlaybackException("文件没有可解码的音视频轨道", null, PlaybackException.ERROR_CODE_DECODING_FORMAT_UNSUPPORTED)
+                        else ended = true
+                    }
                     MediaPlayer.Event.EncounteredError -> error = PlaybackException("兼容解码器无法读取视频流", null, PlaybackException.ERROR_CODE_IO_UNSPECIFIED)
                 }
                 invalidateState()
