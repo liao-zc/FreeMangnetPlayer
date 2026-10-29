@@ -5,7 +5,7 @@ from capture_usage_screenshots import adb,screenshot,PACKAGE,OUT
 rows=[]
 for fixture in json.loads(Path('format-fixtures.json').read_text()):
     adb('shell','am','force-stop',PACKAGE)
-    adb('shell','am','start','-W','-n',PACKAGE+'/.PlayerActivity','--es','source',shlex.quote(fixture['source']),'--es','mode','play','--es','title','Video.'+fixture['extension'])
+    adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','test-torrent-url',shlex.quote(fixture['source']),'--es','mode','play','--es','title','Video.'+fixture['extension'])
     start=time.monotonic();st={};played=False
     while time.monotonic()-start<90:
         try:st=json.loads(adb('shell','run-as',PACKAGE,'cat','files/torrent-check.json'))

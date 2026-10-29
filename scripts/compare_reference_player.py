@@ -43,9 +43,12 @@ if install.returncode==0:
         time.sleep(5);samples.append({'seconds':time.monotonic()-start,'ui':visible_text()})
     snap('compare-03-reference-resource')
     result['observations'].append({'app':'Magnet_player','samples':samples,'actual_ui':visible_text()})
+    result['reference_logcat']=adb('logcat','-d','-t','3000')
+    result['reference_process']=subprocess.run(['adb','shell','pidof',ref],capture_output=True,text=True).stdout.strip()
+    (OUT/'comparison-probe.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     adb('shell','am','force-stop',ref)
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
-adb('shell','am','start','-W','-n',PACKAGE+'/.PlayerActivity','--es','source',shlex.quote(USER_MAGNET),'--es','mode','play')
+adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(USER_MAGNET),'--es','mode','play')
 start=time.monotonic();samples=[]
 for i in range(24):
     time.sleep(5)

@@ -509,6 +509,9 @@ class MainActivity : ComponentActivity() {
             }
         }
         inbound?.let { openTorrent(MagnetResult(magnetTitle(it), it), intent.getStringExtra("mode") ?: "parse") }
+        if (debug) intent.getStringExtra("test-torrent-url")?.takeIf { it.startsWith("http://") || it.startsWith("https://") }?.let {
+            openTorrent(MagnetResult(intent.getStringExtra("title").orEmpty(), it), intent.getStringExtra("mode") ?: "parse")
+        }
     }
 
     private fun injectSearch(view: WebView?, query: String) {
