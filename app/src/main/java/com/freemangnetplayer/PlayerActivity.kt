@@ -75,7 +75,7 @@ class PlayerActivity : ComponentActivity() {
                 var fileDialog by remember { mutableStateOf(false) }
                 var deleteDialog by remember { mutableStateOf(false) }
                 var networkDialog by remember { mutableStateOf(false) }
-                BackHandler(enabled = fullscreen && !floating) { setFullscreen(false) }
+                BackHandler(enabled = fullscreen && !floating) { changeFullscreen(false) }
                 if (current != null) {
                         LaunchedEffect(current) {
                             while (true) {
@@ -116,7 +116,7 @@ class PlayerActivity : ComponentActivity() {
                         } }, update = { it.player = player; it.useController = !floating }, modifier = Modifier.fillMaxSize())
                         if (!floating) {
                             Row(Modifier.align(Alignment.TopStart).safeDrawingPadding().padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { setFullscreen(false) }) { Text("退出全屏") }
+                                Button(onClick = { changeFullscreen(false) }) { Text("退出全屏") }
                                 Button(onClick = { enterFloating() }) { Text("悬浮播放") }
                                 Button(onClick = { fileDialog = true }) { Text("切换视频") }
                                 Button(onClick = { cycleSpeed() }) { Text("${speed}×") }
@@ -174,7 +174,7 @@ class PlayerActivity : ComponentActivity() {
                         }
                         if (player != null) {
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { setFullscreen(true) }, modifier = Modifier.weight(1f).height(48.dp)) { Text("全屏播放") }
+                                Button(onClick = { changeFullscreen(true) }, modifier = Modifier.weight(1f).height(48.dp)) { Text("全屏播放") }
                                 OutlinedButton(onClick = { enterFloating() }, modifier = Modifier.weight(1f).height(48.dp)) { Text("悬浮播放") }
                             }
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -284,7 +284,7 @@ class PlayerActivity : ComponentActivity() {
         speed = values[(values.indexOf(speed) + 1) % values.size]
         player?.setPlaybackSpeed(speed)
     }
-    private fun setFullscreen(enabled: Boolean) {
+    private fun changeFullscreen(enabled: Boolean) {
         fullscreen = enabled
         requestedOrientation = if (enabled) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         updateSystemBars()
