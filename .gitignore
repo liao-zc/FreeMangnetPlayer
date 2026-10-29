@@ -10,3 +10,10 @@ manual-shots/
 fixture-data/
 fixture.json
 fixture.log
+
+performance-data/
+performance-fixture.json
+public-baseline-data/
+public-network-baseline.json
+optimization-data/
+optimization-fixture.json

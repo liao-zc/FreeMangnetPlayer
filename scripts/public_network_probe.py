@@ -16,7 +16,7 @@ try:
     ti = lt.torrent_info(data)
     digest = hashlib.sha1(lt.bencode(lt.bdecode(data)[b'info'])).hexdigest()
     plain = f'magnet:?xt=urn:btih:{digest}'
-    trackers = [item['url'] for item in ti.trackers()]
+    trackers = [item.url for item in ti.trackers()]
     result.update({'torrent_url': base + filename, 'id': digest, 'plain_magnet': plain, 'official_trackers': trackers})
     session = lt.session({'listen_interfaces': '0.0.0.0:0', 'download_rate_limit': 0,
         'upload_rate_limit': 0, 'enable_dht': True, 'enable_lsd': True,
