@@ -13,6 +13,8 @@ for ext,video,audio,extra in formats:
     command=['ffmpeg','-y','-ss','5','-i',str(source),'-t','8','-vf','scale=352:288' if video=='h263' else 'scale=320:240','-r','25','-c:v',video,'-c:a',audio,'-ac','2']+extra
     if ext.endswith(('mp4','mov')):command+=['-movflags','+faststart']
     if ext=='3gp':command+=['-ar','22050','-ac','1']
+    if ext=='rm':
+        command=['ffmpeg','-y','-stream_loop','-1','-i',str(source),'-t','90','-vf','scale=320:240','-r','12','-c:v','rv20','-b:v','300k','-c:a','real_144','-ar','8000','-ac','1']
     subprocess.run(command+[str(path)],check=True)
     fs=lt.file_storage();lt.add_files(fs,str(path));creator=lt.create_torrent(fs,32768,lt.create_torrent.v1_only);creator.add_tracker('http://10.0.2.2:8898/announce');lt.set_piece_hashes(creator,str(root));data=creator.generate();ti=lt.torrent_info(data)
     handle=session.add_torrent({'ti':ti,'save_path':str(root.resolve())});handle.resume();handles.append(handle);torrents[ext]=lt.bencode(data)

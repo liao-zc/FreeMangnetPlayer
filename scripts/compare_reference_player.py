@@ -22,7 +22,9 @@ result={'magnet':USER_MAGNET,'reference_package':ref,'reference_badging':badging
 install=subprocess.run(['adb','install','-r','reference.apk'],capture_output=True,text=True)
 result['reference_install']={'returncode':install.returncode,'output':install.stdout+install.stderr}
 if install.returncode==0:
-    adb('shell','monkey','-p',ref,'1');time.sleep(15);snap('compare-01-reference-home')
+    activity=re.search(r"launchable-activity: name='([^']+)'",badging)[1]
+    result['reference_launch']=adb('shell','am','start','-W','-n',ref+'/'+activity)
+    time.sleep(8);snap('compare-01-reference-home')
     launch=subprocess.run(['adb','shell','am','start','-W','-a','android.intent.action.VIEW','-d',USER_MAGNET,'-p',ref],capture_output=True,text=True)
     result['reference_magnet_intent']=launch.stdout+launch.stderr
     time.sleep(4)

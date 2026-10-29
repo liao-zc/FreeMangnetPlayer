@@ -1,4 +1,4 @@
-import hashlib,json,shlex,subprocess,time
+import hashlib,json,re,shlex,subprocess,time
 from pathlib import Path
 from capture_usage_screenshots import adb,screenshot,PACKAGE,OUT
 
@@ -25,8 +25,11 @@ for fixture in json.loads(Path('format-fixtures.json').read_text()):
             st=json.loads(adb('shell','run-as',PACKAGE,'cat','files/torrent-check.json'))
             if st.get('downloaded',0)>=fixture['size']:break
             time.sleep(.5)
-        path=st['folder']+'/Video.'+fixture['extension'];data=subprocess.check_output(['adb','exec-out','run-as',PACKAGE,'cat',path])
-        row['download_sha256_matches']=hashlib.sha256(data).hexdigest()==fixture['sha256']
+        path=st['folder']+'/Video.'+fixture['extension']
+        checksum=adb('shell','sha256sum',path).split()[0]
+        row['device_sha256']=checksum
+        row['device_file_size']=int(adb('shell','wc','-c',path).split()[0])
+        row['download_sha256_matches']=checksum==fixture['sha256'] and row['device_file_size']==fixture['size']
         row['passed']=played and row['download_sha256_matches']
     rows.append(row);(OUT/'formats-verification.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
     if not row['passed']:print('Actual format failure',fixture['extension'],st)

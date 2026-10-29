@@ -47,6 +47,8 @@ text=f'''# FreeMangnetPlayer v0.1.14 优化与实际验证报告
 
 ## 2. 对标观测与效果图
 
+实际安装包的应用名与包名也在原始 badging 记录中，不能仅凭下载文件名认定与用户手机安装版本完全相同。
+
 对标 APK：[官方仓库](https://github.com/zaidielykelee/Magnet_player)，`st_v1.5.0_9_20260510_211803.apk`。仓库只发布 README 和安装包，没有内核源码；没有复制闭源实现，也没有假定视频源一定是 BT Peer。
 
 | 项目 | FreeMangnetPlayer | Magnet_player | 本轮结论 |
