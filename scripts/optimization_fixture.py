@@ -22,7 +22,7 @@ classes.add_rule('0.0.0.0', '255.255.255.255', 1)
 session.set_peer_class_filter(classes)
 handles = []
 fixtures = []
-for number in range(1, 4):
+for number in range(1, 5):
     folder = root / f'Bundle-{number}'
     folder.mkdir(exist_ok=True)
     for episode in [1, 2]:

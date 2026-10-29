@@ -32,6 +32,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Load stable app signing key
+        env:
+          FMP_KEYSTORE_B64: ${{ secrets.FMP_KEYSTORE_B64 }}
+          FMP_STORE_PASSWORD: ${{ secrets.FMP_STORE_PASSWORD }}
+        run: |
+          test -n "$FMP_KEYSTORE_B64"
+          printf '%s' "$FMP_KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/fmp.p12"
+          echo "FMP_KEYSTORE=$RUNNER_TEMP/fmp.p12" >> "$GITHUB_ENV"
+          echo "FMP_STORE_PASSWORD=$FMP_STORE_PASSWORD" >> "$GITHUB_ENV"
       - name: Check repository source encoding
         run: python3 scripts/check_repository.py
       - name: Build app

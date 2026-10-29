@@ -2,6 +2,18 @@ plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id(
 
 android { namespace = "com.freemangnetplayer"; compileSdk = 35
     defaultConfig { applicationId = "com.freemangnetplayer"; minSdk = 24; targetSdk = 35; versionCode = 11; versionName = "0.1.10" }
+    val signingPath = System.getenv("FMP_KEYSTORE")
+    if (!signingPath.isNullOrBlank()) {
+        signingConfigs.create("fmp") {
+            storeFile = file(signingPath)
+            storeType = "PKCS12"
+            storePassword = System.getenv("FMP_STORE_PASSWORD")
+            keyAlias = "fmp"
+            keyPassword = System.getenv("FMP_STORE_PASSWORD")
+        }
+        buildTypes.getByName("debug").signingConfig = signingConfigs.getByName("fmp")
+        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("fmp")
+    }
     buildFeatures { compose = true }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     kotlinOptions { jvmTarget = "17" }

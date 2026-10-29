@@ -59,6 +59,7 @@ def main():
     edit('下载目录（绝对路径）', base + '/CustomDownloads')
     edit('缓存目录（绝对路径）', base + '/CustomCache')
     edit('最大同时下载数量（1–8，含缓存）', '1')
+    edit('最大缓存任务数量（1–100）', '1')
     screenshot('opt-02-settings-storage.png')
     # Scroll to engine settings and save using actual UI.
     adb('shell', 'input', 'swipe', '540', '1800', '540', '650', '600')
@@ -191,6 +192,15 @@ def main():
     assert subprocess.run(['adb', 'shell', 'test', '-d', cache_folder]).returncode != 0
     screenshot('opt-16-clear-cache.png')
     report.append({'check': 'clear-cache-removes-files', 'passed': True, 'deleted_folder': cache_folder})
+    find_and_tap('返回首页')
+    first_cache = open_torrent(fixtures[2])
+    find_and_tap('返回搜索')
+    second_cache = open_torrent(fixtures[3])
+    time.sleep(8)
+    assert subprocess.run(['adb', 'shell', 'test', '-d', first_cache['folder']]).returncode != 0
+    assert subprocess.run(['adb', 'shell', 'test', '-d', second_cache['folder']]).returncode == 0
+    screenshot('opt-17-cache-limit.png')
+    report.append({'check': 'max-cache-task-eviction', 'passed': True, 'deleted_folder': first_cache['folder'], 'retained_folder': second_cache['folder']})
 
 def select_checkbox(filename):
     import xml.etree.ElementTree as ET
