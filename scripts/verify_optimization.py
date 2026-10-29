@@ -36,14 +36,22 @@ def write_prefs(values):
     subprocess.run(['adb', 'shell', 'run-as', PACKAGE, 'sh', '-c', shlex.quote('cat > shared_prefs/player-settings.xml')], input=values.encode(), check=True)
 
 def edit(label, text):
-    find_and_tap(label)
+    import xml.etree.ElementTree as ET
+    target = {'下载目录（绝对路径）': '下载目录输入框', '缓存目录（绝对路径）': '缓存目录输入框'}.get(label, label)
+    find_and_tap(target)
+    adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
+    tree = ET.fromstring(adb('shell', 'cat', '/sdcard/window.xml'))
+    focused = [n for n in tree.iter('node') if n.get('class') == 'android.widget.EditText' and n.get('focused') == 'true']
+    assert focused, 'No focused text field for ' + target
+    count = len(focused[0].get('text', '')) + 5
     adb('shell', 'input', 'keyevent', 'KEYCODE_MOVE_END')
-    adb('shell', 'input', 'keyevent', '--longpress', 'KEYCODE_DEL')
-    # CTRL+A selects all text in the native EditText/Compose field.
-    adb('shell', 'input', 'keycombination', '113', '29')
+    adb('shell', 'input', 'keyevent', *(['KEYCODE_DEL'] * count))
     adb('shell', 'input', 'text', shlex.quote(text))
     adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
     time.sleep(1)
+    adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
+    tree = ET.fromstring(adb('shell', 'cat', '/sdcard/window.xml'))
+    assert any(n.get('class') == 'android.widget.EditText' and n.get('text') == text for n in tree.iter('node')), 'Field replacement failed: ' + target
 
 def main():
     adb('wait-for-device')
@@ -220,9 +228,14 @@ def main():
     time.sleep(8)
     exists = adb('shell', 'test', '-d', state['folder']) if False else subprocess.run(['adb', 'shell', 'test', '-d', state['folder']]).returncode == 0
     assert not exists, state['folder']
+    require_visible('清理完成')
     screenshot('opt-15-clear-downloads.png')
     report.append({'check': 'clear-downloads-removes-files', 'passed': True, 'deleted_folder': state['folder']})
     find_and_tap('返回首页')
+    find_and_tap('下载')
+    require_visible('下载任务', '这里会显示你实际开始的下载任务')
+    screenshot('opt-15b-cleared-download-list.png')
+    report.append({'check': 'cleared-download-list-empty', 'passed': True})
     state = open_torrent(fixtures[2])
     cache_folder = state['folder']
     find_and_tap('返回搜索')
@@ -232,6 +245,7 @@ def main():
     find_and_tap('确认清空')
     time.sleep(8)
     assert subprocess.run(['adb', 'shell', 'test', '-d', cache_folder]).returncode != 0
+    require_visible('清理完成')
     screenshot('opt-16-clear-cache.png')
     report.append({'check': 'clear-cache-removes-files', 'passed': True, 'deleted_folder': cache_folder})
     find_and_tap('返回首页')

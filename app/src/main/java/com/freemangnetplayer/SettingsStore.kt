@@ -17,7 +17,7 @@ object SettingsStore {
     fun validateRoot(path: String): File {
         require(path.startsWith("/")) { "请输入绝对路径" }
         val root = File(path).canonicalFile
-        require(root.isDirectory || root.mkdirs()) { "无法创建目录，请选择应用可写目录" }
+        require(root.isDirectory || root.mkdirs()) { "无法创建目录：$root，请选择应用可写目录" }
         val probe = File.createTempFile("fmp-write-", ".tmp", root)
         try { probe.writeText("write-check") } finally { probe.delete() }
         return root

@@ -41,7 +41,7 @@ class TorrentTask(val id: String, val source: String, val title: String, folder:
     var job: Job? = null
     var lastUsed = System.currentTimeMillis()
     var stopping = false
-    var clearing = false
+    var clearing by mutableStateOf(false)
     var destination: File? = null
     var moving = false
 }
@@ -52,6 +52,7 @@ object TorrentTasks {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var context: Context
     private var initialized = false
+    var serviceRunning = false
     private val trackers = listOf("udp://tracker.opentrackr.org:1337/announce", "https://tracker.tamersunion.org:443/announce", "udp://open.stealth.si:80/announce")
 
     fun initialize(c: Context) {
@@ -104,6 +105,7 @@ object TorrentTasks {
     fun schedule() {
         if (!initialized) return
         trimCaches()
+        if (!serviceRunning) return
         var active = tasks.values.count { (it.engine != null || it.job?.isActive == true) && !it.queued && !it.paused && !it.complete && !it.cancelled }
         val limit = SettingsStore.maxDownloads(context)
         if (active > limit) {
@@ -297,6 +299,10 @@ object TorrentTasks {
         applyPriorities(task)
     }
     fun resume(task: TorrentTask) {
+        if (!serviceRunning) {
+            val service = Intent(context, DownloadService::class.java)
+            if (android.os.Build.VERSION.SDK_INT >= 26) context.startForegroundService(service) else context.startService(service)
+        }
         task.paused = false
         val active = tasks.values.count { it !== task && (it.engine != null || it.job?.isActive == true) && !it.paused && !it.queued && !it.complete && !it.cancelled }
         task.queued = !task.complete && active >= SettingsStore.maxDownloads(context)
@@ -311,18 +317,25 @@ object TorrentTasks {
         task.handle = null
         task.job?.cancel()
         scope.launch {
+            try {
             task.job?.join()
             withContext(Dispatchers.IO) {
                 closeEngine(task)
                 if (delete) {
-                    val folder = task.folder.canonicalFile
-                    // Only this task's dedicated directory; never delete the configured root.
-                    require(folder.name == task.id && folder.parentFile?.name == "FreeMangnetPlayerTasks")
-                    require(!folder.exists() || folder.deleteRecursively()) { "任务文件删除失败" }
+                    val folders = listOfNotNull(task.folder, task.destination).map { it.canonicalFile }.distinct()
+                    for (folder in folders) {
+                        require(folder.name == task.id && folder.parentFile?.name == "FreeMangnetPlayerTasks")
+                        require(!folder.exists() || folder.deleteRecursively()) { "任务文件删除失败：$folder" }
+                    }
                 }
             }
             if (delete) { tasks.remove(task.id); LibraryStore.removeDownload(context, task.source) }
             task.stopping = false; task.clearing = false; persist(); schedule()
+            } catch (error: Exception) {
+                task.stopping = false; task.clearing = false
+                task.status = "清理失败：${error.localizedMessage}"
+                persist()
+            }
         }
         persist()
     }

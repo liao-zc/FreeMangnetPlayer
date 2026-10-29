@@ -16,6 +16,7 @@ class DownloadService : Service() {
             .newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "FreeMangnetPlayer:downloads")
             .apply { setReferenceCounted(false) }
         TorrentTasks.initialize(this)
+        TorrentTasks.serviceRunning = true
         if (Build.VERSION.SDK_INT >= 26) getSystemService(NotificationManager::class.java)
             .createNotificationChannel(NotificationChannel("downloads", "下载与缓存任务", NotificationManager.IMPORTANCE_LOW))
         foreground()
@@ -57,5 +58,5 @@ class DownloadService : Service() {
         stopSelf()
     }
     override fun onBind(intent: Intent?): IBinder? = null
-    override fun onDestroy() { if (downloadWakeLock.isHeld) downloadWakeLock.release(); scope.cancel(); TorrentTasks.stopAll(); super.onDestroy() }
+    override fun onDestroy() { TorrentTasks.serviceRunning = false; if (downloadWakeLock.isHeld) downloadWakeLock.release(); scope.cancel(); TorrentTasks.stopAll(); super.onDestroy() }
 }
