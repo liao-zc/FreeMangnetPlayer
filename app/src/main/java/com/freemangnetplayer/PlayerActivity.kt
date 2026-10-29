@@ -49,6 +49,7 @@ class PlayerActivity : ComponentActivity() {
     private var fullscreen by mutableStateOf(false)
     private var floating by mutableStateOf(false)
     private var pipRequested = false
+    private var normalOrientation = android.content.res.Configuration.ORIENTATION_PORTRAIT
     private var speed by mutableFloatStateOf(1f)
     private var requested by mutableStateOf(false)
     private var autoPlay = true
@@ -150,6 +151,14 @@ class PlayerActivity : ComponentActivity() {
                     if (current == null) {
                         Text("任务启动失败：${result.exceptionOrNull()?.localizedMessage}")
                     } else {
+                        if (player != null) {
+                            VideoSurface(Modifier.fillMaxWidth().height(240.dp), { fileDialog = true })
+                        } else {
+                            Card(Modifier.fillMaxWidth().height(240.dp)) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
+                                Text(playerMessage, style = MaterialTheme.typography.bodySmall)
+                            } }
+                        }
                         Card(Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(if (current.files.isEmpty()) "正在解析磁力资源" else "资源解析完成", style = MaterialTheme.typography.titleMedium)
@@ -178,14 +187,6 @@ class PlayerActivity : ComponentActivity() {
                                     }
                                 }
                             }
-                        }
-                        if (player != null) {
-                            VideoSurface(Modifier.fillMaxWidth().height(240.dp), { fileDialog = true })
-                        } else {
-                            Card(Modifier.fillMaxWidth().height(240.dp)) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
-                                Text(playerMessage, style = MaterialTheme.typography.bodySmall)
-                            } }
                         }
                         if (current.files.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             OutlinedButton(onClick = {
@@ -301,8 +302,11 @@ class PlayerActivity : ComponentActivity() {
         player?.setPlaybackSpeed(speed)
     }
     private fun changeFullscreen(enabled: Boolean) {
+        if (enabled && !fullscreen) normalOrientation = resources.configuration.orientation
         fullscreen = enabled
-        requestedOrientation = if (enabled) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        requestedOrientation = if (enabled) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            else if (normalOrientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+            else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
         updateSystemBars()
     }
     private fun updateSystemBars() {
