@@ -18,7 +18,7 @@ import java.security.MessageDigest
 data class TaskFile(val index: Int, val path: String, val size: Long, val done: Long = 0) {
     val video get() = path.substringAfterLast('.', "").lowercase() in listOf("mp4", "mkv", "avi", "mov", "webm", "m4v", "ts", "wmv")
 }
-class TorrentTask(val id: String, val source: String, val title: String, folder: File, download: Boolean) {
+class TorrentTask(val id: String, var source: String, val title: String, folder: File, download: Boolean) {
     var folder by mutableStateOf(folder)
     var download by mutableStateOf(download)
     var files by mutableStateOf<List<TaskFile>>(emptyList())
@@ -103,6 +103,24 @@ object TorrentTasks {
                 else SettingsStore.taskFolder(c, download, id)
             TorrentTask(id, source, title.ifBlank { "磁力资源" }, folder, download).also { tasks[id] = it }
         }
+        // Reopening the same hash must not discard newly pasted trackers/peers.
+        if (source.startsWith("magnet:?", true) && task.source.startsWith("magnet:?", true)) {
+            val incoming = source.substringAfter('?').split('&').filter {
+                it.startsWith("tr=", true) || it.startsWith("x.pe=", true) || it.startsWith("ws=", true)
+            }
+            val original = task.source.substringAfter('?').split('&').toSet()
+            val additional = incoming.filter { it !in original }.distinct()
+            if (additional.isNotEmpty()) {
+                task.source += additional.joinToString("") { "&$it" }
+                task.handle?.let { handle ->
+                    additional.filter { it.startsWith("tr=", true) }.forEach {
+                        runCatching { handle.addTracker(AnnounceEntry(java.net.URLDecoder.decode(it.substringAfter('='), "UTF-8"))) }
+                    }
+                    connectExplicitPeers(task, handle)
+                    handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL); handle.forceDHTAnnounce()
+                }
+            }
+        }
         task.lastUsed = System.currentTimeMillis()
         if (task.cancelled && !task.stopping && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
         if (download) {
@@ -143,6 +161,18 @@ object TorrentTasks {
         }
         persist()
     }
+    private fun connectExplicitPeers(task: TorrentTask, handle: TorrentHandle) {
+                            // jlibtorrent 1.2 does not import the standard x.pe extension.
+                            Regex("[?&]x[.]pe=([^&]+)").findAll(task.source).forEach { match ->
+                                runCatching {
+                                    val endpoint = java.net.URLDecoder.decode(match.groupValues[1], "UTF-8")
+                                    val port = endpoint.substringAfterLast(':').toInt()
+                                    val ip = endpoint.substringBeforeLast(':').removePrefix("[").removeSuffix("]")
+                                    require(port in 1..65535)
+                                    handle.swig().connect_peer(TcpEndpoint(ip, port).swig())
+                                }
+                            }
+    }
     private fun setMetadataPriorities(handle: TorrentHandle, task: TorrentTask) {
         val info = handle.torrentFile() ?: return
         val f = info.files()
@@ -179,16 +209,7 @@ object TorrentTasks {
                         override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) {
                             task.handle = engine.retainHandle(handle)
                             handle.setDownloadLimit(0); handle.setUploadLimit(0)
-                            // jlibtorrent 1.2 does not import the standard x.pe extension.
-                            Regex("[?&]x[.]pe=([^&]+)").findAll(task.source).forEach { match ->
-                                runCatching {
-                                    val endpoint = java.net.URLDecoder.decode(match.groupValues[1], "UTF-8")
-                                    val port = endpoint.substringAfterLast(':').toInt()
-                                    val ip = endpoint.substringBeforeLast(':').removePrefix("[").removeSuffix("]")
-                                    require(port in 1..65535)
-                                    handle.swig().connect_peer(TcpEndpoint(ip, port).swig())
-                                }
-                            }
+                            connectExplicitPeers(task, handle)
                             setMetadataPriorities(handle, task)
                             handle.forceReannounce(); handle.forceDHTAnnounce()
                         }

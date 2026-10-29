@@ -16,7 +16,7 @@ checks = json.loads((shots / 'performance-verification.json').read_text(encoding
 required = ['bottom-settings-entry', 'pasted-tracker-free-magnet-metadata', 'unlimited-app-throughput',
     'real-native-limits-and-network-diagnostics', 'immersive-fullscreen-real-playback',
     'system-pip-over-home-continues-playing', 'return-from-pip', 'unlimited-download-complete-file-sha256',
-    'html-encoded-paste-cold-parse', 'plain-hash-input-and-responsive-discovery', 'return-during-plain-magnet-discovery']
+    'html-encoded-paste-cold-parse', 'plain-hash-input-and-responsive-discovery', 'return-during-plain-magnet-discovery', 'existing-hash-merges-new-network-parameters']
 index = {row['check']: row for row in checks}
 assert all(index.get(name, {}).get('passed') is True for name in required), 'Incomplete functional checks'
 fixture = json.loads((shots / 'performance-fixture.json').read_text(encoding='utf-8'))
@@ -50,6 +50,7 @@ labels = {
     'html-encoded-paste-cold-parse': 'HTML 实体编码磁力冷启动粘贴解析',
     'plain-hash-input-and-responsive-discovery': '纯哈希输入识别、节点发现及可操作界面',
     'return-during-plain-magnet-discovery': '节点发现过程中返回首页',
+    'existing-hash-merges-new-network-parameters': '同一哈希重新粘贴时合并新增节点/Tracker 并解析',
 }
 text = f'''# FreeMangnetPlayer v0.1.11 功能优化与速度诊断报告
 
@@ -82,7 +83,8 @@ text = f'''# FreeMangnetPlayer v0.1.11 功能优化与速度诊断报告
 3. 多个任务的原生会话使用默认监听配置；现在各会话使用独立自动端口，并保留 IPv4/IPv6。
 4. 原生磁盘缓存原先关闭；现在每活动会话使用 16 MiB，缓存过期 1 秒。播放器读取前再校验整块磁盘数据的 SHA-1，避免原生写缓存尚未落盘时误读稀疏空洞。
 5. 等待期间原先每 100 毫秒重复设置多个分片 deadline；现在每前进一个分片设置一次有界前向预取窗口，切换视频清理旧 deadlines。
-6. 原会话桥对整条磁力 URL 解码，可能破坏参数内的转义。现在交给原生磁力解析器解码每个参数，保留 Tracker 与直接节点地址。
+6. 同一哈希旧任务原先会丢弃新粘贴链接中的 Tracker 和节点地址；现在合并这些参数并应用到活动会话，避免再次粘贴仍沿用缺失节点的旧链接。
+7. 原会话桥对整条磁力 URL 解码，可能破坏参数内的转义。现在交给原生磁力解析器解码每个参数，保留 Tracker 与直接节点地址。
 
 **以上是代码中可复现的配置问题，不能仅凭代码检查断言其中某项就是用户手机上 10 B/s 的唯一原因。实际低速还需看有效载荷、资源节点、DHT、网络与同链接客户端对照。**
 

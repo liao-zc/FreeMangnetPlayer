@@ -173,6 +173,14 @@ def main():
     find_and_tap('返回搜索')
     require_visible('解析资源', '设置')
     report.append({'check': 'return-during-plain-magnet-discovery', 'passed': True})
+    paste(fixture['direct_magnet'])
+    find_and_tap('解析资源')
+    enriched = wait(lambda s: s.get('id') == fixture['id'] and s.get('metadata'))
+    assert '&x.pe=' in enriched['source'], enriched
+    screenshot('perf-10b-reopen-with-new-peer.png')
+    report.append({'check': 'existing-hash-merges-new-network-parameters', 'passed': True, 'state': enriched})
+    find_and_tap('返回搜索')
+
     baseline_path = Path('public-network-baseline.json')
     if baseline_path.exists():
         public = json.loads(baseline_path.read_text())
