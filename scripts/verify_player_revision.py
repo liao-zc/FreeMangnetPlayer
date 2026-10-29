@@ -39,12 +39,12 @@ def tap(node):
 
 def controller(id=None):
     root = tree()
-    target = next((n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'exo_position'))), None)
+    target = next((n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'player_position'))), None)
     if target is None:
         surface = next(n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface'))
         tap(surface)
         root = tree()
-        target = next(n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'exo_position')))
+        target = next(n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'player_position')))
     return root,target
 
 def control(id):
@@ -95,7 +95,7 @@ def main():
     root,_=controller()
     surface=next(n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface'))
     area=bounds(surface)
-    ids=['exo_rew','exo_play_pause','exo_ffwd','player_speed','player_files','player_pip','player_fullscreen','exo_position','exo_duration','player_progress']
+    ids=['exo_rew','exo_play_pause','exo_ffwd','player_speed','player_files','player_pip','player_fullscreen','player_position','player_duration','player_progress']
     actual={}
     for id in ids:
         node=next(n for n in root.iter('node') if n.get('resource-id','').endswith('/'+id))

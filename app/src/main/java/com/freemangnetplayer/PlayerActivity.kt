@@ -345,11 +345,11 @@ class PlayerActivity : ComponentActivity() {
                 findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
                 findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
                     override fun onScrubStart(timeBar: androidx.media3.ui.TimeBar, position: Long) {
-                        scrubbing = true; resumeAfterScrub = this@PlayerActivity.player?.isPlaying == true
+                        scrubbing = true; resumeAfterScrub = this@PlayerActivity.player?.playWhenReady == true
                         this@PlayerActivity.player?.pause()
                     }
                     override fun onScrubMove(timeBar: androidx.media3.ui.TimeBar, position: Long) {
-                        findViewById<TextView>(R.id.exo_position).text = formatTime(position)
+                        findViewById<TextView>(R.id.player_position).text = formatTime(position)
                     }
                     override fun onScrubStop(timeBar: androidx.media3.ui.TimeBar, position: Long, canceled: Boolean) {
                         if (!canceled) this@PlayerActivity.player?.seekTo(position)
@@ -380,8 +380,8 @@ class PlayerActivity : ComponentActivity() {
             it.setDuration(duration); it.setPosition(current.currentPosition); it.setBufferedPosition(current.bufferedPosition)
             it.isEnabled = duration > 0
         }
-        view.findViewById<TextView>(R.id.exo_position)?.text = formatTime(current.currentPosition)
-        view.findViewById<TextView>(R.id.exo_duration)?.text = formatTime(duration)
+        view.findViewById<TextView>(R.id.player_position)?.text = formatTime(current.currentPosition)
+        view.findViewById<TextView>(R.id.player_duration)?.text = formatTime(duration)
     }
     override fun onStart() {
         super.onStart()
