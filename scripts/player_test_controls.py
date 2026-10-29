@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 
 def reveal_for_label(label):
     names={'全屏播放':'player_fullscreen','退出全屏':'player_fullscreen','悬浮播放':'player_pip',
-           '切换视频':'player_files','后退 15 秒':'exo_rew','前进 15 秒':'exo_ffwd'}
+           '切换视频':'player_files','▶ 播放':'exo_play_pause','后退 15 秒':'exo_rew','前进 15 秒':'exo_ffwd'}
     id=names.get(label)
     if re.fullmatch(r'\d+(?:\.\d+)?×',label): id='player_speed'
     if id is None: return None

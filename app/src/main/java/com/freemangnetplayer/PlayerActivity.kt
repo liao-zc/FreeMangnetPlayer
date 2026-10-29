@@ -131,7 +131,7 @@ class PlayerActivity : ComponentActivity() {
                         VideoSurface(Modifier.fillMaxSize(), { fileDialog = true })
                         if (player == null && !floating) Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                             CircularProgressIndicator(color = Color.White)
-                            Text(playerMessage.ifBlank { "?????????" }, color = Color.White)
+                            Text(playerMessage.ifBlank { "正在等待播放分片…" }, color = Color.White)
                         }
                     }
                 } else {
