@@ -61,6 +61,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     override fun getState(): State {
         if (released) return State.Builder().build()
         val duration = decoder.length
+        val canPlay = ready && (decoder.videoTracksCount > 0 || decoder.audioTracksCount > 0)
         val data = MediaItemData.Builder(item.mediaId.ifEmpty { stream.uri.toString() }).setMediaItem(item)
             .setDurationUs(if (duration > 0) duration * 1000 else C.TIME_UNSET).setIsSeekable(true).build()
         val commands = Player.Commands.Builder().addAll(Player.COMMAND_PLAY_PAUSE, Player.COMMAND_PREPARE, Player.COMMAND_STOP,
@@ -69,8 +70,8 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
             Player.COMMAND_GET_METADATA, Player.COMMAND_GET_TRACKS, Player.COMMAND_SET_VIDEO_SURFACE, Player.COMMAND_RELEASE).build()
         return State.Builder().setAvailableCommands(commands).setPlaylist(listOf(data)).setCurrentMediaItemIndex(0)
             .setPlayWhenReady(wanted, Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
-            .setPlaybackState(if (error != null) Player.STATE_IDLE else if (ended) Player.STATE_ENDED else if (ready) Player.STATE_READY else Player.STATE_BUFFERING)
-            .setIsLoading(!ready && error == null).setPlayerError(error).setPlaybackParameters(PlaybackParameters(speed))
+            .setPlaybackState(if (error != null) Player.STATE_IDLE else if (ended) Player.STATE_ENDED else if (canPlay) Player.STATE_READY else Player.STATE_BUFFERING)
+            .setIsLoading(!canPlay && error == null).setPlayerError(error).setPlaybackParameters(PlaybackParameters(speed))
             .setSeekBackIncrementMs(15000).setSeekForwardIncrementMs(15000).setVideoSize(videoSize)
             .setNewlyRenderedFirstFrame(rendered).setContentPositionMs(decoder.time.coerceAtLeast(0))
             .setContentBufferedPositionMs { decoder.time.coerceAtLeast(0) }.build()

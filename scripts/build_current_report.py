@@ -7,7 +7,9 @@ a=parser.parse_args();root=Path(__file__).resolve().parent.parent;shots=Path(a.s
 formats=json.loads((shots/'formats-verification.json').read_text(encoding='utf-8'))
 pages=json.loads((shots/'pagination-verification.json').read_text(encoding='utf-8'))
 comparison=json.loads((shots/'comparison-probe.json').read_text(encoding='utf-8'))
-assert len(formats)==16 and all(x['passed'] for x in formats)
+assert len(formats)==17 and all(x['passed'] for x in formats)
+invalid=next(r for r in formats if r['fixture'].get('invalid'))
+formats=[r for r in formats if not r['fixture'].get('invalid')]
 assert len(pages)==5 and all(x['passed'] for x in pages)
 target=root/'docs/screenshots/current';target.mkdir(parents=True,exist_ok=True)
 for p in shots.glob('*.png'):
@@ -23,7 +25,7 @@ e=root/'docs/evidence';e.mkdir(exist_ok=True)
 # Publish relevant crash lines only, not unrestricted third-party application logs.
 for key in ['reference_logcat','logcat']:
     comparison[key]='\n'.join(line for line in comparison.get(key,'').splitlines() if any(t in line for t in ['Fatal signal','FATAL EXCEPTION','UnsatisfiedLinkError','libndk_translation','libflutter','AndroidRuntime','SecurityException']) and not any(t in line.lower() for t in ['token','authorization','bearer']))
-for name,value in [('formats',formats),('pagination',pages),('comparison',comparison)]:
+for name,value in [('formats',formats+[invalid]),('pagination',pages),('comparison',comparison)]:
     (e/('current-'+name+'.json')).write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8')
 own=next(x for x in comparison['observations'] if x['app']=='FreeMangnetPlayer');st=own['samples'][-1]['state']
 ref_running=bool(comparison.get('reference_process'))
@@ -101,6 +103,10 @@ text+='''
 ![实际 RM 播放](screenshots/current/format-rm.png)
 
 [格式逐项数据](evidence/current-formats.json)
+
+损坏 MP4 专项：显示播放错误并停止自动重试，原进程保持不变；不会把没有轨道的 VLC Playing 事件计为播放成功。
+
+![损坏文件实际错误界面](screenshots/current/format-broken.png)
 
 ## 5. 修改建议的采纳与边界
 

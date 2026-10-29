@@ -17,6 +17,10 @@ for ext,video,audio,extra in formats:
     fs=lt.file_storage();lt.add_files(fs,str(path));creator=lt.create_torrent(fs,32768,lt.create_torrent.v1_only);creator.add_tracker('http://10.0.2.2:8898/announce');lt.set_piece_hashes(creator,str(root));data=creator.generate();ti=lt.torrent_info(data)
     handle=session.add_torrent({'ti':ti,'save_path':str(root.resolve())});handle.resume();handles.append(handle);torrents[ext]=lt.bencode(data)
     rows.append({'extension':ext,'video_codec':video,'audio_codec':audio,'source':'http://10.0.2.2:8898/'+ext+'.torrent','sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'size':path.stat().st_size})
+bad=root/'Broken.mp4';bad.write_bytes(b'Intentionally invalid media for error recovery test')
+fs=lt.file_storage();lt.add_files(fs,str(bad));creator=lt.create_torrent(fs,32768,lt.create_torrent.v1_only);creator.add_tracker('http://10.0.2.2:8898/announce');lt.set_piece_hashes(creator,str(root));data=creator.generate()
+handle=session.add_torrent({'ti':lt.torrent_info(data),'save_path':str(root.resolve())});handle.resume();handles.append(handle);torrents['broken']=lt.bencode(data)
+rows.append({'invalid':True,'extension':'broken','source':'http://10.0.2.2:8898/broken.torrent','size':bad.stat().st_size})
 end=time.time()+60
 while not all(h.status().is_seeding for h in handles):
     if time.time()>end:raise RuntimeError('format seed verification timed out')
