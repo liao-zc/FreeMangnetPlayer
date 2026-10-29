@@ -302,7 +302,7 @@ class PlayerActivity : ComponentActivity() {
                             startPlayback(task, file, forceSoftware = true)
                             return@post
                         }
-                        if (error.errorCode >= 3000) requested = false
+                        if (error.errorCode >= 3000 || media is VlcTorrentPlayer) requested = false
                         playerMessage = "播放失败：${error.errorCodeName}；可重试或查看网络诊断"
                         retryAfter = System.currentTimeMillis() + 3000
                         releasePlayer()

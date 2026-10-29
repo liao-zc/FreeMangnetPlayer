@@ -24,6 +24,13 @@ jobs:
           echo "FMP_KEYSTORE=$RUNNER_TEMP/fmp.p12" >> "$GITHUB_ENV"
           echo "FMP_STORE_PASSWORD=$FMP_STORE_PASSWORD" >> "$GITHUB_ENV"
       - run: gradle --no-daemon assembleDebug
+      - name: Prepare real format clips and BitTorrent seeds
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y python3-libtorrent ffmpeg
+          /usr/bin/python3 scripts/video_format_fixture.py > format-fixture.log 2>&1 &
+          for i in $(seq 1 180); do test -f format-fixtures.json && break; sleep 1; done
+          test -f format-fixtures.json || (tail -80 format-fixture.log; exit 1)
       - name: Download reference APK
         run: curl -fL --retry 4 -o reference.apk 'https://github.com/zaidielykelee/Magnet_player/releases/download/1.5.0%2B8/st_v1.5.0_9_20260510_211803.apk'
       - name: Start controlled search website
@@ -45,7 +52,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           emulator-boot-timeout: 600
           disable-animations: true
-          script: adb install -r ui-inspector/build/outputs/apk/debug/ui-inspector-debug.apk; python3 scripts/compare_reference_player.py; python3 scripts/verify_search_pages.py
+          script: adb install -r ui-inspector/build/outputs/apk/debug/ui-inspector-debug.apk; python3 scripts/compare_reference_player.py; python3 scripts/verify_search_pages.py; /usr/bin/python3 scripts/verify_video_formats.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
