@@ -44,6 +44,7 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     val startedAt = System.currentTimeMillis()
     var lastDiscovery = 0L
     var outgoingUtp by mutableStateOf(false)
+    var lastPayloadAt = System.currentTimeMillis()
     var selectionPaused = false
     var streaming = false
     var viewers = 0
@@ -208,7 +209,7 @@ object TorrentTasks {
                     // Retain incoming uTP and automatically enable outgoing uTP if TCP
                     // fails to produce a useful connection; this is not a bandwidth cap.
                     options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
-                    task.outgoingUtp = false
+                    task.outgoingUtp = false; task.lastPayloadAt = System.currentTimeMillis()
                     val engine = TorrentSession(options)
                     task.engine = engine
                     engine.listener = object : QuietTorrentListener() {
@@ -294,8 +295,9 @@ object TorrentTasks {
                     task.downloadLimit = task.engine?.actualDownloadLimit ?: 0
                     task.uploadLimit = task.engine?.actualUploadLimit ?: 0
                     task.networkMessage = task.engine?.networkMessage.orEmpty()
+                    if (task.payloadRate >= 1024) task.lastPayloadAt = System.currentTimeMillis()
                     if (!task.outgoingUtp && !task.paused && !task.queued && !task.complete &&
-                        System.currentTimeMillis() - task.startedAt > 12_000 &&
+                        System.currentTimeMillis() - task.lastPayloadAt > 12_000 &&
                         (task.peers == 0 || task.payloadRate < 1024)) {
                         task.engine?.enableOutgoingUtp(); task.outgoingUtp = true
                         handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL)
@@ -390,6 +392,7 @@ object TorrentTasks {
         task.paused = true; task.engine?.pause(); task.status = "已暂停，缓存保留"; persist(); schedule()
     }
     private fun resumeEngine(task: TorrentTask) {
+        task.lastPayloadAt = System.currentTimeMillis()
         task.engine?.resume()
         task.handle?.let { handle ->
             handle.resume()
