@@ -94,15 +94,17 @@ assert caches();record('favorite-delete-keeps-cache-files');screenshot('library-
 restart('播放');find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not entries('playback-entries'))
 assert caches();record('batch-history-delete-keeps-cache')
 find_and_tap('缓存视频');first=next(r for r in caches() if r['title']=='Episode-01.mp4' and r['downloaded']>0);others=[r for r in caches() if r['source']!=first['source']]
-tasks=next(n for n in prefs() if n.get('name')=='torrent-tasks');taskrow=json.loads(tasks.text)[0]
+tasks=next(n for n in prefs() if n.get('name')=='torrent-tasks');taskrow=next(t for t in json.loads(tasks.text) if t['id'].lower()==re.search(r'btih:([a-fA-F0-9]+)',first['source'])[1].lower())
 fileindex=int(re.search(r'[?&]so=(\d+)',first['source'])[1]);path=taskrow['folder']+'/'+next(f['path'] for f in taskrow['files'] if f['index']==fileindex)
 import subprocess
-assert subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode==0
+print('Checking stored file:',path,flush=True)
+subprocess.run(['adb','shell','ls','-la',shlex.quote(taskrow['folder'])])
+assert subprocess.run(['adb','shell','test','-f',shlex.quote(path)]).returncode==0
 # Select exactly one checkbox, then delete that file rather than the whole torrent.
 select_cache(first['title']);find_and_tap('删除所选');find_and_tap('确认删除')
 poll(lambda:all(r['source']!=first['source'] for r in caches()))
 assert all(any(c['source']==r['source'] for c in caches()) for r in others)
-poll(lambda:subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode!=0)
+poll(lambda:subprocess.run(['adb','shell','test','-f',shlex.quote(path)]).returncode!=0)
 record('single-cached-file-delete-preserves-other-files',deleted=first,remaining=caches());screenshot('library-07-single-delete.png')
 find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not caches());record('batch-cache-file-delete');screenshot('library-08-batch-delete.png')
 (OUT/'library-final-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
