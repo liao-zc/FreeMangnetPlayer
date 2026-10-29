@@ -124,15 +124,16 @@ def main():
     windows = adb('shell', 'dumpsys', 'window', 'windows')
     section = windows[windows.find('com.freemangnetplayer/.PlayerActivity'):]
     frame = re.search(r'mFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]', section)
+    import struct
+    width, height = struct.unpack('>II', (OUT / 'perf-07-floating-over-home.png').read_bytes()[16:24])
     if frame:
         x1, y1, x2, y2 = map(int, frame.groups())
-    else:
-        import struct
-        width, height = struct.unpack('>II', (OUT / 'perf-07-floating-over-home.png').read_bytes()[16:24])
+    if not frame or x2 - x1 > width * .8 or y2 - y1 > height * .8:
         x1, y1, x2, y2 = width - 350, height - 450, width - 30, height - 150
     adb('shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
     time.sleep(1)
     adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
+    screenshot('perf-07b-system-menu.png')
     menu = adb('shell', 'cat', '/sdcard/window.xml')
     (OUT / 'pip-system-menu.xml').write_text(menu)
     tree = ET.fromstring(menu)
