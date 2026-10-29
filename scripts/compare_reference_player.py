@@ -41,6 +41,8 @@ if install.returncode==0:
     start=time.monotonic();samples=[]
     for i in range(24):
         time.sleep(5);samples.append({'seconds':time.monotonic()-start,'ui':visible_text()})
+        if not subprocess.run(['adb','shell','pidof',ref],capture_output=True,text=True).stdout.strip():
+            samples[-1]['process_exited']=True;break
     snap('compare-03-reference-resource')
     result['observations'].append({'app':'Magnet_player','samples':samples,'actual_ui':visible_text()})
     result['reference_logcat']=adb('logcat','-d','-t','3000')

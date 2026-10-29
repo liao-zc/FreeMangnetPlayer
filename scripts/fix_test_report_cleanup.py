@@ -1,0 +1,3 @@
+from pathlib import Path
+p=Path('scripts/build_current_report.py');s=p.read_text(encoding='utf-8').replace("'player_revision_fixture.py','public_network_probe.py'","'player_revision_fixture.py','player_test_controls.py','public_network_probe.py'");p.write_text(s,encoding='utf-8')
+p=Path('scripts/compare_reference_player.py');s=p.read_text(encoding='utf-8').replace("        time.sleep(5);samples.append({'seconds':time.monotonic()-start,'ui':visible_text()})", "        time.sleep(5);samples.append({'seconds':time.monotonic()-start,'ui':visible_text()})\n        if not subprocess.run(['adb','shell','pidof',ref],capture_output=True,text=True).stdout.strip():\n            samples[-1]['process_exited']=True;break");p.write_text(s,encoding='utf-8')
