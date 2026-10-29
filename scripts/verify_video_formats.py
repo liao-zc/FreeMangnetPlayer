@@ -2,6 +2,10 @@ import hashlib,json,re,shlex,subprocess,time
 from pathlib import Path
 from capture_usage_screenshots import adb,screenshot,PACKAGE,OUT
 
+# Google APIs emulator is userdebug; root is only used by the verification harness
+# to hash app-scoped external files without scoped-storage shell restrictions.
+adb('root')
+adb('wait-for-device')
 rows=[]
 for fixture in json.loads(Path('format-fixtures.json').read_text()):
     adb('shell','am','force-stop',PACKAGE)
