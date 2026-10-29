@@ -43,6 +43,8 @@ text=f'''# FreeMangnetPlayer v0.1.13 节点连接与播放优化报告
 2. 仅开启 uTP 后，模拟器实测出现已连接做种节点但数据停在约 80 KiB、速率个位数 B/s 的问题。新版立即开放 TCP/uTP，连续 10 秒没有有效数据时重新连接并尝试 TCP；TCP 连不上节点持续 20 秒时再开放 uTP。这是连接恢复，不是限速。
 3. 缺少独立的资源节点查询与回连。新版在无有效供给时执行独立 DHT 查找，并尝试已发现节点，降低对单次公告的依赖。
 
+4. 默认选片此前把已完成的小视频排在用户选择的正片前面。现优先明确选择的文件，再考虑已缓存状态；测试放入一个已下载的损坏小视频，确认默认起播仍选择正片，手动选择坏文件时才显示媒体错误。
+
 上述缺陷已修复；不能只凭截图断言它们是用户手机上该资源失败的全部原因。
 
 ## 2. 元数据完成后继续下载与播放：实际验证
@@ -75,6 +77,7 @@ for version in ['v0.1.12','v0.1.13']:
     text+=f"| {version} | {'已取得' if st.get('metadata') else '未取得'} | {st.get('peers',0)} | {st.get('payloadBytes',0):,} | {f'{frame:.2f} 秒' if frame is not None else '观察期间未起播'} |\n"
 native=by['user-resource-v0.1.13'].get('native_baseline',{});ns=native.get('final_state',{})
 text+=f"\n独立原生客户端（runner、纯 BTIH、未注入 .torrent）观察结果：元数据 {ns.get('metadata',False)}，资源节点 {ns.get('peers',0)}，有效载荷 {ns.get('payload_bytes',0):,} 字节；错误 {native.get('error','无额外错误')}。原始数据附在用户资源证据中。APP 还附加公共 Tracker 和 HTTP 元数据补充，因此不是完全相同的发现入口。\n"
+text+='\n[本机 HTTP 元数据服务检查](evidence/peer-recovery-metadata-http.json)：使用与 APP 相同的 User-Agent，iTorrents .net/.org 对本哈希返回 404，另外两个入口返回的内容不是种子数据。这是 Windows 工作区的观察，不能当作用户手机网络实测，也不能据此断言资源已失效。若该磁力在其他播放器能播放，仍需在用户同一设备网络上对照，或取得其可分享的 .torrent/Tracker 信息，进一步判断发现入口的差异。\n'
 text+='\n每一行按真实观察记录；未起播的资源不标为播放成功。Magnet_player 提供的 GitHub 仓库只有 README 与安装包，没有公开内核源码。本轮没有完成该播放器在用户手机同一网络下的操作对照，不能推断其使用直连、云缓存或其他特定机制。\n'
 for version in ['v0.1.12','v0.1.13']:
     text+=image('user-resource-'+version+'.png','用户磁力 '+version+' 的真实观察画面')
