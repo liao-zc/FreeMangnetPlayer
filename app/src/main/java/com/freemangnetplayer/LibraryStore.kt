@@ -71,6 +71,7 @@ object LibraryStore {
     fun readCaches(context: Context): List<LibraryEntry> = read(context, "cache-entries")
     @Synchronized
     fun saveCache(context: Context, entry: LibraryEntry) {
+        if (readCaches(context).any { it == entry }) return
         val rows = readCaches(context).filter { it.source != entry.source }.toMutableList()
         rows.add(0, entry); write(context, "cache-entries", rows)
     }
@@ -89,6 +90,11 @@ object LibraryStore {
     @Synchronized
     fun removeTaskCaches(context: Context, id: String) {
         write(context, "cache-entries", readCaches(context).filterNot { it.source.contains("btih:$id", true) })
+    }
+    @Synchronized
+    fun removeCachePlaceholder(context: Context, source: String) {
+        val rows = readCaches(context)
+        if (rows.any { it.source == source && it.totalBytes == 0L }) write(context, "cache-entries", rows.filterNot { it.source == source && it.totalBytes == 0L })
     }
     private fun read(context: Context, key: String): List<LibraryEntry> = runCatching {
         val array = JSONArray(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(key, "[]"))

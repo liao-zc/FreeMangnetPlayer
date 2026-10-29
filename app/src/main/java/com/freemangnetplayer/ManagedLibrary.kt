@@ -45,8 +45,8 @@ internal fun ManagedLibrary(title: String, entries: List<LibraryEntry>, kind: St
     }
     if (confirm) AlertDialog(onDismissRequest = { confirm = false }, title = { Text("删除所选 ${selected.size} 项？") },
         text = { Column {
-            Text("删除列表记录；勾选后还会停止对应任务并清理本机文件。收藏和播放记录默认只删除记录。")
-            Row { Checkbox(deleteData, { deleteData = it }); Text("同时删除本机下载 / 缓存文件") }
+            Text("缓存及下载删除会停止对应任务并清理所选本机文件。收藏和播放记录默认只删除记录，可勾选同时删除文件。")
+            Row { Checkbox(deleteData, { deleteData = it }, enabled = kind != "缓存" && kind != "下载"); Text("同时删除本机下载 / 缓存文件") }
         } }, confirmButton = { TextButton(onClick = {
             error = StoredVideos.delete(context, kind, selected, deleteData).orEmpty()
             if (error.isEmpty()) { selected = emptySet(); confirm = false; onRefresh() }

@@ -10,6 +10,11 @@ object StoredVideos {
 
     fun sync(context: Context, task: TorrentTask) {
         if (!task.retainedCache || task.clearing || task.stopping) return
+        if (task.files.isEmpty()) {
+            LibraryStore.saveCache(context, LibraryEntry(task.title, task.source, "缓存任务，打开后恢复文件列表"))
+            return
+        }
+        LibraryStore.removeCachePlaceholder(context, task.source)
         for (file in task.files.filter { it.video && it.index in task.selected && it.index !in task.deletedFiles }) {
             LibraryStore.saveCache(context, LibraryEntry(file.path.substringAfterLast('/'), fileSource(task, file),
                 if (file.done >= file.size) "缓存完成" else "缓存中，可继续播放", file.done, file.size))
