@@ -42,6 +42,22 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     var downloadLimit by mutableIntStateOf(0)
     var uploadLimit by mutableIntStateOf(0)
     val startedAt = System.currentTimeMillis()
+    var metadataAt = 0L
+    var peerAt = 0L
+    var verifiedPieceAt = 0L
+    var playbackAt = 0L
+    var rebufferCount = 0
+    val discoveryStage get() = when {
+        paused -> "PAUSED"
+        queued -> "QUEUED"
+        complete -> "COMPLETED"
+        files.isEmpty() -> "METADATA"
+        peers == 0 && connectionCount > 0 -> "HANDSHAKE"
+        peers == 0 -> "DISCOVERY"
+        done == 0L -> "WAITING_VERIFIED_PIECE"
+        payloadRate < 1024 -> "LOW_SUPPLY"
+        else -> "TRANSFERRING"
+    }
     var lastDiscovery = 0L
     var outgoingUtp by mutableStateOf(false)
     var transportFallbackUsed = false
@@ -306,6 +322,7 @@ object TorrentTasks {
                     }
                     if (snapshot.first.isNotEmpty() && task.files.isEmpty()) {
                         task.files = snapshot.first
+                        if (task.metadataAt == 0L) task.metadataAt = System.currentTimeMillis()
                         if (task.selected.none { index -> index in task.files.indices }) {
                             task.selected = setOf((task.files.filter { it.video }.maxByOrNull { it.size } ?: task.files.maxBy { it.size }).index)
                         }
@@ -319,6 +336,8 @@ object TorrentTasks {
                     task.peers = snapshot.second.numPeers(); task.rate = snapshot.second.downloadRate()
                     task.payloadRate = snapshot.second.downloadPayloadRate(); task.payloadBytes = snapshot.second.totalPayloadDownload()
                     task.seeds = snapshot.second.numSeeds(); task.connectionCount = snapshot.second.numConnections()
+                    if (task.peers > 0 && task.peerAt == 0L) task.peerAt = System.currentTimeMillis()
+                    if (task.done > 0 && task.verifiedPieceAt == 0L) task.verifiedPieceAt = System.currentTimeMillis()
                     task.dhtNodes = task.engine?.dhtNodes ?: 0
                     task.downloadLimit = task.engine?.actualDownloadLimit ?: 0
                     task.uploadLimit = task.engine?.actualUploadLimit ?: 0
@@ -564,9 +583,9 @@ object TorrentTasks {
             .put("retainedCache", it.retainedCache).put("cancelled", it.cancelled).put("complete", it.complete).put("selected", JSONArray(it.selected.toList())).put("playing", it.playingIndex)) }
         SettingsStore.prefs(context).edit().putString("torrent-tasks", rows.toString()).apply()
     }
-    fun stopAll() {
+    fun stopAll(reason: String = "后台服务已停止，缓存保留") {
         val values = tasks.values.toList()
-        values.forEach { it.paused = true; it.engine?.pause(); it.job?.cancel(); it.status = "后台服务已停止，缓存保留" }
+        values.forEach { it.paused = true; it.engine?.pause(); it.job?.cancel(); it.status = reason }
         persist()
         scope.launch { values.forEach { it.job?.join(); withContext(Dispatchers.IO) { closeEngine(it) } } }
     }

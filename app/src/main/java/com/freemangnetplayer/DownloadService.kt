@@ -54,7 +54,10 @@ class DownloadService : Service() {
     }
     // Android 15 limits background dataSync foreground services to six hours per day.
     override fun onTimeout(startId: Int, fgsType: Int) {
-        TorrentTasks.stopAll()
+        scope.cancel()
+        SettingsStore.prefs(this).edit().putString("background-service-stop-reason", "Android 15 后台下载时限已到；任务与已校验数据已保存，请打开下载列表继续").apply()
+        TorrentTasks.stopAll("已暂停：后台下载时限已到，打开下载列表继续")
+        stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }
     override fun onBind(intent: Intent?): IBinder? = null

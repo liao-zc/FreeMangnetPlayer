@@ -113,6 +113,10 @@ class PlayerActivity : ComponentActivity() {
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
                                     File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", current.source).put("id", current.id)
                                         .put("metadata", current.files.isNotEmpty()).put("peers", current.peers).put("downloaded", current.done).put("total", current.total)
+                                        .put("stage", current.discoveryStage).put("metadataMilliseconds", if (current.metadataAt > 0) current.metadataAt - current.startedAt else -1)
+                                        .put("peerMilliseconds", if (current.peerAt > 0) current.peerAt - current.startedAt else -1)
+                                        .put("verifiedPieceMilliseconds", if (current.verifiedPieceAt > 0) current.verifiedPieceAt - current.startedAt else -1)
+                                        .put("playbackMilliseconds", if (current.playbackAt > 0) current.playbackAt - current.startedAt else -1).put("rebufferCount", current.rebufferCount)
                                         .put("files", rows).put("decoder", if (player is VlcTorrentPlayer) "LibVLC" else "Media3").put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
                                         .put("playRequested", requested).put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
@@ -233,6 +237,7 @@ class PlayerActivity : ComponentActivity() {
                         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("应用下载限速：${current.downloadLimit}（0 为不限速）\n应用上传限速：${current.uploadLimit}（0 为不限速）")
                             Text("有效载荷速度：${bytes(current.payloadRate.toLong())}/秒\n含协议总速度：${bytes(current.rate.toLong())}/秒")
+                            Text("连接阶段：${current.discoveryStage}")
                             Text("资源节点：${current.peers}，其中种子：${current.seeds}\n连接数：${current.connectionCount}，DHT 节点：${current.dhtNodes}")
                             Text("有效接收：${bytes(current.payloadBytes)}\nTCP / uTP 自动选择：优先 TCP，无有效传输后自动尝试出站 uTP；DHT、Tracker、局域网发现已启用")
                             Text(if (current.peers == 0) "当前没有资源连接。DHT 为 0 时请对照切换 Wi-Fi / 移动网络，检查 VPN 和 UDP 可达性；DHT 正常仍无节点时可能是资源无人做种。"
@@ -278,9 +283,13 @@ class PlayerActivity : ComponentActivity() {
             .setSeekBackIncrementMs(15000).setSeekForwardIncrementMs(15000)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 15000, 300, 750).build())
             .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }, task.nativeLock) })).build()
+        var playedOnce = false
         media.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) { playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, task.title, task.source) }
+                if (isPlaying) { playedOnce = true; if (task.playbackAt == 0L) task.playbackAt = System.currentTimeMillis(); playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, task.title, task.source) }
+            }
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (player === media && playedOnce && playbackState == Player.STATE_BUFFERING) task.rebufferCount++
             }
             override fun onPlayerError(error: PlaybackException) {
                 // Release outside ExoPlayer's callback; stale callbacks must not clear a new player.
