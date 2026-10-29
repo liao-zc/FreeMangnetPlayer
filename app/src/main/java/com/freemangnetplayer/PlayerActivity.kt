@@ -144,7 +144,7 @@ class PlayerActivity : ComponentActivity() {
                             OutlinedButton(onClick = { requested = false; releasePlayer(); TorrentTasks.cancel(current) }, modifier = Modifier.weight(1f).height(48.dp), enabled = !current.cancelled) { Text("取消下载") }
                             OutlinedButton(onClick = { deleteDialog = true }, modifier = Modifier.weight(1f).height(48.dp)) { Text("清空文件") }
                         }
-                        Text("后台任务持续运行 · ${current.folder.absolutePath}", maxLines = 2, style = MaterialTheme.typography.labelSmall)
+                        Text("${if (current.cancelled) "任务已取消" else if (current.paused) "任务已暂停" else if (current.queued) "任务排队中" else if (current.complete) "文件已校验保存" else "后台任务持续运行"} · ${current.folder.absolutePath}", maxLines = 2, style = MaterialTheme.typography.labelSmall)
                         if (fileDialog) AlertDialog(onDismissRequest = { fileDialog = false }, title = { Text("选择下载 / 切换视频") }, text = {
                             Column {
                                 Row { TextButton(onClick = { TorrentTasks.select(current, current.files.map { it.index }.toSet()) }) { Text("全选") }; TextButton(onClick = { TorrentTasks.select(current, emptySet()) }) { Text("全不选") } }
@@ -168,6 +168,13 @@ class PlayerActivity : ComponentActivity() {
     }
     private fun requestPlayback(play: Boolean) {
         autoPlay = play; requested = true
+        task?.let { current ->
+            if (current.selectionPaused) {
+                val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
+                    ?: current.files.firstOrNull { it.video }
+                if (file != null) TorrentTasks.playFile(current, file.index)
+            }
+        }
         if (player != null) { if (play) player?.play() else player?.pause() }
     }
     private fun switchVideo(task: TorrentTask, index: Int) {

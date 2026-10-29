@@ -136,6 +136,7 @@ object TorrentTasks {
                         shouldStream = false, streamBufferSize = 4, enableLogging = false, dhtNodeMinimum = 0)
                     options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881")
                     options.settingsPack.cacheSize(0)
+                    options.settingsPack.setInteger(settings_pack.int_types.min_reconnect_time.swigValue(), 5)
                     options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
@@ -235,7 +236,9 @@ object TorrentTasks {
     }
     fun playFile(task: TorrentTask, index: Int) {
         task.streaming = true; task.playingIndex = index; task.complete = false; task.lastUsed = System.currentTimeMillis()
-        applyPriorities(task); persist()
+        applyPriorities(task)
+        if (task.selectionPaused) { task.selectionPaused = false; resume(task) }
+        persist()
     }
     private fun applyPriorities(task: TorrentTask) {
         val handle = task.handle ?: return
