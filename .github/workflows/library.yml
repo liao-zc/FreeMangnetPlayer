@@ -28,7 +28,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y python3-libtorrent python3-pil ffmpeg
-          /usr/bin/python3 scripts/player_revision_fixture.py > fixture.log 2>&1 &
+          /usr/bin/python3 scripts/library_fixture.py > fixture.log 2>&1 &
           for i in $(seq 1 180); do test -f optimization-fixture.json && break; sleep 1; done
           test -f optimization-fixture.json
       - name: Start controlled search website

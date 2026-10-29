@@ -65,15 +65,26 @@ find_and_tap('收藏');record('favorite-file-record',entries=entries('favorite-e
 restart();require_visible('缓存视频');find_and_tap('缓存视频');require_visible('Episode-01.mp4','Episode-02.mp4');screenshot('library-05-cache-after-restart.png')
 record('cache-entry-discoverable-after-process-restart',entries=caches())
 find_and_tap('播放 / 打开');resumed=wait(lambda s:s.get('playing'));record('cached-file-reopens-and-plays',state=resumed)
+control('player_files');find_and_tap('切换播放：Bundle-1/MultiQuality.mp4')
+high=wait(lambda s:s.get('playing') and s.get('videoHeight')==360)
+control('player_quality');find_and_tap('480p');low=wait(lambda s:s.get('qualityHeight')==480 and s.get('videoHeight')==180)
+record('existing-lower-resolution-track-selects-real-180p',before=high,after=low);screenshot('library-10-low-quality-track.png')
+control('player_quality');find_and_tap('原画质');wait(lambda s:s.get('qualityHeight')==0 and s.get('videoHeight')==360)
+record('original-quality-restores-highest-track')
 restart('收藏');require_visible('我的收藏');find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not entries('favorite-entries'))
 assert caches();record('favorite-delete-keeps-cache-files');screenshot('library-06-favorite-delete.png')
 restart('播放');find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not entries('playback-entries'))
 assert caches();record('batch-history-delete-keeps-cache')
 find_and_tap('缓存视频');first=caches()[0];others=[r for r in caches() if r['source']!=first['source']]
+tasks=next(n for n in prefs() if n.get('name')=='torrent-tasks');taskrow=json.loads(tasks.text)[0]
+fileindex=int(re.search(r'[?&]so=(\d+)',first['source'])[1]);path=taskrow['folder']+'/'+next(f['path'] for f in taskrow['files'] if f['index']==fileindex)
+import subprocess
+assert subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode==0
 # Select exactly one checkbox, then delete that file rather than the whole torrent.
 node=next(n for n in tree().iter('node') if n.get('class')=='android.widget.CheckBox');tap(node);find_and_tap('删除所选');find_and_tap('确认删除')
 poll(lambda:all(r['source']!=first['source'] for r in caches()))
 assert all(any(c['source']==r['source'] for c in caches()) for r in others)
+assert subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode!=0
 record('single-cached-file-delete-preserves-other-files',deleted=first,remaining=caches());screenshot('library-07-single-delete.png')
 find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not caches());record('batch-cache-file-delete');screenshot('library-08-batch-delete.png')
 (OUT/'library-final-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')

@@ -134,7 +134,7 @@ object TorrentTasks {
             TorrentTask(id, source, title.ifBlank { "磁力资源" }, folder, download).also { tasks[id] = it }
         }
         Regex("(?i)[?&]so=(\\d+)(?:&|$)").find(source)?.groupValues?.get(1)?.toIntOrNull()?.let {
-            task.selected = setOf(it); task.playingIndex = it
+            task.selected = if (task.download || task.retainedCache) task.selected + it else setOf(it); task.deletedFiles = task.deletedFiles - it; task.playingIndex = it
         }
         // Reopening the same hash must not discard newly pasted trackers/peers.
         if (source.startsWith("magnet:?", true) && task.source.startsWith("magnet:?", true)) {
