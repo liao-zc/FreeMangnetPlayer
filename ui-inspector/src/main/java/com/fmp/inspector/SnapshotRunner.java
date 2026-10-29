@@ -17,6 +17,10 @@ public final class SnapshotRunner extends Instrumentation {
         Bundle result = new Bundle();
         try {
             UiAutomation automation = getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES);
+            android.accessibilityservice.AccessibilityServiceInfo service = automation.getServiceInfo();
+            service.flags |= android.accessibilityservice.AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
+            service.flags |= android.accessibilityservice.AccessibilityServiceInfo.FLAG_INCLUDE_NOT_IMPORTANT_VIEWS;
+            automation.setServiceInfo(service);
             AccessibilityNodeInfo root = null;
             for (int i = 0; i < 20 && root == null; i++) {
                 root = automation.getRootInActiveWindow();
@@ -38,6 +42,7 @@ public final class SnapshotRunner extends Instrumentation {
         }
     }
     private void write(XmlSerializer xml, AccessibilityNodeInfo node) throws Exception {
+        if (!node.isVisibleToUser()) return;
         xml.startTag(null, "node");
         xml.attribute(null, "text", value(node.getText()));
         xml.attribute(null, "content-desc", value(node.getContentDescription()));
