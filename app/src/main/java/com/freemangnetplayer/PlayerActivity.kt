@@ -223,7 +223,6 @@ class PlayerActivity : ComponentActivity() {
                                             Checkbox(file.index in current.selected, { checked -> TorrentTasks.select(current, if (checked) current.selected + file.index else current.selected - file.index) })
                                             Text(file.path, Modifier.weight(1f))
                                         }
-                                        TextButton(onClick = { copyFileMagnet(current, file) }) { Text("复制磁力") }
                                         TextButton(onClick = { copyFileMagnet(current, file) }) { Text("复制磁力：${file.path.substringAfterLast('/')}") }
                                         if (file.video) TextButton(onClick = { switchVideo(current, file.index); fileDialog = false }) { Text("切换播放：${file.path.substringAfterLast('/')}") }
                                     } }
