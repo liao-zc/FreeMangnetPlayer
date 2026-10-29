@@ -37,6 +37,13 @@ jobs:
         run: gradle --no-daemon assembleDebug
       - name: Name APK
         run: cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}.apk
+      - name: Build smaller ARM packages
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          for abi in arm64-v8a armeabi-v7a; do
+            gradle --no-daemon assembleDebug -PtargetAbi="$abi"
+            cp app/build/outputs/apk/debug/app-debug.apk "app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}-${abi}.apk"
+          done
       - name: Package named source archive
         if: startsWith(github.ref, 'refs/tags/')
         run: git archive --format=zip --prefix=FreeMangnetPlayer-${GITHUB_REF_NAME}/ --output=FreeMangnetPlayer-${GITHUB_REF_NAME}-source.zip HEAD
@@ -44,7 +51,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" "app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}.apk" "FreeMangnetPlayer-${GITHUB_REF_NAME}-source.zip" --generate-notes --title "FreeMangnetPlayer ${GITHUB_REF_NAME}"
+        run: gh release create "${GITHUB_REF_NAME}" "app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}.apk" "app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}-arm64-v8a.apk" "app/build/outputs/apk/debug/FreeMangnetPlayer-${GITHUB_REF_NAME}-armeabi-v7a.apk" "FreeMangnetPlayer-${GITHUB_REF_NAME}-source.zip" --generate-notes --title "FreeMangnetPlayer ${GITHUB_REF_NAME}"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:

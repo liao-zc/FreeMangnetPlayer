@@ -1,7 +1,12 @@
 plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id("org.jetbrains.kotlin.plugin.compose") }
 
 android { namespace = "com.freemangnetplayer"; compileSdk = 35
-    defaultConfig { applicationId = "com.freemangnetplayer"; minSdk = 24; targetSdk = 35; versionCode = 15; versionName = "0.1.14" }
+    defaultConfig { applicationId = "com.freemangnetplayer"; minSdk = 24; targetSdk = 35; versionCode = 15; versionName = "0.1.14"
+        providers.gradleProperty("targetAbi").orNull?.let { requested ->
+            require(requested in setOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
+            ndk { abiFilters += requested }
+        }
+    }
     val signingPath = System.getenv("FMP_KEYSTORE")
     if (!signingPath.isNullOrBlank()) {
         signingConfigs.create("fmp") {

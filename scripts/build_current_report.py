@@ -33,7 +33,7 @@ text=f'''# FreeMangnetPlayer v0.1.14 优化与实际验证报告
 
 日期：2026-10-29。测试设备：Android 11 / API 30 Google APIs Pixel 2 x86_64 模拟器。对标安装包包含 ARM 库，本 APP 包含四种 ABI；模拟器结果不能代替普通手机、电视和平板的真机验收。
 
-- [下载 APK](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14.apk)
+- [下载 APK](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14-arm64-v8a.apk)
 - [离线图文报告](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14-report.html)
 - [实际安装与测试记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/{a.run})
 
@@ -122,6 +122,14 @@ text+='''
 
 本轮没有用“下载完成”替代“播放成功”，没有将目标电影的 0 Peer 归咎于资源失效，也没有承诺任意磁力都能立即播放。完整文件哈希成功的受控素材与主电影的公网状态分别报告。
 
+## 安装包体积优化
+
+v0.1.13 通用包包含四种 CPU 架构，约 250 MB，比参考 ARM 安装包大。本版另提供单 ABI 安装包，ARM64 手机、电视和平板优先下载 ARM64 版；旧 ARMv7 设备使用 ARMv7 版。保留通用包供其他架构使用，签名、应用名称和功能保持一致。
+
+- [ARM64 版](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14-arm64-v8a.apk)
+- [ARMv7 版](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14-armeabi-v7a.apk)
+- [四 ABI 通用包](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14.apk)
+
 ## 6. 仓库清理与文档可读性
 
 删除旧版本说明、旧截图和旧证据，删除一次性源码替换脚本；保留现行代码、原始许可证、当前报告证据和可重复测试。旧版本仍可从 Git 历史及 Releases 查看。当前报告与操作说明为 UTF-8 明文；验证 Git 对象、图片签名、相对链接与 GitHub Markdown 渲染，并提供截图内嵌离线 HTML。
@@ -133,7 +141,7 @@ GitHub 通知由个人账号设置控制。本项目没有新增发送邮件的�
 
 个人使用的安卓磁力播放器，当前版本 **v0.1.14**。
 
-- [下载 APK](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14.apk)
+- [下载 APK](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14-arm64-v8a.apk)
 - [实际验证与对标报告](docs/report.md)
 - [离线图文报告](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.14/FreeMangnetPlayer-v0.1.14-report.html)
 - [操作说明](docs/usage-zh.md)
