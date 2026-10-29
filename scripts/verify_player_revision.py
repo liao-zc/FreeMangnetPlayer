@@ -55,8 +55,8 @@ def control(id):
 def open_magnet(value):
     find_and_tap('磁力链接输入框')
     focused = next(n for n in tree().iter('node') if n.get('class')=='android.widget.EditText' and n.get('focused')=='true')
-    adb('shell','input','keyevent','KEYCODE_MOVE_END')
-    adb('shell','input','keyevent',*(['KEYCODE_DEL']*(len(focused.get('text',''))+5)))
+    adb('shell','input','keycombination','113','29')
+    adb('shell','input','keyevent','KEYCODE_DEL')
     adb('shell','input','text',shlex.quote(value))
     adb('shell','input','keyevent','KEYCODE_BACK')
     find_and_tap('解析资源')
@@ -88,13 +88,14 @@ def main():
     video=next(f for f in state()['files'] if f['index']==state()['currentFile'])
     control('player_files'); find_and_tap('复制磁力：'+video['path'].split('/')[-1]); find_and_tap('完成')
     find_and_tap('返回搜索'); find_and_tap('磁力链接输入框')
-    adb('shell','input','keyevent','KEYCODE_MOVE_END')
     focused=next(n for n in tree().iter('node') if n.get('class')=='android.widget.EditText' and n.get('focused')=='true')
-    adb('shell','input','keyevent',*(['KEYCODE_DEL']*(len(focused.get('text',''))+5)))
+    adb('shell','input','keycombination','113','29')
+    adb('shell','input','keyevent','KEYCODE_DEL')
     adb('shell','input','keyevent','KEYCODE_PASTE')
     pasted=next(n.get('text','') for n in tree().iter('node') if n.get('class')=='android.widget.EditText' and n.get('focused')=='true')
     assert 'xt=urn:btih:'+fixtures[0]['id'] in pasted and '&so='+str(video['index']) in pasted
     assert 'fallback-announce' in pasted and '&dn=' in pasted
+    assert pasted.count('xs=')==1 and pasted.count('tr=')==1, pasted
     screenshot('revision-00b-file-magnet-copy.png')
     record('file-magnet-system-clipboard-roundtrip',copied=pasted,file=video)
     adb('shell','input','keyevent','KEYCODE_BACK')
@@ -245,8 +246,9 @@ def main():
             if st.get('playing') and st.get('position',0)>100:
                 first_frame=time.monotonic()-begun; break
             time.sleep(1)
+        assert state().get('source')==user_magnet, 'Stale input changed user comparison magnet: '+str(state().get('source'))
         screenshot('user-resource-'+version+'.png')
-        checks.append({'check':'user-resource-'+version,'measured':True,'magnet':user_magnet,'first_frame_seconds':first_frame,'state':state(),'samples':samples})
+        checks.append({'check':'user-resource-'+version,'measured':True,'magnet':user_magnet,'first_frame_seconds':first_frame,'state':state(),'samples':samples,'native_baseline':json.loads(Path('user-network-baseline.json').read_text())})
         (OUT/'player-revision-verification.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
     user_observation('v0.1.13')
     urllib.request.urlretrieve('https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.12/FreeMangnetPlayer-v0.1.12.apk','previous-app.apk')

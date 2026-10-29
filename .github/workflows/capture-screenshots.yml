@@ -74,7 +74,9 @@ jobs:
           test -f performance-fixture.json || (cat fixture.log; exit 1)
       - name: Probe public DHT network with official Ubuntu resource
         if: inputs.mode == 'performance' || inputs.mode == 'player-revision' || github.event_name == 'push'
-        run: /usr/bin/python3 scripts/public_network_probe.py
+        run: |
+          /usr/bin/python3 scripts/public_network_probe.py
+          /usr/bin/python3 scripts/user_network_probe.py
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -102,3 +104,4 @@ jobs:
             manual-shots/
             fixture.log
             public-network-baseline.json
+            user-network-baseline.json

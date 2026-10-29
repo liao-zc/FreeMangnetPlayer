@@ -1,0 +1,13 @@
+from pathlib import Path
+p=Path('scripts/verify_player_revision.py');s=p.read_text(encoding='utf-8')
+s=s.replace("    adb('shell','input','keyevent','KEYCODE_MOVE_END')\n    adb('shell','input','keyevent',*(['KEYCODE_DEL']*(len(focused.get('text',''))+5)))", "    adb('shell','input','keycombination','113','29')\n    adb('shell','input','keyevent','KEYCODE_DEL')")
+s=s.replace("    adb('shell','input','keyevent','KEYCODE_MOVE_END')\n    focused=", "    focused=")
+s=s.replace("    adb('shell','input','keyevent',*(['KEYCODE_DEL']*(len(focused.get('text',''))+5)))", "    adb('shell','input','keycombination','113','29')\n    adb('shell','input','keyevent','KEYCODE_DEL')")
+s=s.replace("    assert 'fallback-announce' in pasted and '&dn=' in pasted", "    assert 'fallback-announce' in pasted and '&dn=' in pasted\n    assert pasted.count('xs=')==1 and pasted.count('tr=')==1, pasted")
+s=s.replace("        screenshot('user-resource-'+version+'.png')", "        assert state().get('source')==user_magnet, 'Stale input changed user comparison magnet: '+str(state().get('source'))\n        screenshot('user-resource-'+version+'.png')")
+s=s.replace("'samples':samples})\n        (OUT/", "'samples':samples,'native_baseline':json.loads(Path('user-network-baseline.json').read_text())})\n        (OUT/")
+p.write_text(s,encoding='utf-8')
+p=Path('.github/workflows/capture-screenshots.yml');s=p.read_text(encoding='utf-8')
+s=s.replace('run: /usr/bin/python3 scripts/public_network_probe.py','run: |\n          /usr/bin/python3 scripts/public_network_probe.py\n          /usr/bin/python3 scripts/user_network_probe.py')
+s=s.replace('            public-network-baseline.json','            public-network-baseline.json\n            user-network-baseline.json')
+p.write_text(s,encoding='utf-8')
