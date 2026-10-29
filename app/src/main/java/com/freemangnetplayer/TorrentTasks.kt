@@ -364,7 +364,7 @@ object TorrentTasks {
             withContext(Dispatchers.IO) {
                 closeEngine(task)
                 val file = File(task.folder, previous.path).canonicalFile
-                require(file.toPath().startsWith(task.folder.canonicalFile.toPath()))
+                require(file.path.startsWith(task.folder.canonicalPath + File.separator))
                 require(!file.exists() || file.delete()) { "无法释放上个视频的临时缓存" }
             }
             task.files = emptyList(); task.selected = setOf(index); task.playingIndex = index
