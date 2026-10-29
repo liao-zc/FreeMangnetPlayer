@@ -36,6 +36,14 @@ def open_cache(title):
         if button is not None:tap(button);return
         node=parents.get(node)
     raise AssertionError('No playback action for cached file '+title)
+def select_cache(title):
+    root=tree();parents={child:parent for parent in root.iter() for child in parent}
+    node=next(n for n in root.iter('node') if n.get('text')==title)
+    while node is not None:
+        checkbox=next((n for n in node.iter('node') if n.get('class')=='android.widget.CheckBox'),None)
+        if checkbox is not None:tap(checkbox);return
+        node=parents.get(node)
+    raise AssertionError('No selector for '+title)
 def prefs():
     return ET.fromstring(adb('shell','run-as',PACKAGE,'cat','shared_prefs/player-settings.xml'))
 def entries(key):
@@ -84,13 +92,13 @@ restart('收藏');require_visible('我的收藏');find_and_tap('全选');find_an
 assert caches();record('favorite-delete-keeps-cache-files');screenshot('library-06-favorite-delete.png')
 restart('播放');find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not entries('playback-entries'))
 assert caches();record('batch-history-delete-keeps-cache')
-find_and_tap('缓存视频');first=caches()[0];others=[r for r in caches() if r['source']!=first['source']]
+find_and_tap('缓存视频');first=next(r for r in caches() if r['title']=='Episode-01.mp4' and r['downloaded']>0);others=[r for r in caches() if r['source']!=first['source']]
 tasks=next(n for n in prefs() if n.get('name')=='torrent-tasks');taskrow=json.loads(tasks.text)[0]
 fileindex=int(re.search(r'[?&]so=(\d+)',first['source'])[1]);path=taskrow['folder']+'/'+next(f['path'] for f in taskrow['files'] if f['index']==fileindex)
 import subprocess
 assert subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode==0
 # Select exactly one checkbox, then delete that file rather than the whole torrent.
-node=next(n for n in tree().iter('node') if n.get('class')=='android.widget.CheckBox');tap(node);find_and_tap('删除所选');find_and_tap('确认删除')
+select_cache(first['title']);find_and_tap('删除所选');find_and_tap('确认删除')
 poll(lambda:all(r['source']!=first['source'] for r in caches()))
 assert all(any(c['source']==r['source'] for c in caches()) for r in others)
 poll(lambda:subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode!=0)
