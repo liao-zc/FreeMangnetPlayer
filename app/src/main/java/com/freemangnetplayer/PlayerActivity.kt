@@ -8,6 +8,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -47,7 +50,10 @@ class PlayerActivity : ComponentActivity() {
         val title = intent.getStringExtra("title").orEmpty().ifBlank { "资源解析" }
         val result = runCatching { TorrentTasks.obtain(this, source, title, intent.getStringExtra("mode") == "download") }
         task = result.getOrNull()
-        requested = intent.getStringExtra("mode") == "play"
+        requested = savedInstanceState?.getBoolean("play-requested") ?: (intent.getStringExtra("mode") == "play")
+        autoPlay = savedInstanceState?.getBoolean("autoplay") ?: true
+        savedPosition = savedInstanceState?.getLong("position") ?: 0L
+        speed = savedInstanceState?.getFloat("speed") ?: 1f
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF087F79), background = Color(0xFFF3F8FA))) {
                 val current = task
@@ -60,6 +66,9 @@ class PlayerActivity : ComponentActivity() {
                         Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
                         OutlinedButton(onClick = { LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
                     }
+                    val compact = LocalConfiguration.current.screenHeightDp < 720
+                    val bodyScroll = rememberScrollState()
+                    Column(Modifier.weight(1f).fillMaxWidth().then(if (compact) Modifier.verticalScroll(bodyScroll) else Modifier), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (current == null) {
                         Text("任务启动失败：${result.exceptionOrNull()?.localizedMessage}")
                     } else {
@@ -116,9 +125,9 @@ class PlayerActivity : ComponentActivity() {
                             }
                         }
                         if (player != null) {
-                            AndroidView(factory = { c -> PlayerView(c).apply { useController = true; player = this@PlayerActivity.player } }, update = { it.player = player }, modifier = Modifier.fillMaxWidth().weight(1f))
+                            AndroidView(factory = { c -> PlayerView(c).apply { useController = true; setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING); player = this@PlayerActivity.player } }, update = { it.player = player }, modifier = Modifier.fillMaxWidth().then(if (compact) Modifier.height(240.dp) else Modifier.weight(1f)))
                         } else {
-                            Card(Modifier.fillMaxWidth().weight(1f)) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                            Card(Modifier.fillMaxWidth().then(if (compact) Modifier.height(240.dp) else Modifier.weight(1f))) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
                                 Text(playerMessage, style = MaterialTheme.typography.bodySmall)
                             } }
@@ -162,9 +171,17 @@ class PlayerActivity : ComponentActivity() {
                         if (deleteDialog) AlertDialog(onDismissRequest = { deleteDialog = false }, title = { Text("清空当前任务文件？") }, text = { Text("将停止任务并永久删除当前任务的下载 / 缓存文件。") },
                             confirmButton = { TextButton(onClick = { requested = false; releasePlayer(); TorrentTasks.cancel(current, true); deleteDialog = false; finish() }) { Text("确认清空") } }, dismissButton = { TextButton(onClick = { deleteDialog = false }) { Text("取消") } })
                     }
+                    }
                 }
             }
         }
+    }
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean("play-requested", requested)
+        outState.putBoolean("autoplay", autoPlay)
+        outState.putLong("position", player?.currentPosition ?: savedPosition)
+        outState.putFloat("speed", speed)
+        super.onSaveInstanceState(outState)
     }
     private fun requestPlayback(play: Boolean) {
         autoPlay = play; requested = true

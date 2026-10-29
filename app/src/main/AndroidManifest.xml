@@ -6,7 +6,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
-    <application android:theme="@style/AppTheme" android:label="FreeMangnetPlayer" android:icon="@drawable/ic_launcher_legacy" android:roundIcon="@drawable/ic_launcher_legacy" android:usesCleartextTraffic="true" android:supportsRtl="true">
+    <application android:theme="@style/AppTheme" android:label="FreeMangnetPlayer" android:icon="@drawable/ic_launcher_legacy" android:roundIcon="@drawable/ic_launcher_legacy" android:banner="@drawable/tv_banner" android:usesCleartextTraffic="true" android:supportsRtl="true">
         <service android:name=".DownloadService" android:exported="false" android:foregroundServiceType="dataSync" android:stopWithTask="false" />
         <activity android:name=".SettingsActivity" android:exported="false" />
         <activity android:name=".PlayerActivity" android:exported="false" />
