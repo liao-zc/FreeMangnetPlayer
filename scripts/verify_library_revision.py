@@ -74,7 +74,7 @@ find_and_tap('收藏');record('favorite-file-record',entries=entries('favorite-e
 restart();require_visible('缓存视频');find_and_tap('缓存视频');require_visible('Episode-01.mp4','Episode-02.mp4');screenshot('library-05-cache-after-restart.png')
 record('cache-entry-discoverable-after-process-restart',entries=caches())
 open_cache('Episode-01.mp4');resumed=wait(lambda s:s.get('playing'));record('cached-file-reopens-and-plays',state=resumed)
-control('player_files');find_and_tap('切换播放：Bundle-1/MultiQuality.mp4')
+control('player_files');find_and_tap('切换播放：MultiQuality.mp4')
 high=wait(lambda s:s.get('playing') and s.get('videoHeight')==720)
 control('player_quality');find_and_tap('480p');low=wait(lambda s:s.get('qualityHeight')==480 and s.get('videoHeight')==360)
 record('existing-lower-resolution-track-selects-real-360p',before=high,after=low);screenshot('library-10-low-quality-track.png')
@@ -93,7 +93,7 @@ assert subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returnc
 node=next(n for n in tree().iter('node') if n.get('class')=='android.widget.CheckBox');tap(node);find_and_tap('删除所选');find_and_tap('确认删除')
 poll(lambda:all(r['source']!=first['source'] for r in caches()))
 assert all(any(c['source']==r['source'] for c in caches()) for r in others)
-assert subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode!=0
+poll(lambda:subprocess.run(['adb','shell','run-as',PACKAGE,'test','-f',path]).returncode!=0)
 record('single-cached-file-delete-preserves-other-files',deleted=first,remaining=caches());screenshot('library-07-single-delete.png')
 find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not caches());record('batch-cache-file-delete');screenshot('library-08-batch-delete.png')
 (OUT/'library-final-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')

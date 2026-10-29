@@ -31,6 +31,7 @@ object StoredVideos {
 
     fun delete(context: Context, kind: String, sources: Set<String>, deleteData: Boolean): String? {
         val grouped = sources.groupBy { source -> Regex("(?i)btih:([a-f0-9]{40})").find(source)?.groupValues?.get(1)?.lowercase() }
+        if (deleteData && grouped.keys.any { id -> TorrentTasks.tasks[id]?.let { it.stopping || it.clearing || it.moving } == true }) return "文件正在移动或清理，请稍后重试"
         if (deleteData && grouped.keys.any { (TorrentTasks.tasks[it]?.viewers ?: 0) > 0 }) return "请先退出所选视频的播放器，再删除文件"
         if (deleteData) for ((id, links) in grouped) {
             val task = TorrentTasks.tasks[id] ?: continue
