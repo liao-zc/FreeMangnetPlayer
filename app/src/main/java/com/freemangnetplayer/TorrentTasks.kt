@@ -112,6 +112,9 @@ object TorrentTasks {
                 else SettingsStore.taskFolder(c, download, id)
             TorrentTask(id, source, title.ifBlank { "磁力资源" }, folder, download).also { tasks[id] = it }
         }
+        Regex("(?i)[?&]so=(\\d+)(?:&|$)").find(source)?.groupValues?.get(1)?.toIntOrNull()?.let {
+            task.selected = setOf(it); task.playingIndex = it
+        }
         // Reopening the same hash must not discard newly pasted trackers/peers.
         if (source.startsWith("magnet:?", true) && task.source.startsWith("magnet:?", true)) {
             val incoming = source.substringAfter('?').split('&').filter {
@@ -187,7 +190,7 @@ object TorrentTasks {
         val info = handle.torrentFile() ?: return
         val f = info.files()
         val rows = (0 until f.numFiles()).map { TaskFile(it, f.filePath(it), f.fileSize(it)) }
-        val selected = task.selected.ifEmpty { setOf((rows.filter { it.video }.maxByOrNull { it.size } ?: rows.maxBy { it.size }).index) }
+        val selected = task.selected.filter { it in rows.indices }.toSet().ifEmpty { setOf((rows.filter { it.video }.maxByOrNull { it.size } ?: rows.maxBy { it.size }).index) }
         handle.prioritizeFiles(Array(rows.size) { if (it in selected) Priority.NORMAL else Priority.IGNORE })
     }
     private fun start(task: TorrentTask) {
@@ -214,11 +217,9 @@ object TorrentTasks {
                     options.settingsPack.setInteger(settings_pack.int_types.min_reconnect_time.swigValue(), 5)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
-                    // Prefer TCP initially: the emulator's throttled uTP path can stall.
-                    // Retain incoming uTP and automatically enable outgoing uTP if TCP
-                    // fails to produce a useful connection; this is not a bandwidth cap.
-                    options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
-                    task.outgoingUtp = false; task.lastPayloadAt = System.currentTimeMillis()
+                    // Both transports must be available immediately on real mobile networks.
+                    options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), true)
+                    task.outgoingUtp = true; task.lastPayloadAt = System.currentTimeMillis()
                     val engine = TorrentSession(options)
                     task.engine = engine
                     engine.listener = object : QuietTorrentListener() {
@@ -254,15 +255,29 @@ object TorrentTasks {
                 // Start DHT/trackers immediately. A blocked HTTP site must not delay them.
                 val currentEngine = task.engine
                 val metadataFallback = launch(Dispatchers.IO) {
-                    delay(8000)
+                    delay(3000)
                     if (task.files.isEmpty() && task.id.length == 40 && !task.cancelled) {
-                        val bytes = fetchMetadata(task.id)
+                        val bytes = fetchMetadata(task)
                         if (bytes != null && task.engine === currentEngine && !task.cancelled) {
                             val handle = task.handle
                             if (handle != null && handle.isValid && handle.torrentFile() == null) {
-                                currentEngine?.supplyMetadata(handle, bytes)
+                                synchronized(task.nativeLock) {
+                                    if (handle.isValid && handle.torrentFile() == null) {
+                                        task.handle = null
+                                        currentEngine?.supplyMetadata(handle, bytes)
+                                    }
+                                }
                             }
                         }
+                    }
+                }
+                val peerDiscovery = launch(Dispatchers.IO) {
+                    delay(6000)
+                    while (isActive && task.engine === currentEngine && !task.cancelled) {
+                        if (!task.paused && !task.queued && !task.complete && task.payloadRate < 1024) {
+                            task.handle?.takeIf { it.isValid }?.let { handle -> runCatching { currentEngine?.discoverPeers(handle) } }
+                        }
+                        delay(20_000)
                     }
                 }
                 var ticks = 0
@@ -288,7 +303,7 @@ object TorrentTasks {
                     }
                     if (snapshot.first.isNotEmpty() && task.files.isEmpty()) {
                         task.files = snapshot.first
-                        if (task.selected.isEmpty()) {
+                        if (task.selected.none { index -> index in task.files.indices }) {
                             task.selected = setOf((task.files.filter { it.video }.maxByOrNull { it.size } ?: task.files.maxBy { it.size }).index)
                         }
                         if (task.playingIndex < 0) task.playingIndex = task.files.filter { it.video }.sortedWith(
@@ -314,9 +329,10 @@ object TorrentTasks {
                         handle.forceDHTAnnounce(); connectExplicitPeers(task, handle)
                     }
                     if (!task.paused && !task.queued && !task.complete && task.peers == 0 &&
-                        System.currentTimeMillis() - task.lastDiscovery > 30_000) {
+                        System.currentTimeMillis() - task.lastDiscovery > 15_000) {
                         task.lastDiscovery = System.currentTimeMillis()
                         handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL); handle.forceDHTAnnounce()
+                        connectExplicitPeers(task, handle); task.engine?.reconnectKnownPeers(handle)
                     }
                     task.status = when {
                         task.paused -> "已暂停，缓存保留"
@@ -333,7 +349,7 @@ object TorrentTasks {
                     if (ticks++ % 4 == 0) { persist(); schedule() }
                     if (task.complete && task.viewers == 0) break
                 }
-                metadataFallback.cancel()
+                metadataFallback.cancel(); peerDiscovery.cancel()
             } catch (error: Exception) {
                 if (error !is CancellationException) { task.status = "任务失败：${error.localizedMessage}"; task.paused = true; persist() }
             } finally {
@@ -545,8 +561,11 @@ object TorrentTasks {
         persist()
         scope.launch { values.forEach { it.job?.join(); withContext(Dispatchers.IO) { closeEngine(it) } } }
     }
-    private fun fetchMetadata(hash: String): ByteArray? = runCatching {
-        val connection = java.net.URL("https://itorrents.net/torrent/${hash.uppercase()}.torrent").openConnection() as java.net.HttpURLConnection
+    private fun fetchMetadata(task: TorrentTask): ByteArray? = runCatching {
+        val hash = task.id
+        val exactSource = Regex("(?i)[?&]xs=([^&]+)").find(task.source)?.groupValues?.get(1)
+            ?.let { java.net.URLDecoder.decode(it, "UTF-8") }?.takeIf { it.startsWith("https://") || it.startsWith("http://") }
+        val connection = java.net.URL(exactSource ?: "https://itorrents.net/torrent/${hash.uppercase()}.torrent").openConnection() as java.net.HttpURLConnection
         try {
             connection.connectTimeout = 6000; connection.readTimeout = 6000
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/131.0.0.0 Mobile Safari/537.36")

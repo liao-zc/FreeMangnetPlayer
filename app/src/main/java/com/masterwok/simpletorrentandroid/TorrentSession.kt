@@ -182,6 +182,7 @@ open class TorrentSession(
 
         setInitialTorrentState(torrentHandle)
 
+        reconnectKnownPeers(torrentHandle)
         listener?.onAddTorrent(
                 torrentHandle
                 , createSessionStatus(torrentHandle)
@@ -471,13 +472,34 @@ open class TorrentSession(
     @Volatile var networkMessage: String = ""
     @Volatile var cacheFlushGeneration: Long = 0
 
+    @Volatile var metadataReplacements = 0
+    @Volatile var restoredTrackers = 0
+    private val knownPeers = java.util.concurrent.ConcurrentHashMap<String, TcpEndpoint>()
+    fun reconnectKnownPeers(handle: TorrentHandle) {
+        knownPeers.values.take(100).forEach { endpoint -> runCatching { handle.swig().connect_peer(endpoint.swig()) } }
+    }
+    fun discoverPeers(handle: TorrentHandle) {
+        val hash = handle.infoHash()
+        sessionManager.dhtGetPeers(hash, 5)?.forEach { endpoint -> knownPeers[endpoint.toString()] = endpoint }
+        if (handle.isValid) reconnectKnownPeers(handle)
+    }
     /** HTTP metadata is a parallel fallback, never a prerequisite for P2P startup. */
     fun supplyMetadata(handle: TorrentHandle, bytes: ByteArray) {
         if (!handle.isValid || handle.torrentFile() != null) return
         val info = TorrentInfo.bdecode(bytes)
         if (info.infoHash() != handle.infoHash()) return
+        // 1.2 bindings cannot set metadata in place. Preserve tracker URLs/tiers
+        // and connected endpoints BEFORE replacing the owning handle.
+        val oldTrackers = handle.trackers()
+        oldTrackers.forEach { info.addTracker(it.url(), it.tier()) }
+        handle.peerInfo().forEach { peer -> runCatching {
+            val endpoint = peer.ip()
+            knownPeers[endpoint] = TcpEndpoint(endpoint.substringBeforeLast(':').removePrefix("[").removeSuffix("]"), endpoint.substringAfterLast(':').toInt())
+        } }
+        restoredTrackers = oldTrackers.size
+        metadataReplacements++
         sessionManager.remove(handle)
-        sessionManager.download(info, torrentSessionOptions.downloadLocation)
+        sessionManager.download(info, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList())
     }
 
     /**

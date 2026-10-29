@@ -118,7 +118,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
-                                        .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("networkMessage", current.networkMessage)
+                                        .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("metadataReplacements", current.engine?.metadataReplacements ?: 0).put("restoredTrackers", current.engine?.restoredTrackers ?: 0).put("networkMessage", current.networkMessage)
                                         .put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
@@ -183,6 +183,7 @@ class PlayerActivity : ComponentActivity() {
                                             Text(file.path, maxLines = 1, style = MaterialTheme.typography.bodySmall)
                                             Text("${bytes(file.done)} / ${bytes(file.size)}", style = MaterialTheme.typography.labelSmall)
                                         }
+                                        TextButton(onClick = { copyFileMagnet(current, file) }) { Text("复制磁力") }
                                         if (file.video) TextButton(onClick = { switchVideo(current, file.index) }) { Text("播放此文件") }
                                     }
                                 }
@@ -222,6 +223,8 @@ class PlayerActivity : ComponentActivity() {
                                             Checkbox(file.index in current.selected, { checked -> TorrentTasks.select(current, if (checked) current.selected + file.index else current.selected - file.index) })
                                             Text(file.path, Modifier.weight(1f))
                                         }
+                                        TextButton(onClick = { copyFileMagnet(current, file) }) { Text("复制磁力") }
+                                        TextButton(onClick = { copyFileMagnet(current, file) }) { Text("复制磁力：${file.path.substringAfterLast('/')}") }
                                         if (file.video) TextButton(onClick = { switchVideo(current, file.index); fileDialog = false }) { Text("切换播放：${file.path.substringAfterLast('/')}") }
                                     } }
                                 }
@@ -295,6 +298,15 @@ class PlayerActivity : ComponentActivity() {
         player = media
         media.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(task.folder, file.path))))
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
+    }
+    private fun copyFileMagnet(current: TorrentTask, file: TaskFile) {
+        val extras = current.source.substringAfter('?', "").split('&').filter {
+            it.startsWith("tr=", true) || it.startsWith("x.pe=", true) || it.startsWith("ws=", true) || it.startsWith("xs=", true)
+        }.distinct().joinToString("") { "&$it" }
+        val link = "magnet:?xt=urn:btih:${current.id}&dn=${java.net.URLEncoder.encode(file.path.substringAfterLast('/'), "UTF-8")}&so=${file.index}$extras"
+        val clipboard = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+        clipboard.setPrimaryClip(android.content.ClipData.newPlainText(file.path.substringAfterLast('/'), link))
+        android.widget.Toast.makeText(this, "已复制磁力链接（包含文件选择，需接收方支持）", android.widget.Toast.LENGTH_SHORT).show()
     }
     private fun cycleSpeed() {
         val values = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
