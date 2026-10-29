@@ -9,7 +9,7 @@ object StoredVideos {
             "&so=${file.index}&dn=${java.net.URLEncoder.encode(file.path.substringAfterLast('/'), "UTF-8") }"
 
     fun sync(context: Context, task: TorrentTask) {
-        if (!task.retainedCache || task.clearing) return
+        if (!task.retainedCache || task.clearing || task.stopping) return
         for (file in task.files.filter { it.video && it.index in task.selected && it.index !in task.deletedFiles }) {
             LibraryStore.saveCache(context, LibraryEntry(file.path.substringAfterLast('/'), fileSource(task, file),
                 if (file.done >= file.size) "缓存完成" else "缓存中，可继续播放", file.done, file.size))
