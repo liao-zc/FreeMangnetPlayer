@@ -65,7 +65,7 @@ text+=image('revision-00-metadata-peer-recovery.png','补充元数据后实际�
 text+=image('revision-03-integrated-controls.png','独立冷启动真实视频与内嵌控制条')
 text+='''## 3. 用户提供的同一磁力：旧版与新版观察
 
-测试链接：`magnet:?xt=urn:btih:f1006d95049a840aa34cec95967ea590bf5ffeaf`。
+测试链接：`magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1`。
 
 两版分别清空应用数据，并尝试解析、下载和播放；每版最多观察 150 次采样，UI 操作也计入时间。公网节点状态随时间变化，因此这个顺序对比不能视为同时同节点的性能基准。
 
@@ -77,7 +77,7 @@ for version in ['v0.1.12','v0.1.13']:
     text+=f"| {version} | {'已取得' if st.get('metadata') else '未取得'} | {st.get('peers',0)} | {st.get('payloadBytes',0):,} | {f'{frame:.2f} 秒' if frame is not None else '观察期间未起播'} |\n"
 native=by['user-resource-v0.1.13'].get('native_baseline',{});ns=native.get('final_state',{})
 text+=f"\n独立原生客户端（runner、纯 BTIH、未注入 .torrent）观察结果：元数据 {ns.get('metadata',False)}，资源节点 {ns.get('peers',0)}，有效载荷 {ns.get('payload_bytes',0):,} 字节；错误 {native.get('error','无额外错误')}。原始数据附在用户资源证据中。APP 还附加公共 Tracker 和 HTTP 元数据补充，因此不是完全相同的发现入口。\n"
-text+='\n[本机 HTTP 元数据服务检查](evidence/peer-recovery-metadata-http.json)：使用与 APP 相同的 User-Agent，iTorrents .net/.org 对本哈希返回 404，另外两个入口返回的内容不是种子数据。这是 Windows 工作区的观察，不能当作用户手机网络实测，也不能据此断言资源已失效。若该磁力在其他播放器能播放，仍需在用户同一设备网络上对照，或取得其可分享的 .torrent/Tracker 信息，进一步判断发现入口的差异。\n'
+text+='\n[本机 HTTP 元数据服务检查](evidence/peer-recovery-metadata-http.json)：使用与 APP 相同的 User-Agent，各入口的状态码、返回字节数与内容是否像种子数据，详见原始记录。此检查只代表 HTTP 服务观察，不代表播放成功。这是 Windows 工作区的观察，不能当作用户手机网络实测，也不能据此断言资源已失效。若该磁力在其他播放器能播放，仍需在用户同一设备网络上对照，或取得其可分享的 .torrent/Tracker 信息，进一步判断发现入口的差异。\n'
 text+='\n每一行按真实观察记录；未起播的资源不标为播放成功。Magnet_player 提供的 GitHub 仓库只有 README 与安装包，没有公开内核源码。本轮没有完成该播放器在用户手机同一网络下的操作对照，不能推断其使用直连、云缓存或其他特定机制。\n'
 for version in ['v0.1.12','v0.1.13']:
     text+=image('user-resource-'+version+'.png','用户磁力 '+version+' 的真实观察画面')

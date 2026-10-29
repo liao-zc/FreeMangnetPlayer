@@ -237,7 +237,7 @@ def main():
     find_and_tap('返回搜索')
     # Same exact user hash, latest app and previous stable APK, fresh app data.
     import urllib.request
-    user_magnet='magnet:?xt=urn:btih:f1006d95049a840aa34cec95967ea590bf5ffeaf'
+    user_magnet='magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1'
     def user_observation(version):
         begun=time.monotonic(); open_magnet(user_magnet); samples=[]; requested=False; first_frame=None
         for _ in range(150):

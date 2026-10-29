@@ -1,7 +1,7 @@
 """Read-only HTTP availability observation, not a playback-success check."""
 import concurrent.futures,json,urllib.request
 from pathlib import Path
-h='F1006D95049A840AA34CEC95967EA590BF5FFEAF'
+h='2362347540B27D8A4142AF2BBE0A071F26A3B7A1'
 urls=['https://itorrents.net/torrent/'+h+'.torrent','https://itorrents.org/torrent/'+h+'.torrent','https://btcache.me/torrent/'+h,'https://torrage.info/torrent.php?h='+h]
 def probe(url):
     try:

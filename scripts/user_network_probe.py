@@ -3,7 +3,7 @@ from pathlib import Path
 s=Path('scripts/public_network_probe.py').read_text(encoding='utf-8')
 start=s.index("    base = ")
 end=s.index("    session = ",start)
-s=s[:start]+'''    digest = 'f1006d95049a840aa34cec95967ea590bf5ffeaf'
+s=s[:start]+'''    digest = '2362347540b27d8a4142af2bbe0a071f26a3b7a1'
     plain = f'magnet:?xt=urn:btih:{digest}'
     result.update({'resource':'User-provided magnet','id':digest,'plain_magnet':plain})
 '''+s[end:]
