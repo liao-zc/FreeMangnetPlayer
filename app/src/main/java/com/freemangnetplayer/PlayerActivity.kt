@@ -56,10 +56,19 @@ class PlayerActivity : ComponentActivity() {
     private var retryAfter = 0L
     private var task: TorrentTask? = null
     private var attached = false
+    private var superseded = false
+    companion object { private var activePlayer = java.lang.ref.WeakReference<PlayerActivity>(null) }
     private val notifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        activePlayer.get()?.takeIf { it !== this }?.let { previous ->
+            previous.superseded = true; previous.requested = false
+            previous.releasePlayer()
+            previous.task?.let { if (previous.attached) { it.viewers = (it.viewers - 1).coerceAtLeast(0); previous.attached = false } }
+            previous.finish()
+        }
+        activePlayer = java.lang.ref.WeakReference(this)
         window.setBackgroundDrawableResource(android.R.color.black)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (Build.VERSION.SDK_INT >= 33) notifications.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -90,7 +99,7 @@ class PlayerActivity : ComponentActivity() {
                                         ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.done >= it.size }.thenByDescending { it.index in current.selected }.thenByDescending { it.size }).firstOrNull()
                                     if (file != null) {
                                         TorrentTasks.playFile(current, file.index)
-                                        runCatching { startPlayback(current, file) }.onFailure { playerMessage = "播放器准备失败：${it.localizedMessage}"; retryAfter = System.currentTimeMillis() + 3000 }
+                                        runCatching { startPlayback(current, file) }.onFailure { releasePlayer(); playerMessage = "播放器准备失败：${it.localizedMessage}"; retryAfter = System.currentTimeMillis() + 3000 }
                                     } else playerMessage = "该链接没有可识别的视频文件，可选择文件下载"
                                 }
                                 if (attached && applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
@@ -113,9 +122,13 @@ class PlayerActivity : ComponentActivity() {
                             }
                         }
                 }
-                if ((fullscreen || floating) && player != null) {
+                if (fullscreen || floating) {
                     Box(Modifier.fillMaxSize().background(Color.Black)) {
                         VideoSurface(Modifier.fillMaxSize(), { fileDialog = true })
+                        if (player == null && !floating) Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                            CircularProgressIndicator(color = Color.White)
+                            Text(playerMessage.ifBlank { "?????????" }, color = Color.White)
+                        }
                     }
                 } else {
                 Column(Modifier.fillMaxSize().safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -302,7 +315,7 @@ class PlayerActivity : ComponentActivity() {
     }
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        if (player?.isPlaying == true && !isFinishing) enterFloating()
+        if (player?.isPlaying == true && !isFinishing && !superseded) enterFloating()
     }
     private fun releasePlayer() {
         val old = player ?: return
@@ -344,6 +357,7 @@ class PlayerActivity : ComponentActivity() {
     override fun onDestroy() {
         releasePlayer(); task?.let { if (attached) { it.viewers = (it.viewers - 1).coerceAtLeast(0); attached = false }; it.lastUsed = System.currentTimeMillis() }
         TorrentTasks.persist()
+        if (activePlayer.get() === this) activePlayer.clear()
         super.onDestroy()
     }
     private fun bytes(value: Long): String = when {
