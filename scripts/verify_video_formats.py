@@ -18,7 +18,7 @@ for fixture in json.loads(Path('format-fixtures.json').read_text()):
         end=time.monotonic()+30
         while time.monotonic()<end:
             st=json.loads(adb('shell','run-as',PACKAGE,'cat','files/torrent-check.json'))
-            if st.get('done',0)>=fixture['size']:break
+            if st.get('downloaded',0)>=fixture['size']:break
             time.sleep(.5)
         path=st['folder']+'/Video.'+fixture['extension'];data=subprocess.check_output(['adb','exec-out','run-as',PACKAGE,'cat',path])
         row['download_sha256_matches']=hashlib.sha256(data).hexdigest()==fixture['sha256']
