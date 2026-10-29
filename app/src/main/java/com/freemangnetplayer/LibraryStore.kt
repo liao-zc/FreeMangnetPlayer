@@ -46,6 +46,15 @@ object LibraryStore {
 
     @Synchronized
     fun updateDownload(context: Context, title: String, source: String, status: String, downloaded: Long = 0, total: Long = 0) {
+        val hash = Regex("(?i)btih:([a-f0-9]{40})").find(source)?.groupValues?.get(1)?.lowercase()
+        val task = TorrentTasks.tasks[hash]
+        if (task != null && task.files.isNotEmpty()) {
+            val rows = read(context, DOWNLOADS).filterNot { it.source.contains("btih:${task.id}", true) }.toMutableList()
+            task.files.filter { it.index in task.selected && it.index !in task.deletedFiles }.forEach { file ->
+                rows.add(LibraryEntry(file.path.substringAfterLast('/'), StoredVideos.fileSource(task, file), status, file.done, file.size))
+            }
+            write(context, DOWNLOADS, rows); return
+        }
         val values = read(context, DOWNLOADS).toMutableList()
         val existing = values.indexOfFirst { it.source == source }
         val entry = LibraryEntry(title.ifBlank { "磁力资源" }, source, status, downloaded.coerceAtLeast(0), total.coerceAtLeast(0))
