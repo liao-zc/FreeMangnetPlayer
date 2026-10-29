@@ -104,7 +104,6 @@ def main():
     find_and_tap('选择文件')
     find_and_tap('全不选')
     # Tap the checkbox by row bounds; file name label shares the checkbox row.
-    find_and_tap('Episode-01.mp4')
     # Label clicks don't toggle a Checkbox by default; explicitly locate the nearest checkbox.
     select_checkbox('Episode-01.mp4')
     find_and_tap('完成')
