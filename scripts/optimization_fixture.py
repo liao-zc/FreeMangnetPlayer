@@ -16,7 +16,7 @@ source = root / 'bunny.mp4'
 urllib.request.urlretrieve('https://media.w3.org/2010/05/bunny/trailer.mp4', source)
 session = lt.session({'listen_interfaces': '0.0.0.0:6881', 'upload_rate_limit': 16 * 1024,
     'local_upload_rate_limit': 16 * 1024, 'ignore_limits_on_local_network': False,
-    'enable_dht': False, 'enable_lsd': False, 'enable_upnp': False, 'enable_natpmp': False})
+    'alert_mask': int(lt.alert.category_t.all_categories), 'enable_dht': False, 'enable_lsd': False, 'enable_upnp': False, 'enable_natpmp': False})
 classes = lt.ip_filter()
 classes.add_rule('0.0.0.0', '255.255.255.255', 1)
 session.set_peer_class_filter(classes)

@@ -33,6 +33,7 @@ class TorrentTask(val id: String, val source: String, val title: String, folder:
     var total by mutableLongStateOf(0)
     var peers by mutableIntStateOf(0)
     var rate by mutableIntStateOf(0)
+    var selectionPaused = false
     var streaming = false
     var viewers = 0
     @Volatile var handle: TorrentHandle? = null
@@ -214,11 +215,22 @@ object TorrentTasks {
         }
     }
     fun select(task: TorrentTask, selected: Set<Int>) {
-        val wasEmpty = task.selected.isEmpty()
         task.selected = selected.filter { index -> task.files.any { it.index == index } }.toSet()
         task.complete = false
-        applyPriorities(task)
-        if (wasEmpty && task.selected.isNotEmpty() && !task.paused) task.handle?.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL)
+        if (task.selected.isEmpty() && !task.streaming) {
+            // Zero wanted bytes makes libtorrent announce itself as a seed and
+            // disconnect the real seed. Pause instead, keeping native priorities.
+            task.selectionPaused = !task.paused
+            task.paused = true
+            task.engine?.pause()
+            task.status = "未选择文件，任务已暂停"
+        } else {
+            applyPriorities(task)
+            if (task.selectionPaused) {
+                task.selectionPaused = false
+                resume(task)
+            }
+        }
         persist()
     }
     fun playFile(task: TorrentTask, index: Int) {
@@ -227,6 +239,7 @@ object TorrentTasks {
     }
     private fun applyPriorities(task: TorrentTask) {
         val handle = task.handle ?: return
+        if (task.selected.isEmpty() && !task.streaming) return
         handle.prioritizeFiles(Array(task.files.size) { if (it in task.selected || (task.streaming && it == task.playingIndex)) Priority.NORMAL else Priority.IGNORE })
         val info = handle.torrentFile() ?: return
         if (!task.streaming) return
@@ -247,7 +260,7 @@ object TorrentTasks {
         }
         task.paused = false; task.cancelled = false; task.complete = false
         LibraryStore.updateDownload(context, task.title, task.source, "正在下载所选文件", task.done, task.total)
-        schedule(); persist()
+        resume(task); persist()
     }
     fun pause(task: TorrentTask) {
         task.paused = true; task.engine?.pause(); task.status = "已暂停，缓存保留"; persist(); schedule()
