@@ -10,7 +10,7 @@ session=lt.session({'listen_interfaces':'0.0.0.0:6882','enable_dht':False,'enabl
 handles=[];torrents={};rows=[]
 for ext,video,audio,extra in formats:
     path=root/('Video.'+ext)
-    command=['ffmpeg','-y','-ss','5','-i',str(source),'-t','8','-vf','scale=352:288' if video=='h263' else 'scale=320:240','-r','25','-c:v',video,'-c:a',audio]+extra
+    command=['ffmpeg','-y','-ss','5','-i',str(source),'-t','8','-vf','scale=352:288' if video=='h263' else 'scale=320:240','-r','25','-c:v',video,'-c:a',audio,'-ac','2']+extra
     if ext.endswith(('mp4','mov')):command+=['-movflags','+faststart']
     if ext=='3gp':command+=['-ar','22050','-ac','1']
     subprocess.run(command+[str(path)],check=True)
