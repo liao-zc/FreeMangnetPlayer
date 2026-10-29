@@ -117,7 +117,27 @@ def main():
     assert p2 > p1 + 2000, (p1, p2)
     report.append({'check': 'system-pip-over-home-continues-playing', 'passed': True, 'state': floating,
         'position_before': p1, 'position_after': p2})
-    adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.PlayerActivity', '--es', 'source', shlex.quote(fixture['direct_magnet']), '--es', 'mode', 'play')
+    # Expand through the real system PiP menu, preserving the same player instance.
+    windows = adb('shell', 'dumpsys', 'window', 'windows')
+    section = windows[windows.find('com.freemangnetplayer/.PlayerActivity'):]
+    frame = re.search(r'mFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]', section)
+    if frame:
+        x1, y1, x2, y2 = map(int, frame.groups())
+    else:
+        import struct
+        width, height = struct.unpack('>II', (OUT / 'perf-07-floating-over-home.png').read_bytes()[16:24])
+        x1, y1, x2, y2 = width - 350, height - 450, width - 30, height - 150
+    adb('shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
+    time.sleep(1)
+    adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
+    menu = adb('shell', 'cat', '/sdcard/window.xml')
+    (OUT / 'pip-system-menu.xml').write_text(menu)
+    tree = ET.fromstring(menu)
+    expand = [n for n in tree.iter('node') if 'expand' in n.get('resource-id', '').lower()
+        or any(label in n.get('content-desc', '').lower() for label in ['full screen', 'fullscreen', 'expand'])]
+    assert expand, 'System PiP expand control missing: ' + menu
+    bounds = list(map(int, re.findall(r'\d+', expand[0].get('bounds'))))
+    adb('shell', 'input', 'tap', str((bounds[0] + bounds[2]) // 2), str((bounds[1] + bounds[3]) // 2))
     restored = wait(lambda s: not s.get('floating') and s.get('playing'))
     screenshot('perf-08-return-from-floating.png')
     report.append({'check': 'return-from-pip', 'passed': True, 'state': restored})
