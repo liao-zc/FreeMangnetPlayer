@@ -27,6 +27,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     private var videoSize = VideoSize.UNKNOWN
     private var rendered = false
     private var output: Any? = null
+    private var pendingSeek: Long? = null
     private val refresh = object : Runnable {
         override fun run() { if (!released) { invalidateState(); main.postDelayed(this, 250) } }
     }
@@ -37,7 +38,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         decoder.setEventListener { event -> main.post {
             if (!released) {
                 when (event.type) {
-                    MediaPlayer.Event.Playing -> { ready = true; ended = false }
+                    MediaPlayer.Event.Playing -> { ready = true; ended = false; decoder.setRate(speed); pendingSeek?.let { decoder.setTime(it); pendingSeek = null } }
                     MediaPlayer.Event.Buffering -> ready = event.buffering >= 100f
                     MediaPlayer.Event.EndReached -> ended = true
                     MediaPlayer.Event.EncounteredError -> error = PlaybackException("RealMedia decoder could not read the video stream", null, PlaybackException.ERROR_CODE_IO_UNSPECIFIED)
@@ -75,13 +76,16 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         speed = playbackParameters.speed; decoder.setRate(speed); return Futures.immediateVoidFuture()
     }
     override fun handleSeek(mediaItemIndex: Int, positionMs: Long, seekCommand: Int): ListenableFuture<*> {
-        decoder.setTime(positionMs.coerceAtLeast(0)); ended = false; return Futures.immediateVoidFuture()
+        if (decoder.length <= 0) pendingSeek = positionMs.coerceAtLeast(0) else decoder.setTime(positionMs.coerceAtLeast(0)); ended = false; return Futures.immediateVoidFuture()
     }
     override fun handleSetVideoOutput(videoOutput: Any): ListenableFuture<*> {
         if (output === videoOutput) return Futures.immediateVoidFuture()
         decoder.vlcVout.detachViews(); output = videoOutput
         if (videoOutput is SurfaceView) {
             decoder.vlcVout.setVideoView(videoOutput)
+            videoOutput.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
+                if (!released && output === videoOutput) decoder.vlcVout.setWindowSize((right-left).coerceAtLeast(1), (bottom-top).coerceAtLeast(1))
+            }
             decoder.vlcVout.attachViews { _, width, height, _, _, sarNum, sarDen ->
                 main.post { if (!released) { videoSize = VideoSize(width, height, 0, if (sarDen > 0) sarNum.toFloat()/sarDen else 1f); rendered = true; invalidateState() } }
             }
