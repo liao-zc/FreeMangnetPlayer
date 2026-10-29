@@ -1,7 +1,6 @@
 package com.freemangnetplayer
 
 import android.content.Context
-import java.io.File
 
 object StoredVideos {
     fun fileSource(task: TorrentTask, file: TaskFile): String =
@@ -25,7 +24,7 @@ object StoredVideos {
         .filter { it === current || it.retainedCache || it.download }
         .flatMap { task -> task.files.filter { file ->
             file.video && file.index !in task.deletedFiles &&
-                (file.done > 0 || File(task.folder, file.path).let { it.isFile && it.length() > 0 })
+                file.done > 0
         }.map { task to it } }
         .sortedWith(compareBy<Pair<TorrentTask, TaskFile>> { it.first !== current }.thenBy { it.second.path })
 

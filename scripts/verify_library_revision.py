@@ -73,6 +73,7 @@ find_and_tap('缓存');poll(lambda:len(caches())>=2);screenshot('library-02-reta
 record('explicit-cache-records-files-before-completion',entries=caches())
 partial=wait(lambda s:any(f['path'].endswith('Episode-02.mp4') and 0<f['done']<f['size'] for f in s.get('files',[])))
 assert any(q['index']==next(f['index'] for f in partial['files'] if f['path'].endswith('Episode-02.mp4')) for q in partial['storedQueue'])
+assert all(q['done']>0 for q in partial['storedQueue'])
 record('partial-downloaded-video-auto-enters-queue',state=partial)
 control('player_files');require_visible('已缓存 / 下载的视频','Episode-02.mp4');screenshot('library-03-stored-queue.png')
 find_and_tap('完成');control('player_next');switched=wait(lambda s:s.get('playing') and any(f['index']==s.get('currentFile') and f['path'].endswith('Episode-02.mp4') for f in s.get('files',[])))
