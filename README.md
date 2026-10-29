@@ -1,24 +1,15 @@
 # FreeMangnetPlayer
 
-自用 Android 磁力播放器，应用名 **FreeMangnetPlayer**，包名 `com.freemangnetplayer`。
+个人使用的 Android 磁力播放器，适配手机、平板和电视。当前版本 **v0.1.12**。
 
-## v0.1.11 下载和实际报告
+- [下载 APK](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.12/FreeMangnetPlayer-v0.1.12.apk)
+- [播放器、解析与缓存优化报告](docs/player-v0.1.12.md)
+- [带实际截图的操作说明](docs/usage-zh.md)
+- [离线 HTML 图文报告](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.12/FreeMangnetPlayer-v0.1.12-report.html)
+- [源码下载](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.12/FreeMangnetPlayer-v0.1.12-source.zip)
 
-- [下载安装包](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.11/FreeMangnetPlayer-v0.1.11.apk)
-- [操作步骤、真实截图和速度优化报告](docs/performance-v0.1.11.md)
-- [离线 HTML 报告，下载后用浏览器打开](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.11/FreeMangnetPlayer-v0.1.11-report.html)
-- [完整源码 ZIP](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.11/FreeMangnetPlayer-v0.1.11-source.zip)
-- [原始点检记录](docs/evidence/performance-verification.json)
+播放器内嵌图标、时间/缓冲进度条、倍速、跳转、切片、全屏和系统画中画；默认并发任务数 5。播放临时缓存会在切换后释放，主动缓存/下载会保留。上传/下载不限速；实际较慢做种测试在 **3.70%** 下载量时开始播放。节点发现和流畅程度受真实资源与网络影响，完整实测范围见报告。
 
-设置入口位于底部。支持关键词搜索、磁力解析、下载/缓存、收藏、多视频切换、倍速/跳转、全屏和系统 PiP 悬浮播放。APP 下载/上传不限速；本轮不限速做种实测峰值 **6.45 MiB/s**，该值来自本地模拟器测试，不代表任意公网资源速度。公网纯磁力对照的实际结果和限制见报告。
+## 开源与构建
 
-v0.1.10 可以直接覆盖安装；v0.1.9 的首次固定签名迁移需卸载旧版，先记录收藏和磁力。Android 7.0+；PiP 需要 Android 8.0+ 和设备支持。电视/平板尚未实机验证。
-
-## 编译
-
-JDK 17、Android SDK 35、Gradle 8.9，执行 `gradle assembleDebug`。内核 jlibtorrent 1.2.19.0，播放器 AndroidX Media3 1.5.1。签名由 GitHub Actions secrets 提供，私钥不在仓库。[第三方许可](third-party/simple-torrent-android-LICENSE.txt)。
-
-## 历史报告
-
-- [v0.1.10 完整说明和 22 项实测](docs/optimization-v0.1.10.md)
-- [v0.1.9 历史报告](docs/archive-v0.1.9.md)
+Kotlin、Jetpack Compose、AndroidX Media3、jlibtorrent；APK 包含 arm64-v8a、armeabi-v7a、x86、x86_64。通过 GitHub Actions 构建和真实 Android 模拟器验证。第三方许可见 [第三方声明](THIRD_PARTY_NOTICES.md)。
