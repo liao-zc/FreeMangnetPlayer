@@ -46,6 +46,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
     implementation("androidx.media3:media3-exoplayer:1.5.1")
     implementation("androidx.media3:media3-ui:1.5.1")
+    implementation("org.videolan.android:libvlc-all:3.6.5")
     implementation("androidx.webkit:webkit:1.12.1")
     // The small MIT session bridge is included as source so handle ownership
     // and native compatibility fixes can be reviewed and compiled together.

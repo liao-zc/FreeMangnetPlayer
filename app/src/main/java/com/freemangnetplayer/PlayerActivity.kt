@@ -45,7 +45,7 @@ import org.json.JSONObject
 import java.io.File
 
 class PlayerActivity : ComponentActivity() {
-    private var player by mutableStateOf<ExoPlayer?>(null)
+    private var player by mutableStateOf<Player?>(null)
     private var fullscreen by mutableStateOf(false)
     private var floating by mutableStateOf(false)
     private var pipRequested = false
@@ -113,7 +113,7 @@ class PlayerActivity : ComponentActivity() {
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
                                     File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", current.source).put("id", current.id)
                                         .put("metadata", current.files.isNotEmpty()).put("peers", current.peers).put("downloaded", current.done).put("total", current.total)
-                                        .put("files", rows).put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
+                                        .put("files", rows).put("decoder", if (player is VlcTorrentPlayer) "LibVLC" else "Media3").put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
                                         .put("playRequested", requested).put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
@@ -273,7 +273,8 @@ class PlayerActivity : ComponentActivity() {
         TorrentTasks.switchStreamFile(task, index); requested = true; autoPlay = true
     }
     private fun startPlayback(task: TorrentTask, file: TaskFile) {
-        val media = ExoPlayer.Builder(this)
+        val realMedia = file.path.substringAfterLast('.').lowercase() in listOf("rm", "rmvb")
+        val media: Player = if (realMedia) VlcTorrentPlayer(this, task, file) else ExoPlayer.Builder(this)
             .setRenderersFactory(androidx.media3.exoplayer.DefaultRenderersFactory(this).setEnableDecoderFallback(true))
             .setSeekBackIncrementMs(15000).setSeekForwardIncrementMs(15000)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 15000, 300, 750).build())
@@ -296,7 +297,7 @@ class PlayerActivity : ComponentActivity() {
             }
         })
         player = media
-        media.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(task.folder, file.path))))
+        if (!realMedia) media.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(task.folder, file.path))))
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
     }
     private fun copyFileMagnet(current: TorrentTask, file: TaskFile) {
@@ -386,6 +387,7 @@ class PlayerActivity : ComponentActivity() {
             }
         }, update = { view ->
             view.player = player
+            if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
             view.useController = !floating
             view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
             view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
