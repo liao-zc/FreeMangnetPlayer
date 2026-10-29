@@ -45,7 +45,8 @@ def poll(fn,timeout=30):
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk');adb('shell','pm','clear',PACKAGE)
 adb('shell','wm','size','1080x2400');adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
 fixture=json.loads(Path('optimization-fixture.json').read_text())[0]
-source=fixture['magnet']+'&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent'
+episode=next(i for i,f in enumerate(fixture['files']) if f['path'].endswith('Episode-01.mp4'))
+source=fixture['magnet']+'&so='+str(episode)+'&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent'
 adb('shell','am','start','-W','-n',PACKAGE+'/.PlayerActivity','--es','source',shlex.quote(source),'--es','mode','play')
 played=wait(lambda s:s.get('playing') and s.get('position',0)>800)
 assert played['qualityHeight']==0;record('default-original-quality',state=played)
