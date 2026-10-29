@@ -9,10 +9,9 @@ import com.frostwire.jlibtorrent.TorrentHandle
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
-import java.security.MessageDigest
 
 /** Read only verified torrent pieces, including after seeking into an uncached region. */
-internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHandle?) : BaseDataSource(false) {
+internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHandle?, private val flushGeneration: () -> Long) : BaseDataSource(false) {
     private var file: RandomAccessFile? = null
     private var uri: Uri? = null
     private var position = 0L
@@ -22,7 +21,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
     private var opened = false
     private var pieceLength = 0L
     private var lastPrefetched = -1
-    private val verified = LinkedHashMap<Int, ByteArray>()
+    private val flushed = mutableSetOf<Int>()
 
     override fun open(dataSpec: DataSpec): Long {
         transferInitializing(dataSpec)
@@ -55,59 +54,43 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         val pieceOffset = (absolute % pieceLength).toInt()
         val count = minOf(length.toLong(), remaining, pieceLength - pieceOffset).toInt()
         val deadline = SystemClock.elapsedRealtime() + 60_000
-        var bytes = verified[piece]
-        var requestedFlush = false
-        while (bytes == null) {
+        var pendingFlush = -1L
+        var flushPieces: List<Int> = emptyList()
+        while (piece !in flushed) {
             val handle = handleProvider() ?: throw IOException("磁力任务已关闭")
             if (!handle.isValid || Thread.currentThread().isInterrupted) throw IOException("读取已取消")
             val info = handle.torrentFile() ?: throw IOException("元数据不可用")
             if (lastPrefetched != piece) {
-                // A bounded 8 MiB forward window, requested once per piece, not every 100 ms.
                 val window = (8 * 1024 * 1024 / pieceLength).toInt().coerceIn(4, 128)
                 val end = minOf(piece + window, ((torrentEnd - 1) / pieceLength).toInt())
-                for (next in piece..end) if (!handle.havePiece(next)) {
-                    handle.setPieceDeadline(next, (next - piece) * 150)
-                }
+                for (next in piece..end) if (!handle.havePiece(next)) handle.setPieceDeadline(next, (next - piece) * 150)
                 lastPrefetched = piece
             }
-            if (handle.havePiece(piece)) {
-                // havePiece can include verified data still in libtorrent's write cache.
-                // Verify disk bytes as well, so a sparse zero-filled range is never played.
-                val files = info.files()
-                val begin = piece * pieceLength
-                val finish = minOf(begin + pieceLength, info.totalSize())
-                val candidate = ByteArray((finish - begin).toInt())
-                var readable = true
-                for (index in 0 until files.numFiles()) {
-                    val fileStart = files.fileOffset(index)
-                    val first = maxOf(begin, fileStart)
-                    val last = minOf(finish, fileStart + files.fileSize(index))
-                    if (first >= last) continue
-                    try {
-                        RandomAccessFile(File(handle.savePath(), files.filePath(index)), "r").use { disk ->
-                            disk.seek(first - fileStart)
-                            disk.readFully(candidate, (first - begin).toInt(), (last - first).toInt())
-                        }
-                    } catch (error: IOException) { readable = false; break }
-                }
-                val digest = if (readable) MessageDigest.getInstance("SHA-1").digest(candidate)
-                    .joinToString("") { "%02x".format(it) } else ""
-                if (readable && digest == info.hashForPiece(piece).toString()) {
-                    bytes = candidate
-                    verified[piece] = candidate
-                    while (verified.size > 3) verified.remove(verified.keys.first())
-                    break
-                }
-                if (!requestedFlush) { handle.flushCache(); requestedFlush = true }
+            if (pendingFlush >= 0 && flushGeneration() > pendingFlush) {
+                flushed.addAll(flushPieces)
+                continue
+            }
+            if (pendingFlush < 0 && handle.havePiece(piece)) {
+                // Snapshot verified pieces before flushing. CACHE_FLUSHED confirms those
+                // bytes are on disk, including files sharing a piece with skipped files.
+                // Do not read skipped neighbors: libtorrent may store them in a partfile.
+                val bits = handle.status(TorrentHandle.QUERY_PIECES).pieces()
+                val first = (torrentOffset / pieceLength).toInt()
+                val last = ((torrentEnd - 1) / pieceLength).toInt()
+                flushPieces = (first..last).filter { bits.getBit(it) }
+                pendingFlush = flushGeneration()
+                handle.flushCache()
             }
             if (SystemClock.elapsedRealtime() >= deadline) throw IOException("视频分片供给不足，请查看资源节点和网络诊断")
-            try { Thread.sleep(100) } catch (interrupted: InterruptedException) {
+            try { Thread.sleep(50) } catch (interrupted: InterruptedException) {
                 Thread.currentThread().interrupt()
                 throw IOException("读取已取消", interrupted)
             }
         }
-        val read = minOf(count, bytes!!.size - pieceOffset)
-        System.arraycopy(bytes, pieceOffset, buffer, offset, read)
+        val disk = file ?: throw IOException("视频文件已关闭")
+        disk.seek(position)
+        val read = disk.read(buffer, offset, count)
+        if (read < 0) throw IOException("已校验分片尚未写入文件")
         position += read
         remaining -= read
         bytesTransferred(read)
@@ -120,7 +103,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         try { file?.close() } finally {
             file = null
             uri = null
-            verified.clear(); lastPrefetched = -1
+            flushed.clear(); lastPrefetched = -1
             if (opened) { opened = false; transferEnded() }
         }
     }

@@ -101,6 +101,7 @@ open class TorrentSession(
                     AlertType.TORRENT_PAUSED -> torrentSession.get()?.onTorrentPaused(alert as TorrentPausedAlert)
                     AlertType.TORRENT_FINISHED -> torrentSession.get()?.onTorrentFinished(alert as TorrentFinishedAlert)
                     AlertType.TORRENT_ERROR -> torrentSession.get()?.onTorrentError(alert as TorrentErrorAlert)
+                    AlertType.CACHE_FLUSHED -> torrentSession.get()?.let { it.cacheFlushGeneration++ }
                     AlertType.TRACKER_ERROR, AlertType.LISTEN_FAILED -> torrentSession.get()?.networkMessage = alert.toString()
                     AlertType.ADD_TORRENT -> torrentSession.get()?.onAddTorrent(alert as AddTorrentAlert)
                     AlertType.BLOCK_UPLOADED -> torrentSession.get()?.onBlockUploaded(alert as BlockUploadedAlert)
@@ -463,6 +464,7 @@ open class TorrentSession(
     val actualDownloadLimit: Int get() = sessionManager.downloadRateLimit()
     val actualUploadLimit: Int get() = sessionManager.uploadRateLimit()
     @Volatile var networkMessage: String = ""
+    @Volatile var cacheFlushGeneration: Long = 0
 
     /** HTTP metadata is a parallel fallback, never a prerequisite for P2P startup. */
     fun supplyMetadata(handle: TorrentHandle, bytes: ByteArray) {
