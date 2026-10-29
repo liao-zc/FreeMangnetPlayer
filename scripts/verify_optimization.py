@@ -131,6 +131,19 @@ def main():
     services = adb('shell', 'dumpsys', 'activity', 'services', PACKAGE)
     assert 'DownloadService' in services and 'isForeground=true' in services, services
     report.append({'check': 'background-after-back-and-home', 'passed': True, 'before': before, 'after': current['done'], 'foreground_service': True})
+    before_sleep = current['done']
+    assert before_sleep < current['total'], current
+    adb('shell', 'input', 'keyevent', 'KEYCODE_SLEEP')
+    time.sleep(10)
+    sleeping = next(t for t in diagnostic('tasks') if t['id'] == fixtures[0]['id'])
+    assert sleeping['done'] > before_sleep, (before_sleep, sleeping)
+    adb('shell', 'input', 'keyevent', 'KEYCODE_WAKEUP')
+    adb('shell', 'wm', 'dismiss-keyguard')
+    adb('shell', 'cmd', 'statusbar', 'expand-notifications')
+    time.sleep(2)
+    screenshot('opt-07b-screen-off-background.png')
+    adb('shell', 'cmd', 'statusbar', 'collapse')
+    report.append({'check': 'screen-off-download-continues', 'passed': True, 'before': before_sleep, 'after': sleeping['done'], 'screen_off_seconds': 10})
 
     state = open_torrent(fixtures[0], 'play')
     find_and_tap('选择文件')

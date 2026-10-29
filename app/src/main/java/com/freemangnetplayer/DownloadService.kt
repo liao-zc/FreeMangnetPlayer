@@ -8,9 +8,13 @@ import android.os.IBinder
 import kotlinx.coroutines.*
 
 class DownloadService : Service() {
+    private lateinit var downloadWakeLock: android.os.PowerManager.WakeLock
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     override fun onCreate() {
         super.onCreate()
+        downloadWakeLock = getSystemService(android.os.PowerManager::class.java)
+            .newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "FreeMangnetPlayer:downloads")
+            .apply { setReferenceCounted(false) }
         TorrentTasks.initialize(this)
         if (Build.VERSION.SDK_INT >= 26) getSystemService(NotificationManager::class.java)
             .createNotificationChannel(NotificationChannel("downloads", "下载与缓存任务", NotificationManager.IMPORTANCE_LOW))
@@ -26,6 +30,8 @@ class DownloadService : Service() {
             java.io.File(filesDir, "tasks-check.json").writeText(rows.toString())
         }
         val active = tasks.count { !it.paused && !it.cancelled && !it.complete }
+        if (active > 0) downloadWakeLock.acquire(10 * 60 * 1000L)
+        else if (downloadWakeLock.isHeld) downloadWakeLock.release()
         val pending = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).putExtra("open-tab", "下载"), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         fun action(value: String) = PendingIntent.getService(this, value.hashCode(), Intent(this, DownloadService::class.java).setAction(value), PendingIntent.FLAG_IMMUTABLE)
         val builder = if (Build.VERSION.SDK_INT >= 26) Notification.Builder(this, "downloads") else Notification.Builder(this)
@@ -51,5 +57,5 @@ class DownloadService : Service() {
         stopSelf()
     }
     override fun onBind(intent: Intent?): IBinder? = null
-    override fun onDestroy() { scope.cancel(); TorrentTasks.stopAll(); super.onDestroy() }
+    override fun onDestroy() { if (downloadWakeLock.isHeld) downloadWakeLock.release(); scope.cancel(); TorrentTasks.stopAll(); super.onDestroy() }
 }
