@@ -166,7 +166,7 @@ def main():
 
     complete = wait(lambda s: s.get('downloaded', 0) >= fixture['size'], 120)
     file = complete['folder'] + '/' + fixture['path']
-    output = subprocess.check_output(['adb', 'shell', 'run-as', PACKAGE, 'sha256sum', shlex.quote(file)], text=True)
+    output = subprocess.check_output(['adb', 'shell', 'sha256sum', shlex.quote(file)], text=True)
     actual = output.split()[0]
     assert actual == fixture['sha256'], (actual, fixture['sha256'])
     report.append({'check': 'unlimited-download-complete-file-sha256', 'passed': True, 'size': fixture['size'], 'sha256': actual})
