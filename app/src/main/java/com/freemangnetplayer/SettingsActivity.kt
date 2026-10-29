@@ -77,7 +77,7 @@ class SettingsActivity : ComponentActivity() {
                     }
                     if (clearType != null) AlertDialog(onDismissRequest = { clearType = null }, title = { Text("确认清空${if (clearType == true) "下载" else "缓存"}？") },
                         text = { Text("会永久删除对应任务的文件。") },
-                        confirmButton = { TextButton(onClick = { TorrentTasks.initialize(this); val skipped = TorrentTasks.clear(clearType!!); clearType = null; message = "正在清理；$skipped 个正在打开的任务已保留" }) { Text("确认清空") } },
+                        confirmButton = { TextButton(onClick = { TorrentTasks.initialize(this@SettingsActivity); val skipped = TorrentTasks.clear(clearType!!); clearType = null; message = "正在清理；$skipped 个正在打开的任务已保留" }) { Text("确认清空") } },
                         dismissButton = { TextButton(onClick = { clearType = null }) { Text("取消") } })
                 }
             }

@@ -39,6 +39,7 @@ class TorrentTask(val id: String, val source: String, val title: String, folder:
     @Volatile var engine: TorrentSession? = null
     var job: Job? = null
     var lastUsed = System.currentTimeMillis()
+    var stopping = false
     var clearing = false
     var moving = false
 }
@@ -84,7 +85,7 @@ object TorrentTasks {
             TorrentTask(id, source, title.ifBlank { "磁力资源" }, folder, download).also { tasks[id] = it }
         }
         task.lastUsed = System.currentTimeMillis()
-        if (task.cancelled && !task.clearing) { task.cancelled = false; task.queued = true }
+        if (task.cancelled && !task.stopping && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
         if (download) task.download = true
         persist()
         c.startForegroundService(Intent(c, DownloadService::class.java))
@@ -95,13 +96,19 @@ object TorrentTasks {
         trimCaches()
         var active = tasks.values.count { it.engine != null && !it.queued && !it.paused && !it.complete && !it.cancelled }
         val limit = SettingsStore.maxDownloads(context)
+        if (active > limit) {
+            for (task in tasks.values.filter { it.engine != null && !it.queued && !it.paused && !it.complete && !it.cancelled }.sortedBy { it.viewers > 0 }) {
+                if (active <= limit) break
+                task.queued = true; task.engine?.pause(); task.status = "排队中：并发数量已调整"; active--
+            }
+        }
         for (task in tasks.values.sortedByDescending { it.viewers > 0 }) {
-            if (task.cancelled || task.clearing || task.paused || task.moving) continue
+            if (task.cancelled || task.stopping || task.clearing || task.paused || task.moving) continue
             if (task.engine != null) {
                 if (task.queued && active < limit) { task.queued = false; task.engine?.resume(); active++ }
                 continue
             }
-            if (task.job?.isActive == true) continue
+            if (task.job?.isActive == true || (task.complete && task.viewers == 0)) continue
             if (active >= limit) { task.queued = true; task.status = "排队中：已达到最大同时下载数量 $limit"; continue }
             task.queued = false
             task.status = "正在连接种子并获取文件信息…"
@@ -241,6 +248,8 @@ object TorrentTasks {
     }
     fun cancel(task: TorrentTask, delete: Boolean = false) {
         task.cancelled = true; task.paused = true; task.status = if (delete) "正在清理任务文件…" else "已取消，已下载文件保留"
+        if (task.stopping) return
+        task.stopping = true
         task.clearing = delete
         task.handle = null
         task.job?.cancel()
@@ -256,7 +265,7 @@ object TorrentTasks {
                 }
             }
             if (delete) { tasks.remove(task.id); LibraryStore.removeDownload(context, task.source) }
-            task.clearing = false; persist(); schedule()
+            task.stopping = false; task.clearing = false; persist(); schedule()
         }
         persist()
     }
@@ -285,9 +294,10 @@ object TorrentTasks {
         SettingsStore.prefs(context).edit().putString("torrent-tasks", rows.toString()).apply()
     }
     fun stopAll() {
-        tasks.values.forEach { pause(it) }
+        val values = tasks.values.toList()
+        values.forEach { it.paused = true; it.engine?.pause(); it.job?.cancel(); it.status = "后台服务已停止，缓存保留" }
         persist()
-        scope.launch(Dispatchers.IO) { tasks.values.toList().forEach { closeEngine(it) } }
+        scope.launch { values.forEach { it.job?.join(); withContext(Dispatchers.IO) { closeEngine(it) } } }
     }
     private fun fetchMetadata(hash: String): ByteArray? = runCatching {
         val connection = java.net.URL("https://itorrents.net/torrent/${hash.uppercase()}.torrent").openConnection() as java.net.HttpURLConnection

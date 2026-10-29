@@ -192,7 +192,7 @@ class PlayerActivity : ComponentActivity() {
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
         player = media
     }
-    private fun releasePlayer() { player?.release(); player = null }
+    private fun releasePlayer() { player?.let { savedPosition = it.currentPosition; it.release() }; player = null }
     override fun onDestroy() {
         releasePlayer(); task?.let { it.viewers = (it.viewers - 1).coerceAtLeast(0); it.lastUsed = System.currentTimeMillis() }
         TorrentTasks.persist()
