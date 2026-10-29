@@ -73,6 +73,8 @@ text+='''## 3. 用户提供的同一磁力：旧版与新版观察
 for version in ['v0.1.12','v0.1.13']:
     r=by['user-resource-'+version];st=r['state'];frame=r['first_frame_seconds']
     text+=f"| {version} | {'已取得' if st.get('metadata') else '未取得'} | {st.get('peers',0)} | {st.get('payloadBytes',0):,} | {f'{frame:.2f} 秒' if frame is not None else '观察期间未起播'} |\n"
+native=by['user-resource-v0.1.13'].get('native_baseline',{});ns=native.get('final_state',{})
+text+=f"\n独立原生客户端（runner、纯 BTIH、未注入 .torrent）观察结果：元数据 {ns.get('metadata',False)}，资源节点 {ns.get('peers',0)}，有效载荷 {ns.get('payload_bytes',0):,} 字节；错误 {native.get('error','无额外错误')}。原始数据附在用户资源证据中。APP 还附加公共 Tracker 和 HTTP 元数据补充，因此不是完全相同的发现入口。\n"
 text+='\n每一行按真实观察记录；未起播的资源不标为播放成功。Magnet_player 提供的 GitHub 仓库只有 README 与安装包，没有公开内核源码。本轮没有完成该播放器在用户手机同一网络下的操作对照，不能推断其使用直连、云缓存或其他特定机制。\n'
 for version in ['v0.1.12','v0.1.13']:
     text+=image('user-resource-'+version+'.png','用户磁力 '+version+' 的真实观察画面')
