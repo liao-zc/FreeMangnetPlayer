@@ -173,6 +173,14 @@ def main():
     assert not re.search(r'FATAL EXCEPTION.*|Fatal signal.*com\.freemangnetplayer',logs)
     screenshot('revision-09-lifecycle-stress.png')
     record('no-crash-or-process-restart-during-playback-stress',pid=process,cycles=6)
+    control('player_files')
+    find_and_tap('切换播放：Broken.mp4')
+    failed=wait(lambda s:not s.get('playing') and not s.get('playRequested') and '播放失败' in s.get('playerError',''))
+    time.sleep(5)
+    assert adb('shell','pidof',PACKAGE).strip()==process
+    screenshot('revision-09b-media-error.png')
+    record('invalid-media-shows-error-without-process-restart',state=failed,pid=process)
+
     find_and_tap('返回搜索')
     # A real pure hash may not be publicly discoverable; preserve the actual observation.
     public=json.loads(Path('public-network-baseline.json').read_text())

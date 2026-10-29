@@ -19,7 +19,7 @@ required=['default-maximum-downloads-five','pasted-magnet-real-metadata','stream
           'embedded-pause-play-speed-and-seek','fullscreen-embedded-small-icons','pip-continues-and-restores',
           'switch-file-releases-previous-temporary-bytes','explicit-cache-survives-next-resource',
           'new-resource-clears-previous-unretained-cache','no-crash-or-process-restart-during-playback-stress',
-          'magnet-retry-and-back-remain-responsive']
+          'magnet-retry-and-back-remain-responsive','invalid-media-shows-error-without-process-restart']
 assert all(by.get(n,{}).get('passed') is True for n in required),'Required checks incomplete'
 target=Path('docs/screenshots/player-revision');target.mkdir(parents=True,exist_ok=True)
 for p in shots.glob('revision-*.png'):
@@ -96,6 +96,7 @@ text+=f'''## 5. 白屏与闪退：修复及验证范围
 
 **这些是本轮设备上的实际结果，用户原始闪退尚无设备、完整磁力及崩溃日志，不能断言已找出那次闪退的唯一原因。** 测试覆盖 H.264/AAC 实际音视频；其他硬件解码器或特殊视频格式需要相应资源验证。
 '''
+text+=image('revision-09b-media-error.png','损坏媒体的实际错误提示，应用进程未重启')
 text+=image('revision-09-lifecycle-stress.png','连续切换后的实际播放器，进程保持不变')
 text+=f'''## 6. 边下边播：按所需分片起播
 

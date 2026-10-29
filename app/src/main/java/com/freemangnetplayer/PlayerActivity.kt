@@ -111,7 +111,7 @@ class PlayerActivity : ComponentActivity() {
                                     File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", current.source).put("id", current.id)
                                         .put("metadata", current.files.isNotEmpty()).put("peers", current.peers).put("downloaded", current.done).put("total", current.total)
                                         .put("files", rows).put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
-                                        .put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
+                                        .put("playRequested", requested).put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
