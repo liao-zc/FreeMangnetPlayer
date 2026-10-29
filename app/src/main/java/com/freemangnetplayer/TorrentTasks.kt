@@ -310,7 +310,7 @@ object TorrentTasks {
                             task.selected = setOf((task.files.filter { it.video }.maxByOrNull { it.size } ?: task.files.maxBy { it.size }).index)
                         }
                         if (task.playingIndex < 0) task.playingIndex = task.files.filter { it.video }.sortedWith(
-                            compareByDescending<TaskFile> { it.done >= it.size }.thenByDescending { it.index in task.selected }.thenByDescending { it.size }).firstOrNull()?.index ?: -1
+                            compareByDescending<TaskFile> { it.index in task.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()?.index ?: -1
                         applyPriorities(task)
                     } else task.files = snapshot.first
                     task.done = task.files.filter { it.index in task.selected || (task.streaming && it.index == task.playingIndex) }.sumOf { it.done }

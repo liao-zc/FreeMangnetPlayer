@@ -118,6 +118,7 @@ def main():
     start=time.monotonic()
     open_magnet(fixtures[0]['magnet'])
     parsed=wait(lambda s:s.get('id')==fixtures[0]['id'] and s.get('metadata'))
+    assert parsed['currentFile']==next(f['index'] for f in parsed['files'] if f.get('selected')), parsed
     screenshot('revision-02-real-file-list.png')
     record('pasted-magnet-real-metadata',state=parsed,seconds=time.monotonic()-start)
     find_and_tap('▶ 播放')

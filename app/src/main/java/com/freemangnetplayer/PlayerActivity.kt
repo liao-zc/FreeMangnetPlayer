@@ -102,7 +102,7 @@ class PlayerActivity : ComponentActivity() {
                             while (true) {
                                 if (attached && requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.destination == null && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
                                     val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
-                                        ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.done >= it.size }.thenByDescending { it.index in current.selected }.thenByDescending { it.size }).firstOrNull()
+                                        ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.index in current.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()
                                     if (file != null) {
                                         TorrentTasks.playFile(current, file.index)
                                         runCatching { startPlayback(current, file) }.onFailure { releasePlayer(); playerMessage = "播放器准备失败：${it.localizedMessage}"; retryAfter = System.currentTimeMillis() + 3000 }
