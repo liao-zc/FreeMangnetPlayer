@@ -9,6 +9,14 @@ import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from capture_usage_screenshots import adb, screenshot, require_visible, find_and_tap, PACKAGE, OUT
+from player_test_controls import tap_player
+_original_tap = find_and_tap
+def find_and_tap(label):
+    if not tap_player(label):
+        _original_tap(label)
+    else:
+        time.sleep(1)
+
 
 fixture = json.loads(Path('performance-fixture.json').read_text())
 report = []
