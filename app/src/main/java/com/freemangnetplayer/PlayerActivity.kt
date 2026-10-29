@@ -65,7 +65,7 @@ class PlayerActivity : ComponentActivity() {
                     } else {
                         LaunchedEffect(current) {
                             while (true) {
-                                if (requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
+                                if (attached && requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
                                     val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
                                         ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.done >= it.size }.thenByDescending { it.index in current.selected }.thenByDescending { it.size }).firstOrNull()
                                     if (file != null) {
@@ -73,7 +73,7 @@ class PlayerActivity : ComponentActivity() {
                                         if (File(current.folder, file.path).exists() && file.done > 0) startPlayback(current, file)
                                     } else playerMessage = "该链接没有可识别的视频文件，可选择文件下载"
                                 }
-                                if (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+                                if (attached && applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
                                     val rows = JSONArray()
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
                                     File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", source).put("id", current.id)
