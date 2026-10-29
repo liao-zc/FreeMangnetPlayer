@@ -11,6 +11,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser()
 parser.add_argument('--version', required=True)
 parser.add_argument('--html', required=True)
+parser.add_argument('--evidence-prefix', default='optimization')
 args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
 repo = 'liao-zc/FreeMangnetPlayer'
@@ -30,7 +31,7 @@ release = api(f'https://api.github.com/repos/{repo}/releases/tags/{args.version}
 archive = subprocess.check_output(['git', 'archive', '--format=zip', f'--prefix=FreeMangnetPlayer-{args.version}/', 'HEAD'], cwd=root)
 buffer = io.BytesIO()
 with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as bundle:
-    for path in sorted((root / 'docs/evidence').glob('optimization*')):
+    for path in sorted((root / 'docs/evidence').glob(args.evidence_prefix + '*')):
         bundle.writestr(path.name, path.read_bytes())
 assets = {
     f'FreeMangnetPlayer-{args.version}-report.html': (Path(args.html).read_bytes(), 'text/html; charset=utf-8'),
