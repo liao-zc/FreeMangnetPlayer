@@ -80,7 +80,7 @@ def main():
     fallback = f"magnet:?xt=urn:btih:{fixtures[0]['id']}&tr=http%3A%2F%2F10.0.2.2%3A8888%2Ffallback-announce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent"
     begun=time.monotonic(); open_magnet(fallback)
     recovered=wait(lambda s:s.get('metadata') and s.get('metadataReplacements')==1 and s.get('downloaded',0)>0)
-    assert recovered['restoredTrackers']>0 and recovered['outgoingUtp'] is True
+    assert recovered['restoredTrackers']>0
     find_and_tap('▶ 播放'); wait(lambda s:s.get('playing'))
     screenshot('revision-00-metadata-peer-recovery.png')
     record('metadata-fallback-preserves-trackers-and-downloads',seconds=time.monotonic()-begun,state=state())

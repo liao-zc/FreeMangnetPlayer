@@ -44,6 +44,8 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     val startedAt = System.currentTimeMillis()
     var lastDiscovery = 0L
     var outgoingUtp by mutableStateOf(false)
+    var transportFallbackUsed = false
+    var transportRecoveryAt = 0L
     var lastPayloadAt = System.currentTimeMillis()
     var retainedCache by mutableStateOf(false)
     val nativeLock = Any()
@@ -219,6 +221,7 @@ object TorrentTasks {
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
                     // Both transports must be available immediately on real mobile networks.
                     options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), true)
+                    task.transportFallbackUsed = false; task.transportRecoveryAt = 0L
                     task.outgoingUtp = true; task.lastPayloadAt = System.currentTimeMillis()
                     val engine = TorrentSession(options)
                     task.engine = engine
@@ -321,11 +324,17 @@ object TorrentTasks {
                     task.uploadLimit = task.engine?.actualUploadLimit ?: 0
                     task.networkMessage = task.engine?.networkMessage.orEmpty()
                     if (task.payloadRate >= 1024) task.lastPayloadAt = System.currentTimeMillis()
-                    if (!task.outgoingUtp && !task.paused && !task.queued && !task.complete &&
-                        System.currentTimeMillis() - task.lastPayloadAt > 12_000 &&
-                        (task.peers == 0 || task.payloadRate < 1024)) {
+                    if (!task.transportFallbackUsed && task.outgoingUtp && !task.paused && !task.queued && !task.complete &&
+                        task.peers > 0 && System.currentTimeMillis() - task.lastPayloadAt > 10_000) {
+                        task.transportFallbackUsed = true; task.transportRecoveryAt = System.currentTimeMillis()
+                        task.engine?.preferTcp(handle); task.outgoingUtp = false
+                        connectExplicitPeers(task, handle)
+                    }
+                    if (!task.outgoingUtp && !task.paused && !task.queued && !task.complete && task.peers == 0 &&
+                        System.currentTimeMillis() - task.transportRecoveryAt > 20_000) {
+                        // Some mobile peers accept only uTP. Re-enable it only if
+                        // TCP has failed to make a connection; keep useful TCP peers.
                         task.engine?.enableOutgoingUtp(); task.outgoingUtp = true
-                        handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL)
                         handle.forceDHTAnnounce(); connectExplicitPeers(task, handle)
                     }
                     if (!task.paused && !task.queued && !task.complete && task.peers == 0 &&

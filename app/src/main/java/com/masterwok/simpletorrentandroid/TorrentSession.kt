@@ -461,6 +461,15 @@ open class TorrentSession(
     val isPaused: Boolean get() = sessionManager.isPaused
 
     val isRunning: Boolean get() = sessionManager.isRunning
+    fun preferTcp(handle: TorrentHandle) {
+        val settings = SettingsPack()
+        settings.setBoolean(com.frostwire.jlibtorrent.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
+        sessionManager.applySettings(settings)
+        // Applying settings alone leaves an existing stalled uTP peer alive.
+        handle.pause(); handle.resume()
+        handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL)
+        handle.forceDHTAnnounce(); reconnectKnownPeers(handle)
+    }
     fun enableOutgoingUtp() {
         val settings = SettingsPack()
         settings.setBoolean(com.frostwire.jlibtorrent.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), true)

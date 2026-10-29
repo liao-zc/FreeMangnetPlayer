@@ -118,7 +118,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
-                                        .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("metadataReplacements", current.engine?.metadataReplacements ?: 0).put("restoredTrackers", current.engine?.restoredTrackers ?: 0).put("networkMessage", current.networkMessage)
+                                        .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("transportFallbackUsed", current.transportFallbackUsed).put("metadataReplacements", current.engine?.metadataReplacements ?: 0).put("restoredTrackers", current.engine?.restoredTrackers ?: 0).put("networkMessage", current.networkMessage)
                                         .put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
