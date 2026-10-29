@@ -498,7 +498,11 @@ open class TorrentSession(
         } }
         restoredTrackers = oldTrackers.size
         metadataReplacements++
+        val hash = info.infoHash()
         sessionManager.remove(handle)
+        val deadline = android.os.SystemClock.elapsedRealtime() + 3000
+        while (sessionManager.find(hash)?.isValid == true && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(20)
+        check(sessionManager.find(hash)?.isValid != true) { "Previous metadata task is still being removed" }
         sessionManager.download(info, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList())
     }
 
