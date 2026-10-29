@@ -266,8 +266,8 @@ object TorrentTasks {
                         trackers.forEach { info.addTracker(it, 0) }
                         engine.start(info.bencode())
                     } else {
-                        val source = task.source + trackers.filter { !task.source.contains(java.net.URLEncoder.encode(it, "UTF-8")) }
-                            .joinToString("") { "&tr=" + java.net.URLEncoder.encode(it, "UTF-8") }
+                        val source = if (task.source.startsWith("magnet:", true)) task.source + trackers.filter { !task.source.contains(java.net.URLEncoder.encode(it, "UTF-8")) }
+                            .joinToString("") { "&tr=" + java.net.URLEncoder.encode(it, "UTF-8") } else task.source
                         engine.start(context, Uri.parse(source))
                     }
                 }
