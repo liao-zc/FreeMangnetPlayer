@@ -106,6 +106,18 @@ def main():
     find_and_tap('继续下载')
     wait(lambda s: not s.get('paused') and s.get('downloaded', 0) > after['downloaded'])
     report.append({'check': 'resume-download', 'passed': True})
+    active_before = diagnostic()
+    assert 0 < active_before['downloaded'] < active_before['total'], active_before
+    find_and_tap('取消下载')
+    wait(lambda s: s.get('cancelled'))
+    time.sleep(5)
+    a = diagnostic()['downloaded']; time.sleep(5); b = diagnostic()['downloaded']
+    assert a == b and a > 0, (a, b)
+    screenshot('opt-06b-active-cancel.png')
+    report.append({'check': 'cancel-active-partial-download', 'passed': True, 'before': a, 'after': b})
+    state = open_torrent(fixtures[0])
+    wait(lambda s: s.get('downloaded', 0) > b)
+    report.append({'check': 'reopen-cancelled-task-resumes-from-verified-cache', 'passed': True})
     find_and_tap('下载')
     state = wait(lambda s: s.get('folder', '').startswith(base + '/CustomDownloads/'))
     before = state['downloaded']

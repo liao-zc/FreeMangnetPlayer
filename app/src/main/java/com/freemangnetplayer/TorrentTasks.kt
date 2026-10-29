@@ -107,7 +107,7 @@ object TorrentTasks {
         for (task in tasks.values.sortedByDescending { it.viewers > 0 }) {
             if (task.cancelled || task.stopping || task.clearing || task.paused || task.moving) continue
             if (task.engine != null) {
-                if (task.queued && active < limit) { task.queued = false; task.engine?.resume(); active++ }
+                if (task.queued && active < limit) { task.queued = false; resumeEngine(task); active++ }
                 continue
             }
             if (task.job?.isActive == true || (task.complete && task.viewers == 0)) continue
@@ -214,9 +214,12 @@ object TorrentTasks {
         }
     }
     fun select(task: TorrentTask, selected: Set<Int>) {
+        val wasEmpty = task.selected.isEmpty()
         task.selected = selected.filter { index -> task.files.any { it.index == index } }.toSet()
         task.complete = false
-        applyPriorities(task); persist()
+        applyPriorities(task)
+        if (wasEmpty && task.selected.isNotEmpty() && !task.paused) task.handle?.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL)
+        persist()
     }
     fun playFile(task: TorrentTask, index: Int) {
         task.streaming = true; task.playingIndex = index; task.complete = false; task.lastUsed = System.currentTimeMillis()
@@ -249,11 +252,20 @@ object TorrentTasks {
     fun pause(task: TorrentTask) {
         task.paused = true; task.engine?.pause(); task.status = "已暂停，缓存保留"; persist(); schedule()
     }
+    private fun resumeEngine(task: TorrentTask) {
+        task.engine?.resume()
+        task.handle?.let { handle ->
+            handle.resume()
+            handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL)
+            handle.forceDHTAnnounce()
+        }
+        applyPriorities(task)
+    }
     fun resume(task: TorrentTask) {
         task.paused = false
         val active = tasks.values.count { it !== task && (it.engine != null || it.job?.isActive == true) && !it.paused && !it.queued && !it.complete && !it.cancelled }
         task.queued = active >= SettingsStore.maxDownloads(context)
-        if (!task.queued) task.engine?.resume()
+        if (!task.queued) resumeEngine(task)
         schedule(); persist()
     }
     fun cancel(task: TorrentTask, delete: Boolean = false) {
