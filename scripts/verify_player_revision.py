@@ -105,7 +105,6 @@ def main():
     assert state()['duration']>0
     screenshot('revision-03-integrated-controls.png')
     record('all-player-controls-inside-video',surface=area,controls=actual)
-    record('playback-time-duration-and-scrubbable-progress',duration=state()['duration'],controls=actual)
     control('exo_play_pause'); wait(lambda s:not s.get('playing'))
     control('exo_play_pause'); wait(lambda s:s.get('playing'))
     control('player_speed'); wait(lambda s:s.get('speed')!=1)
@@ -113,6 +112,13 @@ def main():
     control('exo_rew'); rewind=state()
     assert rewind['position']<forward['position'],(forward,rewind)
     record('embedded-pause-play-speed-and-seek',forward=forward,rewind=rewind)
+    _, bar = controller('player_progress')
+    x1,y1,x2,y2 = bounds(bar)
+    target = state()['duration']*.10
+    adb('shell','input','tap',str(x1+int((x2-x1)*.10)),str((y1+y2)//2))
+    scrubbed=wait(lambda s:s.get('playing') and abs(s.get('position',0)-target)<6000)
+    record('playback-time-duration-and-scrubbable-progress',duration=scrubbed['duration'],target=target,actual=scrubbed['position'],controls=actual)
+
     control('player_fullscreen'); wait(lambda s:s.get('fullscreen') and s.get('playing'))
     if 'Got it' in ' '.join(n.get('text','') for n in tree().iter('node')): find_and_tap('Got it')
     controller()
