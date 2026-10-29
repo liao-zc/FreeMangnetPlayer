@@ -106,7 +106,7 @@ class PlayerActivity : ComponentActivity() {
                                         runCatching { startPlayback(current, file) }.onFailure { releasePlayer(); playerMessage = "播放器准备失败：${it.localizedMessage}"; retryAfter = System.currentTimeMillis() + 3000 }
                                     } else playerMessage = "该链接没有可识别的视频文件，可选择文件下载"
                                 }
-                                if (attached && applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+                                if (attached && applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) { runCatching {
                                     val rows = JSONArray()
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
                                     File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", current.source).put("id", current.id)
@@ -121,7 +121,7 @@ class PlayerActivity : ComponentActivity() {
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
                                     File(filesDir, "tasks-check.json").writeText(tasks.toString())
-                                }
+                                }.onFailure { android.util.Log.w("FreeMangnetPlayer", "Unable to update debug state", it) } }
                                 refreshProgress()
                                 delay(500)
                             }
@@ -187,7 +187,10 @@ class PlayerActivity : ComponentActivity() {
                             } }
                         }
                         if (current.files.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            OutlinedButton(onClick = { TorrentTasks.retainCache(current); playerMessage = "已保存为缓存，切换资源后继续保留" }, modifier = Modifier.weight(1f).height(48.dp)) { Text(if (current.retainedCache) "已缓存" else "缓存") }
+                            OutlinedButton(onClick = {
+                                playerMessage = if (TorrentTasks.retainCache(current)) "已保存为缓存，切换资源后继续保留" else "已达到最大缓存数量，请清理缓存或修改设置"
+                                android.widget.Toast.makeText(this@PlayerActivity, playerMessage, android.widget.Toast.LENGTH_SHORT).show()
+                            }, modifier = Modifier.weight(1f).height(48.dp)) { Text(if (current.retainedCache) "已缓存" else "缓存") }
                             OutlinedButton(onClick = {
                                 if (current.selected.isEmpty()) playerMessage = "请至少勾选一个下载文件" else {
                                     releasePlayer(); TorrentTasks.download(current)

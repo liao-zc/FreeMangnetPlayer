@@ -89,6 +89,9 @@ object TorrentTasks {
             task.playingIndex = row.optInt("playing", -1)
             task.destination = row.optString("destination").takeIf { it.isNotBlank() }?.let { File(it) }
             task.cancelled = row.optBoolean("cancelled")
+            if (!task.download && !task.retainedCache) {
+                task.cancelled = true; task.paused = true
+            }
             task.status = if (task.cancelled) "已取消，已下载文件保留" else if (task.paused) "已暂停" else "正在恢复并校验缓存…"
             tasks[task.id] = task
         }
@@ -336,10 +339,12 @@ object TorrentTasks {
             }
         }
     }
-    fun retainCache(task: TorrentTask) {
+    fun retainCache(task: TorrentTask): Boolean {
+        if (!task.retainedCache && !task.download && tasks.values.count { it.retainedCache && !it.download && !it.clearing } >= SettingsStore.maxCaches(context)) return false
         task.retainedCache = true
         if (task.paused || task.cancelled) resume(task)
         persist()
+        return true
     }
     fun releaseOtherTemporaryTasks(keep: TorrentTask) {
         // The previous Activity may still be stopping during the new onCreate.
@@ -360,6 +365,7 @@ object TorrentTasks {
         task.handle = null
         task.job?.cancel()
         scope.launch {
+            try {
             task.job?.join()
             withContext(Dispatchers.IO) {
                 closeEngine(task)
@@ -371,6 +377,11 @@ object TorrentTasks {
             task.complete = false; task.streaming = true; task.moving = false
             task.paused = false; task.queued = true; task.job = null
             schedule()
+            } catch (error: Exception) {
+                task.moving = false; task.paused = true
+                task.status = "切换失败：${error.localizedMessage}，可以返回或重试"
+                persist()
+            }
         }
     }
     fun retryDiscovery(task: TorrentTask) {
@@ -510,7 +521,7 @@ object TorrentTasks {
         return tasks.values.count { it.download == download && it.viewers > 0 }
     }
     private fun trimCaches() {
-        val values = tasks.values.filter { !it.download && !it.clearing }.sortedBy { it.lastUsed }
+        val values = tasks.values.filter { !it.download && !it.retainedCache && !it.clearing }.sortedBy { it.lastUsed }
         var excess = values.size - SettingsStore.maxCaches(context)
         for (task in values) if (excess > 0 && task.viewers == 0) { cancel(task, true); excess-- }
     }
@@ -518,7 +529,7 @@ object TorrentTasks {
         if (!initialized) return
         val rows = JSONArray()
         tasks.values.filter { it.download && !it.clearing }.forEach { LibraryStore.updateDownload(context, it.title, it.source, it.status, it.done, it.total) }
-        tasks.values.filter { !it.clearing && (it.download || it.retainedCache) }.forEach { rows.put(JSONObject().put("id", it.id).put("source", it.source).put("title", it.title)
+        tasks.values.filter { !it.clearing }.forEach { rows.put(JSONObject().put("id", it.id).put("source", it.source).put("title", it.title)
             .put("folder", it.folder.absolutePath).put("destination", it.destination?.absolutePath ?: "").put("download", it.download).put("paused", it.paused)
             .put("retainedCache", it.retainedCache).put("cancelled", it.cancelled).put("complete", it.complete).put("selected", JSONArray(it.selected.toList())).put("playing", it.playingIndex)) }
         SettingsStore.prefs(context).edit().putString("torrent-tasks", rows.toString()).apply()
