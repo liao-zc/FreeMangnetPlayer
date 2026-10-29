@@ -22,6 +22,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
     private var pieceLength = 0L
     private var lastPrefetched = -1
     private val flushed = mutableSetOf<Int>()
+    private var pieceSnapshot: com.frostwire.jlibtorrent.TorrentStatus? = null
 
     override fun open(dataSpec: DataSpec): Long {
         transferInitializing(dataSpec)
@@ -68,16 +69,19 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
             }
             if (pendingFlush >= 0 && flushGeneration() > pendingFlush) {
                 flushed.addAll(flushPieces)
+                pieceSnapshot = null
                 continue
             }
             if (pendingFlush < 0 && handle.havePiece(piece)) {
                 // Snapshot verified pieces before flushing. CACHE_FLUSHED confirms those
                 // bytes are on disk, including files sharing a piece with skipped files.
                 // Do not read skipped neighbors: libtorrent may store them in a partfile.
-                val bits = handle.status(TorrentHandle.QUERY_PIECES).pieces()
+                pieceSnapshot = handle.status(TorrentHandle.QUERY_PIECES)
+                val bits = pieceSnapshot!!.pieces()
                 val first = (torrentOffset / pieceLength).toInt()
                 val last = ((torrentEnd - 1) / pieceLength).toInt()
-                flushPieces = (first..last).filter { bits.getBit(it) }
+                flushPieces = (first..last).filter { it < bits.size() && bits.getBit(it) }
+                if (piece !in flushPieces) flushPieces = flushPieces + piece
                 pendingFlush = flushGeneration()
                 handle.flushCache()
             }
@@ -103,7 +107,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         try { file?.close() } finally {
             file = null
             uri = null
-            flushed.clear(); lastPrefetched = -1
+            flushed.clear(); pieceSnapshot = null; lastPrefetched = -1
             if (opened) { opened = false; transferEnded() }
         }
     }
