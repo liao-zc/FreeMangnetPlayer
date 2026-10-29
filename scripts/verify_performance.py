@@ -38,6 +38,13 @@ def clear_app():
 def paste(value):
     # Actual focus + input events; no Activity source extra or .torrent injection.
     find_and_tap('磁力链接输入框')
+    adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
+    tree = ET.fromstring(adb('shell', 'cat', '/sdcard/window.xml'))
+    focused = [n for n in tree.iter('node') if n.get('class') == 'android.widget.EditText' and n.get('focused') == 'true']
+    assert focused, 'No focused magnet field'
+    count = len(focused[0].get('text', '')) + 5
+    adb('shell', 'input', 'keyevent', 'KEYCODE_MOVE_END')
+    adb('shell', 'input', 'keyevent', *(['KEYCODE_DEL'] * count))
     adb('shell', 'input', 'text', shlex.quote(value))
     adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
     screenshot('perf-02-pasted-magnet.png')
@@ -95,11 +102,17 @@ def main():
     find_and_tap('关闭')
     report.append({'check': 'real-native-limits-and-network-diagnostics', 'passed': True})
 
-    # Use the real rewind control to show a representative movie scene.
-    for attempt in range(2):
-        if state().get('position', 0) > 25000:
+    # Use real seek controls to show the movie rather than its opening title.
+    for attempt in range(8):
+        position = state().get('position', 0)
+        if position < 20000:
+            find_and_tap('前进 15 秒')
+        elif position > 45000:
             find_and_tap('后退 15 秒')
-    wait(lambda s: s.get('playing'))
+        else:
+            break
+        time.sleep(1)
+    wait(lambda s: s.get('playing') and 18000 <= s.get('position', 0) <= 60000)
     find_and_tap('全屏播放')
     full = wait(lambda s: s.get('fullscreen') and s.get('playing'))
     from capture_usage_screenshots import visible_text
