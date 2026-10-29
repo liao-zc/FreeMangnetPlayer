@@ -1,0 +1,908 @@
+[
+  {
+    "check": "default-original-quality",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 621572,
+      "total": 12590316,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4366,
+      "peerMilliseconds": 847,
+      "verifiedPieceMilliseconds": 8947,
+      "playbackMilliseconds": 15036,
+      "rebufferCount": 0,
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": false
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 621572,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 11605,
+          "selected": false
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 1128,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 1520,
+      "playerError": "正在播放：Bundle-1/Episode-01.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 88912,
+      "payloadBytes": 646936,
+      "rate": 91950,
+      "dhtNodes": 62,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": true,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 9,
+      "networkMessage": "TRACKER_ERROR - tracker_error - Bundle-1 (https://tracker.gbitt.info/announce)[0.0.0.0:39053] Host not found (authoritative) \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 621572,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 11605,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 4
+    }
+  },
+  {
+    "check": "quality-control-inside-player-with-no-transcoding-claim",
+    "passed": true
+  },
+  {
+    "check": "explicit-cache-records-files-before-completion",
+    "passed": true,
+    "entries": [
+      {
+        "title": "Episode-01.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 2208072,
+        "total": 12590316
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 51
+      },
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 11605,
+        "total": 11011765
+      },
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 19116132
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "缓存中，可继续播放",
+        "downloaded": 13759,
+        "total": 3671275
+      }
+    ]
+  },
+  {
+    "check": "partial-downloaded-video-auto-enters-queue",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 2233436,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4366,
+      "peerMilliseconds": 847,
+      "verifiedPieceMilliseconds": 8947,
+      "playbackMilliseconds": 15036,
+      "rebufferCount": 1,
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 2208072,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 11605,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 12923,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 27680,
+      "playerError": "已保存为缓存，切换资源后继续保留",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 128693,
+      "payloadBytes": 2233436,
+      "rate": 132638,
+      "dhtNodes": 122,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": true,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 9,
+      "networkMessage": "TRACKER_ERROR - tracker_error - Bundle-1 (https://tracker.gbitt.info/announce)[0.0.0.0:39053] Host not found (authoritative) \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 2208072,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 11605,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 4
+    }
+  },
+  {
+    "check": "next-control-switches-to-partial-video",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 3530812,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4366,
+      "peerMilliseconds": 847,
+      "verifiedPieceMilliseconds": 8947,
+      "playbackMilliseconds": 15036,
+      "rebufferCount": 1,
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 3087596,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 429457,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 0,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 1600,
+      "playerError": "正在播放：Bundle-1/Episode-02.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 134314,
+      "payloadBytes": 3530812,
+      "rate": 138494,
+      "dhtNodes": 121,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": true,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 9,
+      "networkMessage": "TRACKER_ERROR - tracker_error - Bundle-1 (https://tracker.gbitt.info/announce)[0.0.0.0:39053] Host not found (authoritative) \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 3087596,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 429457,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 5
+    }
+  },
+  {
+    "check": "download-library-indexes-individual-files",
+    "passed": true,
+    "entries": [
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 0,
+        "total": 19116132
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 0,
+        "total": 51
+      },
+      {
+        "title": "License.txt",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=2&dn=License.txt",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 0,
+        "total": 61
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 13759,
+        "total": 3671275
+      },
+      {
+        "title": "Episode-01.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 3087596,
+        "total": 12590316
+      },
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 916245,
+        "total": 11011765
+      }
+    ]
+  },
+  {
+    "check": "favorite-file-record",
+    "passed": true,
+    "entries": [
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "已收藏",
+        "downloaded": 0,
+        "total": 0
+      }
+    ]
+  },
+  {
+    "check": "cache-entry-discoverable-after-process-restart",
+    "passed": true,
+    "entries": [
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 1042845,
+        "total": 11011765
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 51
+      },
+      {
+        "title": "Episode-01.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 3087596,
+        "total": 12590316
+      },
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 19116132
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "缓存中，可继续播放",
+        "downloaded": 13759,
+        "total": 3671275
+      }
+    ]
+  },
+  {
+    "check": "cached-file-reopens-and-plays",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 4207333,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4366,
+      "peerMilliseconds": 847,
+      "verifiedPieceMilliseconds": 8947,
+      "playbackMilliseconds": 15036,
+      "rebufferCount": 1,
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 3087596,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 1105978,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 2855,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 16400,
+      "playerError": "正在播放：Bundle-1/Episode-02.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Downloads/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 125400,
+      "payloadBytes": 4207333,
+      "rate": 129270,
+      "dhtNodes": 120,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": true,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 9,
+      "networkMessage": "TRACKER_ERROR - tracker_error - Bundle-1 (https://tracker.gbitt.info/announce)[0.0.0.0:39053] Host not found (authoritative) \"\" (3)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 3087596,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 1105978,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 5
+    }
+  },
+  {
+    "check": "existing-lower-resolution-track-selects-real-360p",
+    "passed": true,
+    "before": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 4790624,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 8012,
+      "peerMilliseconds": 9724,
+      "verifiedPieceMilliseconds": 9037,
+      "playbackMilliseconds": 9668,
+      "rebufferCount": 0,
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 454756,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 51,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 61,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 34027,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 3087596,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 1214133,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 0,
+      "playRequested": true,
+      "duration": 30000,
+      "buffered": 440,
+      "playerError": "正在播放：Bundle-1/MultiQuality.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Downloads/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 63841,
+      "payloadBytes": 475136,
+      "rate": 66304,
+      "dhtNodes": 71,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - Bundle-1 (udp://tracker.torrent.eu.org:451/announce)[[::]:43411] timed out \"\" (1)",
+      "videoHeight": 720,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 1,
+          "done": 51,
+          "size": 51
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 3087596,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 1214133,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 0,
+          "done": 454756,
+          "size": 19116132
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 34027,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    "after": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 5266560,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 8012,
+      "peerMilliseconds": 9724,
+      "verifiedPieceMilliseconds": 9037,
+      "playbackMilliseconds": 9668,
+      "rebufferCount": 1,
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 930692,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 51,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 61,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 34027,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 3087596,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 1214133,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 530,
+      "playRequested": true,
+      "duration": 30000,
+      "buffered": 1760,
+      "playerError": "正在播放：Bundle-1/MultiQuality.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Downloads/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 107621,
+      "payloadBytes": 951072,
+      "rate": 111157,
+      "dhtNodes": 70,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - Bundle-1 (udp://tracker.torrent.eu.org:451/announce)[[::]:43411] timed out \"\" (1)",
+      "videoHeight": 360,
+      "qualityHeight": 480,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 1,
+          "done": 51,
+          "size": 51
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 3087596,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 1214133,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 0,
+          "done": 930692,
+          "size": 19116132
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 34027,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    }
+  },
+  {
+    "check": "original-quality-restores-highest-track",
+    "passed": true
+  },
+  {
+    "check": "favorite-delete-keeps-cache-files",
+    "passed": true
+  },
+  {
+    "check": "batch-history-delete-keeps-cache",
+    "passed": true
+  },
+  {
+    "check": "single-cached-file-delete-preserves-other-files",
+    "passed": true,
+    "deleted": {
+      "title": "Episode-01.mp4",
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+      "status": "缓存中，可继续播放",
+      "downloaded": 3087596,
+      "total": 12590316
+    },
+    "remaining": [
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 1264573,
+        "total": 19116132
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "缓存完成",
+        "downloaded": 51,
+        "total": 51
+      },
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 1214133,
+        "total": 11011765
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "缓存中，可继续播放",
+        "downloaded": 34027,
+        "total": 3671275
+      }
+    ]
+  },
+  {
+    "check": "batch-cache-file-delete",
+    "passed": true
+  },
+  {
+    "check": "batch-download-file-deletion",
+    "passed": true
+  }
+]

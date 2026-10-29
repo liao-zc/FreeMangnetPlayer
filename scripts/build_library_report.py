@@ -7,7 +7,9 @@ a=p.parse_args();root=Path(__file__).resolve().parent.parent
 lib=Path(a.library);pages=Path(a.pages);player=Path(a.player)
 checks=json.loads((lib/'library-verification.json').read_text(encoding='utf-8'))
 pagination=json.loads((pages/'pagination-verification.json').read_text(encoding='utf-8'))
-reg=[r for r in json.loads((player/'player-revision-verification.json').read_text(encoding='utf-8')) if 'passed' in r]
+raw_reg=json.loads((player/'player-revision-verification.json').read_text(encoding='utf-8'))
+reg=[r for r in raw_reg if 'passed' in r]
+observations=[r for r in raw_reg if 'passed' not in r]
 assert len(checks)>=16 and all(r['passed'] for r in checks)
 assert len(pagination)==10 and all(r['passed'] for r in pagination)
 assert len(reg)==21 and all(r['passed'] for r in reg)
@@ -15,11 +17,13 @@ target=root/'docs/screenshots/current';target.mkdir(parents=True,exist_ok=True)
 keep={'docs/report.md','docs/usage-zh.md'}
 for directory,prefix in [(lib,'library-'),(pages,'pages-'),(player,'player-')]:
  for image in directory.glob('*.png'):
-  if directory==player and not image.name.startswith('revision-'):continue
+  if prefix=='player-' and not image.name.startswith('revision-'):continue
+  if prefix=='library-' and not image.name.startswith('library-'):continue
+  if prefix=='pages-' and not image.name.startswith(('local-results-','pagination-')):continue
   assert image.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
   path=target/(prefix+image.name);shutil.copyfile(image,path);keep.add(path.relative_to(root).as_posix())
 e=root/'docs/evidence';e.mkdir(exist_ok=True)
-for name,data in [('library',checks),('pages',pagination),('player',reg)]:
+for name,data in [('library',checks),('pages',pagination),('player',reg),('network-observations',observations)]:
  path=e/('current-'+name+'.json');path.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8');keep.add(path.relative_to(root).as_posix())
 version='v0.1.15';url='https://github.com/liao-zc/FreeMangnetPlayer'
 text=f'''# FreeMangnetPlayer {version} 功能优化与实际验收
