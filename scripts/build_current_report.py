@@ -3,6 +3,7 @@ import argparse,json,shutil,subprocess
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
 parser=argparse.ArgumentParser();parser.add_argument('--shots',required=True);parser.add_argument('--run',required=True)
+parser.add_argument('--regression',required=True)
 a=parser.parse_args();root=Path(__file__).resolve().parent.parent;shots=Path(a.shots)
 formats=json.loads((shots/'formats-verification.json').read_text(encoding='utf-8'))
 pages=json.loads((shots/'pagination-verification.json').read_text(encoding='utf-8'))
@@ -138,6 +139,18 @@ v0.1.13 通用包包含四种 CPU 架构，约 250 MB，比参考 ARM 安装包�
 
 GitHub 通知由个人账号设置控制。本项目没有新增发送邮件的工作流；平台 Actions 邮件可在 https://github.com/settings/notifications 调整。
 '''
+regdir=Path(a.regression)
+reg=[r for r in json.loads((regdir/'player-revision-verification.json').read_text(encoding='utf-8')) if 'passed' in r]
+assert len(reg)==21 and all(r['passed'] for r in reg)
+(e/'current-regression.json').write_text(json.dumps(reg,ensure_ascii=False,indent=2),encoding='utf-8')
+for p in regdir.glob('revision-*.png'):
+    if p.read_bytes().startswith(b'\x89PNG\r\n\x1a\n'):shutil.copyfile(p,target/('reg-'+p.name))
+text+='\n## 7. 播放与缓存回归点检\n\nAndroid 15 / API 35 模拟器实际执行 [回归工作流](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40848325867)，21 项通过。受控做种素材用于验证生命周期与下载行为，不代替指定电影。\n\n| 检查项 | 结果 |\n| --- | --- |\n'
+for r in reg:text+=f"| `{r['check']}` | 通过 |\n"
+text+='\n实际操作截图：\n\n'
+for label,name in [('文件列表与选片','02-real-file-list'),('复制目标文件磁力','00b-file-magnet-copy'),('内置播放、暂停、倍速、跳转与进度条','03-integrated-controls'),('全屏','04-fullscreen-icons'),('悬浮画中画','05-real-pip'),('切换第二个文件','06-second-video'),('保留显式缓存','07-explicit-cache'),('缓存数量限制','07b-cache-limit'),('新资源清理临时缓存','08-new-resource'),('RealMedia 播放','09c-realmedia'),('损坏文件错误反馈','09b-media-error'),('重试与返回','11-retry-responsive')]:
+    text+=f'### {label}\n\n![{label}](screenshots/current/reg-revision-{name}.png)\n\n'
+text+='\n[逐项状态与测量数据](evidence/current-regression.json)\n\n时间指标采用约 500 ms 状态轮询及开始播放事件；不是精确视频首帧计时。短暂 Peer 连接可能未采到，出现已下载数据但 Peer 耗时为 -1 不代表没有连接。\n'
 (root/'docs/report.md').write_text(text,encoding='utf-8');(root/'docs/usage-zh.md').write_text(text,encoding='utf-8')
 (root/'README.md').write_text('''# FreeMangnetPlayer
 
