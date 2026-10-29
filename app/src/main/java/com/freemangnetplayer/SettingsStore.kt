@@ -12,7 +12,7 @@ object SettingsStore {
             if (download) "Downloads" else "Cache")
         return File(prefs(c).getString(key, fallback.absolutePath) ?: fallback.absolutePath)
     }
-    fun maxDownloads(c: Context) = prefs(c).getInt("max-downloads", 2).coerceIn(1, 8)
+    fun maxDownloads(c: Context) = prefs(c).getInt("max-downloads", 5).coerceIn(1, 8)
     fun maxCaches(c: Context) = prefs(c).getInt("max-caches", 10).coerceIn(1, 100)
     fun validateRoot(path: String): File {
         require(path.startsWith("/")) { "请输入绝对路径" }

@@ -11,6 +11,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import android.Manifest
 import android.net.Uri
+import android.widget.TextView
+import android.view.View
+import android.view.WindowManager
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -57,11 +60,14 @@ class PlayerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setBackgroundDrawableResource(android.R.color.black)
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (Build.VERSION.SDK_INT >= 33) notifications.launch(Manifest.permission.POST_NOTIFICATIONS)
         val source = intent.getStringExtra("source") ?: intent.data?.toString().orEmpty()
         val title = intent.getStringExtra("title").orEmpty().ifBlank { "资源解析" }
         val result = runCatching { TorrentTasks.obtain(this, source, title, intent.getStringExtra("mode") == "download") }
         task = result.getOrNull()
+        task?.let { TorrentTasks.releaseOtherTemporaryTasks(it) }
         requested = savedInstanceState?.getBoolean("play-requested") ?: (intent.getStringExtra("mode") == "play")
         autoPlay = savedInstanceState?.getBoolean("autoplay") ?: true
         savedPosition = savedInstanceState?.getLong("position") ?: 0L
@@ -84,16 +90,16 @@ class PlayerActivity : ComponentActivity() {
                                         ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.done >= it.size }.thenByDescending { it.index in current.selected }.thenByDescending { it.size }).firstOrNull()
                                     if (file != null) {
                                         TorrentTasks.playFile(current, file.index)
-                                        if (File(current.folder, file.path).exists() && file.done > 0) startPlayback(current, file)
+                                        runCatching { startPlayback(current, file) }.onFailure { playerMessage = "播放器准备失败：${it.localizedMessage}"; retryAfter = System.currentTimeMillis() + 3000 }
                                     } else playerMessage = "该链接没有可识别的视频文件，可选择文件下载"
                                 }
                                 if (attached && applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
                                     val rows = JSONArray()
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
-                                    File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", source).put("id", current.id)
+                                    File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", current.source).put("id", current.id)
                                         .put("metadata", current.files.isNotEmpty()).put("peers", current.peers).put("downloaded", current.done).put("total", current.total)
                                         .put("files", rows).put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
-                                        .put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
+                                        .put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
@@ -109,19 +115,7 @@ class PlayerActivity : ComponentActivity() {
                 }
                 if ((fullscreen || floating) && player != null) {
                     Box(Modifier.fillMaxSize().background(Color.Black)) {
-                        AndroidView(factory = { c -> PlayerView(c).apply {
-                            useController = !floating
-                            setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
-                            player = this@PlayerActivity.player
-                        } }, update = { it.player = player; it.useController = !floating }, modifier = Modifier.fillMaxSize())
-                        if (!floating) {
-                            Row(Modifier.align(Alignment.TopStart).safeDrawingPadding().padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { changeFullscreen(false) }) { Text("退出全屏") }
-                                Button(onClick = { enterFloating() }) { Text("悬浮播放") }
-                                Button(onClick = { fileDialog = true }) { Text("切换视频") }
-                                Button(onClick = { cycleSpeed() }) { Text("${speed}×") }
-                            }
-                        }
+                        VideoSurface(Modifier.fillMaxSize(), { fileDialog = true })
                     }
                 } else {
                 Column(Modifier.fillMaxSize().safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -143,6 +137,7 @@ class PlayerActivity : ComponentActivity() {
                                 if (current.files.isEmpty() && !current.paused && !current.cancelled) LinearProgressIndicator(Modifier.fillMaxWidth())
                                 else LinearProgressIndicator(progress = { if (current.total == 0L) 0f else (current.done.toFloat() / current.total).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
                                 Text("${bytes(current.done)} / ${bytes(current.total)} · ${bytes(current.payloadRate.toLong())}/秒 · ${current.peers} 节点", style = MaterialTheme.typography.bodySmall)
+                                TextButton(onClick = { TorrentTasks.retryDiscovery(current) }) { Text("重试解析 / 连接") }
                                 TextButton(onClick = { networkDialog = true }) { Text("网络诊断 · 不限速 · DHT ${current.dhtNodes}") }
                             }
                         }
@@ -165,26 +160,15 @@ class PlayerActivity : ComponentActivity() {
                             }
                         }
                         if (player != null) {
-                            AndroidView(factory = { c -> PlayerView(c).apply { useController = true; setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING); player = this@PlayerActivity.player } }, update = { it.player = player }, modifier = Modifier.fillMaxWidth().then(if (compact) Modifier.height(240.dp) else Modifier.weight(1f)))
+                            VideoSurface(Modifier.fillMaxWidth().then(if (compact) Modifier.height(240.dp) else Modifier.weight(1f)), { fileDialog = true })
                         } else {
                             Card(Modifier.fillMaxWidth().then(if (compact) Modifier.height(240.dp) else Modifier.weight(1f))) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
                                 Text(playerMessage, style = MaterialTheme.typography.bodySmall)
                             } }
                         }
-                        if (player != null) {
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Button(onClick = { changeFullscreen(true) }, modifier = Modifier.weight(1f).height(48.dp)) { Text("全屏播放") }
-                                OutlinedButton(onClick = { enterFloating() }, modifier = Modifier.weight(1f).height(48.dp)) { Text("悬浮播放") }
-                            }
-                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                OutlinedButton(onClick = { player?.let { it.seekTo((it.currentPosition - 15000).coerceAtLeast(0)) } }, modifier = Modifier.weight(1f)) { Text("后退 15 秒") }
-                                OutlinedButton(onClick = { player?.let { it.seekTo(it.currentPosition + 15000) } }, modifier = Modifier.weight(1f)) { Text("前进 15 秒") }
-                                OutlinedButton(onClick = { cycleSpeed() }, modifier = Modifier.weight(1f)) { Text("${speed}×") }
-                            }
-                        }
                         if (current.files.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            OutlinedButton(onClick = { requestPlayback(false) }, modifier = Modifier.weight(1f).height(48.dp)) { Text("预览") }
+                            OutlinedButton(onClick = { TorrentTasks.retainCache(current); playerMessage = "已保存为缓存，切换资源后继续保留" }, modifier = Modifier.weight(1f).height(48.dp)) { Text(if (current.retainedCache) "已缓存" else "缓存") }
                             OutlinedButton(onClick = {
                                 if (current.selected.isEmpty()) playerMessage = "请至少勾选一个下载文件" else {
                                     releasePlayer(); TorrentTasks.download(current)
@@ -258,26 +242,32 @@ class PlayerActivity : ComponentActivity() {
     }
     private fun switchVideo(task: TorrentTask, index: Int) {
         releasePlayer(); savedPosition = 0; retryAfter = 0
-        TorrentTasks.playFile(task, index); requested = true; autoPlay = true
+        TorrentTasks.switchStreamFile(task, index); requested = true; autoPlay = true
     }
     private fun startPlayback(task: TorrentTask, file: TaskFile) {
         val media = ExoPlayer.Builder(this)
+            .setSeekBackIncrementMs(15000).setSeekForwardIncrementMs(15000)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 15000, 300, 750).build())
-            .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }) })).build()
+            .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }, task.nativeLock) })).build()
         media.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) { playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, task.title, task.source) }
             }
             override fun onPlayerError(error: PlaybackException) {
-                savedPosition = media.currentPosition
-                playerMessage = "等待已校验缓存：${error.errorCodeName}"
-                retryAfter = System.currentTimeMillis() + 3000
-                player = null; media.release()
+                // Release outside ExoPlayer's callback; stale callbacks must not clear a new player.
+                window.decorView.post {
+                    if (player === media && !isDestroyed) {
+                        savedPosition = media.currentPosition
+                        playerMessage = "播放失败：${error.errorCodeName}；可重试或查看网络诊断"
+                        retryAfter = System.currentTimeMillis() + 3000
+                        releasePlayer()
+                    }
+                }
             }
         })
+        player = media
         media.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(task.folder, file.path))))
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
-        player = media
     }
     private fun cycleSpeed() {
         val values = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
@@ -314,7 +304,33 @@ class PlayerActivity : ComponentActivity() {
         super.onUserLeaveHint()
         if (player?.isPlaying == true && !isFinishing) enterFloating()
     }
-    private fun releasePlayer() { player?.let { savedPosition = it.currentPosition; it.release() }; player = null }
+    private fun releasePlayer() {
+        val old = player ?: return
+        player = null
+        savedPosition = old.currentPosition
+        old.stop()
+        old.release()
+    }
+    @Composable
+    private fun VideoSurface(modifier: Modifier, onFiles: () -> Unit) {
+        AndroidView(factory = { context ->
+            (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
+                setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+                setShutterBackgroundColor(android.graphics.Color.BLACK)
+                controllerShowTimeoutMs = 3500
+                setShowRewindButton(true); setShowFastForwardButton(true)
+                findViewById<View>(R.id.player_fullscreen).setOnClickListener { changeFullscreen(!fullscreen) }
+                findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }
+                findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
+                findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
+            }
+        }, update = { view ->
+            view.player = player
+            view.useController = !floating
+            view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
+            view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
+        }, onRelease = { view -> view.player = null }, modifier = modifier.background(Color.Black))
+    }
     override fun onStart() {
         super.onStart()
         task?.let { if (!attached) { it.viewers++; attached = true }; TorrentTasks.schedule() }

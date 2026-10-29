@@ -11,7 +11,7 @@ import java.io.IOException
 import java.io.RandomAccessFile
 
 /** Read only verified torrent pieces, including after seeking into an uncached region. */
-internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHandle?, private val flushGeneration: () -> Long) : BaseDataSource(false) {
+internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHandle?, private val flushGeneration: () -> Long, private val nativeLock: Any) : BaseDataSource(false) {
     private var file: RandomAccessFile? = null
     private var uri: Uri? = null
     private var position = 0L
@@ -26,10 +26,11 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
 
     override fun open(dataSpec: DataSpec): Long {
         transferInitializing(dataSpec)
+        val local = File(dataSpec.uri.path ?: throw IOException("文件地址无效"))
+        synchronized(nativeLock) {
         val handle = handleProvider() ?: throw IOException("磁力任务已关闭")
         val info = handle.torrentFile() ?: throw IOException("尚未取得文件元数据")
         val files = info.files()
-        val local = File(dataSpec.uri.path ?: throw IOException("文件地址无效"))
         val index = (0 until files.numFiles()).firstOrNull {
             File(handle.savePath(), files.filePath(it)).canonicalPath == local.canonicalPath
         } ?: throw IOException("文件不在当前种子列表中")
@@ -41,6 +42,13 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         position = dataSpec.position
         remaining = if (dataSpec.length == C.LENGTH_UNSET.toLong()) size - position else minOf(dataSpec.length, size - position)
         uri = dataSpec.uri
+        }
+        val deadline = SystemClock.elapsedRealtime() + 60_000
+        while (!local.exists()) {
+            if (handleProvider() == null || Thread.currentThread().isInterrupted) throw IOException("读取已取消")
+            if (SystemClock.elapsedRealtime() >= deadline) throw IOException("尚无可播放分片，资源节点未提供数据")
+            try { Thread.sleep(50) } catch (e: InterruptedException) { Thread.currentThread().interrupt(); throw IOException("读取已取消", e) }
+        }
         file = RandomAccessFile(local, "r").apply { seek(position) }
         opened = true
         transferStarted(dataSpec)
@@ -58,6 +66,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         var pendingFlush = -1L
         var flushPieces: List<Int> = emptyList()
         while (piece !in flushed) {
+            synchronized(nativeLock) {
             val handle = handleProvider() ?: throw IOException("磁力任务已关闭")
             if (!handle.isValid || Thread.currentThread().isInterrupted) throw IOException("读取已取消")
             val info = handle.torrentFile() ?: throw IOException("元数据不可用")
@@ -70,9 +79,8 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
             if (pendingFlush >= 0 && flushGeneration() > pendingFlush) {
                 flushed.addAll(flushPieces)
                 pieceSnapshot = null
-                continue
             }
-            if (pendingFlush < 0 && handle.havePiece(piece)) {
+            if (piece !in flushed && pendingFlush < 0 && handle.havePiece(piece)) {
                 // Snapshot verified pieces before flushing. CACHE_FLUSHED confirms those
                 // bytes are on disk, including files sharing a piece with skipped files.
                 // Do not read skipped neighbors: libtorrent may store them in a partfile.
@@ -84,6 +92,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
                 if (piece !in flushPieces) flushPieces = flushPieces + piece
                 pendingFlush = flushGeneration()
                 handle.flushCache()
+            }
             }
             if (SystemClock.elapsedRealtime() >= deadline) throw IOException("视频分片供给不足，请查看资源节点和网络诊断")
             try { Thread.sleep(50) } catch (interrupted: InterruptedException) {
