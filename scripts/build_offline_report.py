@@ -9,8 +9,9 @@ import markdown
 ROOT = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
 parser.add_argument("--output", default=str(ROOT / "dist/FreeMangnetPlayer-v0.1.9-report.html"))
+parser.add_argument("--source", default="docs/usage-zh.md")
 args = parser.parse_args()
-source = ROOT / "docs/usage-zh.md"
+source = (ROOT / args.source).resolve()
 body = markdown.markdown(source.read_text(encoding="utf-8"), extensions=["tables", "fenced_code"])
 
 
