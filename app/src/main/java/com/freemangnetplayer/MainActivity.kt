@@ -742,7 +742,7 @@ internal fun normalizeMagnetUri(raw: String): String? = runCatching {
     val parameters = candidate.substringAfter('?').split('&').mapNotNull { parameter ->
         val key = parameter.substringBefore('=').lowercase()
         val value = parameter.substringAfter('=', "")
-        if (key in setOf("xt", "dn", "tr", "xs", "as", "ws", "x.pe") && value.isNotBlank()) key to value else null
+        if (key in setOf("xt", "dn", "tr", "xs", "as", "ws", "x.pe", "so") && value.isNotBlank()) key to value else null
     }
     val xt = parameters.firstNotNullOfOrNull { (key, value) ->
         if (key != "xt") null else java.net.URLDecoder.decode(value, "UTF-8")
