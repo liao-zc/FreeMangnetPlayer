@@ -38,14 +38,15 @@ def tap(node):
     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
 
 def controller(id=None):
-    root = tree()
-    target = next((n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'player_position'))), None)
-    if target is None:
-        surface = next(n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface'))
-        tap(surface)
-        root = tree()
-        target = next(n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'player_position')))
-    return root,target
+    deadline=time.monotonic()+10
+    while time.monotonic()<deadline:
+        root=tree()
+        target=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'player_position'))),None)
+        if target is not None: return root,target
+        surface=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface')),None)
+        if surface is not None: tap(surface)
+        time.sleep(.2)
+    raise AssertionError('Video/controller did not become visible after orientation transition')
 
 def control(id):
     _, node = controller(id)
