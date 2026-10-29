@@ -18,7 +18,8 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
     private val workers = Executors.newFixedThreadPool(4)
     private val clients = ConcurrentHashMap<Socket, TorrentFileDataSource>()
     @Volatile private var closed = false
-    val uri: Uri = Uri.parse("http://127.0.0.1:${server.localPort}/$token/video.rmvb")
+    private val resourcePath = "/$token/video.${MediaFormats.extension(target.path).ifBlank { "bin" }}"
+    val uri: Uri = Uri.parse("http://127.0.0.1:${server.localPort}$resourcePath")
     init {
         Thread({
             while (!closed) runCatching {
@@ -33,7 +34,7 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
             socket.soTimeout = 15000
             val reader = BufferedReader(InputStreamReader(socket.getInputStream(), Charsets.ISO_8859_1))
             val request = reader.readLine()?.split(' ') ?: return
-            if (request.size < 2 || request[1].substringBefore('?') != "/$token/video.rmvb") return
+            if (request.size < 2 || request[1].substringBefore('?') != resourcePath) return
             var range: String? = null
             var headerCount = 0
             while (headerCount++ < 64) {
