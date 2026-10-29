@@ -179,6 +179,16 @@ object TorrentTasks {
                         override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) {
                             task.handle = engine.retainHandle(handle)
                             handle.setDownloadLimit(0); handle.setUploadLimit(0)
+                            // jlibtorrent 1.2 does not import the standard x.pe extension.
+                            Regex("[?&]x[.]pe=([^&]+)").findAll(task.source).forEach { match ->
+                                runCatching {
+                                    val endpoint = java.net.URLDecoder.decode(match.groupValues[1], "UTF-8")
+                                    val port = endpoint.substringAfterLast(':').toInt()
+                                    val ip = endpoint.substringBeforeLast(':').removePrefix("[").removeSuffix("]")
+                                    require(port in 1..65535)
+                                    handle.swig().connect_peer(TcpEndpoint(ip, port).swig())
+                                }
+                            }
                             setMetadataPriorities(handle, task)
                             handle.forceReannounce(); handle.forceDHTAnnounce()
                         }
