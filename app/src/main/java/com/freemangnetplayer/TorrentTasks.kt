@@ -70,6 +70,7 @@ object TorrentTasks {
             tasks[task.id] = task
         }
     }
+    private fun hasData(folder: File) = folder.isDirectory && folder.walkTopDown().any { it.isFile && it.length() > 0 }
     fun obtain(c: Context, raw: String, title: String, download: Boolean): TorrentTask {
         initialize(c)
         val source = normalizeMagnetUri(raw) ?: raw
@@ -80,7 +81,7 @@ object TorrentTasks {
             // Reuse existing download data before cache data; libtorrent verifies pieces.
             val downloadFolder = File(SettingsStore.root(c, true), "FreeMangnetPlayerTasks/$id")
             val cacheFolder = File(SettingsStore.root(c, false), "FreeMangnetPlayerTasks/$id")
-            val folder = if (downloadFolder.exists()) downloadFolder else if (cacheFolder.exists()) cacheFolder
+            val folder = if (hasData(downloadFolder)) downloadFolder else if (hasData(cacheFolder)) cacheFolder
                 else SettingsStore.taskFolder(c, download, id)
             TorrentTask(id, source, title.ifBlank { "磁力资源" }, folder, download).also { tasks[id] = it }
         }
@@ -153,7 +154,14 @@ object TorrentTasks {
                     val bytes = metadataFile.takeIf { it.exists() }?.readBytes()
                         ?: if (!task.source.contains("&tr=", true) && task.id.length == 40) fetchMetadata(task.id) else null
                     if (task.cancelled) return@withContext
-                    if (bytes != null) engine.start(bytes) else {
+                    if (bytes != null) {
+                        val info = TorrentInfo.bdecode(bytes)
+                        Regex("[?&]tr=([^&]+)").findAll(task.source).forEach {
+                            info.addTracker(java.net.URLDecoder.decode(it.groupValues[1], "UTF-8"), 0)
+                        }
+                        trackers.forEach { info.addTracker(it, 0) }
+                        engine.start(info.bencode())
+                    } else {
                         val source = task.source + trackers.filter { !task.source.contains(java.net.URLEncoder.encode(it, "UTF-8")) }
                             .joinToString("") { "&tr=" + java.net.URLEncoder.encode(it, "UTF-8") }
                         engine.start(context, Uri.parse(source))
@@ -308,7 +316,17 @@ object TorrentTasks {
             connection.connectTimeout = 6000; connection.readTimeout = 6000
             connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 Chrome/131.0.0.0 Mobile Safari/537.36")
             if (connection.responseCode != 200) return@runCatching null
-            val bytes = connection.inputStream.use { it.readBytes().takeIf { data -> data.size <= 2 * 1024 * 1024 } } ?: return@runCatching null
+            val bytes = connection.inputStream.use { input ->
+                val output = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(8192)
+                while (true) {
+                    val count = input.read(buffer)
+                    if (count < 0) break
+                    if (output.size() + count > 2 * 1024 * 1024) return@runCatching null
+                    output.write(buffer, 0, count)
+                }
+                output.toByteArray()
+            } ?: return@runCatching null
             val info = TorrentInfo.bdecode(bytes)
             if (!info.infoHash().toString().equals(hash, true)) return@runCatching null
             trackers.forEach { info.addTracker(it, 0) }; info.bencode()

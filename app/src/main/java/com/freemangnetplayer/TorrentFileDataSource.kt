@@ -17,6 +17,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
     private var position = 0L
     private var remaining = 0L
     private var torrentOffset = 0L
+    private var torrentEnd = 0L
     private var opened = false
 
     override fun open(dataSpec: DataSpec): Long {
@@ -31,6 +32,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         val size = files.fileSize(index)
         if (dataSpec.position > size) throw IOException("播放位置超出文件范围")
         torrentOffset = files.fileOffset(index)
+        torrentEnd = torrentOffset + size
         position = dataSpec.position
         remaining = if (dataSpec.length == C.LENGTH_UNSET.toLong()) size - position else minOf(dataSpec.length, size - position)
         uri = dataSpec.uri
@@ -55,7 +57,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
             val missing = (first..last).filter { !handle.havePiece(it) }
             if (missing.isEmpty()) break
             for (piece in missing) handle.setPieceDeadline(piece, 0)
-            for (piece in (last + 1)..minOf(last + 12, info.numPieces() - 1)) {
+            for (piece in (last + 1)..minOf(last + 12, ((torrentEnd - 1) / pieceLength).toInt())) {
                 if (!handle.havePiece(piece)) handle.setPieceDeadline(piece, 1000)
             }
             if (SystemClock.elapsedRealtime() >= deadline) throw IOException("所需视频分片尚未缓存，等待连接超时")

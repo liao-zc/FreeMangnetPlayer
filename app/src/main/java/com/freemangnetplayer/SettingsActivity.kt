@@ -17,7 +17,7 @@ class SettingsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val prefs = SettingsStore.prefs(this)
         setContent {
-            MaterialTheme {
+            MaterialTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF087F79))) {
                 var download by remember { mutableStateOf(SettingsStore.root(this, true).absolutePath) }
                 var cache by remember { mutableStateOf(SettingsStore.root(this, false).absolutePath) }
                 var downloads by remember { mutableStateOf(SettingsStore.maxDownloads(this).toString()) }

@@ -37,6 +37,7 @@ class PlayerActivity : ComponentActivity() {
     private var savedPosition = 0L
     private var retryAfter = 0L
     private var task: TorrentTask? = null
+    private var attached = false
     private val notifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,7 +46,7 @@ class PlayerActivity : ComponentActivity() {
         val source = intent.getStringExtra("source") ?: intent.data?.toString().orEmpty()
         val title = intent.getStringExtra("title").orEmpty().ifBlank { "资源解析" }
         val result = runCatching { TorrentTasks.obtain(this, source, title, intent.getStringExtra("mode") == "download") }
-        task = result.getOrNull()?.also { it.viewers++ }
+        task = result.getOrNull()
         requested = intent.getStringExtra("mode") == "play"
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF087F79), background = Color(0xFFF3F8FA))) {
@@ -193,8 +194,17 @@ class PlayerActivity : ComponentActivity() {
         player = media
     }
     private fun releasePlayer() { player?.let { savedPosition = it.currentPosition; it.release() }; player = null }
+    override fun onStart() {
+        super.onStart()
+        task?.let { if (!attached) { it.viewers++; attached = true }; TorrentTasks.schedule() }
+    }
+    override fun onStop() {
+        releasePlayer()
+        task?.let { if (attached) { it.viewers = (it.viewers - 1).coerceAtLeast(0); attached = false } }
+        super.onStop()
+    }
     override fun onDestroy() {
-        releasePlayer(); task?.let { it.viewers = (it.viewers - 1).coerceAtLeast(0); it.lastUsed = System.currentTimeMillis() }
+        releasePlayer(); task?.let { if (attached) { it.viewers = (it.viewers - 1).coerceAtLeast(0); attached = false }; it.lastUsed = System.currentTimeMillis() }
         TorrentTasks.persist()
         super.onDestroy()
     }
