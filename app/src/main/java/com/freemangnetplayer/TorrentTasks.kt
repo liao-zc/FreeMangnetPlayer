@@ -211,7 +211,7 @@ object TorrentTasks {
         val info = handle.torrentFile() ?: return
         val f = info.files()
         val rows = (0 until f.numFiles()).map { TaskFile(it, f.filePath(it), f.fileSize(it)) }
-        val selected = task.selected.filter { it in rows.indices }.toSet().ifEmpty { setOf((rows.filter { it.video }.maxByOrNull { it.size } ?: rows.maxBy { it.size }).index) }
+        val selected = task.selected.filter { it in rows.indices && it !in task.deletedFiles }.toSet().ifEmpty { rows.filter { it.index !in task.deletedFiles }.let { available -> (available.filter { it.video }.maxByOrNull { it.size } ?: available.maxByOrNull { it.size })?.let { setOf(it.index) } ?: emptySet() } }
         handle.prioritizeFiles(Array(rows.size) { if (it in selected) Priority.NORMAL else Priority.IGNORE })
     }
     private fun start(task: TorrentTask) {
@@ -327,7 +327,7 @@ object TorrentTasks {
                         task.files = snapshot.first
                         if (task.metadataAt == 0L) task.metadataAt = System.currentTimeMillis()
                         if (task.selected.none { index -> index in task.files.indices }) {
-                            task.selected = setOf((task.files.filter { it.video }.maxByOrNull { it.size } ?: task.files.maxBy { it.size }).index)
+                            task.selected = setOf((task.files.filter { it.video && it.index !in task.deletedFiles }.maxByOrNull { it.size } ?: task.files.filter { it.index !in task.deletedFiles }.maxBy { it.size }).index)
                         }
                         if (task.playingIndex < 0) task.playingIndex = task.files.filter { it.video }.sortedWith(
                             compareByDescending<TaskFile> { it.index in task.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()?.index ?: -1
@@ -580,7 +580,7 @@ object TorrentTasks {
                     }
                 }
             }
-            if (delete) { tasks.remove(task.id); LibraryStore.removeDownload(context, task.source) }
+            if (delete) { tasks.remove(task.id); LibraryStore.removeDownload(context, task.source); LibraryStore.removeTaskCaches(context, task.id) }
             task.stopping = false; task.clearing = false; persist(); schedule()
             } catch (error: Exception) {
                 task.stopping = false; task.clearing = false

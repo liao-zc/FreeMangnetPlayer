@@ -77,6 +77,10 @@ object LibraryStore {
         })
     }
 
+    @Synchronized
+    fun removeTaskCaches(context: Context, id: String) {
+        write(context, "cache-entries", readCaches(context).filterNot { it.source.contains("btih:$id", true) })
+    }
     private fun read(context: Context, key: String): List<LibraryEntry> = runCatching {
         val array = JSONArray(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(key, "[]"))
         (0 until array.length()).mapNotNull { index ->

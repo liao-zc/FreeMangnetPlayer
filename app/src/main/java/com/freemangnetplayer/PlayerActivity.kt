@@ -125,7 +125,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
                                         .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("transportFallbackUsed", current.transportFallbackUsed).put("metadataReplacements", current.engine?.metadataReplacements ?: 0).put("restoredTrackers", current.engine?.restoredTrackers ?: 0).put("networkMessage", current.networkMessage)
-                                        .put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
+                                        .put("qualityHeight", qualityHeight).put("storedQueue", JSONArray().also { a -> StoredVideos.queue(current).forEach { row -> a.put(JSONObject().put("task", row.first.id).put("index", row.second.index).put("done", row.second.done).put("size", row.second.size)) } }).put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
                                     File(filesDir, "tasks-check.json").writeText(tasks.toString())
@@ -149,7 +149,7 @@ class PlayerActivity : ComponentActivity() {
                     Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
-                        OutlinedButton(onClick = { current.files.firstOrNull { it.index == current.playingIndex }?.let { LibraryStore.addFavorite(this@PlayerActivity, it.path.substringAfterLast('/'), StoredVideos.fileSource(current, it)) } ?: LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
+                        OutlinedButton(onClick = { current?.let { t -> t.files.firstOrNull { it.index == t.playingIndex }?.let { LibraryStore.addFavorite(this@PlayerActivity, it.path.substringAfterLast('/'), StoredVideos.fileSource(t, it)) } } ?: LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
                     }
                     val compact = LocalConfiguration.current.screenHeightDp < 720
                     val bodyScroll = rememberScrollState()
