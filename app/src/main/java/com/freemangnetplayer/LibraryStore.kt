@@ -58,6 +58,25 @@ object LibraryStore {
         write(context, DOWNLOADS, read(context, DOWNLOADS).filter { it.source != source })
     }
 
+    @Synchronized
+    fun readCaches(context: Context): List<LibraryEntry> = read(context, "cache-entries")
+    @Synchronized
+    fun saveCache(context: Context, entry: LibraryEntry) {
+        val rows = readCaches(context).filter { it.source != entry.source }.toMutableList()
+        rows.add(0, entry); write(context, "cache-entries", rows)
+    }
+    @Synchronized
+    fun removeEntries(context: Context, kind: String, sources: Set<String>) {
+        val key = when (kind) { "缓存" -> "cache-entries"; "下载" -> DOWNLOADS; "收藏" -> FAVORITES; else -> PLAYBACKS }
+        write(context, key, read(context, key).filter { it.source !in sources })
+    }
+    @Synchronized
+    fun removeFileReferences(context: Context, id: String, indices: Set<Int>) {
+        for (key in listOf("cache-entries", DOWNLOADS, PLAYBACKS, FAVORITES)) write(context, key, read(context, key).filterNot {
+            it.source.contains("btih:$id", true) && Regex("[?&]so=(\\d+)").find(it.source)?.groupValues?.get(1)?.toIntOrNull() in indices
+        })
+    }
+
     private fun read(context: Context, key: String): List<LibraryEntry> = runCatching {
         val array = JSONArray(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(key, "[]"))
         (0 until array.length()).mapNotNull { index ->

@@ -23,6 +23,7 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     var download by mutableStateOf(download)
     var files by mutableStateOf<List<TaskFile>>(emptyList())
     var selected by mutableStateOf<Set<Int>>(emptySet())
+    var deletedFiles by mutableStateOf<Set<Int>>(emptySet())
     var playingIndex by mutableIntStateOf(-1)
     var status by mutableStateOf("等待任务调度…")
     var paused by mutableStateOf(false)
@@ -105,6 +106,8 @@ object TorrentTasks {
             task.complete = row.optBoolean("complete")
             task.selected = row.optJSONArray("selected")?.let { a -> (0 until a.length()).map { a.getInt(it) }.toSet() } ?: emptySet()
             task.playingIndex = row.optInt("playing", -1)
+            task.deletedFiles = row.optJSONArray("deletedFiles")?.let { a -> (0 until a.length()).map { a.getInt(it) }.toSet() } ?: emptySet()
+            task.files = row.optJSONArray("files")?.let { a -> (0 until a.length()).map { n -> a.getJSONObject(n).let { f -> TaskFile(f.getInt("index"), f.getString("path"), f.getLong("size"), f.optLong("done")) } } } ?: emptyList()
             task.destination = row.optString("destination").takeIf { it.isNotBlank() }?.let { File(it) }
             task.cancelled = row.optBoolean("cancelled")
             if (!task.download && !task.retainedCache) {
@@ -373,6 +376,7 @@ object TorrentTasks {
                         task.payloadRate < 1024 -> "已连接 ${task.peers} 节点，但有效数据供给较低；可查看网络诊断"
                         else -> "正在下载 / 缓存，可边下边播"
                     }
+                    StoredVideos.sync(context, task)
                     if (task.download) LibraryStore.updateDownload(context, task.title, task.source, task.status, task.done, task.total)
                     if (ticks++ % 4 == 0) { persist(); schedule() }
                     if (task.complete && task.viewers == 0) break
@@ -388,6 +392,7 @@ object TorrentTasks {
     fun retainCache(task: TorrentTask): Boolean {
         if (!task.retainedCache && !task.download && tasks.values.count { it.retainedCache && !it.download && !it.clearing } >= SettingsStore.maxCaches(context)) return false
         task.retainedCache = true
+        StoredVideos.sync(context, task)
         if (task.paused || task.cancelled) resume(task)
         persist()
         return true
@@ -444,7 +449,7 @@ object TorrentTasks {
         task.status = "正在重新发现资源节点；可返回，不会阻塞界面"
     }
     fun select(task: TorrentTask, selected: Set<Int>) {
-        task.selected = selected.filter { index -> task.files.any { it.index == index } }.toSet()
+        task.selected = selected.filter { index -> index !in task.deletedFiles && task.files.any { it.index == index } }.toSet()
         task.complete = allWantedFilesPresent(task)
         if (task.selected.isEmpty() && !task.streaming) {
             // Zero wanted bytes makes libtorrent announce itself as a seed and
@@ -463,6 +468,7 @@ object TorrentTasks {
         persist()
     }
     fun playFile(task: TorrentTask, index: Int) {
+        if (index in task.deletedFiles) return
         if (task.playingIndex != index) task.handle?.clearPieceDeadlines()
         if (!task.download && !task.retainedCache) task.selected = setOf(index)
         task.streaming = true; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
@@ -477,7 +483,7 @@ object TorrentTasks {
     private fun applyPriorities(task: TorrentTask) {
         val handle = task.handle ?: return
         if (task.files.isEmpty() || (task.selected.isEmpty() && !task.streaming)) return
-        handle.prioritizeFiles(Array(task.files.size) { if (it in task.selected || (task.streaming && it == task.playingIndex)) Priority.NORMAL else Priority.IGNORE })
+        handle.prioritizeFiles(Array((task.files.maxOfOrNull { it.index } ?: -1) + 1) { if (it !in task.deletedFiles && (it in task.selected || (task.streaming && it == task.playingIndex))) Priority.NORMAL else Priority.IGNORE })
         val info = handle.torrentFile() ?: return
         if (!task.streaming) return
         val file = task.files.firstOrNull { it.index == task.playingIndex } ?: return
@@ -527,6 +533,32 @@ object TorrentTasks {
         task.queued = !task.complete && active >= SettingsStore.maxDownloads(context)
         if (!task.queued) resumeEngine(task)
         schedule(); persist()
+    }
+    fun deleteFiles(task: TorrentTask, indices: Set<Int>) {
+        if (task.stopping || task.clearing || task.viewers > 0) return
+        val files = task.files.filter { it.index in indices }
+        task.paused = true; task.stopping = true; task.handle = null
+        task.job?.cancel()
+        scope.launch {
+            try {
+                task.job?.join()
+                withContext(Dispatchers.IO) {
+                    closeEngine(task)
+                    for (file in files) {
+                        val path = File(task.folder, file.path).canonicalFile
+                        require(path.path.startsWith(task.folder.canonicalPath + File.separator))
+                        require(!path.exists() || path.delete()) { "删除失败：${file.path}" }
+                    }
+                }
+                task.deletedFiles = task.deletedFiles + indices
+                task.selected = task.selected - indices
+                if (task.playingIndex in indices) { task.playingIndex = -1; task.streaming = false }
+                task.files = task.files.map { if (it.index in indices) it.copy(done = 0) else it }
+                LibraryStore.removeFileReferences(context, task.id, indices)
+                task.status = "所选文件已删除，其他文件保留；任务已暂停"
+            } catch (error: Exception) { task.status = "删除失败：${error.localizedMessage}" }
+            task.stopping = false; persist(); schedule()
+        }
     }
     fun cancel(task: TorrentTask, delete: Boolean = false) {
         task.cancelled = true; task.paused = true; task.status = if (delete) "正在清理任务文件…" else "已取消，已下载文件保留"
@@ -580,7 +612,7 @@ object TorrentTasks {
         tasks.values.filter { it.download && !it.clearing }.forEach { LibraryStore.updateDownload(context, it.title, it.source, it.status, it.done, it.total) }
         tasks.values.filter { !it.clearing }.forEach { rows.put(JSONObject().put("id", it.id).put("source", it.source).put("title", it.title)
             .put("folder", it.folder.absolutePath).put("destination", it.destination?.absolutePath ?: "").put("download", it.download).put("paused", it.paused)
-            .put("retainedCache", it.retainedCache).put("cancelled", it.cancelled).put("complete", it.complete).put("selected", JSONArray(it.selected.toList())).put("playing", it.playingIndex)) }
+            .put("files", JSONArray().also { a -> it.files.forEach { f -> a.put(JSONObject().put("index", f.index).put("path", f.path).put("size", f.size).put("done", f.done)) } }).put("deletedFiles", JSONArray(it.deletedFiles.toList())).put("retainedCache", it.retainedCache).put("cancelled", it.cancelled).put("complete", it.complete).put("selected", JSONArray(it.selected.toList())).put("playing", it.playingIndex)) }
         SettingsStore.prefs(context).edit().putString("torrent-tasks", rows.toString()).apply()
     }
     fun stopAll(reason: String = "后台服务已停止，缓存保留") {

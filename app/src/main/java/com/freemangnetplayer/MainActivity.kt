@@ -87,6 +87,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        TorrentTasks.initialize(this)
         val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()?.let(::normalizeMagnetUri)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val debug = applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0
@@ -128,6 +129,7 @@ class MainActivity : ComponentActivity() {
                 val pageNext = remember { mutableStateMapOf<Int, String>() }
                 val downloads = remember { mutableStateListOf<LibraryEntry>() }
                 val favorites = remember { mutableStateListOf<LibraryEntry>() }
+                val caches = remember { mutableStateListOf<LibraryEntry>() }
                 val playbacks = remember { mutableStateListOf<LibraryEntry>() }
                 val focus = LocalFocusManager.current
                 val lifecycleOwner = LocalLifecycleOwner.current
@@ -137,6 +139,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 fun reloadLibrary() {
+                    TorrentTasks.tasks.values.forEach { StoredVideos.sync(this@MainActivity, it) }
+                    caches.clear(); caches.addAll(LibraryStore.readCaches(this@MainActivity))
                     downloads.clear()
                     downloads.addAll(LibraryStore.readDownloads(this@MainActivity))
                     favorites.clear()
@@ -309,28 +313,13 @@ class MainActivity : ComponentActivity() {
                                 onParse = { openTorrent(it, "parse") },
                                 onDownload = { openTorrent(it, "download") }
                             )
-                            "播放" -> LibraryScreen(
-                                title = "播放列表",
-                                entries = playbacks,
-                                emptyText = "开始播放的资源会保存在这里，方便继续观看。",
-                                openLabel = "继续播放",
-                                onOpen = { openTorrent(it, "play") },
-                                onDownload = { openTorrent(it, "download") }
-                            )
-                            "下载" -> LibraryScreen(
-                                title = "下载任务",
-                                entries = downloads,
-                                emptyText = "这里会显示你实际开始的下载任务。",
-                                onOpen = { openTorrent(it, "parse") },
-                                onDownload = { openTorrent(it, "download") }
-                            )
-                            "收藏" -> LibraryScreen(
-                                title = "我的收藏",
-                                entries = favorites,
-                                emptyText = "完成资源解析后可收藏资源，并从这里重新打开。",
-                                onOpen = { openTorrent(it, "parse") },
-                                onDownload = { openTorrent(it, "download") }
-                            )
+                            "播放" -> Column {
+                                Row { TextButton(onClick = { selectedTab = "缓存"; reloadLibrary() }) { Text("缓存视频 (${caches.size})") } }
+                                ManagedLibrary("播放列表", playbacks, "播放", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                            }
+                            "缓存" -> ManagedLibrary("缓存视频", caches, "缓存", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                            "下载" -> ManagedLibrary("下载任务", downloads, "下载", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                            "收藏" -> ManagedLibrary("我的收藏", favorites, "收藏", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             else -> SearchHome(
                                 keyword = keyword,
                                 onKeywordChange = { keyword = it; error = "" },
@@ -664,6 +653,11 @@ private fun SearchResultsScreen(
     onParse: (MagnetResult) -> Unit,
     onDownload: (MagnetResult) -> Unit
 ) {
+    var localPage by remember(page, keyword, engine) { mutableIntStateOf(1) }
+    val localPages = ((results.size + 9) / 10).coerceAtLeast(1)
+    val shownPage = localPage.coerceAtMost(localPages)
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(shownPage, page) { listState.scrollToItem(0) }
     Column(Modifier.fillMaxSize().background(canvas).padding(horizontal = 16.dp, vertical = 10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedButton(onClick = onBack, modifier = Modifier.height(54.dp)) { Text("‹ 返回") }
@@ -684,8 +678,13 @@ private fun SearchResultsScreen(
         when {
             results.isNotEmpty() -> {
                 Text("本页 ${results.size} 条磁力链接（不限制结果数量）", Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.bodyMedium)
-                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(results, key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    TextButton(onClick = { localPage = shownPage - 1 }, enabled = shownPage > 1) { Text("前 10 条") }
+                    Text("结果 $shownPage / $localPages 页")
+                    TextButton(onClick = { localPage = shownPage + 1 }, enabled = shownPage < localPages) { Text("后 10 条") }
+                }
+                LazyColumn(Modifier.weight(1f), state = listState, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    items(results.drop((shownPage - 1) * 10).take(10), key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
                 }
             }
             state == "loading" -> Column(

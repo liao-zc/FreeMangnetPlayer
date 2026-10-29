@@ -62,6 +62,7 @@ class PlayerActivity : ComponentActivity() {
     private var resumeAfterScrub = false
     private var attached = false
     private var superseded = false
+    private var qualityHeight = 0
     companion object { private var activePlayer = java.lang.ref.WeakReference<PlayerActivity>(null) }
     private val notifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
@@ -94,6 +95,7 @@ class PlayerActivity : ComponentActivity() {
                 val current = task
                 var favorite by remember { mutableStateOf(LibraryStore.readFavorites(this).any { it.source == source }) }
                 var fileDialog by remember { mutableStateOf(false) }
+                var qualityDialog by remember { mutableStateOf(false) }
                 var deleteDialog by remember { mutableStateOf(false) }
                 var networkDialog by remember { mutableStateOf(false) }
                 BackHandler(enabled = fullscreen && !floating) { changeFullscreen(false) }
@@ -101,8 +103,8 @@ class PlayerActivity : ComponentActivity() {
                         LaunchedEffect(current) {
                             while (true) {
                                 if (attached && requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.destination == null && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
-                                    val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
-                                        ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.index in current.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()
+                                    val file = current.files.firstOrNull { it.index == current.playingIndex && it.video && it.index !in current.deletedFiles }
+                                        ?: current.files.filter { it.video && it.index !in current.deletedFiles }.sortedWith(compareByDescending<TaskFile> { it.index in current.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()
                                     if (file != null) {
                                         TorrentTasks.playFile(current, file.index)
                                         runCatching { startPlayback(current, file) }.onFailure { releasePlayer(); playerMessage = "播放器准备失败：${it.localizedMessage}"; retryAfter = System.currentTimeMillis() + 3000 }
@@ -135,7 +137,7 @@ class PlayerActivity : ComponentActivity() {
                 }
                 if (fullscreen || floating) {
                     Box(Modifier.fillMaxSize().background(Color.Black)) {
-                        VideoSurface(Modifier.fillMaxSize(), { fileDialog = true })
+                        VideoSurface(Modifier.fillMaxSize(), onQuality = { qualityDialog = true }, onFiles = { fileDialog = true })
                         if (player == null && !floating) Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                             if (requested) CircularProgressIndicator(color = Color.White)
                             else TextButton(onClick = { requestPlayback(true) }) { Text("重试播放", color = Color.White) }
@@ -147,7 +149,7 @@ class PlayerActivity : ComponentActivity() {
                     Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
-                        OutlinedButton(onClick = { LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
+                        OutlinedButton(onClick = { current.files.firstOrNull { it.index == current.playingIndex }?.let { LibraryStore.addFavorite(this@PlayerActivity, it.path.substringAfterLast('/'), StoredVideos.fileSource(current, it)) } ?: LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
                     }
                     val compact = LocalConfiguration.current.screenHeightDp < 720
                     val bodyScroll = rememberScrollState()
@@ -156,7 +158,7 @@ class PlayerActivity : ComponentActivity() {
                         Text("任务启动失败：${result.exceptionOrNull()?.localizedMessage}")
                     } else {
                         if (player != null) {
-                            VideoSurface(Modifier.fillMaxWidth().height(240.dp), { fileDialog = true })
+                            VideoSurface(Modifier.fillMaxWidth().height(240.dp), onQuality = { qualityDialog = true }, onFiles = { fileDialog = true })
                         } else {
                             Card(Modifier.fillMaxWidth().height(240.dp)) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
@@ -220,9 +222,16 @@ class PlayerActivity : ComponentActivity() {
                 if (current != null) {
                         if (fileDialog) AlertDialog(onDismissRequest = { fileDialog = false }, title = { Text("选择下载 / 切换视频") }, text = {
                             Column {
+                                Text("已缓存 / 下载的视频（含未完成）")
+                                LazyColumn(Modifier.heightIn(max = 140.dp)) {
+                                    items(StoredVideos.queue(current), key = { it.first.id + ":" + it.second.index }) { row ->
+                                        TextButton(onClick = { openStored(row.first, row.second); fileDialog = false }) { Text(row.second.path.substringAfterLast('/')) }
+                                    }
+                                }
+                                Text("当前链接文件")
                                 Row { TextButton(onClick = { TorrentTasks.select(current, current.files.map { it.index }.toSet()) }) { Text("全选") }; TextButton(onClick = { TorrentTasks.select(current, emptySet()) }) { Text("全不选") } }
                                 LazyColumn(Modifier.heightIn(max = 400.dp)) {
-                                    items(current.files) { file -> Column {
+                                    items(current.files.filter { it.index !in current.deletedFiles }) { file -> Column {
                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                             Checkbox(file.index in current.selected, { checked -> TorrentTasks.select(current, if (checked) current.selected + file.index else current.selected - file.index) })
                                             Text(file.path, Modifier.weight(1f))
@@ -233,6 +242,12 @@ class PlayerActivity : ComponentActivity() {
                                 }
                             }
                         }, confirmButton = { TextButton(onClick = { fileDialog = false }) { Text("完成") } })
+                    if (qualityDialog) AlertDialog(onDismissRequest = { qualityDialog = false }, title = { Text("播放画质") }, text = {
+                        Column {
+                            Text("默认原画质。720p / 480p 仅选择文件中已有的视频轨道；单画质磁力无法靠缩小画面减少下载量。")
+                            for (height in listOf(0, 720, 480)) TextButton(onClick = { selectQuality(height); qualityDialog = false }) { Text(if (height == 0) "原画质" else "${height}p（需已有低清轨道）") }
+                        }
+                    }, confirmButton = { TextButton(onClick = { qualityDialog = false }) { Text("关闭") } })
                     if (networkDialog) AlertDialog(onDismissRequest = { networkDialog = false }, title = { Text("真实网络诊断") }, text = {
                         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("应用下载限速：${current.downloadLimit}（0 为不限速）\n应用上传限速：${current.uploadLimit}（0 为不限速）")
@@ -265,7 +280,7 @@ class PlayerActivity : ComponentActivity() {
         task?.let { current ->
             if (play && (current.paused || current.cancelled)) TorrentTasks.resume(current)
             if (current.selectionPaused) {
-                val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
+                val file = current.files.firstOrNull { it.index == current.playingIndex && it.video && it.index !in current.deletedFiles }
                     ?: current.files.firstOrNull { it.video }
                 if (file != null) TorrentTasks.playFile(current, file.index)
             }
@@ -286,7 +301,7 @@ class PlayerActivity : ComponentActivity() {
         var playedOnce = false
         media.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) { playedOnce = true; if (task.playbackAt == 0L) task.playbackAt = System.currentTimeMillis(); playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, task.title, task.source) }
+                if (isPlaying) { playedOnce = true; if (task.playbackAt == 0L) task.playbackAt = System.currentTimeMillis(); playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, file.path.substringAfterLast('/'), StoredVideos.fileSource(task, file)) }
             }
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (player === media && playedOnce && playbackState == Player.STATE_BUFFERING) task.rebufferCount++
@@ -312,7 +327,32 @@ class PlayerActivity : ComponentActivity() {
         })
         player = media
         if (!realMedia) media.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(task.folder, file.path))))
+        if (media is ExoPlayer) media.trackSelectionParameters = media.trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true).build()
+        qualityHeight = 0
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
+    }
+    private fun openStored(target: TorrentTask, file: TaskFile) {
+        val current = task ?: return
+        if (target === current) { switchVideo(current, file.index); return }
+        startActivity(android.content.Intent(this, PlayerActivity::class.java)
+            .putExtra("source", StoredVideos.fileSource(target, file)).putExtra("title", file.path.substringAfterLast('/')).putExtra("mode", "play"))
+        finish()
+    }
+    private fun playNextStored() {
+        val current = task ?: return
+        val queue = StoredVideos.queue(current)
+        val index = queue.indexOfFirst { it.first === current && it.second.index == current.playingIndex }
+        val next = queue.getOrNull(index + 1)
+        if (next != null) openStored(next.first, next.second)
+        else android.widget.Toast.makeText(this, "没有下一个已缓存或下载的视频", android.widget.Toast.LENGTH_SHORT).show()
+    }
+    private fun selectQuality(height: Int) {
+        val media = player as? ExoPlayer
+        if (height == 0) { qualityHeight = 0; media?.let { it.trackSelectionParameters = it.trackSelectionParameters.buildUpon().clearVideoSizeConstraints().setForceHighestSupportedBitrate(true).build() }; return }
+        val available = media?.currentTracks?.groups?.any { group -> group.type == C.TRACK_TYPE_VIDEO && (0 until group.length).any { group.getTrackFormat(it).height in 1..height } } == true
+        if (!available) { android.widget.Toast.makeText(this, "当前文件没有可选低清轨道；请在文件列表选择低码率版本", android.widget.Toast.LENGTH_LONG).show(); return }
+        qualityHeight = height
+        media!!.trackSelectionParameters = media.trackSelectionParameters.buildUpon().setMaxVideoSize(height * 16 / 9, height).setForceHighestSupportedBitrate(false).build()
     }
     private fun copyFileMagnet(current: TorrentTask, file: TaskFile) {
         val extras = current.source.substringAfter('?', "").split('&').filter {
@@ -372,7 +412,7 @@ class PlayerActivity : ComponentActivity() {
         old.release()
     }
     @Composable
-    private fun VideoSurface(modifier: Modifier, onFiles: () -> Unit) {
+    private fun VideoSurface(modifier: Modifier, onQuality: () -> Unit = {}, onFiles: () -> Unit) {
         AndroidView(factory = { context ->
             (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
                 setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
@@ -383,6 +423,8 @@ class PlayerActivity : ComponentActivity() {
                 findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }
                 findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
                 findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
+                findViewById<View>(R.id.player_next).setOnClickListener { playNextStored() }
+                findViewById<View>(R.id.player_quality).setOnClickListener { onQuality() }
                 findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
                     override fun onScrubStart(timeBar: androidx.media3.ui.TimeBar, position: Long) {
                         scrubbing = true; resumeAfterScrub = this@PlayerActivity.player?.playWhenReady == true
