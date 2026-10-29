@@ -25,4 +25,4 @@ for fixture in json.loads(Path('format-fixtures.json').read_text()):
         row['passed']=played and row['download_sha256_matches']
     rows.append(row);(OUT/'formats-verification.json').write_text(json.dumps(rows,ensure_ascii=False,indent=2),encoding='utf-8')
     if not row['passed']:print('Actual format failure',fixture['extension'],st)
-assert len(rows)==13 and all(r['passed'] for r in rows),[(r['check'],r['state']) for r in rows if not r['passed']]
+assert len(rows)==16 and all(r['passed'] for r in rows),[(r['check'],r['state']) for r in rows if not r['passed']]
