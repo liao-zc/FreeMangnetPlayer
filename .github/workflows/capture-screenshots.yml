@@ -49,7 +49,7 @@ jobs:
         if: inputs.mode == 'full' || inputs.mode == 'engines'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y python3-libtorrent ffmpeg
+          sudo apt-get install -y python3-libtorrent python3-pil ffmpeg
           python3 -m pip install playwright
           python3 -m playwright install --with-deps chromium
           /usr/bin/python3 scripts/torrent_fixture.py > fixture.log 2>&1 &
@@ -60,7 +60,7 @@ jobs:
         if: inputs.mode == 'optimization'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y python3-libtorrent ffmpeg
+          sudo apt-get install -y python3-libtorrent python3-pil ffmpeg
           /usr/bin/python3 scripts/optimization_fixture.py > fixture.log 2>&1 &
           for i in $(seq 1 120); do test -f optimization-fixture.json && break; sleep 1; done
           test -f optimization-fixture.json || (cat fixture.log; exit 1)
@@ -68,7 +68,7 @@ jobs:
         if: inputs.mode == 'performance' || github.event_name == 'push'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y python3-libtorrent ffmpeg
+          sudo apt-get install -y python3-libtorrent python3-pil ffmpeg
           /usr/bin/python3 scripts/performance_fixture.py > fixture.log 2>&1 &
           for i in $(seq 1 240); do test -f performance-fixture.json && break; sleep 1; done
           test -f performance-fixture.json || (cat fixture.log; exit 1)

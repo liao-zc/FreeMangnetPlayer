@@ -161,6 +161,7 @@ text += '''
 '''
 text += image('perf-07-floating-over-home.png', '系统 pinned 画中画窗口中的真实影片')
 text += f"\n悬浮期间播放位置从 {pip['position_before']} ms 前进到 {pip['position_after']} ms，系统窗口状态为 pinned，播放器未因页面离开而释放。\n"
+text += image('perf-07b-system-menu.png', '实际系统悬浮窗菜单中的展开与关闭控制')
 text += image('perf-08-return-from-floating.png', '返回播放器后的真实影片')
 text += '\n## 6. 逐项点检\n\n| 点检项 | 结果 |\n| --- | --- |\n'
 for name in required:
