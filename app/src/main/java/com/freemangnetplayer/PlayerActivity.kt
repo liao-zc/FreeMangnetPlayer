@@ -317,7 +317,7 @@ class PlayerActivity : ComponentActivity() {
             (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
                 setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                 setShutterBackgroundColor(android.graphics.Color.BLACK)
-                controllerShowTimeoutMs = 3500
+                controllerShowTimeoutMs = 5000
                 setShowRewindButton(true); setShowFastForwardButton(true)
                 findViewById<View>(R.id.player_fullscreen).setOnClickListener { changeFullscreen(!fullscreen) }
                 findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }

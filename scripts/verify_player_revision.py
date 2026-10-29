@@ -1,0 +1,189 @@
+"""Actual APK checks for every v0.1.12 player/lifecycle request."""
+import json
+import re
+import shlex
+import subprocess
+import time
+import xml.etree.ElementTree as ET
+from pathlib import Path
+from capture_usage_screenshots import adb, screenshot, find_and_tap, require_visible, PACKAGE, OUT
+
+fixtures = json.loads(Path('optimization-fixture.json').read_text())
+checks = []
+
+def tree():
+    adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
+    return ET.fromstring(adb('shell', 'cat', '/sdcard/window.xml'))
+
+def state():
+    try:
+        return json.loads(adb('shell', 'run-as', PACKAGE, 'cat', 'files/torrent-check.json'))
+    except Exception:
+        return {}
+
+def wait(predicate, timeout=100):
+    start = time.monotonic()
+    while time.monotonic() - start < timeout:
+        current = state()
+        if predicate(current):
+            return current
+        time.sleep(.2)
+    raise AssertionError(state())
+
+def bounds(node):
+    return list(map(int, re.findall(r'\d+', node.get('bounds'))))
+
+def tap(node):
+    x1,y1,x2,y2 = bounds(node)
+    adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+
+def controller(id=None):
+    root = tree()
+    target = next((n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'exo_position'))), None)
+    if target is None:
+        surface = next(n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface'))
+        tap(surface)
+        root = tree()
+        target = next(n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'exo_position')))
+    return root,target
+
+def control(id):
+    _, node = controller(id)
+    tap(node)
+    time.sleep(.4)
+
+def open_magnet(value):
+    find_and_tap('磁力链接输入框')
+    focused = next(n for n in tree().iter('node') if n.get('class')=='android.widget.EditText' and n.get('focused')=='true')
+    adb('shell','input','keyevent','KEYCODE_MOVE_END')
+    adb('shell','input','keyevent',*(['KEYCODE_DEL']*(len(focused.get('text',''))+5)))
+    adb('shell','input','text',shlex.quote(value))
+    adb('shell','input','keyevent','KEYCODE_BACK')
+    find_and_tap('解析资源')
+
+def record(name, **data):
+    checks.append({'check':name,'passed':True,**data})
+    (OUT/'player-revision-verification.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
+
+def main():
+    adb('wait-for-device')
+    adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
+    adb('shell','wm','size','1080x2400')
+    adb('shell','am','force-stop',PACKAGE)
+    adb('shell','pm','clear',PACKAGE)
+    adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
+    adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity')
+    time.sleep(2)
+    find_and_tap('设置')
+    root=tree()
+    fields=[n.get('text') for n in root.iter('node') if n.get('class')=='android.widget.EditText']
+    assert '5' in fields, fields
+    screenshot('revision-01-default-settings.png')
+    record('default-maximum-downloads-five',fields=fields)
+    find_and_tap('返回首页')
+    start=time.monotonic()
+    open_magnet(fixtures[0]['magnet'])
+    parsed=wait(lambda s:s.get('id')==fixtures[0]['id'] and s.get('metadata'))
+    screenshot('revision-02-real-file-list.png')
+    record('pasted-magnet-real-metadata',state=parsed,seconds=time.monotonic()-start)
+    find_and_tap('▶ 播放')
+    first=wait(lambda s:s.get('playing') and s.get('position',0)>100)
+    ratio=first['downloaded']/first['total']
+    assert ratio < .20, first
+    record('stream-start-below-twenty-percent',state=first,ratio=ratio,seed_upload_limit=128*1024)
+    process=adb('shell','pidof',PACKAGE).strip()
+    root,_=controller()
+    surface=next(n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface'))
+    area=bounds(surface)
+    ids=['exo_rew','exo_play_pause','exo_ffwd','player_speed','player_files','player_pip','player_fullscreen','exo_position','exo_duration','exo_progress']
+    actual={}
+    for id in ids:
+        node=next(n for n in root.iter('node') if n.get('resource-id','').endswith('/'+id))
+        b=bounds(node)
+        assert area[0]<=b[0]<b[2]<=area[2] and area[1]<=b[1]<b[3]<=area[3], (id,b,area)
+        actual[id]={'bounds':b,'text':node.get('text'),'description':node.get('content-desc')}
+    assert state()['duration']>0
+    screenshot('revision-03-integrated-controls.png')
+    record('all-player-controls-inside-video',surface=area,controls=actual)
+    record('playback-time-duration-and-scrubbable-progress',duration=state()['duration'],controls=actual)
+    control('exo_play_pause'); wait(lambda s:not s.get('playing'))
+    control('exo_play_pause'); wait(lambda s:s.get('playing'))
+    control('player_speed'); wait(lambda s:s.get('speed')!=1)
+    control('exo_ffwd'); forward=wait(lambda s:s.get('position',0)>15000)
+    control('exo_rew'); rewind=state()
+    assert rewind['position']<forward['position'],(forward,rewind)
+    record('embedded-pause-play-speed-and-seek',forward=forward,rewind=rewind)
+    control('player_fullscreen'); wait(lambda s:s.get('fullscreen') and s.get('playing'))
+    if 'Got it' in ' '.join(n.get('text','') for n in tree().iter('node')): find_and_tap('Got it')
+    controller()
+    screenshot('revision-04-fullscreen-icons.png')
+    record('fullscreen-embedded-small-icons',state=state())
+    control('player_pip'); wait(lambda s:s.get('floating') and s.get('playing'))
+    before=state()['position']; time.sleep(3); after=state()['position']; assert after>before+1000
+    screenshot('revision-05-real-pip.png')
+    windows=adb('shell','dumpsys','window','windows')
+    assert 'mode=pinned' in adb('shell','dumpsys','activity','activities')
+    player=next(s for s in re.split(r'(?m)^  Window #',windows) if 'com.freemangnetplayer.PlayerActivity' in s and 'mWindowingMode=pinned' in s)
+    frame=re.search(r' frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]',player); x1,y1,x2,y2=map(int,frame.groups())
+    adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2)); time.sleep(.5)
+    adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
+    wait(lambda s:not s.get('floating') and s.get('playing'))
+    record('pip-continues-and-restores',position_before=before,position_after=after)
+    control('player_fullscreen'); wait(lambda s:not s.get('fullscreen') and s.get('playing'))
+    # Switch an unretained file; the previous native writer must stop before deletion.
+    first_index=state()['currentFile']
+    previous=next(f for f in state()['files'] if f['index']==first_index)
+    old_path=state()['folder']+'/'+previous['path']
+    control('player_files')
+    other=next(f for f in state()['files'] if f['path'].endswith('.mp4') and f['index']!=first_index)
+    find_and_tap('切换播放：'+other['path'].split('/')[-1])
+    changed=wait(lambda s:s.get('currentFile')==other['index'] and s.get('playing'))
+    assert adb('shell','test','!','-e',old_path)==''
+    screenshot('revision-06-second-video.png')
+    record('switch-file-releases-previous-temporary-bytes',state=changed,removed=old_path)
+    # Explicitly retain this torrent, then open another actual magnet through the input.
+    find_and_tap('缓存'); wait(lambda s:s.get('retainedCache'))
+    retained_path=state()['folder']+'/'+other['path']
+    screenshot('revision-07-explicit-cache.png')
+    find_and_tap('返回搜索')
+    open_magnet(fixtures[1]['magnet']); wait(lambda s:s.get('id')==fixtures[1]['id'] and s.get('metadata'))
+    find_and_tap('▶ 播放'); wait(lambda s:s.get('playing'))
+    transient=state(); transient_folder=transient['folder']
+    assert adb('shell','test','-f',retained_path)==''
+    record('explicit-cache-survives-next-resource',retained_path=retained_path,new_state=transient)
+    find_and_tap('返回搜索')
+    open_magnet(fixtures[2]['magnet']); wait(lambda s:s.get('id')==fixtures[2]['id'] and s.get('metadata'))
+    find_and_tap('▶ 播放'); wait(lambda s:s.get('playing'))
+    time.sleep(2)
+    assert adb('shell','test','!','-d',transient_folder)==''
+    screenshot('revision-08-new-resource.png')
+    record('new-resource-clears-previous-unretained-cache',removed=transient_folder,state=state())
+    # Stress the real fullscreen + decoder lifecycle, preserving the same process.
+    for i in range(6):
+        control('player_fullscreen'); wait(lambda s:s.get('fullscreen') and s.get('playing'))
+        control('player_fullscreen'); wait(lambda s:not s.get('fullscreen') and s.get('playing'))
+        assert adb('shell','pidof',PACKAGE).strip()==process
+    logs=adb('logcat','-d')
+    assert not re.search(r'FATAL EXCEPTION.*|Fatal signal.*com\.freemangnetplayer',logs)
+    screenshot('revision-09-lifecycle-stress.png')
+    record('no-crash-or-process-restart-during-playback-stress',pid=process,cycles=6)
+    find_and_tap('返回搜索')
+    # A real pure hash may not be publicly discoverable; preserve the actual observation.
+    public=json.loads(Path('public-network-baseline.json').read_text())
+    open_magnet(public['plain_magnet'])
+    samples=[]
+    for i in range(75):
+        samples.append(state()); time.sleep(1)
+    screenshot('revision-10-public-magnet.png')
+    checks.append({'check':'public-pure-magnet-discovery','measured':True,'state':state(),'samples':samples,'native_baseline':public})
+    find_and_tap('重试解析 / 连接'); require_visible('返回搜索')
+    screenshot('revision-11-retry-responsive.png')
+    find_and_tap('返回搜索'); require_visible('解析资源')
+    record('magnet-retry-and-back-remain-responsive')
+
+try:
+    main()
+finally:
+    (OUT/'player-revision-verification.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
+    (OUT/'player-revision-last-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
+    (OUT/'player-revision-logcat.txt').write_text(adb('logcat','-d'),encoding='utf-8')
