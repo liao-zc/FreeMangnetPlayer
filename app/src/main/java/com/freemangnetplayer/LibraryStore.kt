@@ -68,7 +68,7 @@ object LibraryStore {
     }
 
     @Synchronized
-    fun readCaches(context: Context): List<LibraryEntry> = read(context, "cache-entries")
+    fun readCaches(context: Context): List<LibraryEntry> = read(context, "cache-entries").sortedBy { it.title }
     @Synchronized
     fun saveCache(context: Context, entry: LibraryEntry) {
         if (readCaches(context).any { it == entry }) return

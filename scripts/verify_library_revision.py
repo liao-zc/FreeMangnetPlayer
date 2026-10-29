@@ -28,6 +28,14 @@ def control(name):
         if n is not None:tap(n)
         time.sleep(.3)
     raise AssertionError('Missing built-in control '+name)
+def open_cache(title):
+    root=tree();parents={child:parent for parent in root.iter() for child in parent}
+    node=next(n for n in root.iter('node') if n.get('text')==title)
+    while node is not None:
+        button=next((n for n in node.iter('node') if n.get('text')=='播放 / 打开'),None)
+        if button is not None:tap(button);return
+        node=parents.get(node)
+    raise AssertionError('No playback action for cached file '+title)
 def prefs():
     return ET.fromstring(adb('shell','run-as',PACKAGE,'cat','shared_prefs/player-settings.xml'))
 def entries(key):
@@ -65,7 +73,7 @@ old_folder=state()['folder'];find_and_tap('下载');wait(lambda s:s.get('folder'
 find_and_tap('收藏');record('favorite-file-record',entries=entries('favorite-entries'))
 restart();require_visible('缓存视频');find_and_tap('缓存视频');require_visible('Episode-01.mp4','Episode-02.mp4');screenshot('library-05-cache-after-restart.png')
 record('cache-entry-discoverable-after-process-restart',entries=caches())
-find_and_tap('播放 / 打开');resumed=wait(lambda s:s.get('playing'));record('cached-file-reopens-and-plays',state=resumed)
+open_cache('Episode-01.mp4');resumed=wait(lambda s:s.get('playing'));record('cached-file-reopens-and-plays',state=resumed)
 control('player_files');find_and_tap('切换播放：Bundle-1/MultiQuality.mp4')
 high=wait(lambda s:s.get('playing') and s.get('videoHeight')==720)
 control('player_quality');find_and_tap('480p');low=wait(lambda s:s.get('qualityHeight')==480 and s.get('videoHeight')==360)
