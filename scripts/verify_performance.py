@@ -147,26 +147,18 @@ def main():
     if expand:
         bounds = list(map(int, re.findall(r'\d+', expand[0].get('bounds'))))
     else:
-        # The PiP menu is a nonfocusable SystemUI overlay and is not included in
-        # uiautomator's active-window tree. Its actual screenshot shows the grey
-        # menu panel with the fullscreen icon at its center. Locate that panel.
-        from PIL import Image
+        # Nonfocusable SystemUI overlays are absent from the active XML tree.
+        # Use the pinned player surface frame, which matches the menu bounds.
         windows = adb('shell', 'dumpsys', 'window', 'windows')
         (OUT / 'pip-system-windows.txt').write_text(windows)
-        assert 'PipMenuActivity' in windows, 'No real SystemUI PiP menu window'
-        image = Image.open(OUT / 'perf-07b-system-menu.png').convert('RGB')
-        width, height = image.size
-        mask = Image.new('1', image.size)
-        pixels = image.load()
-        selected = mask.load()
-        for y in range(height // 2, height):
-            for x in range(width // 2, width):
-                r, g, b = pixels[x, y]
-                if 110 <= r <= 125 and max(r, g, b) - min(r, g, b) <= 2:
-                    selected[x, y] = 1
-        bounds = mask.getbbox()
-        assert bounds and bounds[2] - bounds[0] > 200 and bounds[3] - bounds[1] > 100, 'PiP menu panel not detected'
-        (OUT / 'pip-expand-target.json').write_text(json.dumps({'panel_bounds': bounds, 'method': 'actual SystemUI screenshot'}))
+        assert 'Embedded{PipMenuView}' in windows or 'PipMenuActivity' in windows, 'No real SystemUI PiP menu window'
+        sections = re.split(r'(?m)^  Window #', windows)
+        player = next(section for section in sections if 'com.freemangnetplayer.PlayerActivity' in section and 'mWindowingMode=pinned' in section)
+        match = re.search(r' frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]', player)
+        assert match, 'No pinned player surface frame'
+        bounds = list(map(int, match.groups()))
+        assert bounds[2] - bounds[0] > 200 and bounds[3] - bounds[1] > 100, 'Invalid PiP menu bounds'
+        (OUT / 'pip-expand-target.json').write_text(json.dumps({'panel_bounds': bounds, 'method': 'actual pinned window frame with SystemUI menu present'}))
     adb('shell', 'input', 'tap', str((bounds[0] + bounds[2]) // 2), str((bounds[1] + bounds[3]) // 2))
     restored = wait(lambda s: not s.get('floating') and s.get('playing'))
     screenshot('perf-08-return-from-floating.png')
