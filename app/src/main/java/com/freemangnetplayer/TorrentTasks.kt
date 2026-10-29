@@ -103,6 +103,7 @@ object TorrentTasks {
         require(source.startsWith("magnet:?", true) || source.startsWith("https://") || source.startsWith("http://")) { "资源链接无效" }
         val id = Regex("(?i)xt=urn:btih:([0-9a-f]{40})").find(source)?.groupValues?.get(1)?.lowercase()
             ?: MessageDigest.getInstance("SHA-256").digest(source.toByteArray()).joinToString("") { "%02x".format(it) }
+        require(tasks[id]?.clearing != true) { "当前资源正在清理，请稍后重试解析" }
         val task = tasks[id] ?: run {
             // Reuse existing download data before cache data; libtorrent verifies pieces.
             val downloadFolder = File(SettingsStore.root(c, true), "FreeMangnetPlayerTasks/$id")
@@ -130,7 +131,8 @@ object TorrentTasks {
             }
         }
         task.lastUsed = System.currentTimeMillis()
-        if (task.cancelled && !task.stopping && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
+        if (task.cancelled && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
+        if (task.paused && task.files.isEmpty() && !task.clearing) { task.paused = false; task.queued = true }
         if (download) {
             if (!task.download || task.folder.canonicalPath == File(SettingsStore.root(c, false), "FreeMangnetPlayerTasks/$id").canonicalPath) {
                 task.destination = SettingsStore.taskFolder(c, true, id)
@@ -459,6 +461,7 @@ object TorrentTasks {
         task.paused = true; task.engine?.pause(); task.status = "已暂停，缓存保留"; persist(); schedule()
     }
     private fun resumeEngine(task: TorrentTask) {
+        if (task.stopping || task.clearing || task.moving) return
         task.lastPayloadAt = System.currentTimeMillis()
         task.engine?.resume()
         task.handle?.let { handle ->
@@ -473,7 +476,9 @@ object TorrentTasks {
             val service = Intent(context, DownloadService::class.java)
             if (android.os.Build.VERSION.SDK_INT >= 26) context.startForegroundService(service) else context.startService(service)
         }
-        task.paused = false
+        if (task.clearing) return
+        task.cancelled = false; task.paused = false
+        if (task.stopping || task.moving) { task.queued = true; persist(); return }
         val active = tasks.values.count { it !== task && (it.engine != null || it.job?.isActive == true) && !it.paused && !it.queued && !it.complete && !it.cancelled }
         task.queued = !task.complete && active >= SettingsStore.maxDownloads(context)
         if (!task.queued) resumeEngine(task)

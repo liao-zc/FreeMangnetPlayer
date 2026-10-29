@@ -82,6 +82,7 @@ class PlayerActivity : ComponentActivity() {
         task = result.getOrNull()
         task?.let { TorrentTasks.releaseOtherTemporaryTasks(it) }
         requested = savedInstanceState?.getBoolean("play-requested") ?: (intent.getStringExtra("mode") == "play")
+        if (requested) task?.let { if (it.paused || it.cancelled) TorrentTasks.resume(it) }
         autoPlay = savedInstanceState?.getBoolean("autoplay") ?: true
         savedPosition = savedInstanceState?.getLong("position") ?: 0L
         speed = savedInstanceState?.getFloat("speed") ?: 1f
@@ -254,6 +255,7 @@ class PlayerActivity : ComponentActivity() {
     private fun requestPlayback(play: Boolean) {
         autoPlay = play; requested = true
         task?.let { current ->
+            if (play && (current.paused || current.cancelled)) TorrentTasks.resume(current)
             if (current.selectionPaused) {
                 val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
                     ?: current.files.firstOrNull { it.video }

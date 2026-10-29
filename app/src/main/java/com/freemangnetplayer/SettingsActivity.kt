@@ -57,7 +57,7 @@ class SettingsActivity : ComponentActivity() {
                         }
                         OutlinedTextField(downloads, { downloads = it }, label = { Text("最大同时下载数量（1–8，含缓存）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                         OutlinedTextField(caches, { caches = it }, label = { Text("最大缓存任务数量（1–100）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                        Text("超出并发数的任务排队；缓存达到上限时清除最早使用且未打开的缓存任务。正在播放的任务会保留。", style = MaterialTheme.typography.bodySmall)
+                        Text("超出并发数的任务排队；缓存上限限制新增主动缓存。切换资源会清理临时播放数据，主动缓存和下载文件保留。", style = MaterialTheme.typography.bodySmall)
                         Text("搜索引擎", style = MaterialTheme.typography.titleMedium)
                         Box {
                             OutlinedButton(onClick = { menu = true }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("默认搜索引擎：$engine") }
@@ -85,7 +85,7 @@ class SettingsActivity : ComponentActivity() {
                             }.onFailure { message = "保存失败：${it.localizedMessage}" }
                         }, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("保存设置") }
                         Text(message)
-                        Text("下载任务：${TorrentTasks.tasks.values.count { it.download && !it.clearing }} · 缓存任务：${TorrentTasks.tasks.values.count { !it.download && !it.clearing }}")
+                        Text("下载任务：${TorrentTasks.tasks.values.count { it.download && !it.clearing }} · 已保存缓存：${TorrentTasks.tasks.values.count { !it.download && it.retainedCache && !it.clearing }} · 临时播放：${TorrentTasks.tasks.values.count { !it.download && !it.retainedCache && !it.clearing }}")
                         OutlinedButton(onClick = { clearType = false }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("一键清空缓存") }
                         OutlinedButton(onClick = { clearType = true }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("一键清空下载") }
                         Text("清空会停止对应任务并删除其专属目录中的文件。正在打开的资源请先返回；其他文件不受影响。", style = MaterialTheme.typography.bodySmall)
