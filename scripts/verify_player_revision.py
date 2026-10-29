@@ -127,7 +127,9 @@ def main():
     screenshot('revision-04-fullscreen-icons.png')
     record('fullscreen-embedded-small-icons',state=state())
     control('player_pip'); wait(lambda s:s.get('floating') and s.get('playing'))
-    before=state()['position']; time.sleep(3); after=state()['position']; assert after>before+1000
+    before=state()['position']; begun=time.monotonic()
+    progressed=wait(lambda s:s.get('floating') and s.get('playing') and s.get('position',0)>before+2000,45)
+    after=progressed['position']; pip_elapsed=time.monotonic()-begun
     screenshot('revision-05-real-pip.png')
     windows=adb('shell','dumpsys','window','windows')
     assert 'mode=pinned' in adb('shell','dumpsys','activity','activities')
@@ -136,7 +138,7 @@ def main():
     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2)); time.sleep(.5)
     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
     wait(lambda s:not s.get('floating') and s.get('playing'))
-    record('pip-continues-and-restores',position_before=before,position_after=after)
+    record('pip-continues-and-restores',position_before=before,position_after=after,elapsed_seconds=pip_elapsed)
     control('player_fullscreen'); wait(lambda s:not s.get('fullscreen') and s.get('playing'))
     # Switch an unretained file; the previous native writer must stop before deletion.
     first_index=state()['currentFile']

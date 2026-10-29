@@ -47,7 +47,7 @@ def require_visible(*labels: str) -> None:
         raise RuntimeError(f"Expected visible app controls {missing}; UI dump was: {visible}")
 
 
-def find_and_tap(label: str) -> None:
+def find_and_tap(label: str, _attempt: int = 0) -> None:
     adb("shell", "uiautomator", "dump", "/sdcard/window.xml")
     xml = adb("shell", "cat", "/sdcard/window.xml")
     tree = ET.fromstring(xml)
@@ -61,6 +61,12 @@ def find_and_tap(label: str) -> None:
             x1, y1, x2, y2 = map(int, match.groups())
             if x2 > x1 and y2 > y1:
                 candidates.append((not any(value == label for value in values), (x2 - x1) * (y2 - y1), x1, y1, x2, y2))
+    if not candidates and _attempt < 3:
+        size = adb('shell', 'wm', 'size')
+        width, height = map(int, re.findall(r'(\d+)x(\d+)', size)[-1])
+        adb('shell', 'input', 'swipe', str(width//2), str(int(height*.32)), str(width//2), str(int(height*.18)), '300')
+        time.sleep(.5)
+        return find_and_tap(label, _attempt+1)
     if not candidates:
         raise RuntimeError(f"Could not find UI element: {label}; visible text: {visible_text()}")
     _, _, x1, y1, x2, y2 = min(candidates)
