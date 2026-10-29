@@ -95,6 +95,11 @@ def main():
     find_and_tap('关闭')
     report.append({'check': 'real-native-limits-and-network-diagnostics', 'passed': True})
 
+    # Use the real rewind control to show a representative movie scene.
+    for attempt in range(2):
+        if state().get('position', 0) > 25000:
+            find_and_tap('后退 15 秒')
+    wait(lambda s: s.get('playing'))
     find_and_tap('全屏播放')
     full = wait(lambda s: s.get('fullscreen') and s.get('playing'))
     from capture_usage_screenshots import visible_text
