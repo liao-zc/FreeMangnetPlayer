@@ -115,14 +115,14 @@ object TorrentTasks {
         for (task in tasks.values.sortedByDescending { it.viewers > 0 }) {
             if (task.cancelled || task.stopping || task.clearing || task.paused || task.moving) continue
             if (task.engine != null) {
-                if (task.queued && active < limit) { task.queued = false; resumeEngine(task); active++ }
+                if (task.queued && (active < limit || task.complete)) { task.queued = false; resumeEngine(task); if (!task.complete) active++ }
                 continue
             }
             if (task.job?.isActive == true || (task.complete && task.viewers == 0)) continue
-            if (active >= limit) { task.queued = true; task.status = "排队中：已达到最大同时下载数量 $limit"; continue }
+            if (active >= limit && !task.complete) { task.queued = true; task.status = "排队中：已达到最大同时下载数量 $limit"; continue }
             task.queued = false
             task.status = "正在连接种子并获取文件信息…"
-            active++
+            if (!task.complete) active++
             start(task)
         }
         persist()
@@ -230,7 +230,7 @@ object TorrentTasks {
     }
     fun select(task: TorrentTask, selected: Set<Int>) {
         task.selected = selected.filter { index -> task.files.any { it.index == index } }.toSet()
-        task.complete = false
+        task.complete = allWantedFilesPresent(task)
         if (task.selected.isEmpty() && !task.streaming) {
             // Zero wanted bytes makes libtorrent announce itself as a seed and
             // disconnect the real seed. Pause instead, keeping native priorities.
@@ -248,14 +248,18 @@ object TorrentTasks {
         persist()
     }
     fun playFile(task: TorrentTask, index: Int) {
-        task.streaming = true; task.playingIndex = index; task.complete = false; task.lastUsed = System.currentTimeMillis()
+        task.streaming = true; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
         applyPriorities(task)
         if (task.selectionPaused) { task.selectionPaused = false; resume(task) }
         persist()
     }
+    private fun allWantedFilesPresent(task: TorrentTask): Boolean {
+        val wanted = task.files.filter { it.index in task.selected || (task.streaming && it.index == task.playingIndex) }
+        return wanted.isNotEmpty() && wanted.all { it.done >= it.size }
+    }
     private fun applyPriorities(task: TorrentTask) {
         val handle = task.handle ?: return
-        if (task.selected.isEmpty() && !task.streaming) return
+        if (task.files.isEmpty() || (task.selected.isEmpty() && !task.streaming)) return
         handle.prioritizeFiles(Array(task.files.size) { if (it in task.selected || (task.streaming && it == task.playingIndex)) Priority.NORMAL else Priority.IGNORE })
         val info = handle.torrentFile() ?: return
         if (!task.streaming) return
@@ -276,7 +280,7 @@ object TorrentTasks {
             task.handle?.moveStorage(target.absolutePath)
         }
         if (task.folder.canonicalPath == target.canonicalPath) task.destination = null
-        task.paused = false; task.cancelled = false; task.complete = false
+        task.paused = false; task.cancelled = false; task.complete = allWantedFilesPresent(task)
         LibraryStore.updateDownload(context, task.title, task.source, "正在下载所选文件", task.done, task.total)
         resume(task); persist()
     }
@@ -295,7 +299,7 @@ object TorrentTasks {
     fun resume(task: TorrentTask) {
         task.paused = false
         val active = tasks.values.count { it !== task && (it.engine != null || it.job?.isActive == true) && !it.paused && !it.queued && !it.complete && !it.cancelled }
-        task.queued = active >= SettingsStore.maxDownloads(context)
+        task.queued = !task.complete && active >= SettingsStore.maxDownloads(context)
         if (!task.queued) resumeEngine(task)
         schedule(); persist()
     }
