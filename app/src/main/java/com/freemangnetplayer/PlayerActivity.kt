@@ -130,7 +130,8 @@ class PlayerActivity : ComponentActivity() {
                     Box(Modifier.fillMaxSize().background(Color.Black)) {
                         VideoSurface(Modifier.fillMaxSize(), { fileDialog = true })
                         if (player == null && !floating) Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                            CircularProgressIndicator(color = Color.White)
+                            if (requested) CircularProgressIndicator(color = Color.White)
+                            else TextButton(onClick = { requestPlayback(true) }) { Text("重试播放", color = Color.White) }
                             Text(playerMessage.ifBlank { "正在等待播放分片…" }, color = Color.White)
                         }
                     }
@@ -263,6 +264,7 @@ class PlayerActivity : ComponentActivity() {
     }
     private fun startPlayback(task: TorrentTask, file: TaskFile) {
         val media = ExoPlayer.Builder(this)
+            .setRenderersFactory(androidx.media3.exoplayer.DefaultRenderersFactory(this).setEnableDecoderFallback(true))
             .setSeekBackIncrementMs(15000).setSeekForwardIncrementMs(15000)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 15000, 300, 750).build())
             .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }, task.nativeLock) })).build()
@@ -275,6 +277,7 @@ class PlayerActivity : ComponentActivity() {
                 window.decorView.post {
                     if (player === media && !isDestroyed) {
                         savedPosition = media.currentPosition
+                        if (error.errorCode >= 3000) requested = false
                         playerMessage = "播放失败：${error.errorCodeName}；可重试或查看网络诊断"
                         retryAfter = System.currentTimeMillis() + 3000
                         releasePlayer()
