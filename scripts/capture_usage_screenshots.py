@@ -1,4 +1,6 @@
 import re
+import os
+import base64
 import subprocess
 import time
 import xml.etree.ElementTree as ET
@@ -9,7 +11,19 @@ OUT.mkdir(exist_ok=True)
 PACKAGE = "com.freemangnetplayer"
 
 
+_ui_snapshot = None
+
 def adb(*args: str) -> str:
+    global _ui_snapshot
+    if os.environ.get('FMP_FAST_UI') == '1':
+        if args[:3] == ('shell', 'uiautomator', 'dump'):
+            raw = subprocess.check_output(['adb', 'shell', 'am', 'instrument', '-w', 'com.fmp.inspector/.SnapshotRunner'], text=True, encoding='utf-8')
+            match = re.search(r'INSTRUMENTATION_RESULT: tree=(\S+)', raw)
+            if not match: raise RuntimeError('Actual active-window inspection failed: '+raw)
+            _ui_snapshot = base64.b64decode(match.group(1)).decode('utf-8')
+            return 'Actual UI snapshot captured'
+        if args == ('shell', 'cat', '/sdcard/window.xml') and _ui_snapshot is not None:
+            return _ui_snapshot
     return subprocess.check_output(["adb", *args], text=True, encoding="utf-8", errors="replace")
 
 
