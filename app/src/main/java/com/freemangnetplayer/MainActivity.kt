@@ -251,6 +251,12 @@ class MainActivity : ComponentActivity() {
                                 icon = { Icon(Icons.Default.Bookmarks, contentDescription = null) },
                                 label = { Text("收藏") }
                             )
+                            NavigationBarItem(
+                                selected = false,
+                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
+                                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                                label = { Text("设置") }
+                            )
                         }
                     }
                 ) { insets ->
@@ -314,7 +320,6 @@ class MainActivity : ComponentActivity() {
                                     showEngineMenu = false
                                 },
                                 onCustomEngine = { showEngineMenu = false; showCustomDialog = true },
-                                onSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
                                 magnet = magnet,
                                 onMagnetChange = { magnet = it; error = "" },
                                 onParseMagnet = {
@@ -534,16 +539,12 @@ private fun SearchHome(
     builtIns: List<SearchProvider>,
     onSelectEngine: (SearchProvider) -> Unit,
     onCustomEngine: () -> Unit,
-    onSettings: () -> Unit,
     magnet: String,
     onMagnetChange: (String) -> Unit,
     onParseMagnet: () -> Unit,
     error: String
 ) {
     Column(Modifier.fillMaxSize()) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-            TextButton(onClick = onSettings, modifier = Modifier.height(48.dp)) { Text("设置") }
-        }
         Row(
             Modifier.fillMaxWidth().background(teal).padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -725,16 +726,39 @@ private fun magnetTitle(magnet: String): String = runCatching {
     if (dn.isNullOrBlank()) "磁力资源" else java.net.URLDecoder.decode(dn, "UTF-8")
 }.getOrDefault("磁力资源")
 
+/** Accept a pasted URL, HTML entity or encoded URL; canonicalize base32 BTIH. */
 internal fun normalizeMagnetUri(raw: String): String? = runCatching {
-    val decoded = Regex("&#(?:x([0-9a-fA-F]+)|(\\d+));", RegexOption.IGNORE_CASE).replace(raw.trim().replace("&amp;", "&", true)) { match ->
-        val code = match.groups[1]?.value?.toInt(16) ?: match.groups[2]?.value?.toInt() ?: return@replace match.value
-        code.toChar().toString()
-    }.trim().trimEnd('*', '_', ' ')
-    val match = Regex("(?i)([?&]xt=urn:btih:)([0-9a-f]{40}|[a-z2-7]{32})").find(decoded) ?: return null
-    val prefix = decoded.substring(0, match.range.first) + match.groupValues[1]
-    val suffix = decoded.substring(match.range.last + 1)
-    val validSuffix = if (suffix.startsWith("&")) suffix else ""
-    "$prefix${match.groupValues[2]}$validSuffix"
+    var decoded = Regex("&#(?:x([0-9a-fA-F]+)|(\\d+));", RegexOption.IGNORE_CASE)
+        .replace(raw.replace("&amp;", "&", true)) { match ->
+            val code = match.groups[1]?.value?.toInt(16) ?: match.groups[2]!!.value.toInt()
+            if (Character.isValidCodePoint(code)) String(Character.toChars(code)) else ""
+        }
+    if (!decoded.contains("magnet:?", true)) decoded = java.net.URLDecoder.decode(decoded, "UTF-8")
+    val start = decoded.indexOf("magnet:?", ignoreCase = true)
+    if (start < 0) return null
+    val candidate = decoded.substring(start).substringBefore('"').substringBefore('<').substringBefore('>')
+        .substringBefore('\n').substringBefore('\r').trim().trimEnd('*', '_', ')', ']', ' ')
+    val parameters = candidate.substringAfter('?').split('&').mapNotNull { parameter ->
+        val key = parameter.substringBefore('=').lowercase()
+        val value = parameter.substringAfter('=', "")
+        if (key in setOf("xt", "dn", "tr", "xs", "as", "ws", "x.pe") && value.isNotBlank()) key to value else null
+    }
+    val xt = parameters.firstNotNullOfOrNull { (key, value) ->
+        if (key != "xt") null else java.net.URLDecoder.decode(value, "UTF-8")
+            .let { Regex("(?i)^urn:btih:([0-9a-f]{40}|[a-z2-7]{32})").find(it)?.groupValues?.get(1) }
+    } ?: return null
+    val hash = if (xt.length == 40) xt.lowercase() else {
+        var bits = 0; var accumulator = 0
+        val bytes = java.io.ByteArrayOutputStream()
+        for (letter in xt.uppercase()) {
+            accumulator = (accumulator shl 5) or "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".indexOf(letter)
+            bits += 5
+            if (bits >= 8) { bits -= 8; bytes.write((accumulator shr bits) and 255) }
+        }
+        bytes.toByteArray().joinToString("") { "%02x".format(it) }
+    }
+    "magnet:?xt=urn:btih:$hash" + parameters.filter { it.first != "xt" }
+        .joinToString("") { (key, value) -> "&$key=$value" }
 }.getOrNull()
 
 private fun formatLibraryBytes(value: Long): String = when {

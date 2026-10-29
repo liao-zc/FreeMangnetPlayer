@@ -9,6 +9,7 @@ import com.frostwire.jlibtorrent.TorrentHandle
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
+import java.security.MessageDigest
 
 /** Read only verified torrent pieces, including after seeking into an uncached region. */
 internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHandle?) : BaseDataSource(false) {
@@ -19,6 +20,9 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
     private var torrentOffset = 0L
     private var torrentEnd = 0L
     private var opened = false
+    private var pieceLength = 0L
+    private var lastPrefetched = -1
+    private val verified = LinkedHashMap<Int, ByteArray>()
 
     override fun open(dataSpec: DataSpec): Long {
         transferInitializing(dataSpec)
@@ -31,6 +35,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         } ?: throw IOException("文件不在当前种子列表中")
         val size = files.fileSize(index)
         if (dataSpec.position > size) throw IOException("播放位置超出文件范围")
+        pieceLength = info.pieceLength().toLong()
         torrentOffset = files.fileOffset(index)
         torrentEnd = torrentOffset + size
         position = dataSpec.position
@@ -45,29 +50,64 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
     override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
         if (length == 0) return 0
         if (remaining == 0L) return C.RESULT_END_OF_INPUT
-        val count = minOf(length.toLong(), remaining).toInt()
-        val deadline = SystemClock.elapsedRealtime() + 30_000
-        while (true) {
+        val absolute = torrentOffset + position
+        val piece = (absolute / pieceLength).toInt()
+        val pieceOffset = (absolute % pieceLength).toInt()
+        val count = minOf(length.toLong(), remaining, pieceLength - pieceOffset).toInt()
+        val deadline = SystemClock.elapsedRealtime() + 60_000
+        var bytes = verified[piece]
+        var requestedFlush = false
+        while (bytes == null) {
             val handle = handleProvider() ?: throw IOException("磁力任务已关闭")
             if (!handle.isValid || Thread.currentThread().isInterrupted) throw IOException("读取已取消")
             val info = handle.torrentFile() ?: throw IOException("元数据不可用")
-            val pieceLength = info.pieceLength().toLong()
-            val first = ((torrentOffset + position) / pieceLength).toInt()
-            val last = ((torrentOffset + position + count - 1) / pieceLength).toInt()
-            val missing = (first..last).filter { !handle.havePiece(it) }
-            if (missing.isEmpty()) break
-            for (piece in missing) handle.setPieceDeadline(piece, 0)
-            for (piece in (last + 1)..minOf(last + 12, ((torrentEnd - 1) / pieceLength).toInt())) {
-                if (!handle.havePiece(piece)) handle.setPieceDeadline(piece, 1000)
+            if (lastPrefetched != piece) {
+                // A bounded 8 MiB forward window, requested once per piece, not every 100 ms.
+                val window = (8 * 1024 * 1024 / pieceLength).toInt().coerceIn(4, 128)
+                val end = minOf(piece + window, ((torrentEnd - 1) / pieceLength).toInt())
+                for (next in piece..end) if (!handle.havePiece(next)) {
+                    handle.setPieceDeadline(next, (next - piece) * 150)
+                }
+                lastPrefetched = piece
             }
-            if (SystemClock.elapsedRealtime() >= deadline) throw IOException("所需视频分片尚未缓存，等待连接超时")
+            if (handle.havePiece(piece)) {
+                // havePiece can include verified data still in libtorrent's write cache.
+                // Verify disk bytes as well, so a sparse zero-filled range is never played.
+                val files = info.files()
+                val begin = piece * pieceLength
+                val finish = minOf(begin + pieceLength, info.totalSize())
+                val candidate = ByteArray((finish - begin).toInt())
+                var readable = true
+                for (index in 0 until files.numFiles()) {
+                    val fileStart = files.fileOffset(index)
+                    val first = maxOf(begin, fileStart)
+                    val last = minOf(finish, fileStart + files.fileSize(index))
+                    if (first >= last) continue
+                    try {
+                        RandomAccessFile(File(handle.savePath(), files.filePath(index)), "r").use { disk ->
+                            disk.seek(first - fileStart)
+                            disk.readFully(candidate, (first - begin).toInt(), (last - first).toInt())
+                        }
+                    } catch (error: IOException) { readable = false; break }
+                }
+                val digest = if (readable) MessageDigest.getInstance("SHA-1").digest(candidate)
+                    .joinToString("") { "%02x".format(it) } else ""
+                if (readable && digest == info.hashForPiece(piece).toString()) {
+                    bytes = candidate
+                    verified[piece] = candidate
+                    while (verified.size > 3) verified.remove(verified.keys.first())
+                    break
+                }
+                if (!requestedFlush) { handle.flushCache(); requestedFlush = true }
+            }
+            if (SystemClock.elapsedRealtime() >= deadline) throw IOException("视频分片供给不足，请查看资源节点和网络诊断")
             try { Thread.sleep(100) } catch (interrupted: InterruptedException) {
                 Thread.currentThread().interrupt()
                 throw IOException("读取已取消", interrupted)
             }
         }
-        val read = file?.read(buffer, offset, count) ?: throw IOException("视频文件已关闭")
-        if (read < 0) throw IOException("已校验分片尚未写入文件")
+        val read = minOf(count, bytes!!.size - pieceOffset)
+        System.arraycopy(bytes, pieceOffset, buffer, offset, read)
         position += read
         remaining -= read
         bytesTransferred(read)
@@ -80,6 +120,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
         try { file?.close() } finally {
             file = null
             uri = null
+            verified.clear(); lastPrefetched = -1
             if (opened) { opened = false; transferEnded() }
         }
     }

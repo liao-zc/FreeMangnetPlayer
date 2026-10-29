@@ -1,5 +1,14 @@
 package com.freemangnetplayer
 
+import android.app.PictureInPictureParams
+import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.content.res.Configuration
+import android.util.Rational
+import androidx.activity.compose.BackHandler
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import android.Manifest
 import android.net.Uri
 import android.os.Build
@@ -7,6 +16,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -33,6 +43,8 @@ import java.io.File
 
 class PlayerActivity : ComponentActivity() {
     private var player by mutableStateOf<ExoPlayer?>(null)
+    private var fullscreen by mutableStateOf(false)
+    private var floating by mutableStateOf(false)
     private var speed by mutableFloatStateOf(1f)
     private var requested by mutableStateOf(false)
     private var autoPlay = true
@@ -54,24 +66,17 @@ class PlayerActivity : ComponentActivity() {
         autoPlay = savedInstanceState?.getBoolean("autoplay") ?: true
         savedPosition = savedInstanceState?.getLong("position") ?: 0L
         speed = savedInstanceState?.getFloat("speed") ?: 1f
+        fullscreen = savedInstanceState?.getBoolean("fullscreen") ?: false
+        updateSystemBars()
         setContent {
             MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF087F79), background = Color(0xFFF3F8FA))) {
                 val current = task
                 var favorite by remember { mutableStateOf(LibraryStore.readFavorites(this).any { it.source == source }) }
                 var fileDialog by remember { mutableStateOf(false) }
                 var deleteDialog by remember { mutableStateOf(false) }
-                Column(Modifier.fillMaxSize().safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
-                        OutlinedButton(onClick = { LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
-                    }
-                    val compact = LocalConfiguration.current.screenHeightDp < 720
-                    val bodyScroll = rememberScrollState()
-                    Column(Modifier.weight(1f).fillMaxWidth().then(if (compact) Modifier.verticalScroll(bodyScroll) else Modifier), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (current == null) {
-                        Text("任务启动失败：${result.exceptionOrNull()?.localizedMessage}")
-                    } else {
+                var networkDialog by remember { mutableStateOf(false) }
+                BackHandler(enabled = fullscreen && !floating) { setFullscreen(false) }
+                if (current != null) {
                         LaunchedEffect(current) {
                             while (true) {
                                 if (attached && requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.destination == null && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
@@ -89,6 +94,10 @@ class PlayerActivity : ComponentActivity() {
                                         .put("metadata", current.files.isNotEmpty()).put("peers", current.peers).put("downloaded", current.done).put("total", current.total)
                                         .put("files", rows).put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
                                         .put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
+                                        .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
+                                        .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
+                                        .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
+                                        .put("fullscreen", fullscreen).put("floating", floating).put("networkMessage", current.networkMessage)
                                         .put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
@@ -97,13 +106,44 @@ class PlayerActivity : ComponentActivity() {
                                 delay(500)
                             }
                         }
+                }
+                if ((fullscreen || floating) && player != null) {
+                    Box(Modifier.fillMaxSize().background(Color.Black)) {
+                        AndroidView(factory = { c -> PlayerView(c).apply {
+                            useController = !floating
+                            setShowBuffering(PlayerView.SHOW_BUFFERING_WHEN_PLAYING)
+                            player = this@PlayerActivity.player
+                        } }, update = { it.player = player; it.useController = !floating }, modifier = Modifier.fillMaxSize())
+                        if (!floating) {
+                            Row(Modifier.align(Alignment.TopStart).safeDrawingPadding().padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(onClick = { setFullscreen(false) }) { Text("退出全屏") }
+                                Button(onClick = { enterFloating() }) { Text("悬浮播放") }
+                                Button(onClick = { fileDialog = true }) { Text("切换视频") }
+                                Button(onClick = { cycleSpeed() }) { Text("${speed}×") }
+                            }
+                        }
+                    }
+                } else {
+                Column(Modifier.fillMaxSize().safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
+                        OutlinedButton(onClick = { LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
+                    }
+                    val compact = LocalConfiguration.current.screenHeightDp < 720
+                    val bodyScroll = rememberScrollState()
+                    Column(Modifier.weight(1f).fillMaxWidth().then(if (compact) Modifier.verticalScroll(bodyScroll) else Modifier), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (current == null) {
+                        Text("任务启动失败：${result.exceptionOrNull()?.localizedMessage}")
+                    } else {
                         Card(Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(if (current.files.isEmpty()) "正在解析磁力资源" else "资源解析完成", style = MaterialTheme.typography.titleMedium)
                                 Text(current.status)
                                 if (current.files.isEmpty() && !current.paused && !current.cancelled) LinearProgressIndicator(Modifier.fillMaxWidth())
                                 else LinearProgressIndicator(progress = { if (current.total == 0L) 0f else (current.done.toFloat() / current.total).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-                                Text("${bytes(current.done)} / ${bytes(current.total)} · ${bytes(current.rate.toLong())}/秒 · ${current.peers} 节点", style = MaterialTheme.typography.bodySmall)
+                                Text("${bytes(current.done)} / ${bytes(current.total)} · ${bytes(current.payloadRate.toLong())}/秒 · ${current.peers} 节点", style = MaterialTheme.typography.bodySmall)
+                                TextButton(onClick = { networkDialog = true }) { Text("网络诊断 · 不限速 · DHT ${current.dhtNodes}") }
                             }
                         }
                         if (current.files.isNotEmpty()) {
@@ -133,10 +173,14 @@ class PlayerActivity : ComponentActivity() {
                             } }
                         }
                         if (player != null) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Button(onClick = { setFullscreen(true) }, modifier = Modifier.weight(1f).height(48.dp)) { Text("全屏播放") }
+                                OutlinedButton(onClick = { enterFloating() }, modifier = Modifier.weight(1f).height(48.dp)) { Text("悬浮播放") }
+                            }
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                                 OutlinedButton(onClick = { player?.let { it.seekTo((it.currentPosition - 15000).coerceAtLeast(0)) } }, modifier = Modifier.weight(1f)) { Text("后退 15 秒") }
                                 OutlinedButton(onClick = { player?.let { it.seekTo(it.currentPosition + 15000) } }, modifier = Modifier.weight(1f)) { Text("前进 15 秒") }
-                                OutlinedButton(onClick = { val values = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f); speed = values[(values.indexOf(speed) + 1) % values.size]; player?.setPlaybackSpeed(speed) }, modifier = Modifier.weight(1f)) { Text("${speed}×") }
+                                OutlinedButton(onClick = { cycleSpeed() }, modifier = Modifier.weight(1f)) { Text("${speed}×") }
                             }
                         }
                         if (current.files.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -154,6 +198,13 @@ class PlayerActivity : ComponentActivity() {
                             OutlinedButton(onClick = { deleteDialog = true }, modifier = Modifier.weight(1f).height(48.dp)) { Text("清空文件") }
                         }
                         Text("${if (current.cancelled) "任务已取消" else if (current.paused) "任务已暂停" else if (current.queued) "任务排队中" else if (current.complete) "文件已校验保存" else "后台任务持续运行"} · ${current.folder.absolutePath}", maxLines = 2, style = MaterialTheme.typography.labelSmall)
+                        if (deleteDialog) AlertDialog(onDismissRequest = { deleteDialog = false }, title = { Text("清空当前任务文件？") }, text = { Text("将停止任务并永久删除当前任务的下载 / 缓存文件。") },
+                            confirmButton = { TextButton(onClick = { requested = false; releasePlayer(); TorrentTasks.cancel(current, true); deleteDialog = false; finish() }) { Text("确认清空") } }, dismissButton = { TextButton(onClick = { deleteDialog = false }) { Text("取消") } })
+                    }
+                    }
+                }
+                }
+                if (current != null) {
                         if (fileDialog) AlertDialog(onDismissRequest = { fileDialog = false }, title = { Text("选择下载 / 切换视频") }, text = {
                             Column {
                                 Row { TextButton(onClick = { TorrentTasks.select(current, current.files.map { it.index }.toSet()) }) { Text("全选") }; TextButton(onClick = { TorrentTasks.select(current, emptySet()) }) { Text("全不选") } }
@@ -168,19 +219,30 @@ class PlayerActivity : ComponentActivity() {
                                 }
                             }
                         }, confirmButton = { TextButton(onClick = { fileDialog = false }) { Text("完成") } })
-                        if (deleteDialog) AlertDialog(onDismissRequest = { deleteDialog = false }, title = { Text("清空当前任务文件？") }, text = { Text("将停止任务并永久删除当前任务的下载 / 缓存文件。") },
-                            confirmButton = { TextButton(onClick = { requested = false; releasePlayer(); TorrentTasks.cancel(current, true); deleteDialog = false; finish() }) { Text("确认清空") } }, dismissButton = { TextButton(onClick = { deleteDialog = false }) { Text("取消") } })
-                    }
-                    }
+                    if (networkDialog) AlertDialog(onDismissRequest = { networkDialog = false }, title = { Text("真实网络诊断") }, text = {
+                        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("应用下载限速：${current.downloadLimit}（0 为不限速）\n应用上传限速：${current.uploadLimit}（0 为不限速）")
+                            Text("有效载荷速度：${bytes(current.payloadRate.toLong())}/秒\n含协议总速度：${bytes(current.rate.toLong())}/秒")
+                            Text("资源节点：${current.peers}，其中种子：${current.seeds}\n连接数：${current.connectionCount}，DHT 节点：${current.dhtNodes}")
+                            Text("有效接收：${bytes(current.payloadBytes)}\nTCP / uTP、DHT、Tracker、局域网发现均已启用")
+                            Text(if (current.peers == 0) "当前没有资源连接。DHT 为 0 时请对照切换 Wi-Fi / 移动网络，检查 VPN 和 UDP 可达性；DHT 正常仍无节点时可能是资源无人做种。"
+                                else if (current.payloadRate < 1024) "已建立连接但没有足够有效数据；请用同一链接、同一网络与其他 BT 客户端对照。节点存在不代表节点愿意发送数据。"
+                                else "正在接收有效数据。边下边播需要下载速度持续高于视频码率。")
+                            if (current.networkMessage.isNotBlank()) Text("最近的 Tracker / 监听事件：${current.networkMessage}")
+                            Text(playerMessage)
+                        }
+                    }, confirmButton = { TextButton(onClick = { networkDialog = false }) { Text("关闭") } })
                 }
             }
         }
     }
+
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putBoolean("play-requested", requested)
         outState.putBoolean("autoplay", autoPlay)
         outState.putLong("position", player?.currentPosition ?: savedPosition)
         outState.putFloat("speed", speed)
+        outState.putBoolean("fullscreen", fullscreen)
         super.onSaveInstanceState(outState)
     }
     private fun requestPlayback(play: Boolean) {
@@ -217,12 +279,48 @@ class PlayerActivity : ComponentActivity() {
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
         player = media
     }
+    private fun cycleSpeed() {
+        val values = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
+        speed = values[(values.indexOf(speed) + 1) % values.size]
+        player?.setPlaybackSpeed(speed)
+    }
+    private fun setFullscreen(enabled: Boolean) {
+        fullscreen = enabled
+        requestedOrientation = if (enabled) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE else ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        updateSystemBars()
+    }
+    private fun updateSystemBars() {
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        if (fullscreen) {
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        } else controller.show(WindowInsetsCompat.Type.systemBars())
+    }
+    private fun enterFloating() {
+        if (Build.VERSION.SDK_INT < 26 || !packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            playerMessage = "此设备不支持系统悬浮播放（需要 Android 8.0+ 与画中画支持）"
+            return
+        }
+        try {
+            enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build())
+        } catch (error: Exception) { playerMessage = "无法进入悬浮播放，请检查系统画中画权限：${error.localizedMessage}" }
+    }
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        floating = isInPictureInPictureMode
+        if (!floating) updateSystemBars()
+    }
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (player?.isPlaying == true && !isFinishing) enterFloating()
+    }
     private fun releasePlayer() { player?.let { savedPosition = it.currentPosition; it.release() }; player = null }
     override fun onStart() {
         super.onStart()
         task?.let { if (!attached) { it.viewers++; attached = true }; TorrentTasks.schedule() }
     }
     override fun onStop() {
+        if (Build.VERSION.SDK_INT >= 26 && isInPictureInPictureMode) { super.onStop(); return }
         releasePlayer()
         task?.let { if (attached) { it.viewers = (it.viewers - 1).coerceAtLeast(0); attached = false } }
         super.onStop()

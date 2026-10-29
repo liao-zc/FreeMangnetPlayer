@@ -33,6 +33,16 @@ class TorrentTask(val id: String, val source: String, val title: String, folder:
     var total by mutableLongStateOf(0)
     var peers by mutableIntStateOf(0)
     var rate by mutableIntStateOf(0)
+    var payloadRate by mutableIntStateOf(0)
+    var payloadBytes by mutableLongStateOf(0)
+    var dhtNodes by mutableLongStateOf(0)
+    var seeds by mutableIntStateOf(0)
+    var connectionCount by mutableIntStateOf(0)
+    var networkMessage by mutableStateOf("")
+    var downloadLimit by mutableIntStateOf(0)
+    var uploadLimit by mutableIntStateOf(0)
+    val startedAt = System.currentTimeMillis()
+    var lastDiscovery = 0L
     var selectionPaused = false
     var streaming = false
     var viewers = 0
@@ -53,7 +63,11 @@ object TorrentTasks {
     private lateinit var context: Context
     private var initialized = false
     var serviceRunning = false
-    private val trackers = listOf("udp://tracker.opentrackr.org:1337/announce", "https://tracker.tamersunion.org:443/announce", "udp://open.stealth.si:80/announce")
+    private val trackers = listOf(
+        "udp://tracker.opentrackr.org:1337/announce", "https://tracker.tamersunion.org:443/announce",
+        "udp://open.stealth.si:80/announce", "udp://tracker.torrent.eu.org:451/announce",
+        "udp://exodus.desync.com:6969/announce", "udp://open.demonii.com:1337/announce",
+        "https://tracker.gbitt.info/announce", "http://tracker.opentrackr.org:1337/announce")
 
     fun initialize(c: Context) {
         context = c.applicationContext
@@ -142,11 +156,21 @@ object TorrentTasks {
                 withContext(Dispatchers.IO) {
                     task.folder.mkdirs()
                     val options = TorrentSessionOptions(downloadLocation = task.folder, onlyDownloadLargestFile = false,
-                        shouldStream = false, streamBufferSize = 4, enableLogging = false, dhtNodeMinimum = 0)
+                        shouldStream = false, streamBufferSize = 4, enableLogging = false, dhtNodeMinimum = 0,
+                        downloadRateLimit = 0, uploadRateLimit = 0, connectionsLimit = 300)
                     options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881")
-                    options.settingsPack.cacheSize(0)
+                    // 16 MiB per active session; queue limits already bound memory usage.
+                    options.settingsPack.cacheSize(1024)
+                    options.settingsPack.setInteger(settings_pack.int_types.cache_expiry.swigValue(), 1)
+                    options.settingsPack.listenInterfaces("0.0.0.0:0,[::]:0")
+                    options.settingsPack.setInteger(settings_pack.int_types.connection_speed.swigValue(), 30)
+                    for (flag in listOf(settings_pack.bool_types.enable_dht, settings_pack.bool_types.enable_lsd,
+                        settings_pack.bool_types.enable_upnp, settings_pack.bool_types.enable_natpmp,
+                        settings_pack.bool_types.enable_incoming_tcp, settings_pack.bool_types.enable_outgoing_tcp,
+                        settings_pack.bool_types.enable_incoming_utp, settings_pack.bool_types.enable_outgoing_utp)) {
+                        options.settingsPack.setBoolean(flag.swigValue(), true)
+                    }
                     options.settingsPack.setInteger(settings_pack.int_types.min_reconnect_time.swigValue(), 5)
-                    options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
                     val engine = TorrentSession(options)
@@ -154,6 +178,7 @@ object TorrentTasks {
                     engine.listener = object : QuietTorrentListener() {
                         override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) {
                             task.handle = engine.retainHandle(handle)
+                            handle.setDownloadLimit(0); handle.setUploadLimit(0)
                             setMetadataPriorities(handle, task)
                             handle.forceReannounce(); handle.forceDHTAnnounce()
                         }
@@ -162,8 +187,9 @@ object TorrentTasks {
                         }
                     }
                     val metadataFile = File(context.filesDir, "${task.id}.torrent")
-                    val bytes = metadataFile.takeIf { it.exists() }?.readBytes()
-                        ?: if (!task.source.contains("&tr=", true) && task.id.length == 40) fetchMetadata(task.id) else null
+                    val bytes = metadataFile.takeIf { it.exists() }?.let { file ->
+                        runCatching { file.readBytes().also { TorrentInfo.bdecode(it) } }.getOrElse { file.delete(); null }
+                    }
                     if (task.cancelled) return@withContext
                     if (bytes != null) {
                         val info = TorrentInfo.bdecode(bytes)
@@ -176,6 +202,20 @@ object TorrentTasks {
                         val source = task.source + trackers.filter { !task.source.contains(java.net.URLEncoder.encode(it, "UTF-8")) }
                             .joinToString("") { "&tr=" + java.net.URLEncoder.encode(it, "UTF-8") }
                         engine.start(context, Uri.parse(source))
+                    }
+                }
+                // Start DHT/trackers immediately. A blocked HTTP site must not delay them.
+                val currentEngine = task.engine
+                val metadataFallback = launch(Dispatchers.IO) {
+                    delay(8000)
+                    if (task.files.isEmpty() && task.id.length == 40 && !task.cancelled) {
+                        val bytes = fetchMetadata(task.id)
+                        if (bytes != null && task.engine === currentEngine && !task.cancelled) {
+                            val handle = task.handle
+                            if (handle != null && handle.isValid && handle.torrentFile() == null) {
+                                currentEngine?.supplyMetadata(handle, bytes)
+                            }
+                        }
                     }
                 }
                 var ticks = 0
@@ -211,18 +251,33 @@ object TorrentTasks {
                     task.total = task.files.filter { it.index in task.selected || (task.streaming && it.index == task.playingIndex) }.sumOf { it.size }
                     task.complete = task.total > 0 && task.done >= task.total
                     task.peers = snapshot.second.numPeers(); task.rate = snapshot.second.downloadRate()
+                    task.payloadRate = snapshot.second.downloadPayloadRate(); task.payloadBytes = snapshot.second.totalPayloadDownload()
+                    task.seeds = snapshot.second.numSeeds(); task.connectionCount = snapshot.second.numConnections()
+                    task.dhtNodes = task.engine?.dhtNodes ?: 0
+                    task.downloadLimit = task.engine?.actualDownloadLimit ?: 0
+                    task.uploadLimit = task.engine?.actualUploadLimit ?: 0
+                    task.networkMessage = task.engine?.networkMessage.orEmpty()
+                    if (!task.paused && !task.queued && !task.complete && task.peers == 0 &&
+                        System.currentTimeMillis() - task.lastDiscovery > 30_000) {
+                        task.lastDiscovery = System.currentTimeMillis()
+                        handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL); handle.forceDHTAnnounce()
+                    }
                     task.status = when {
                         task.paused -> "已暂停，缓存保留"
                         task.queued -> "排队等待下载"
                         task.complete -> "下载完成，已校验文件"
-                        task.files.isEmpty() && ++ticks > 90 -> "未取得元数据；仍在寻找节点，可暂停或返回"
+                        task.files.isEmpty() && System.currentTimeMillis() - task.startedAt > 45_000 ->
+                            "尚未找到提供文件信息的节点；DHT ${task.dhtNodes} 节点，可查看网络诊断或返回"
                         task.files.isEmpty() -> "正在连接种子并读取文件列表…"
+                        task.peers == 0 -> "尚无可连接资源节点，正在重新发现；应用未限速"
+                        task.payloadRate < 1024 -> "已连接 ${task.peers} 节点，但有效数据供给较低；可查看网络诊断"
                         else -> "正在下载 / 缓存，可边下边播"
                     }
                     if (task.download) LibraryStore.updateDownload(context, task.title, task.source, task.status, task.done, task.total)
                     if (ticks++ % 4 == 0) { persist(); schedule() }
                     if (task.complete && task.viewers == 0) break
                 }
+                metadataFallback.cancel()
             } catch (error: Exception) {
                 if (error !is CancellationException) { task.status = "任务失败：${error.localizedMessage}"; task.paused = true; persist() }
             } finally {
@@ -250,6 +305,7 @@ object TorrentTasks {
         persist()
     }
     fun playFile(task: TorrentTask, index: Int) {
+        if (task.playingIndex != index) task.handle?.clearPieceDeadlines()
         task.streaming = true; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
         applyPriorities(task)
         if (task.selectionPaused) { task.selectionPaused = false; resume(task) }

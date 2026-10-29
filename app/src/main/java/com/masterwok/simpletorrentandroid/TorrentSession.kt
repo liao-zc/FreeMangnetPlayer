@@ -101,6 +101,7 @@ open class TorrentSession(
                     AlertType.TORRENT_PAUSED -> torrentSession.get()?.onTorrentPaused(alert as TorrentPausedAlert)
                     AlertType.TORRENT_FINISHED -> torrentSession.get()?.onTorrentFinished(alert as TorrentFinishedAlert)
                     AlertType.TORRENT_ERROR -> torrentSession.get()?.onTorrentError(alert as TorrentErrorAlert)
+                    AlertType.TRACKER_ERROR, AlertType.LISTEN_FAILED -> torrentSession.get()?.networkMessage = alert.toString()
                     AlertType.ADD_TORRENT -> torrentSession.get()?.onAddTorrent(alert as AddTorrentAlert)
                     AlertType.BLOCK_UPLOADED -> torrentSession.get()?.onBlockUploaded(alert as BlockUploadedAlert)
                     else -> Log.d(Tag, "Unhandled alert: $alert")
@@ -369,7 +370,7 @@ open class TorrentSession(
         }
 
         sessionManager.download(
-                URLDecoder.decode(magnetUrl, "utf-8")
+                magnetUrl // Native parser decodes parameters; decoding the full URL corrupts trackers.
                 , downloadLocation
         )
     }
@@ -456,6 +457,19 @@ open class TorrentSession(
     val isPaused: Boolean get() = sessionManager.isPaused
 
     val isRunning: Boolean get() = sessionManager.isRunning
+    val dhtNodes: Long get() = sessionManager.dhtNodes()
+    val actualDownloadLimit: Int get() = sessionManager.downloadRateLimit()
+    val actualUploadLimit: Int get() = sessionManager.uploadRateLimit()
+    @Volatile var networkMessage: String = ""
+
+    /** HTTP metadata is a parallel fallback, never a prerequisite for P2P startup. */
+    fun supplyMetadata(handle: TorrentHandle, bytes: ByteArray) {
+        if (!handle.isValid || handle.torrentFile() != null) return
+        val info = TorrentInfo.bdecode(bytes)
+        if (info.infoHash() != handle.infoHash()) return
+        sessionManager.remove(handle)
+        sessionManager.download(info, torrentSessionOptions.downloadLocation)
+    }
 
     /**
      * Alert handles borrow storage from the native alert and must not be kept

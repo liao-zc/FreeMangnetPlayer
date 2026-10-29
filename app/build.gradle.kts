@@ -1,7 +1,7 @@
 plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id("org.jetbrains.kotlin.plugin.compose") }
 
 android { namespace = "com.freemangnetplayer"; compileSdk = 35
-    defaultConfig { applicationId = "com.freemangnetplayer"; minSdk = 24; targetSdk = 35; versionCode = 11; versionName = "0.1.10" }
+    defaultConfig { applicationId = "com.freemangnetplayer"; minSdk = 24; targetSdk = 35; versionCode = 12; versionName = "0.1.11" }
     val signingPath = System.getenv("FMP_KEYSTORE")
     if (!signingPath.isNullOrBlank()) {
         signingConfigs.create("fmp") {
