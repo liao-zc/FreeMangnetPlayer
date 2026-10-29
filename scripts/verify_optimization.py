@@ -43,6 +43,7 @@ def edit(label, text):
     adb('shell', 'input', 'keycombination', '113', '29')
     adb('shell', 'input', 'text', shlex.quote(text))
     adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
+    time.sleep(1)
 
 def main():
     adb('wait-for-device')
@@ -55,7 +56,7 @@ def main():
     screenshot('opt-01-home.png')
     find_and_tap('设置')
     require_visible('下载目录', '缓存目录', '最大同时下载', '默认搜索引擎')
-    base = f'/sdcard/Android/data/{PACKAGE}/files'
+    base = f'/storage/emulated/0/Android/data/{PACKAGE}/files'
     edit('下载目录（绝对路径）', base + '/CustomDownloads')
     edit('缓存目录（绝对路径）', base + '/CustomCache')
     edit('最大同时下载数量（1–8，含缓存）', '1')
@@ -69,7 +70,10 @@ def main():
     require_visible('设置已保存')
     screenshot('opt-03-settings-saved.png')
     find_and_tap('返回首页')
-    require_visible('Pomo')
+    find_and_tap('选择搜索引擎')
+    require_visible('搜索引擎：Pomo')
+    screenshot('opt-03b-default-engine.png')
+    adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
     report.append({'check': 'settings-ui-save-and-default-engine', 'passed': True, 'download_path': base + '/CustomDownloads', 'cache_path': base + '/CustomCache', 'max_downloads': 1})
 
     state = open_torrent(fixtures[0])
@@ -221,6 +225,7 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as error:
+        (OUT / 'optimization-logcat.txt').write_text(adb('shell', 'logcat', '-d', '-t', '5000'), encoding='utf-8')
         screenshot('opt-failure.png')
         report.append({'check': 'failure', 'passed': False, 'error': str(error), 'state': diagnostic()})
         raise
