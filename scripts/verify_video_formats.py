@@ -12,6 +12,7 @@ for fixture in json.loads(Path('format-fixtures.json').read_text()):
         try:st=json.loads(adb('shell','run-as',PACKAGE,'cat','files/torrent-check.json'))
         except Exception:st={}
         if fixture.get('invalid') and st.get('source')==fixture['source'] and not st.get('playRequested') and '播放失败' in st.get('playerError',''):break
+        if st.get('source')==fixture['source'] and not st.get('playRequested') and '播放失败' in st.get('playerError',''):break
         if st.get('source')==fixture['source'] and st.get('playing') and st.get('position',0)>800:played=True;break
         time.sleep(.5)
     screenshot('format-'+fixture['extension']+'.png')
