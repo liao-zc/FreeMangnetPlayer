@@ -24,6 +24,15 @@ for page in [1,2,3]:
     assert actual==wanted,(actual-wanted,wanted-actual)
     require_visible('上一页','下一页','返回');screenshot('pagination-'+str(page)+'.png')
     checks.append({'check':'source-page-'+str(page)+'-complete','passed':True,'state':st,'expected_count':len(wanted)})
+    if page==1:
+        for screen in range(1,5):
+            require_visible(f'结果 {screen} / 4 页', st['results'][(screen-1)*10]['title'])
+            screenshot('local-results-'+str(screen)+'.png')
+            checks.append({'check':'local-ten-result-screen-'+str(screen),'passed':True,'source_page':1,'screen':screen,'total_results':len(st['results'])})
+            if screen<4:find_and_tap('后 10 条')
+        for _ in range(3):find_and_tap('前 10 条')
+        require_visible('结果 1 / 4 页')
+        checks.append({'check':'local-page-back-restores-first-screen','passed':True})
     if page<3:find_and_tap('下一页')
 find_and_tap('上一页');st=wait(2,17);checks.append({'check':'previous-page-restores-all-results','passed':True,'state':st});screenshot('pagination-back.png')
 find_and_tap('‹ 返回');require_visible('解析资源');checks.append({'check':'empty-page-and-back-responsive','passed':True})
