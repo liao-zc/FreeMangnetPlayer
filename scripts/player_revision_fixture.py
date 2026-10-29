@@ -3,7 +3,7 @@ from pathlib import Path
 
 source = Path('scripts/optimization_fixture.py').read_text(encoding='utf-8')
 source = source.replace("16 * 1024", "128 * 1024")
-source = source.replace('range(1, 5)', 'range(1, 7)')
+source = source.replace('range(1, 5)', 'range(1, 4)')
 source = source.replace("'-ss', '5', '-i'", "'-stream_loop', '-1', '-ss', '5', '-i'")
 source = source.replace("'-t', '45'", "'-t', '180'")
 source = source.replace("'-preset', 'ultrafast', '-an'", "'-preset', 'ultrafast', '-c:a', 'aac', '-b:a', '64k'")

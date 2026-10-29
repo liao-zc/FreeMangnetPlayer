@@ -115,7 +115,9 @@ def main():
     _, bar = controller('player_progress')
     x1,y1,x2,y2 = bounds(bar)
     target = state()['duration']*.10
-    adb('shell','input','tap',str(x1+int((x2-x1)*.10)),str((y1+y2)//2))
+    density=int(re.findall(r'\d+',adb('shell','wm','density'))[-1])
+    padding=round(8*density/160)
+    adb('shell','input','tap',str(x1+padding+int((x2-x1-2*padding)*.10)),str((y1+y2)//2))
     scrubbed=wait(lambda s:s.get('playing') and abs(s.get('position',0)-target)<6000)
     record('playback-time-duration-and-scrubbable-progress',duration=scrubbed['duration'],target=target,actual=scrubbed['position'],controls=actual)
 
@@ -141,7 +143,7 @@ def main():
     previous=next(f for f in state()['files'] if f['index']==first_index)
     old_path=state()['folder']+'/'+previous['path']
     control('player_files')
-    other=next(f for f in state()['files'] if f['path'].endswith('.mp4') and f['index']!=first_index)
+    other=next(f for f in state()['files'] if f['path'].endswith('.mp4') and f['size']>1024 and f['index']!=first_index)
     find_and_tap('切换播放：'+other['path'].split('/')[-1])
     changed=wait(lambda s:s.get('currentFile')==other['index'] and s.get('playing'))
     assert adb('shell','test','!','-e',old_path)==''
