@@ -1,0 +1,30 @@
+{
+  "keyword": "Avengers",
+  "api": "35",
+  "reference_attempts": [
+    {
+      "renderer": "default",
+      "launch": "Starting: Intent { cmp=com.ddd.mingshuo/.MainActivity }\nStatus: ok\nLaunchState: UNKNOWN (0)\nActivity: com.ddd.mingshuo/.MainActivity\nWaitTime: 4801\nComplete\n",
+      "process": "",
+      "ui": "            Pixel Launcher isn't responding        Close app  Wait ",
+      "diagnostic": ""
+    },
+    {
+      "renderer": "opengl",
+      "launch": "Starting: Intent { cmp=com.ddd.mingshuo/.MainActivity (has extras) }\nStatus: ok\nLaunchState: UNKNOWN (0)\nActivity: com.ddd.mingshuo/.MainActivity\nWaitTime: 4200\nComplete\n",
+      "process": "",
+      "ui": "            Pixel Launcher isn't responding        Close app  Wait ",
+      "diagnostic": "10-29 10:09:50.401  1538  1545 W gle.android.gms: ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~vgTEEnGcv3eU9yE43z4qmg==/com.ddd.mingshuo-mJ1wEu6D8sk0AVTUhN7xEg==/base.apk' with 1 weak references"
+    },
+    {
+      "renderer": "software",
+      "launch": "Starting: Intent { cmp=com.ddd.mingshuo/.MainActivity (has extras) }\nStatus: ok\nLaunchState: UNKNOWN (0)\nActivity: com.ddd.mingshuo/.MainActivity\nWaitTime: 2628\nComplete\n",
+      "process": "",
+      "ui": "            Pixel Launcher isn't responding        Close app  Wait ",
+      "diagnostic": ""
+    }
+  ],
+  "searches": [],
+  "reference_search_error": "Reference process exits before usable UI on this emulator.",
+  "exclusion_reason": "Launcher ANR obscured foreground UI; search observations excluded as invalid. Earlier harness engine override was corrected in run 40856458567."
+}

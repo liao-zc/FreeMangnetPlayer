@@ -205,3 +205,72 @@ Android 15 / API 35 模拟器实际执行 [回归工作流](https://github.com/l
 [逐项状态与测量数据](evidence/current-regression.json)
 
 时间指标采用约 500 ms 状态轮询及开始播放事件；不是精确视频首帧计时。短暂 Peer 连接可能未采到，出现已下载数据但 Peer 耗时为 -1 不代表没有连接。
+
+## 8. 同关键词搜索与立即起播核查（2026-10-29）
+
+用户只有固定磁力，没有 `.torrent`。本轮采用同关键词 `Avengers`（复仇者联盟）搜索对照，不再以提供种子作为前提。[实际工作流](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40856458567)。
+
+### 起播条件核查
+
+- `PlayerActivity` 在取得视频文件列表后创建播放器，不检查下载百分比。
+- Media3 起播缓冲设置为 300 ms；LibVLC 网络及文件缓冲设置为 300 ms。这些值是播放器时间缓冲设置，不是固定文件缓存比例，也不是端到端起播时间保证。
+- `TorrentFileDataSource` 按读取偏移等待已校验并写盘的分片，跳转时调整分片期限；视频头部和尾部索引优先请求，不等完整下载。
+- 既有受控回归在约 **4.57%** 下载量时起播，但从任务开始到播放事件约 **20.7 秒**，不能标为“立马播”。指定电影上次仍为 **0 视频字节**，同样不能标为通过。
+
+### 真实搜索与参考 APP 启动结果
+
+两个版本使用相同关键词。只有能取得相同 BTIH 的实际搜索结果并播放，才能比较同资源起播；不同版本或不同节点的数据不可直接作速度排名。渲染尝试为默认、关闭 Impeller、软件渲染，均使用原 APK 的启动参数，没有修改参考安装包。
+
+### Android API 30
+
+| 参考 APP 渲染尝试 | 保持进程 |
+| --- | --- |
+| default | 未保持运行 |
+| opengl | 未保持运行 |
+| software | 未保持运行 |
+
+参考搜索未完成：`Reference process exits before usable UI on this emulator.`。此环境不能验证双方实际播放差异。
+
+| 本 APP 实际请求引擎 | 实际报告引擎 | 磁力结果数量 |
+| --- | --- | --- |
+| clg.im | clg.im | 12 |
+| BT搜索（dobt） | BT搜索（dobt） | 0 |
+| BD电影首发站 | BD电影首发站 | 674 |
+| Pomo | Pomo | 450 |
+| 美剧粉 | 美剧粉 | 0 |
+| 高清族 | 高清族 | 223 |
+
+[实际状态、UI 与诊断证据](evidence/current-same-search-api30.json)
+
+![API 30 search-ours-0 实际截图](screenshots/current/same-search-api30-search-ours-0.png)
+
+![API 30 search-ours-1 实际截图](screenshots/current/same-search-api30-search-ours-1.png)
+
+![API 30 search-ours-2 实际截图](screenshots/current/same-search-api30-search-ours-2.png)
+
+![API 30 search-ours-3 实际截图](screenshots/current/same-search-api30-search-ours-3.png)
+
+![API 30 search-ours-4 实际截图](screenshots/current/same-search-api30-search-ours-4.png)
+
+![API 30 search-ours-5 实际截图](screenshots/current/same-search-api30-search-ours-5.png)
+
+![API 30 search-reference-default 实际截图](screenshots/current/same-search-api30-search-reference-default.png)
+
+![API 30 search-reference-opengl 实际截图](screenshots/current/same-search-api30-search-reference-opengl.png)
+
+![API 30 search-reference-software 实际截图](screenshots/current/same-search-api30-search-reference-software.png)
+
+
+**立即起播及同资源播放对照尚未通过，不能把本轮搜索执行完成写成播放优化完成。**如参考 APP 仍无法运行，此测试环境缺少可用对标客户端，需要在可运行参考 APP 的安卓设备继续验证。
+
+### 结果解释与测试限制
+
+上述数量仅为提取到的磁力条数，不能解读为全部符合 `Avengers` 的不同影片，更不能解读为可播放数。BD 首发站在采样时仍有 3 个详情页面读取中；dobt 为超时，美剧粉为无结果。没有两款 APP 的同一 BTIH 播放数据，因此尚不能作播放速度排名。
+
+首次脚本未正确持久化引擎选择，得到重复默认引擎结果；复测已通过真实设置文件修正，各请求引擎与实际引擎一致。Android 15 初次环境另外出现 Launcher ANR，遮挡界面，其搜索观测已排除，不计通过。
+
+![Android 15 测试环境实际 ANR](screenshots/current/reference-api35-launcher-anr.png)
+
+[Android 15 参考启动诊断与无效数据排除记录](evidence/current-reference-api35.json)
+
+本轮没有修改播放器代码或发布新 APK，仅增加可重复对照脚本和真实报告。**指定电影立即起播尚未实现**；现有环境无法运行参考 APP，需要能运行它的安卓设备才能继续取得同资源播放差异。并未要求用户必须提供 `.torrent`。
