@@ -53,7 +53,7 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
             }
             val length = end - start + 1
             val status = if (range == null) "200 OK" else "206 Partial Content"
-            val headers = "HTTP/1.1 $status\r\nContent-Type: application/vnd.rn-realmedia\r\nAccept-Ranges: bytes\r\nContent-Length: $length\r\n" +
+            val headers = "HTTP/1.1 $status\r\nContent-Type: application/octet-stream\r\nAccept-Ranges: bytes\r\nContent-Length: $length\r\n" +
                 (if (range != null) "Content-Range: bytes $start-$end/$size\r\n" else "") + "Connection: close\r\n\r\n"
             output.write(headers.toByteArray()); output.flush()
             if (request[0] == "HEAD") return

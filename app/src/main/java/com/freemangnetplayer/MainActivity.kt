@@ -58,6 +58,8 @@ data class SearchProvider(
     val queryUrl: String? = null
 )
 
+private data class SearchPage(val label: String, val url: String)
+
 private data class MagnetResult(val title: String, val magnet: String)
 
 val builtInProviders = listOf(
@@ -119,6 +121,11 @@ class MainActivity : ComponentActivity() {
                 var showSearchBrowser by remember { mutableStateOf(false) }
                 var currentSearchUrl by remember { mutableStateOf("") }
                 val results = remember { mutableStateListOf<MagnetResult>() }
+                var pageNumber by remember { mutableIntStateOf(1) }
+                var nextPage by remember { mutableStateOf("") }
+                val pageUrls = remember { mutableStateMapOf<Int, String>() }
+                val pageCache = remember { mutableStateMapOf<Int, List<MagnetResult>>() }
+                val pageNext = remember { mutableStateMapOf<Int, String>() }
                 val downloads = remember { mutableStateListOf<LibraryEntry>() }
                 val favorites = remember { mutableStateListOf<LibraryEntry>() }
                 val playbacks = remember { mutableStateListOf<LibraryEntry>() }
@@ -171,6 +178,7 @@ class MainActivity : ComponentActivity() {
                     }
                     focus.clearFocus()
                     error = ""
+                    pageNumber = 1; nextPage = ""; pageUrls.clear(); pageCache.clear(); pageNext.clear()
                     results.clear()
                     selectedTab = "搜索结果"
                     searchState = "loading"
@@ -186,13 +194,26 @@ class MainActivity : ComponentActivity() {
                     searchTrigger++
                 }
 
+                fun changePage(number: Int, url: String) {
+                    if (url.isBlank() || number < 1) return
+                    pageCache[pageNumber] = results.toList(); pageNext[pageNumber] = nextPage
+                    pageNumber = number; nextPage = pageNext[number].orEmpty()
+                    results.clear(); results.addAll(pageCache[number].orEmpty())
+                    pageUrls[number] = url
+                    currentSearchUrl = url; searchPageUrl = url
+                    firstPageLoad = false; searchNeedsFormSubmit = false
+                    searchState = if (results.isEmpty()) "loading" else "results"
+                    searchMessage = "正在读取第 $number 页…"
+                    searchTrigger++
+                }
+
                 LaunchedEffect(Unit) { if (!requestedQuery.isNullOrBlank()) beginSearch() }
-                LaunchedEffect(searchState, results.size) {
+                LaunchedEffect(searchState, results.size, pageNumber, nextPage) {
                     if (debug && searchTrigger > 0) {
                         val rows = JSONArray()
                         results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet)) }
                         java.io.File(filesDir, "search-check.json").writeText(JSONObject().put("engine", activeProvider)
-                            .put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
+                            .put("page", pageNumber).put("next", nextPage).put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
                     }
                 }
 
@@ -264,6 +285,10 @@ class MainActivity : ComponentActivity() {
                     Box(Modifier.fillMaxSize().background(canvas).padding(insets)) {
                         when (selectedTab) {
                             "搜索结果" -> SearchResultsScreen(
+                                page = pageNumber,
+                                nextAvailable = nextPage.isNotBlank(),
+                                onPrevious = { changePage(pageNumber - 1, pageUrls[pageNumber - 1].orEmpty()) },
+                                onNext = { changePage(pageNumber + 1, nextPage) },
                                 keyword = activeQuery,
                                 engine = activeProvider,
                                 state = searchState,
@@ -342,7 +367,7 @@ class MainActivity : ComponentActivity() {
                                 WebView(context).apply {
                                     importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                                     magnetWebView = this
-                                    searchBridge = MagnetSearchBridge { title, link ->
+                                    searchBridge = MagnetSearchBridge(onMagnet = { title, link ->
                                         runOnUiThread {
                                             if (generation == searchTrigger && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
                                                 results.add(MagnetResult(title.ifBlank { magnetTitle(link) }, link))
@@ -350,7 +375,14 @@ class MainActivity : ComponentActivity() {
                                                 searchMessage = ""
                                             }
                                         }
-                                    }
+                                    }, onPage = { url, next, pending, failures -> runOnUiThread {
+                                        if (generation == searchTrigger) {
+                                            if (url.startsWith("http")) { pageUrls[pageNumber] = url; currentSearchUrl = url }
+                                            nextPage = next
+                                            searchMessage = if (pending > 0) "正在读取 $pending 个详情页面…" else if (failures > 0) "$failures 个详情页面读取失败，可重试本页或查看网页" else "本页已读取完成"
+                                            if (pending == 0 && !searchNeedsFormSubmit && results.isEmpty() && searchState != "error") searchState = "empty"
+                                        }
+                                    } })
                                     settings.javaScriptEnabled = true
                                     settings.domStorageEnabled = true
                                     settings.javaScriptCanOpenWindowsAutomatically = false
@@ -513,7 +545,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private class MagnetSearchBridge(private val onMagnet: (String, String) -> Unit) {
+private class MagnetSearchBridge(
+    private val onPage: (String, String, Int, Int) -> Unit = { _, _, _, _ -> },
+    private val onMagnet: (String, String) -> Unit
+) {
+    @JavascriptInterface
+    fun onPageInfo(json: String) {
+        runCatching { val value = JSONObject(json); onPage(value.optString("url"), value.optString("next"), value.optInt("pending"), value.optInt("failures")) }
+    }
     @JavascriptInterface
     fun onResults(json: String) {
         runCatching {
@@ -606,6 +645,10 @@ private fun SearchHome(
 
 @Composable
 private fun SearchResultsScreen(
+    page: Int,
+    nextAvailable: Boolean,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit,
     keyword: String,
     engine: String,
     state: String,
@@ -627,10 +670,18 @@ private fun SearchResultsScreen(
             }
         }
         Spacer(Modifier.height(12.dp))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            OutlinedButton(onClick = onPrevious, enabled = page > 1, modifier = Modifier.weight(1f).height(52.dp)) { Text("上一页") }
+            Text("第 $page 页")
+            Button(onClick = onNext, enabled = nextAvailable, modifier = Modifier.weight(1f).height(52.dp)) { Text("下一页") }
+        }
+        Text(message, Modifier.padding(vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
+        if (!nextAvailable && state != "loading") Text("当前页面未提供下一页链接；可查看原网页确认是否有更多结果。", style = MaterialTheme.typography.bodySmall)
+        OutlinedButton(onClick = onOpenWeb, modifier = Modifier.fillMaxWidth()) { Text("查看本页原网页 / 验证") }
         when {
             results.isNotEmpty() -> {
-                Text("找到 ${results.size} 条可识别磁力链接", Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.bodyMedium)
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text("本页 ${results.size} 条磁力链接（不限制结果数量）", Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.bodyMedium)
+                LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     items(results, key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
                 }
             }

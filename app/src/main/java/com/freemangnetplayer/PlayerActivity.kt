@@ -271,8 +271,8 @@ class PlayerActivity : ComponentActivity() {
         releasePlayer(); savedPosition = 0; retryAfter = 0
         TorrentTasks.switchStreamFile(task, index); requested = true; autoPlay = true
     }
-    private fun startPlayback(task: TorrentTask, file: TaskFile) {
-        val realMedia = file.path.substringAfterLast('.').lowercase() in listOf("rm", "rmvb")
+    private fun startPlayback(task: TorrentTask, file: TaskFile, forceSoftware: Boolean = false) {
+        val realMedia = forceSoftware || MediaFormats.useSoftware(file.path)
         val media: Player = if (realMedia) VlcTorrentPlayer(this, task, file) else ExoPlayer.Builder(this)
             .setRenderersFactory(androidx.media3.exoplayer.DefaultRenderersFactory(this).setEnableDecoderFallback(true))
             .setSeekBackIncrementMs(15000).setSeekForwardIncrementMs(15000)
@@ -287,6 +287,12 @@ class PlayerActivity : ComponentActivity() {
                 window.decorView.post {
                     if (player === media && !isDestroyed) {
                         savedPosition = media.currentPosition
+                        if (media !is VlcTorrentPlayer && error.errorCode in 3000..4999) {
+                            releasePlayer()
+                            playerMessage = "正在尝试兼容解码：${file.path}"
+                            startPlayback(task, file, forceSoftware = true)
+                            return@post
+                        }
                         if (error.errorCode >= 3000) requested = false
                         playerMessage = "播放失败：${error.errorCodeName}；可重试或查看网络诊断"
                         retryAfter = System.currentTimeMillis() + 3000

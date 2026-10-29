@@ -16,7 +16,7 @@ import java.io.File
 import java.security.MessageDigest
 
 data class TaskFile(val index: Int, val path: String, val size: Long, val done: Long = 0) {
-    val video get() = path.substringAfterLast('.', "").lowercase() in listOf("mp4", "mkv", "avi", "mov", "webm", "m4v", "ts", "wmv", "rm", "rmvb")
+    val video get() = MediaFormats.isVideo(path)
 }
 class TorrentTask(val id: String, var source: String, val title: String, folder: File, download: Boolean) {
     var folder by mutableStateOf(folder)

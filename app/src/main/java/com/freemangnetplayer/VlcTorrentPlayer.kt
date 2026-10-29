@@ -41,7 +41,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
                     MediaPlayer.Event.Playing -> { ready = true; ended = false; decoder.setRate(speed); pendingSeek?.let { decoder.setTime(it); pendingSeek = null } }
                     MediaPlayer.Event.Buffering -> ready = event.buffering >= 100f
                     MediaPlayer.Event.EndReached -> ended = true
-                    MediaPlayer.Event.EncounteredError -> error = PlaybackException("RealMedia decoder could not read the video stream", null, PlaybackException.ERROR_CODE_IO_UNSPECIFIED)
+                    MediaPlayer.Event.EncounteredError -> error = PlaybackException("兼容解码器无法读取视频流", null, PlaybackException.ERROR_CODE_IO_UNSPECIFIED)
                 }
                 invalidateState()
             }
