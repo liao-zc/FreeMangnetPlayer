@@ -42,6 +42,7 @@ class TorrentTask(val id: String, val source: String, val title: String, folder:
     var lastUsed = System.currentTimeMillis()
     var stopping = false
     var clearing = false
+    var destination: File? = null
     var moving = false
 }
 
@@ -66,6 +67,7 @@ object TorrentTasks {
             task.complete = row.optBoolean("complete")
             task.selected = row.optJSONArray("selected")?.let { a -> (0 until a.length()).map { a.getInt(it) }.toSet() } ?: emptySet()
             task.playingIndex = row.optInt("playing", -1)
+            task.destination = row.optString("destination").takeIf { it.isNotBlank() }?.let { File(it) }
             task.cancelled = row.optBoolean("cancelled")
             task.status = if (task.cancelled) "已取消，已下载文件保留" else if (task.paused) "已暂停" else "正在恢复并校验缓存…"
             tasks[task.id] = task
@@ -88,7 +90,12 @@ object TorrentTasks {
         }
         task.lastUsed = System.currentTimeMillis()
         if (task.cancelled && !task.stopping && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
-        if (download) task.download = true
+        if (download) {
+            if (!task.download || task.folder.canonicalPath == File(SettingsStore.root(c, false), "FreeMangnetPlayerTasks/$id").canonicalPath) {
+                task.destination = SettingsStore.taskFolder(c, true, id)
+            }
+            task.download = true
+        }
         persist()
         val service = Intent(c, DownloadService::class.java)
         if (android.os.Build.VERSION.SDK_INT >= 26) c.startForegroundService(service) else c.startService(service)
@@ -182,7 +189,13 @@ object TorrentTasks {
                         Triple(rows, native, File(handle.savePath()))
                     }
                     task.folder = snapshot.third
-                    if (task.moving && task.folder.canonicalPath == SettingsStore.taskFolder(context, true, task.id).canonicalPath) task.moving = false
+                    task.destination?.let { target ->
+                        if (task.folder.canonicalPath == target.canonicalPath) {
+                            task.moving = false; task.destination = null
+                        } else if (!task.moving) {
+                            target.mkdirs(); task.moving = true; handle.moveStorage(target.absolutePath)
+                        }
+                    }
                     if (snapshot.first.isNotEmpty() && task.files.isEmpty()) {
                         task.files = snapshot.first
                         if (task.selected.isEmpty()) {
@@ -257,10 +270,12 @@ object TorrentTasks {
     fun download(task: TorrentTask) {
         task.download = true
         val target = SettingsStore.taskFolder(context, true, task.id)
+        task.destination = target
         if (task.folder.canonicalPath != target.canonicalPath && task.handle != null) {
             task.moving = true
             task.handle?.moveStorage(target.absolutePath)
         }
+        if (task.folder.canonicalPath == target.canonicalPath) task.destination = null
         task.paused = false; task.cancelled = false; task.complete = false
         LibraryStore.updateDownload(context, task.title, task.source, "正在下载所选文件", task.done, task.total)
         resume(task); persist()
@@ -328,7 +343,7 @@ object TorrentTasks {
         val rows = JSONArray()
         tasks.values.filter { it.download && !it.clearing }.forEach { LibraryStore.updateDownload(context, it.title, it.source, it.status, it.done, it.total) }
         tasks.values.filter { !it.clearing }.forEach { rows.put(JSONObject().put("id", it.id).put("source", it.source).put("title", it.title)
-            .put("folder", it.folder.absolutePath).put("download", it.download).put("paused", it.paused)
+            .put("folder", it.folder.absolutePath).put("destination", it.destination?.absolutePath ?: "").put("download", it.download).put("paused", it.paused)
             .put("cancelled", it.cancelled).put("complete", it.complete).put("selected", JSONArray(it.selected.toList())).put("playing", it.playingIndex)) }
         SettingsStore.prefs(context).edit().putString("torrent-tasks", rows.toString()).apply()
     }

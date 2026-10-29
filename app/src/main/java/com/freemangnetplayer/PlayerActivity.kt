@@ -65,7 +65,7 @@ class PlayerActivity : ComponentActivity() {
                     } else {
                         LaunchedEffect(current) {
                             while (true) {
-                                if (attached && requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
+                                if (attached && requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.destination == null && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
                                     val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
                                         ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.done >= it.size }.thenByDescending { it.index in current.selected }.thenByDescending { it.size }).firstOrNull()
                                     if (file != null) {
