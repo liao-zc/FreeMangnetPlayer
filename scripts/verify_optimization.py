@@ -9,6 +9,8 @@ from capture_usage_screenshots import adb, screenshot, require_visible, find_and
 from player_test_controls import tap_player
 _original_tap = find_and_tap
 def find_and_tap(label):
+    if label == '▶ 播放' and diagnostic().get('playing'):
+        return
     if not tap_player(label):
         _original_tap(label)
     else:

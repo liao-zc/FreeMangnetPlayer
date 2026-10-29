@@ -82,7 +82,7 @@ object TorrentTasks {
             val row = saved.getJSONObject(i)
             val task = TorrentTask(row.getString("id"), row.getString("source"), row.getString("title"),
                 File(row.getString("folder")), row.getBoolean("download"))
-            task.retainedCache = row.optBoolean("retainedCache", true)
+            task.retainedCache = row.optBoolean("retainedCache", row.getBoolean("download"))
             task.paused = row.optBoolean("paused")
             task.complete = row.optBoolean("complete")
             task.selected = row.optJSONArray("selected")?.let { a -> (0 until a.length()).map { a.getInt(it) }.toSet() } ?: emptySet()
