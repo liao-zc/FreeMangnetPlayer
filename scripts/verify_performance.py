@@ -140,14 +140,11 @@ def main():
         'position_before': p1, 'position_after': p2})
     # Expand through the real system PiP menu, preserving the same player instance.
     windows = adb('shell', 'dumpsys', 'window', 'windows')
-    section = windows[windows.find('com.freemangnetplayer/.PlayerActivity'):]
-    frame = re.search(r'mFrame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]', section)
-    import struct
-    width, height = struct.unpack('>II', (OUT / 'perf-07-floating-over-home.png').read_bytes()[16:24])
-    if frame:
-        x1, y1, x2, y2 = map(int, frame.groups())
-    if not frame or x2 - x1 > width * .8 or y2 - y1 > height * .8:
-        x1, y1, x2, y2 = width - 350, height - 450, width - 30, height - 150
+    sections = re.split(r'(?m)^  Window #', windows)
+    player = next(section for section in sections if 'com.freemangnetplayer.PlayerActivity' in section and 'mWindowingMode=pinned' in section)
+    frame = re.search(r' frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]', player)
+    assert frame, 'No actual pinned surface for opening SystemUI menu'
+    x1, y1, x2, y2 = map(int, frame.groups())
     adb('shell', 'input', 'tap', str((x1 + x2) // 2), str((y1 + y2) // 2))
     time.sleep(1)
     adb('shell', 'uiautomator', 'dump', '/sdcard/window.xml')
