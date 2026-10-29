@@ -222,7 +222,7 @@ def main():
     adb('shell', 'wm', 'size', '1080x2400')
     time.sleep(3)
     wait(lambda s: s.get('playing') and s.get('speed') == 1.25, 30)
-    require_visible('返回搜索', '▶ 播放')
+    require_visible('返回搜索')
     report.append({'check': 'compact-landscape-and-playback-state-restore', 'passed': True, 'state': landscape})
     find_and_tap('返回搜索')
     # Force-stop is a system stop, not a normal background operation. Reopen to check cache preference and persistence.

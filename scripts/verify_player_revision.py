@@ -74,12 +74,16 @@ def main():
     adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
     adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity')
     time.sleep(2)
+    initial_pid=adb('shell','pidof',PACKAGE).strip()
     find_and_tap('设置')
     root=tree()
     fields=[n.get('text') for n in root.iter('node') if n.get('class')=='android.widget.EditText']
     assert '5' in fields, fields
     screenshot('revision-01-default-settings.png')
     record('default-maximum-downloads-five',fields=fields)
+    from verify_optimization import edit
+    edit('最大缓存任务数量（1–100）','1')
+    find_and_tap('保存设置')
     find_and_tap('返回首页')
     start=time.monotonic()
     open_magnet(fixtures[0]['magnet'])
@@ -92,6 +96,7 @@ def main():
     assert ratio < .20, first
     record('stream-start-below-twenty-percent',state=first,ratio=ratio,seed_upload_limit=128*1024)
     process=adb('shell','pidof',PACKAGE).strip()
+    assert process==initial_pid, 'Process restarted during initial parsing/playback'
     root,_=controller()
     surface=next(n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface'))
     area=bounds(surface)
@@ -162,13 +167,25 @@ def main():
     transient=state(); transient_folder=transient['folder']
     assert adb('shell','test','-f',retained_path)==''
     record('explicit-cache-survives-next-resource',retained_path=retained_path,new_state=transient)
+    find_and_tap('缓存')
+    denied=wait(lambda s:not s.get('retainedCache') and '最大缓存数量' in s.get('playerError',''))
+    assert adb('shell','test','-f',retained_path)==''
+    screenshot('revision-07b-cache-limit.png')
+    record('cache-limit-preserves-explicit-cache',state=denied,retained_path=retained_path)
+
     find_and_tap('返回搜索')
+    adb('shell','am','force-stop',PACKAGE)
+    adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity')
+    time.sleep(2)
+    process=adb('shell','pidof',PACKAGE).strip()
     open_magnet(fixtures[2]['magnet']); wait(lambda s:s.get('id')==fixtures[2]['id'] and s.get('metadata'))
     find_and_tap('▶ 播放'); wait(lambda s:s.get('playing'))
     time.sleep(2)
     assert adb('shell','test','!','-d',transient_folder)==''
     screenshot('revision-08-new-resource.png')
-    record('new-resource-clears-previous-unretained-cache',removed=transient_folder,state=state())
+    record('new-resource-clears-previous-unretained-cache',removed=transient_folder,state=state(),after_deliberate_system_stop=True)
+    assert adb('shell','test','-f',retained_path)==''
+    record('temporary-cleanup-and-explicit-retention-after-restart',removed=transient_folder,retained_path=retained_path)
     # Stress the real fullscreen + decoder lifecycle, preserving the same process.
     for i in range(6):
         control('player_fullscreen'); wait(lambda s:s.get('fullscreen') and s.get('playing'))

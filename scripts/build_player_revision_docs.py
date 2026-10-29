@@ -19,7 +19,7 @@ required=['default-maximum-downloads-five','pasted-magnet-real-metadata','stream
           'embedded-pause-play-speed-and-seek','fullscreen-embedded-small-icons','pip-continues-and-restores',
           'switch-file-releases-previous-temporary-bytes','explicit-cache-survives-next-resource',
           'new-resource-clears-previous-unretained-cache','no-crash-or-process-restart-during-playback-stress',
-          'magnet-retry-and-back-remain-responsive','invalid-media-shows-error-without-process-restart']
+          'magnet-retry-and-back-remain-responsive','invalid-media-shows-error-without-process-restart','cache-limit-preserves-explicit-cache','temporary-cleanup-and-explicit-retention-after-restart']
 assert all(by.get(n,{}).get('passed') is True for n in required),'Required checks incomplete'
 target=Path('docs/screenshots/player-revision');target.mkdir(parents=True,exist_ok=True)
 for p in shots.glob('revision-*.png'):
@@ -92,7 +92,7 @@ text+=f'''## 5. 白屏与闪退：修复及验证范围
 4. 解绑旧 PlayerView 与播放器，记录播放状态再释放；分片读取和原生会话销毁使用同一生命周期锁。
 5. 切换临时文件必须先停解码器、停止原生写入、等待结束，再删除旧文件，避免写入与删除同时发生。
 
-本轮连续 {stress['cycles']} 次进入/退出全屏，另包含多文件切换、两个新链接和画中画返回；进程 PID 始终为 `{stress['pid']}`，没有自动重启，日志没有 APP 崩溃记录。
+本轮连续 {stress['cycles']} 次进入/退出全屏，另包含多文件切换、两个新链接和画中画返回；连续切换阶段进程 PID 始终为 `{stress['pid']}`，没有自动重启，日志没有 APP 崩溃记录。另有一次主动执行的系统停止用于校验缓存持久化，已在原始证据中标明；该操作不作为崩溃或自动重启。
 
 **这些是本轮设备上的实际结果，用户原始闪退尚无设备、完整磁力及崩溃日志，不能断言已找出那次闪退的唯一原因。** 测试覆盖 H.264/AAC 实际音视频；其他硬件解码器或特殊视频格式需要相应资源验证。
 '''
@@ -121,7 +121,7 @@ APP 没有“总文件下载 20% 才能播放”的判断。旧报告的 20% 是
 
 - 仅点“播放”：创建临时播放数据。换成另一个磁力资源后，停止上个临时任务并删除它的文件。
 - 同一个链接切换另一个视频：若未主动保存，停止旧文件写入后删除上个视频，再恢复当前文件任务；播放器从新视频 0 秒开始。
-- 主动点“缓存”：将这个磁力任务标为保留，切换资源后保留已选文件的缓存，可从收藏或播放列表重新打开。
+- 主动点“缓存”：将这个磁力任务标为保留，切换资源后保留已选文件的缓存，可从收藏或播放列表重新打开。达到最大缓存数时拒绝新增主动缓存并提示清理或调整设置；不会因新视频的临时播放删除旧主动缓存。
 - 主动点“下载”：保留下载文件并后台持续运行，切换播放资源不会删除下载。
 - 收藏保存资源入口，**不自动等同于缓存**；若希望离线保留文件，还需点缓存或下载。
 
@@ -129,6 +129,7 @@ APP 没有“总文件下载 20% 才能播放”的判断。旧报告的 20% 是
 '''
 text+=image('revision-06-second-video.png','同链接切换至第二个视频，释放之前的临时视频')
 text+=image('revision-07-explicit-cache.png','主动缓存标记：切换后继续保留')
+text+=image('revision-07b-cache-limit.png','实际缓存数量上限提示，已保存的视频继续保留')
 text+=image('revision-08-new-resource.png','新磁力的实际视频，清理上一临时资源')
 text+='''## 8. 磁力解析与节点发现
 
