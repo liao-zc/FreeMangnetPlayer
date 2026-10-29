@@ -16,11 +16,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           python3 - <<'PY'
-          import json, subprocess
+          import json, subprocess, time
           from pathlib import Path
           for filename in ['README.md', 'docs/usage-zh.md']:
               payload = {'text': Path(filename).read_text(encoding='utf-8'), 'mode': 'gfm', 'context': '${{ github.repository }}'}
-              result = subprocess.run(['gh', 'api', 'markdown', '--input', '-'], input=json.dumps(payload), text=True, capture_output=True, check=True)
+              for attempt in range(5):
+                  result = subprocess.run(['gh', 'api', 'markdown', '--input', '-'], input=json.dumps(payload), text=True, capture_output=True)
+                  if result.returncode == 0:
+                      break
+                  print('GitHub render request failed; retry:', filename, attempt + 1, result.stderr[-400:])
+                  time.sleep(2 ** attempt)
+              if result.returncode != 0:
+                  raise RuntimeError('GitHub rendering failed: ' + filename + ': ' + result.stderr[-400:])
               assert '<h1' in result.stdout, filename
               assert 'E-SafeNet' not in result.stdout, filename
               print('GitHub rendered:', filename)
