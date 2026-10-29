@@ -88,16 +88,17 @@ object TorrentTasks {
         if (task.cancelled && !task.stopping && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
         if (download) task.download = true
         persist()
-        c.startForegroundService(Intent(c, DownloadService::class.java))
+        val service = Intent(c, DownloadService::class.java)
+        if (android.os.Build.VERSION.SDK_INT >= 26) c.startForegroundService(service) else c.startService(service)
         return task
     }
     fun schedule() {
         if (!initialized) return
         trimCaches()
-        var active = tasks.values.count { it.engine != null && !it.queued && !it.paused && !it.complete && !it.cancelled }
+        var active = tasks.values.count { (it.engine != null || it.job?.isActive == true) && !it.queued && !it.paused && !it.complete && !it.cancelled }
         val limit = SettingsStore.maxDownloads(context)
         if (active > limit) {
-            for (task in tasks.values.filter { it.engine != null && !it.queued && !it.paused && !it.complete && !it.cancelled }.sortedBy { it.viewers > 0 }) {
+            for (task in tasks.values.filter { (it.engine != null || it.job?.isActive == true) && !it.queued && !it.paused && !it.complete && !it.cancelled }.sortedBy { it.viewers > 0 }) {
                 if (active <= limit) break
                 task.queued = true; task.engine?.pause(); task.status = "排队中：并发数量已调整"; active--
             }
@@ -195,11 +196,12 @@ object TorrentTasks {
                     }
                     if (task.download) LibraryStore.updateDownload(context, task.title, task.source, task.status, task.done, task.total)
                     if (ticks++ % 4 == 0) { persist(); schedule() }
+                    if (task.complete && task.viewers == 0) break
                 }
             } catch (error: Exception) {
                 if (error !is CancellationException) { task.status = "任务失败：${error.localizedMessage}"; task.paused = true; persist() }
             } finally {
-                if (task.cancelled) withContext(NonCancellable + Dispatchers.IO) { closeEngine(task) }
+                withContext(NonCancellable + Dispatchers.IO) { closeEngine(task) }
             }
         }
     }
@@ -241,7 +243,7 @@ object TorrentTasks {
     }
     fun resume(task: TorrentTask) {
         task.paused = false
-        val active = tasks.values.count { it !== task && it.engine != null && !it.paused && !it.queued && !it.complete && !it.cancelled }
+        val active = tasks.values.count { it !== task && (it.engine != null || it.job?.isActive == true) && !it.paused && !it.queued && !it.complete && !it.cancelled }
         task.queued = active >= SettingsStore.maxDownloads(context)
         if (!task.queued) task.engine?.resume()
         schedule(); persist()
@@ -288,6 +290,7 @@ object TorrentTasks {
     fun persist() {
         if (!initialized) return
         val rows = JSONArray()
+        tasks.values.filter { it.download && !it.clearing }.forEach { LibraryStore.updateDownload(context, it.title, it.source, it.status, it.done, it.total) }
         tasks.values.filter { !it.clearing }.forEach { rows.put(JSONObject().put("id", it.id).put("source", it.source).put("title", it.title)
             .put("folder", it.folder.absolutePath).put("download", it.download).put("paused", it.paused)
             .put("cancelled", it.cancelled).put("complete", it.complete).put("selected", JSONArray(it.selected.toList())).put("playing", it.playingIndex)) }
