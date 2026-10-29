@@ -60,6 +60,11 @@ def main():
     adb('shell', 'wm', 'size', '1080x2400')
     adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.MainActivity')
     time.sleep(4)
+    from capture_usage_screenshots import visible_text
+    if "Quickstep isn't responding" in visible_text():
+        find_and_tap('Wait')
+        adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.MainActivity')
+        time.sleep(5)
     require_visible('设置', '解析资源', '播放', '下载', '收藏')
     screenshot('opt-01-home.png')
     find_and_tap('设置')

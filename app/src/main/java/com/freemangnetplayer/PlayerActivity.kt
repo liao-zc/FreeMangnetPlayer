@@ -97,7 +97,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
-                                        .put("fullscreen", fullscreen).put("floating", floating).put("networkMessage", current.networkMessage)
+                                        .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("networkMessage", current.networkMessage)
                                         .put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
@@ -224,7 +224,7 @@ class PlayerActivity : ComponentActivity() {
                             Text("应用下载限速：${current.downloadLimit}（0 为不限速）\n应用上传限速：${current.uploadLimit}（0 为不限速）")
                             Text("有效载荷速度：${bytes(current.payloadRate.toLong())}/秒\n含协议总速度：${bytes(current.rate.toLong())}/秒")
                             Text("资源节点：${current.peers}，其中种子：${current.seeds}\n连接数：${current.connectionCount}，DHT 节点：${current.dhtNodes}")
-                            Text("有效接收：${bytes(current.payloadBytes)}\nTCP / uTP、DHT、Tracker、局域网发现均已启用")
+                            Text("有效接收：${bytes(current.payloadBytes)}\nTCP / uTP 自动选择：优先 TCP，无有效传输后自动尝试出站 uTP；DHT、Tracker、局域网发现已启用")
                             Text(if (current.peers == 0) "当前没有资源连接。DHT 为 0 时请对照切换 Wi-Fi / 移动网络，检查 VPN 和 UDP 可达性；DHT 正常仍无节点时可能是资源无人做种。"
                                 else if (current.payloadRate < 1024) "已建立连接但没有足够有效数据；请用同一链接、同一网络与其他 BT 客户端对照。节点存在不代表节点愿意发送数据。"
                                 else "正在接收有效数据。边下边播需要下载速度持续高于视频码率。")

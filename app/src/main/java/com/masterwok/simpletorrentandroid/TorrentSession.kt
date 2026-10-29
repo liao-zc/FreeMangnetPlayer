@@ -460,6 +460,11 @@ open class TorrentSession(
     val isPaused: Boolean get() = sessionManager.isPaused
 
     val isRunning: Boolean get() = sessionManager.isRunning
+    fun enableOutgoingUtp() {
+        val settings = SettingsPack()
+        settings.setBoolean(com.frostwire.jlibtorrent.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), true)
+        sessionManager.applySettings(settings)
+    }
     val dhtNodes: Long get() = sessionManager.dhtNodes()
     val actualDownloadLimit: Int get() = sessionManager.downloadRateLimit()
     val actualUploadLimit: Int get() = sessionManager.uploadRateLimit()

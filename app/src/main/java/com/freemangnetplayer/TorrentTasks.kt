@@ -43,6 +43,7 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     var uploadLimit by mutableIntStateOf(0)
     val startedAt = System.currentTimeMillis()
     var lastDiscovery = 0L
+    var outgoingUtp by mutableStateOf(false)
     var selectionPaused = false
     var streaming = false
     var viewers = 0
@@ -203,6 +204,11 @@ object TorrentTasks {
                     options.settingsPack.setInteger(settings_pack.int_types.min_reconnect_time.swigValue(), 5)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
                     options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
+                    // Prefer TCP initially: the emulator's throttled uTP path can stall.
+                    // Retain incoming uTP and automatically enable outgoing uTP if TCP
+                    // fails to produce a useful connection; this is not a bandwidth cap.
+                    options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
+                    task.outgoingUtp = false
                     val engine = TorrentSession(options)
                     task.engine = engine
                     engine.listener = object : QuietTorrentListener() {
@@ -288,6 +294,13 @@ object TorrentTasks {
                     task.downloadLimit = task.engine?.actualDownloadLimit ?: 0
                     task.uploadLimit = task.engine?.actualUploadLimit ?: 0
                     task.networkMessage = task.engine?.networkMessage.orEmpty()
+                    if (!task.outgoingUtp && !task.paused && !task.queued && !task.complete &&
+                        System.currentTimeMillis() - task.startedAt > 12_000 &&
+                        (task.peers == 0 || task.payloadRate < 1024)) {
+                        task.engine?.enableOutgoingUtp(); task.outgoingUtp = true
+                        handle.forceReannounce(0, -1, TorrentHandle.IGNORE_MIN_INTERVAL)
+                        handle.forceDHTAnnounce(); connectExplicitPeers(task, handle)
+                    }
                     if (!task.paused && !task.queued && !task.complete && task.peers == 0 &&
                         System.currentTimeMillis() - task.lastDiscovery > 30_000) {
                         task.lastDiscovery = System.currentTimeMillis()
