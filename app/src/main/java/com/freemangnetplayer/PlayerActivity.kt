@@ -48,6 +48,7 @@ class PlayerActivity : ComponentActivity() {
     private var player by mutableStateOf<ExoPlayer?>(null)
     private var fullscreen by mutableStateOf(false)
     private var floating by mutableStateOf(false)
+    private var pipRequested = false
     private var speed by mutableFloatStateOf(1f)
     private var requested by mutableStateOf(false)
     private var autoPlay = true
@@ -307,22 +308,25 @@ class PlayerActivity : ComponentActivity() {
         } else controller.show(WindowInsetsCompat.Type.systemBars())
     }
     private fun enterFloating() {
+        if (floating || pipRequested) return
         if (Build.VERSION.SDK_INT < 26 || !packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
             playerMessage = "此设备不支持系统悬浮播放（需要 Android 8.0+ 与画中画支持）"
             return
         }
         try {
-            enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build())
-        } catch (error: Exception) { playerMessage = "无法进入悬浮播放，请检查系统画中画权限：${error.localizedMessage}" }
+            pipRequested = true
+            pipRequested = enterPictureInPictureMode(PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build())
+        } catch (error: Exception) { pipRequested = false; playerMessage = "无法进入悬浮播放，请检查系统画中画权限：${error.localizedMessage}" }
     }
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         floating = isInPictureInPictureMode
+        pipRequested = false
         if (!floating) updateSystemBars()
     }
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        if (player?.isPlaying == true && !isFinishing && !superseded) enterFloating()
+        if (player?.playWhenReady == true && !isFinishing && !superseded) enterFloating()
     }
     private fun releasePlayer() {
         val old = player ?: return
@@ -388,7 +392,7 @@ class PlayerActivity : ComponentActivity() {
         task?.let { if (!attached) { it.viewers++; attached = true }; TorrentTasks.schedule() }
     }
     override fun onStop() {
-        if (Build.VERSION.SDK_INT >= 26 && isInPictureInPictureMode) { super.onStop(); return }
+        if (Build.VERSION.SDK_INT >= 26 && (pipRequested || floating || isInPictureInPictureMode)) { super.onStop(); return }
         releasePlayer()
         task?.let { if (attached) { it.viewers = (it.viewers - 1).coerceAtLeast(0); attached = false } }
         super.onStop()
