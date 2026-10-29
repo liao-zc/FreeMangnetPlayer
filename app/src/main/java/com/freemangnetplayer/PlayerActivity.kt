@@ -55,6 +55,9 @@ class PlayerActivity : ComponentActivity() {
     private var savedPosition = 0L
     private var retryAfter = 0L
     private var task: TorrentTask? = null
+    private var activeView: PlayerView? = null
+    private var scrubbing = false
+    private var resumeAfterScrub = false
     private var attached = false
     private var superseded = false
     companion object { private var activePlayer = java.lang.ref.WeakReference<PlayerActivity>(null) }
@@ -118,6 +121,7 @@ class PlayerActivity : ComponentActivity() {
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
                                     File(filesDir, "tasks-check.json").writeText(tasks.toString())
                                 }
+                                refreshProgress()
                                 delay(500)
                             }
                         }
@@ -131,7 +135,7 @@ class PlayerActivity : ComponentActivity() {
                         }
                     }
                 } else {
-                Column(Modifier.fillMaxSize().safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
@@ -139,7 +143,7 @@ class PlayerActivity : ComponentActivity() {
                     }
                     val compact = LocalConfiguration.current.screenHeightDp < 720
                     val bodyScroll = rememberScrollState()
-                    Column(Modifier.weight(1f).fillMaxWidth().then(if (compact) Modifier.verticalScroll(bodyScroll) else Modifier), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(bodyScroll), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (current == null) {
                         Text("任务启动失败：${result.exceptionOrNull()?.localizedMessage}")
                     } else {
@@ -173,9 +177,9 @@ class PlayerActivity : ComponentActivity() {
                             }
                         }
                         if (player != null) {
-                            VideoSurface(Modifier.fillMaxWidth().then(if (compact) Modifier.height(240.dp) else Modifier.weight(1f)), { fileDialog = true })
+                            VideoSurface(Modifier.fillMaxWidth().height(240.dp), { fileDialog = true })
                         } else {
-                            Card(Modifier.fillMaxWidth().then(if (compact) Modifier.height(240.dp) else Modifier.weight(1f))) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                            Card(Modifier.fillMaxWidth().height(240.dp)) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
                                 Text(playerMessage, style = MaterialTheme.typography.bodySmall)
                             } }
@@ -336,13 +340,45 @@ class PlayerActivity : ComponentActivity() {
                 findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }
                 findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
                 findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
+                findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
+                    override fun onScrubStart(timeBar: androidx.media3.ui.TimeBar, position: Long) {
+                        scrubbing = true; resumeAfterScrub = this@PlayerActivity.player?.isPlaying == true
+                        this@PlayerActivity.player?.pause()
+                    }
+                    override fun onScrubMove(timeBar: androidx.media3.ui.TimeBar, position: Long) {
+                        findViewById<TextView>(R.id.exo_position).text = formatTime(position)
+                    }
+                    override fun onScrubStop(timeBar: androidx.media3.ui.TimeBar, position: Long, canceled: Boolean) {
+                        if (!canceled) this@PlayerActivity.player?.seekTo(position)
+                        scrubbing = false
+                        if (resumeAfterScrub) this@PlayerActivity.player?.play()
+                    }
+                })
+                activeView = this
             }
         }, update = { view ->
             view.player = player
             view.useController = !floating
             view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
             view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
-        }, onRelease = { view -> view.player = null }, modifier = modifier.background(Color.Black))
+        }, onRelease = { view -> if (activeView === view) activeView = null; view.player = null }, modifier = modifier.background(Color.Black))
+    }
+    private fun formatTime(value: Long): String {
+        val seconds = (value.coerceAtLeast(0) / 1000)
+        return if (seconds >= 3600) "%d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60)
+        else "%02d:%02d".format(seconds / 60, seconds % 60)
+    }
+    private fun refreshProgress() {
+        val current = player ?: return
+        val view = activeView ?: return
+        if (scrubbing) return
+        val duration = current.duration.takeIf { it > 0 } ?: 0L
+        view.findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress)?.let {
+            it.setDuration(duration); it.setPosition(current.currentPosition); it.setBufferedPosition(current.bufferedPosition)
+            it.isEnabled = duration > 0
+        }
+        view.findViewById<TextView>(R.id.exo_position)?.text = formatTime(current.currentPosition)
+        view.findViewById<TextView>(R.id.exo_duration)?.text = formatTime(duration)
     }
     override fun onStart() {
         super.onStart()

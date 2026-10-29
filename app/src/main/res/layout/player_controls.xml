@@ -2,7 +2,7 @@
 <LinearLayout android:id="@+id/exo_bottom_bar" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:orientation="vertical" android:background="#B8000000" android:paddingHorizontal="4dp" android:paddingBottom="4dp">
 <LinearLayout android:layout_width="match_parent" android:layout_height="32dp" android:gravity="center_vertical">
 <TextView android:id="@+id/exo_position" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="12sp" android:minWidth="40dp" android:gravity="center" android:text="00:00"/>
-<androidx.media3.ui.DefaultTimeBar android:id="@+id/exo_progress" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp" app:played_color="#29CEC0" app:scrubber_color="#FFFFFF" app:buffered_color="#88FFFFFF"/>
+<androidx.media3.ui.DefaultTimeBar android:id="@+id/player_progress" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp" app:played_color="#29CEC0" app:scrubber_color="#FFFFFF" app:buffered_color="#88FFFFFF"/>
 <TextView android:id="@+id/exo_duration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="12sp" android:minWidth="40dp" android:gravity="center" android:text="00:00"/>
 </LinearLayout>
 <LinearLayout android:layout_width="match_parent" android:layout_height="44dp" android:gravity="center_vertical">

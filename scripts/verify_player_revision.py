@@ -95,7 +95,7 @@ def main():
     root,_=controller()
     surface=next(n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface'))
     area=bounds(surface)
-    ids=['exo_rew','exo_play_pause','exo_ffwd','player_speed','player_files','player_pip','player_fullscreen','exo_position','exo_duration','exo_progress']
+    ids=['exo_rew','exo_play_pause','exo_ffwd','player_speed','player_files','player_pip','player_fullscreen','exo_position','exo_duration','player_progress']
     actual={}
     for id in ids:
         node=next(n for n in root.iter('node') if n.get('resource-id','').endswith('/'+id))
@@ -184,6 +184,8 @@ def main():
 try:
     main()
 finally:
+    screenshot('revision-last-screen.png')
+    (OUT/'revision-last-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
     (OUT/'player-revision-verification.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
     (OUT/'player-revision-last-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
     (OUT/'player-revision-logcat.txt').write_text(adb('logcat','-d'),encoding='utf-8')
