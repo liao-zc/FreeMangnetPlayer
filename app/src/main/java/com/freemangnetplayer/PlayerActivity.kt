@@ -1,492 +1,207 @@
-﻿package com.freemangnetplayer
+package com.freemangnetplayer
 
+import android.Manifest
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.lifecycleScope
-import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
+import androidx.media3.common.*
+import androidx.media3.datasource.*
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
-import androidx.media3.datasource.DataSource
 import androidx.media3.ui.PlayerView
-import com.frostwire.jlibtorrent.TorrentHandle
-import com.frostwire.jlibtorrent.TorrentInfo
-import com.frostwire.jlibtorrent.swig.settings_pack
-import com.masterwok.simpletorrentandroid.TorrentSession
-import com.masterwok.simpletorrentandroid.TorrentSessionOptions
-import com.masterwok.simpletorrentandroid.contracts.TorrentSessionListener
-import com.masterwok.simpletorrentandroid.models.TorrentSessionStatus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 
 class PlayerActivity : ComponentActivity() {
     private var player by mutableStateOf<ExoPlayer?>(null)
-    private var torrentHandle: TorrentHandle? = null
-    private data class ResourceFile(val path: String, val bytes: Long)
-    private var resourceFiles by mutableStateOf<List<ResourceFile>>(emptyList())
-    private var session: TorrentSession? = null
-    private var currentUri: Uri? = null
-    private var currentSource: String = ""
-    private var downloadMode = false
-    private var metadataReady by mutableStateOf(false)
-    private var previewRequested = false
-    private var autoplayRequested = false
-    private var playbackAttemptBytes = -1L
-    private var connectionTimedOut by mutableStateOf(false)
-    private var favoriteSaved by mutableStateOf(false)
-    private var playbackActive by mutableStateOf(false)
-    private var playbackSpeed by mutableFloatStateOf(1f)
-    private var resumeOnReady = false
-    private var playbackResumePosition = 0L
-
-    private var statusText by mutableStateOf("正在准备磁力任务…")
-    private var progressValue by mutableFloatStateOf(0f)
-    private var downloadedBytes by mutableLongStateOf(0L)
-    private var totalBytes by mutableLongStateOf(0L)
-    private var downloadRate by mutableIntStateOf(0)
-    private var peerCount by mutableIntStateOf(0)
+    private var speed by mutableFloatStateOf(1f)
+    private var requested by mutableStateOf(false)
+    private var autoPlay = true
+    private var playerMessage by mutableStateOf("")
+    private var savedPosition = 0L
+    private var retryAfter = 0L
+    private var task: TorrentTask? = null
+    private val notifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        File(filesDir, "torrent-check.json").delete()
-        currentSource = intent.getStringExtra("source") ?: intent.data?.toString().orEmpty()
-        downloadMode = intent.getStringExtra("mode") == "download"
-        resumeOnReady = intent.getStringExtra("mode") == "play"
-        val title = intent.getStringExtra("title").orEmpty()
-
+        if (Build.VERSION.SDK_INT >= 33) notifications.launch(Manifest.permission.POST_NOTIFICATIONS)
+        val source = intent.getStringExtra("source") ?: intent.data?.toString().orEmpty()
+        val title = intent.getStringExtra("title").orEmpty().ifBlank { "资源解析" }
+        val result = runCatching { TorrentTasks.obtain(this, source, title, intent.getStringExtra("mode") == "download") }
+        task = result.getOrNull()?.also { it.viewers++ }
+        requested = intent.getStringExtra("mode") == "play"
         setContent {
-            MaterialTheme(colorScheme = lightColorScheme(
-                primary = Color(0xFF087F79), secondary = Color(0xFF344AB8), background = Color(0xFFF3F8FA)
-            )) {
-                Column(Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 18.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(title.ifBlank { "资源解析" }, maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.titleLarge)
-                    Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-                        Button(onClick = { finish() }, modifier = Modifier.height(54.dp)) { Text("返回搜索") }
-                        Spacer(Modifier.weight(1f))
-                        if (metadataReady || playbackActive) {
-                            OutlinedButton(
-                                onClick = {
-                                    LibraryStore.addFavorite(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource)
-                                    favoriteSaved = true
-                                },
-                                modifier = Modifier.height(54.dp)
-                            ) { Text(if (favoriteSaved) "已收藏" else "收藏") }
-                        }
+            MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF087F79), background = Color(0xFFF3F8FA))) {
+                val current = task
+                var favorite by remember { mutableStateOf(LibraryStore.readFavorites(this).any { it.source == source }) }
+                var fileDialog by remember { mutableStateOf(false) }
+                var deleteDialog by remember { mutableStateOf(false) }
+                Column(Modifier.fillMaxSize().safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
+                        OutlinedButton(onClick = { LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
                     }
-
-                    LaunchedEffect(currentSource) {
-                        delay(45_000)
-                        if (!metadataReady) {
-                            connectionTimedOut = true
-                            statusText = "45 秒内未取得种子元数据。请确认链接、网络及做种者状态。"
-                        }
-                    }
-
-                    Card(
-                        Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(18.dp),
-                        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color.White)
-                    ) {
-                        Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text(if (metadataReady) "资源解析完成" else "正在解析磁力资源", style = MaterialTheme.typography.titleLarge)
-                            Text(statusText, style = MaterialTheme.typography.bodyMedium)
-                            if (metadataReady) {
-                                LinearProgressIndicator(progress = { progressValue.coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
-                                Text("${(progressValue * 100).toInt()}%  ·  ${formatBytes(downloadedBytes)} / ${formatBytes(totalBytes)}")
-                            } else if (!connectionTimedOut) {
-                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                                Text("正在获取元数据，尚无可计算的完成百分比")
-                            }
-                            Text("${formatBytes(downloadRate.toLong())}/秒  ·  已连接 $peerCount 个节点", style = MaterialTheme.typography.bodySmall)
-                            Text(currentSource.take(150), maxLines = 2, style = MaterialTheme.typography.bodySmall, color = Color(0xFF087F79))
-                        }
-                    }
-
-                    if (resourceFiles.isNotEmpty()) {
-                        Text("真实文件列表（${resourceFiles.size} 项；当前缓存最大文件）", style = MaterialTheme.typography.titleSmall)
-                        LazyColumn(Modifier.fillMaxWidth().heightIn(max = 130.dp)) {
-                            items(resourceFiles) { file ->
-                                Text("${file.path} · ${formatBytes(file.bytes)}", Modifier.padding(vertical = 4.dp), style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    }
-
-                    if (!metadataReady && (connectionTimedOut || statusText.contains("失败") || statusText.contains("无效"))) {
-                        Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(18.dp)) {
-                            Column(Modifier.fillMaxSize().padding(22.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                                Text(if (connectionTimedOut) "连接未成功" else "资源解析失败", style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.error)
-                                Spacer(Modifier.height(10.dp))
-                                Text(statusText)
-                                Spacer(Modifier.height(16.dp))
-                                Button(onClick = { finish() }, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("返回搜索结果") }
-                            }
-                        }
-                    } else if (!metadataReady) {
-                        Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(18.dp)) {
-                            Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                                CircularProgressIndicator()
-                                Spacer(Modifier.height(16.dp))
-                                Text("正在连接种子并读取文件列表…")
-                                Spacer(Modifier.height(6.dp))
-                                Text("资源信息取决于种子节点是否在线。", style = MaterialTheme.typography.bodySmall)
-                            }
-                        }
-                    } else if (player != null) {
-                        AndroidView(
-                            factory = { context -> PlayerView(context).apply { useController = true; player = this@PlayerActivity.player } },
-                            update = { it.player = player },
-                            modifier = Modifier.fillMaxWidth().weight(1f)
-                        )
+                    if (current == null) {
+                        Text("任务启动失败：${result.exceptionOrNull()?.localizedMessage}")
                     } else {
-                        Card(Modifier.fillMaxWidth().weight(1f), shape = RoundedCornerShape(18.dp), colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = Color(0xFFE4F2F1))) {
-                            Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
-                                Text("▣", style = MaterialTheme.typography.displayLarge, color = Color(0xFF087F79))
-                                Spacer(Modifier.height(10.dp))
-                                Text(currentUri?.lastPathSegment ?: title.ifBlank { "视频资源已就绪" }, maxLines = 2, style = MaterialTheme.typography.titleMedium)
-                                Spacer(Modifier.height(6.dp))
-                                Text("选择预览、下载或播放", style = MaterialTheme.typography.bodyMedium)
+                        LaunchedEffect(current) {
+                            while (true) {
+                                if (requested && player == null && !current.cancelled && !current.paused && !current.queued && !current.moving && current.files.isNotEmpty() && System.currentTimeMillis() > retryAfter) {
+                                    val file = current.files.firstOrNull { it.index == current.playingIndex && it.video }
+                                        ?: current.files.filter { it.video }.sortedWith(compareByDescending<TaskFile> { it.done >= it.size }.thenByDescending { it.index in current.selected }.thenByDescending { it.size }).firstOrNull()
+                                    if (file != null) {
+                                        TorrentTasks.playFile(current, file.index)
+                                        if (File(current.folder, file.path).exists() && file.done > 0) startPlayback(current, file)
+                                    } else playerMessage = "该链接没有可识别的视频文件，可选择文件下载"
+                                }
+                                if (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+                                    val rows = JSONArray()
+                                    current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
+                                    File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", source).put("id", current.id)
+                                        .put("metadata", current.files.isNotEmpty()).put("peers", current.peers).put("downloaded", current.done).put("total", current.total)
+                                        .put("files", rows).put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
+                                        .put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
+                                        .put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
+                                    val tasks = JSONArray()
+                                    TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
+                                    File(filesDir, "tasks-check.json").writeText(tasks.toString())
+                                }
+                                delay(500)
                             }
                         }
-                    }
-
-                    if (player != null) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { seekBySeconds(-15) }, modifier = Modifier.weight(1f).height(50.dp)) { Text("后退 15 秒") }
-                            OutlinedButton(onClick = { seekBySeconds(15) }, modifier = Modifier.weight(1f).height(50.dp)) { Text("前进 15 秒") }
-                            OutlinedButton(onClick = { cyclePlaybackSpeed() }, modifier = Modifier.weight(1f).height(50.dp)) { Text("${playbackSpeed}×") }
+                        Card(Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(if (current.files.isEmpty()) "正在解析磁力资源" else "资源解析完成", style = MaterialTheme.typography.titleMedium)
+                                Text(current.status)
+                                if (current.files.isEmpty() && !current.paused && !current.cancelled) LinearProgressIndicator(Modifier.fillMaxWidth())
+                                else LinearProgressIndicator(progress = { if (current.total == 0L) 0f else (current.done.toFloat() / current.total).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())
+                                Text("${bytes(current.done)} / ${bytes(current.total)} · ${bytes(current.rate.toLong())}/秒 · ${current.peers} 节点", style = MaterialTheme.typography.bodySmall)
+                            }
                         }
-                    }
-
-                    if (metadataReady) {
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(onClick = { requestPlayback(autoPlay = false) }, modifier = Modifier.weight(1f)) { Text("预览") }
+                        if (current.files.isNotEmpty()) {
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Text("真实文件列表（${current.files.size} 项）", Modifier.weight(1f))
+                                TextButton(onClick = { fileDialog = true }) { Text("选择文件") }
+                            }
+                            LazyColumn(Modifier.fillMaxWidth().heightIn(max = 120.dp)) {
+                                items(current.files) { file ->
+                                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                        Checkbox(checked = file.index in current.selected, onCheckedChange = { checked -> TorrentTasks.select(current, if (checked) current.selected + file.index else current.selected - file.index) })
+                                        Column(Modifier.weight(1f)) {
+                                            Text(file.path, maxLines = 1, style = MaterialTheme.typography.bodySmall)
+                                            Text("${bytes(file.done)} / ${bytes(file.size)}", style = MaterialTheme.typography.labelSmall)
+                                        }
+                                        if (file.video) TextButton(onClick = { switchVideo(current, file.index) }) { Text("播放此文件") }
+                                    }
+                                }
+                            }
+                        }
+                        if (player != null) {
+                            AndroidView(factory = { c -> PlayerView(c).apply { useController = true; player = this@PlayerActivity.player } }, update = { it.player = player }, modifier = Modifier.fillMaxWidth().weight(1f))
+                        } else {
+                            Card(Modifier.fillMaxWidth().weight(1f)) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
+                                Text(playerMessage, style = MaterialTheme.typography.bodySmall)
+                            } }
+                        }
+                        if (player != null) {
+                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                OutlinedButton(onClick = { player?.let { it.seekTo((it.currentPosition - 15000).coerceAtLeast(0)) } }, modifier = Modifier.weight(1f)) { Text("后退 15 秒") }
+                                OutlinedButton(onClick = { player?.let { it.seekTo(it.currentPosition + 15000) } }, modifier = Modifier.weight(1f)) { Text("前进 15 秒") }
+                                OutlinedButton(onClick = { val values = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f); speed = values[(values.indexOf(speed) + 1) % values.size]; player?.setPlaybackSpeed(speed) }, modifier = Modifier.weight(1f)) { Text("${speed}×") }
+                            }
+                        }
+                        if (current.files.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            OutlinedButton(onClick = { requestPlayback(false) }, modifier = Modifier.weight(1f).height(48.dp)) { Text("预览") }
                             OutlinedButton(onClick = {
-                                downloadMode = true
-                                statusText = "下载与缓存进行中；保持任务页面打开。"
-                                LibraryStore.updateDownload(this@PlayerActivity, title.ifBlank { "磁力资源" }, currentSource, statusText, downloadedBytes, totalBytes)
-                            }, modifier = Modifier.weight(1f)) { Text("下载") }
-                            Button(onClick = { requestPlayback(autoPlay = true) }, modifier = Modifier.weight(1f)) { Text("▶ 播放") }
+                                if (current.selected.isEmpty()) playerMessage = "请至少勾选一个下载文件" else {
+                                    releasePlayer(); TorrentTasks.download(current)
+                                }
+                            }, modifier = Modifier.weight(1f).height(48.dp)) { Text("下载") }
+                            Button(onClick = { requestPlayback(true) }, modifier = Modifier.weight(1f).height(48.dp)) { Text("▶ 播放") }
                         }
-                    } else if (downloadMode) {
-                        OutlinedButton(onClick = { togglePause() }, modifier = Modifier.fillMaxWidth()) { Text("暂停 / 继续下载") }
-                    }
-                    if (downloadMode) Text("下载任务在应用内运行；当前版本不支持退出应用后的后台续传。", style = MaterialTheme.typography.bodySmall)
-                }
-            }
-        }
-        startTorrent(currentSource)
-    }
-
-    private fun startTorrent(raw: String) {
-        val source = normalizeMagnetUri(raw)?.let { normalized ->
-            // Bare hashes have no trackers. Keep provided trackers and add bootstrap
-            // alternatives so discovery does not depend exclusively on UDP DHT.
-            normalized + listOf("udp://tracker.opentrackr.org:1337/announce", "https://tracker.tamersunion.org:443/announce", "udp://open.stealth.si:80/announce")
-                .filter { !normalized.contains(java.net.URLEncoder.encode(it, "UTF-8")) }
-                .joinToString("") { "&tr=" + java.net.URLEncoder.encode(it, "UTF-8") }
-        } ?: raw.trim().replace("&amp;", "&", ignoreCase = true)
-        val validMagnet = source.startsWith("magnet:?", true) && Regex("(?i)(?:[?&])xt=urn:btih:").containsMatchIn(source)
-        val validTorrentUrl = source.startsWith("https://", true) || source.startsWith("http://", true)
-        if (!validMagnet && !validTorrentUrl) {
-            statusText = "磁力链接无效。请从搜索结果重新选择资源。"
-            return
-        }
-
-        statusText = if (downloadMode) "正在连接并下载…" else "正在连接种子、获取文件信息…"
-        if (downloadMode) LibraryStore.updateDownload(this, intent.getStringExtra("title").orEmpty(), source, statusText)
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                // SessionManager loads libtorrent JNI. Initialize it off the UI thread so the
-                // activity can render progress and errors even when native startup is slow.
-                val folder = File(getExternalFilesDir(Environment.DIRECTORY_MOVIES), "FreeMangnetPlayer").apply { mkdirs() }
-                val options = TorrentSessionOptions(
-                    downloadLocation = folder,
-                    onlyDownloadLargestFile = true,
-                    shouldStream = !downloadMode,
-                    streamBufferSize = 12,
-                    enableLogging = true,
-                    // Do not wait forever for a fixed DHT node count before announcing to trackers.
-                    // The upstream wrapper blocks inside start() when this threshold is not reached.
-                    dhtNodeMinimum = 0
-                )
-                options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(),
-                    "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881,dht.libtorrent.org:25401")
-                // The player reads the same file as libtorrent's disk writer.
-                // Use the OS cache rather than a separate native write cache.
-                options.settingsPack.cacheSize(0)
-                // Some NATs establish uTP handshakes but stall before TCP fallback.
-                // DHT and inbound uTP remain enabled.
-                options.settingsPack.setBoolean(settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
-                options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_tiers.swigValue(), true)
-                options.settingsPack.setBoolean(settings_pack.bool_types.announce_to_all_trackers.swigValue(), true)
-                val engine = TorrentSession(options)
-                engine.listener = createTorrentListener()
-                withContext(Dispatchers.Main) { session = engine }
-                val hash = Regex("(?i)xt=urn:btih:([0-9a-f]{40})").find(source)?.groupValues?.get(1)
-                val cache = hash?.let { File(filesDir, "${it.lowercase()}.torrent") }
-                val metadata = cache?.takeIf { it.exists() }?.readBytes()
-                    ?: if (!raw.contains("&tr=", true) && hash != null) fetchVerifiedMetadata(hash) else null
-                if (metadata != null) {
-                    cache?.writeBytes(metadata)
-                    engine.start(metadata)
-                } else engine.start(this@PlayerActivity, Uri.parse(source))
-                while (engine.isRunning) {
-                    delay(1000)
-                    val handle = torrentHandle ?: continue
-                    if (!handle.isValid) continue
-                    val native = handle.status(TorrentHandle.QUERY_ACCURATE_DOWNLOAD_COUNTERS)
-                    runOnUiThread {
-                        peerCount = native.numPeers()
-                        downloadRate = native.downloadRate()
-                        downloadedBytes = native.totalDone()
-                        totalBytes = native.totalWanted()
-                        progressValue = native.progress()
-                        if (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) {
-                            val fileRows = org.json.JSONArray()
-                            resourceFiles.forEach { fileRows.put(org.json.JSONObject().put("path", it.path).put("size", it.bytes)) }
-                            File(filesDir, "torrent-check.json").writeText(org.json.JSONObject()
-                                .put("source", currentSource).put("metadata", metadataReady).put("peers", peerCount)
-                                .put("downloaded", downloadedBytes).put("total", totalBytes).put("files", fileRows)
-                                .put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
-                                .put("speed", playbackSpeed).put("status", statusText).toString())
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            OutlinedButton(onClick = { if (current.paused) TorrentTasks.resume(current) else TorrentTasks.pause(current) }, modifier = Modifier.weight(1f).height(48.dp), enabled = !current.cancelled) { Text(if (current.paused) "继续下载" else "暂停下载") }
+                            OutlinedButton(onClick = { requested = false; releasePlayer(); TorrentTasks.cancel(current) }, modifier = Modifier.weight(1f).height(48.dp), enabled = !current.cancelled) { Text("取消下载") }
+                            OutlinedButton(onClick = { deleteDialog = true }, modifier = Modifier.weight(1f).height(48.dp)) { Text("清空文件") }
                         }
+                        Text("后台任务持续运行 · ${current.folder.absolutePath}", maxLines = 2, style = MaterialTheme.typography.labelSmall)
+                        if (fileDialog) AlertDialog(onDismissRequest = { fileDialog = false }, title = { Text("选择下载 / 切换视频") }, text = {
+                            Column {
+                                Row { TextButton(onClick = { TorrentTasks.select(current, current.files.map { it.index }.toSet()) }) { Text("全选") }; TextButton(onClick = { TorrentTasks.select(current, emptySet()) }) { Text("全不选") } }
+                                LazyColumn(Modifier.heightIn(max = 400.dp)) {
+                                    items(current.files) { file -> Column {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Checkbox(file.index in current.selected, { checked -> TorrentTasks.select(current, if (checked) current.selected + file.index else current.selected - file.index) })
+                                            Text(file.path, Modifier.weight(1f))
+                                        }
+                                        if (file.video) TextButton(onClick = { switchVideo(current, file.index); fileDialog = false }) { Text("切换播放：${file.path.substringAfterLast('/')}") }
+                                    } }
+                                }
+                            }
+                        }, confirmButton = { TextButton(onClick = { fileDialog = false }) { Text("完成") } })
+                        if (deleteDialog) AlertDialog(onDismissRequest = { deleteDialog = false }, title = { Text("清空当前任务文件？") }, text = { Text("将停止任务并永久删除当前任务的下载 / 缓存文件。") },
+                            confirmButton = { TextButton(onClick = { requested = false; releasePlayer(); TorrentTasks.cancel(current, true); deleteDialog = false; finish() }) { Text("确认清空") } }, dismissButton = { TextButton(onClick = { deleteDialog = false }) { Text("取消") } })
                     }
                 }
-            } catch (error: Exception) {
-                runOnUiThread { statusText = "启动失败：${error.localizedMessage ?: error.javaClass.simpleName}" }
             }
         }
     }
-
-    private fun createTorrentListener() = object : TorrentSessionListener {
-        override fun onAddTorrent(handle: TorrentHandle, state: TorrentSessionStatus) {
-            torrentHandle = session?.retainHandle(handle)
-            handle.forceReannounce()
-            handle.forceDHTAnnounce()
-            updateFrom(state, "任务已添加，正在发现节点并获取元数据…")
-            if (handle.torrentFile() != null) publishMetadata(handle)
-        }
-        override fun onMetadataReceived(handle: TorrentHandle, state: TorrentSessionStatus) {
-            publishMetadata(handle)
-            runOnUiThread {
-                if (resumeOnReady) {
-                    previewRequested = true
-                    autoplayRequested = true
-                    statusText = "已读取文件信息，正在缓冲并继续播放…"
-                }
+    private fun requestPlayback(play: Boolean) {
+        autoPlay = play; requested = true
+        if (player != null) { if (play) player?.play() else player?.pause() }
+    }
+    private fun switchVideo(task: TorrentTask, index: Int) {
+        releasePlayer(); savedPosition = 0; retryAfter = 0
+        TorrentTasks.playFile(task, index); requested = true; autoPlay = true
+    }
+    private fun startPlayback(task: TorrentTask, file: TaskFile) {
+        val media = ExoPlayer.Builder(this)
+            .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 15000, 300, 750).build())
+            .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource { task.handle } })).build()
+        media.addListener(object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                if (isPlaying) { playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, task.title, task.source) }
             }
-            updateFrom(state, if (resumeOnReady) "已读取文件信息，正在缓冲并继续播放…" else "已获取文件信息，开始缓存…")
-        }
-        override fun onPieceFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
-            updateFrom(state, if (downloadMode) "正在下载并缓存…" else "正在缓冲，准备播放…")
-            if (previewRequested && hasPlaybackBuffer(state)) startPlayback(state.videoFileUri, state.bytesDownloaded, autoplayRequested)
-        }
-        override fun onTorrentFinished(handle: TorrentHandle, state: TorrentSessionStatus) {
-            updateFrom(state, "下载完成，文件已保存在应用 Movies 目录")
-            if (previewRequested) startPlayback(state.videoFileUri, state.bytesDownloaded, autoplayRequested)
-        }
-        override fun onTorrentError(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "种子任务失败：${state.state}")
-        override fun onMetadataFailed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "无法读取种子元数据。请尝试其他资源或检查做种者是否在线。")
-        override fun onTorrentDeleteFailed(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-        override fun onTorrentPaused(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "下载已暂停")
-        override fun onTorrentDeleted(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-        override fun onTorrentRemoved(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-        override fun onTorrentResumed(handle: TorrentHandle, state: TorrentSessionStatus) = updateFrom(state, "下载已继续…")
-        override fun onBlockUploaded(handle: TorrentHandle, state: TorrentSessionStatus) = Unit
-    }
-
-    private fun publishMetadata(handle: TorrentHandle) {
-        val info = handle.torrentFile() ?: return
-        val files = info.files()
-        val actual = (0 until files.numFiles()).map { ResourceFile(files.filePath(it), files.fileSize(it)) }
-        File(filesDir, "${info.infoHash().toString().lowercase()}.torrent").writeBytes(info.bencode())
-        runOnUiThread {
-            resourceFiles = actual
-            metadataReady = true
-            connectionTimedOut = false
-            if (resumeOnReady) { previewRequested = true; autoplayRequested = true }
-            statusText = "已取得并校验元数据；正在连接节点缓存视频…"
-        }
-    }
-
-    private fun fetchVerifiedMetadata(hash: String): ByteArray? = runCatching {
-        runOnUiThread { statusText = "正在查询元数据缓存；将校验内容是否与磁力哈希一致…" }
-        val connection = java.net.URL("https://itorrents.net/torrent/${hash.uppercase()}.torrent")
-            .openConnection() as java.net.HttpURLConnection
-        try {
-            connection.connectTimeout = 6000
-            connection.readTimeout = 6000
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36")
-            if (connection.responseCode != 200) throw java.io.IOException("Metadata cache HTTP ${connection.responseCode}")
-            val bytes = connection.inputStream.use { input ->
-                val output = java.io.ByteArrayOutputStream()
-                val buffer = ByteArray(8192)
-                while (true) {
-                    val count = input.read(buffer)
-                    if (count < 0) break
-                    if (output.size() + count > 2 * 1024 * 1024) return@runCatching null
-                    output.write(buffer, 0, count)
-                }
-                output.toByteArray()
+            override fun onPlayerError(error: PlaybackException) {
+                savedPosition = media.currentPosition
+                playerMessage = "等待已校验缓存：${error.errorCodeName}"
+                retryAfter = System.currentTimeMillis() + 3000
+                player = null; media.release()
             }
-            val info = TorrentInfo.bdecode(bytes)
-            if (!info.infoHash().toString().equals(hash, true)) null else {
-                info.addTracker("udp://tracker.opentrackr.org:1337/announce", 0)
-                info.addTracker("https://tracker.tamersunion.org:443/announce", 0)
-                info.addTracker("udp://open.stealth.si:80/announce", 0)
-                info.bencode()
-            }
-        } finally { connection.disconnect() }
-    }.onFailure { android.util.Log.w("TorrentMetadata", "Metadata cache failed for $hash", it) }.getOrNull()
-
-    private fun hasPlaybackBuffer(state: TorrentSessionStatus): Boolean {
-        val buffer = state.torrentSessionBuffer
-        val readyPieces = (buffer.bufferHeadIndex - buffer.startIndex).coerceAtLeast(0)
-        return readyPieces >= 3 || state.progress >= 0.99f
+        })
+        media.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(task.folder, file.path))))
+        media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
+        player = media
     }
-
-    private fun updateFrom(state: TorrentSessionStatus, message: String) {
-        runOnUiThread {
-            if (!connectionTimedOut || metadataReady) statusText = message
-            progressValue = state.progress.coerceIn(0f, 1f)
-            downloadedBytes = state.bytesDownloaded.coerceAtLeast(0L)
-            totalBytes = state.bytesWanted.coerceAtLeast(0L)
-            downloadRate = state.downloadRate.coerceAtLeast(0)
-            if (state.videoFileUri != Uri.EMPTY) currentUri = state.videoFileUri
-            if (downloadMode) {
-                LibraryStore.updateDownload(
-                    this@PlayerActivity,
-                    intent.getStringExtra("title").orEmpty(),
-                    currentSource,
-                    message,
-                    state.bytesDownloaded,
-                    state.bytesWanted
-                )
-            }
-        }
-    }
-
-    private fun requestPlayback(autoPlay: Boolean) {
-        autoplayRequested = autoPlay
-        if (player != null) {
-            if (autoPlay) player?.play() else player?.pause()
-            statusText = if (autoPlay) "正在播放…" else "预览已暂停；点击播放继续。"
-            return
-        }
-        previewRequested = true
-        statusText = if (autoPlay) "正在等待可播放缓存…" else "正在准备预览画面…"
-        currentUri?.let { uri ->
-            if (downloadedBytes > 0) startPlayback(uri, downloadedBytes, autoPlay)
-        }
-    }
-
-    private fun seekBySeconds(seconds: Int) {
-        val activePlayer = player ?: return
-        val target = (activePlayer.currentPosition + seconds * 1_000L).coerceAtLeast(0L)
-        activePlayer.seekTo(target)
-    }
-
-    private fun cyclePlaybackSpeed() {
-        val speeds = listOf(0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f)
-        val index = speeds.indexOf(playbackSpeed).coerceAtLeast(0)
-        playbackSpeed = speeds[(index + 1) % speeds.size]
-        player?.setPlaybackSpeed(playbackSpeed)
-    }
-
-    private fun startPlayback(uri: Uri, bytesAtAttempt: Long, autoPlay: Boolean) {
-        if (uri == Uri.EMPTY) return
-        runOnUiThread {
-            if (player != null) return@runOnUiThread
-            playbackAttemptBytes = bytesAtAttempt
-            currentUri = uri
-            player?.release()
-            val newPlayer = ExoPlayer.Builder(this)
-                .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource { torrentHandle } }))
-                .build()
-            newPlayer.addListener(object : Player.Listener {
-                override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    playbackActive = isPlaying
-                    if (isPlaying) LibraryStore.addPlayback(
-                        this@PlayerActivity,
-                        intent.getStringExtra("title").orEmpty().ifBlank { "磁力资源" },
-                        currentSource
-                    )
-                }
-
-                override fun onPlayerError(error: PlaybackException) {
-                    playbackActive = false
-                    playbackResumePosition = newPlayer.currentPosition
-                    statusText = "播放器暂时无法读取已缓存片段，下载仍会继续：${error.errorCodeName}"
-                    player = null
-                    newPlayer.release()
-                }
-            })
-            newPlayer.setMediaItem(MediaItem.fromUri(uri))
-            newPlayer.seekTo(playbackResumePosition)
-            newPlayer.prepare()
-            newPlayer.setPlaybackSpeed(playbackSpeed)
-            newPlayer.playWhenReady = autoPlay
-            player = newPlayer
-            statusText = if (autoPlay) "正在播放，下载仍会继续…" else "预览已就绪，点击播放开始播放。"
-        }
-    }
-
-    private fun togglePause() {
-        val engine = session ?: return
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                if (engine.isPaused) engine.resume() else engine.pause()
-                runOnUiThread { statusText = if (engine.isPaused) "下载已暂停" else "下载已继续…" }
-            } catch (error: Exception) {
-                runOnUiThread { statusText = "操作失败：${error.localizedMessage ?: error.javaClass.simpleName}" }
-            }
-        }
-    }
-
-    private fun formatBytes(bytes: Long): String {
-        if (bytes < 1024) return "$bytes B"
-        val units = listOf("KB", "MB", "GB", "TB")
-        var value = bytes.toDouble() / 1024.0
-        var unit = 0
-        while (value >= 1024 && unit < units.lastIndex) { value /= 1024.0; unit++ }
-        return "%.1f %s".format(value, units[unit])
-    }
-
+    private fun releasePlayer() { player?.release(); player = null }
     override fun onDestroy() {
-        if (downloadMode && (totalBytes == 0L || downloadedBytes < totalBytes)) {
-            LibraryStore.updateDownload(this, intent.getStringExtra("title").orEmpty(), currentSource,
-                "已暂停：离开任务页，已下载缓存保留", downloadedBytes, totalBytes)
-        }
-        session?.listener = null
-        val closing = session
-        session = null
-        torrentHandle = null
-        Thread { runCatching { closing?.stop() } }.start()
-        player?.release()
-        player = null
+        releasePlayer(); task?.let { it.viewers = (it.viewers - 1).coerceAtLeast(0); it.lastUsed = System.currentTimeMillis() }
+        TorrentTasks.persist()
         super.onDestroy()
+    }
+    private fun bytes(value: Long): String = when {
+        value >= 1024 * 1024 * 1024 -> "%.1f GB".format(value / (1024.0 * 1024 * 1024))
+        value >= 1024 * 1024 -> "%.1f MB".format(value / (1024.0 * 1024))
+        value >= 1024 -> "%.1f KB".format(value / 1024.0)
+        else -> "$value B"
     }
 }

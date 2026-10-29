@@ -10,9 +10,9 @@ on:
     inputs:
       mode:
         description: Test scope
-        default: full
+        default: optimization
         type: choice
-        options: [full, user-resources, engines, titles]
+        options: [optimization, full, user-resources, engines, titles]
 permissions:
   contents: write
 jobs:
@@ -37,7 +37,7 @@ jobs:
       - name: Build app
         run: gradle --no-daemon assembleDebug
       - name: Prepare real BitTorrent seed and browser baseline
-        if: inputs.mode != 'user-resources' && inputs.mode != 'titles'
+        if: inputs.mode == 'full' || inputs.mode == 'engines'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y python3-libtorrent ffmpeg
@@ -47,6 +47,14 @@ jobs:
           python3 scripts/browser_baseline.py
           for i in $(seq 1 120); do test -f fixture.json && break; sleep 1; done
           test -f fixture.json || (cat fixture.log; exit 1)
+      - name: Prepare multi-file real seeds
+        if: inputs.mode == 'optimization' || github.event_name == 'push'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y python3-libtorrent ffmpeg
+          /usr/bin/python3 scripts/optimization_fixture.py > fixture.log 2>&1 &
+          for i in $(seq 1 120); do test -f optimization-fixture.json && break; sleep 1; done
+          test -f optimization-fixture.json || (cat fixture.log; exit 1)
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -54,7 +62,7 @@ jobs:
           sudo udevadm trigger --name-match=kvm
       - name: Run app in Android emulator and capture UI
         env:
-          FMP_TEST_MODE: ${{ inputs.mode || 'full' }}
+          FMP_TEST_MODE: ${{ inputs.mode || 'optimization' }}
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
@@ -64,7 +72,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           emulator-boot-timeout: 600
           disable-animations: true
-          script: /usr/bin/python3 scripts/verify_real_app.py
+          script: if [ "$FMP_TEST_MODE" = optimization ]; then /usr/bin/python3 scripts/verify_optimization.py; else /usr/bin/python3 scripts/verify_real_app.py; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:

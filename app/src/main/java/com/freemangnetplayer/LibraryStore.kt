@@ -53,6 +53,11 @@ object LibraryStore {
         write(context, DOWNLOADS, values)
     }
 
+    @Synchronized
+    fun removeDownload(context: Context, source: String) {
+        write(context, DOWNLOADS, read(context, DOWNLOADS).filter { it.source != source })
+    }
+
     private fun read(context: Context, key: String): List<LibraryEntry> = runCatching {
         val array = JSONArray(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(key, "[]"))
         (0 until array.length()).mapNotNull { index ->

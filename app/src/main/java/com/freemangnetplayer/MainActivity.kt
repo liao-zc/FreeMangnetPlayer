@@ -51,7 +51,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
 
-private data class SearchProvider(
+data class SearchProvider(
     val name: String,
     val homepage: String,
     val queryUrl: String? = null
@@ -59,7 +59,7 @@ private data class SearchProvider(
 
 private data class MagnetResult(val title: String, val magnet: String)
 
-private val builtInProviders = listOf(
+val builtInProviders = listOf(
     SearchProvider("clg.im", "https://clg.im/"),
     SearchProvider("BT搜索（dobt）", "https://mg.dobt.cc/"),
     SearchProvider("BD电影首发站", "https://www.bdflixs.com/", "https://www.bdflixs.com/?s=%s"),
@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
             )) {
                 var keyword by remember { mutableStateOf(requestedQuery.orEmpty()) }
                 var magnet by remember { mutableStateOf("") }
-                var selectedTab by remember { mutableStateOf("搜索") }
+                var selectedTab by remember { mutableStateOf(intent.getStringExtra("open-tab") ?: "搜索") }
                 var showEngineMenu by remember { mutableStateOf(false) }
                 var showCustomDialog by remember { mutableStateOf(false) }
                 var customName by remember { mutableStateOf(prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索") }
@@ -139,11 +139,19 @@ class MainActivity : ComponentActivity() {
 
                 DisposableEffect(lifecycleOwner) {
                     val observer = LifecycleEventObserver { _, event ->
-                        if (event == Lifecycle.Event.ON_RESUME) reloadLibrary()
+                        if (event == Lifecycle.Event.ON_RESUME) {
+                            reloadLibrary()
+                            selectedName = prefs.getString("search-name", "clg.im") ?: "clg.im"
+                            selectedUrl = prefs.getString("search-url", "https://clg.im/") ?: "https://clg.im/"
+                            customName = prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索"
+                            customUrl = prefs.getString("custom-url", "") ?: ""
+                        }
                     }
                     lifecycleOwner.lifecycle.addObserver(observer)
                     onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                 }
+
+                LaunchedEffect(Unit) { while (true) { reloadLibrary(); delay(1500) } }
 
                 LaunchedEffect(searchTrigger) {
                     if (searchTrigger == 0) return@LaunchedEffect
@@ -306,6 +314,7 @@ class MainActivity : ComponentActivity() {
                                     showEngineMenu = false
                                 },
                                 onCustomEngine = { showEngineMenu = false; showCustomDialog = true },
+                                onSettings = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
                                 magnet = magnet,
                                 onMagnetChange = { magnet = it; error = "" },
                                 onParseMagnet = {
@@ -525,12 +534,16 @@ private fun SearchHome(
     builtIns: List<SearchProvider>,
     onSelectEngine: (SearchProvider) -> Unit,
     onCustomEngine: () -> Unit,
+    onSettings: () -> Unit,
     magnet: String,
     onMagnetChange: (String) -> Unit,
     onParseMagnet: () -> Unit,
     error: String
 ) {
     Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+            TextButton(onClick = onSettings, modifier = Modifier.height(48.dp)) { Text("设置") }
+        }
         Row(
             Modifier.fillMaxWidth().background(teal).padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
