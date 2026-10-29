@@ -104,7 +104,7 @@ open class TorrentSession(
                     AlertType.TRACKER_ERROR, AlertType.LISTEN_FAILED -> torrentSession.get()?.networkMessage = alert.toString()
                     AlertType.ADD_TORRENT -> torrentSession.get()?.onAddTorrent(alert as AddTorrentAlert)
                     AlertType.BLOCK_UPLOADED -> torrentSession.get()?.onBlockUploaded(alert as BlockUploadedAlert)
-                    else -> Log.d(Tag, "Unhandled alert: $alert")
+                    else -> if (torrentSession.get()?.torrentSessionOptions?.enableLogging == true) Log.d(Tag, "Unhandled alert: $alert")
                 }
             } catch (e: Exception) {
                 Log.e(Tag, "An exception occurred within torrent session callback", e)
@@ -192,6 +192,8 @@ open class TorrentSession(
     }
 
     private fun onPieceFinished(pieceFinishedAlert: PieceFinishedAlert) {
+        // The modern player handles its own buffering; do not log every downloaded piece.
+        if (!torrentSessionOptions.shouldStream) return
         val torrentHandle = pieceFinishedAlert.handle()
 
         val pieceIndex = pieceFinishedAlert.pieceIndex()
