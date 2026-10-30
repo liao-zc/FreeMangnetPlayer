@@ -19,7 +19,7 @@
   function info() {
     const pages=[...document.querySelectorAll('.pagination a[href],.pager a[href],.pages a[href],a.page-numbers[href]')].map(a=>({page:parseInt(clean(a.textContent),10),url:a.href})).filter(p=>p.page>0);
     const text=clean(document.body.textContent);const totalMatch=/(?:共|total)\s*(\d+)\s*(?:页|pages)/i.exec(text);
-    window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,errors:[...failed],linkErrors:linkErrors,running:running,pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest('.pagination,.pager,.pages,.page-numbers'),rel:a.rel})),complete:document.readyState==="complete"}));
+    window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,errors:[...failed],linkErrors:linkErrors,running:running,pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest('.pagination,.pager,.pages,.page-numbers'),rel:a.rel})),complete:document.readyState==="complete"&&!running&&pending===0}));
   }
   function details(node, uri) {
     const chunks=[];if(node){const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);let part;while((part=walker.nextNode()))if(!part.parentElement.closest('script,style,noscript'))chunks.push(part.textContent);}
@@ -57,7 +57,7 @@
     while((m=pattern.exec(html))) {if(!emitted.has(decode(m[0])))emit(m[0],fallback,null);}
   }
   window.__fmpScan=function(){
-    if(window.__fmpStopped)return;parse(document,document.title); if(running){info();return;} running=true;
+    if(window.__fmpStopped)return;parse(document,document.title); if(running&&pending>0){info();return;} running=true;
     const links=[...document.querySelectorAll('a[href]')].filter(a=>{
       try{
         const tests={protocol:/^https?:$/.test(a.protocol),origin:a.origin===location.origin,
@@ -70,7 +70,7 @@
         return Object.values(tests).every(Boolean);
       }catch(e){linkErrors.push(String(e));return false;}
     });
-    const urls=[...new Map(links.map(a=>[a.href,a])).values()]; pending=urls.length; linkErrors.push('detail-candidates='+urls.length); info();
+    const urls=[...new Map(links.map(a=>[a.href,a])).values()]; pending=urls.length; linkErrors.push('detail-candidates='+urls.length); if(!pending){running=false;info();return;} info();
     async function worker(){
       while(urls.length){
         const a=urls.shift();visited.add(a.href);const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
