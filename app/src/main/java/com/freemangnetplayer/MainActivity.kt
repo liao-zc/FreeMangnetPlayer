@@ -60,7 +60,6 @@ data class SearchProvider(
     val queryUrl: String? = null
 )
 
-private data class SearchPage(val label: String, val url: String)
 
 private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "视频", val heat: String = "")
 
@@ -690,9 +689,10 @@ private fun SearchResultsScreen(
         if(state in listOf("error","timeout") || message=="搜索未完成") Text("搜索未完成",color=MaterialTheme.colorScheme.error)
         if(results.isNotEmpty()) {
             Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
-                TextButton(onClick={localPage=shown-1},enabled=shown>1) { Text("? 20 ?") }
+                TextButton(onClick={localPage=shown-1},enabled=shown>1) { Text("前 20 条") }
                 Text("结果 $shown / $localPages 页 · ${results.size} 条",style=MaterialTheme.typography.bodySmall)
-                TextButton(onClick={localPage=shown+1},enabled=shown<localPages) { Text("? 20 ?") }
+                TextButton(onClick={localPage=shown+1},enabled=shown<localPages) { Text("后 20 条") }
+                TextButton(onClick={jumpDialog="结果"},modifier=Modifier.semantics { contentDescription="跳转结果页" }) { Text("跳页") }
             }
             LazyColumn(Modifier.weight(1f),state=list,verticalArrangement=Arrangement.spacedBy(4.dp)) {
                 items(results.drop((shown-1)*20).take(20),key={it.magnet}) { item -> MagnetResultCard(item,onParse,onDownload) }
@@ -730,49 +730,6 @@ private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit
                 TextButton(onClick={onParse(item)}) { Text("播放",style=textStyle) }
                 TextButton(onClick={onDownload(item)}) { Text("下载 / 缓存",style=textStyle) }
                 TextButton(onClick={LibraryStore.addFavorite(c,item.title,item.magnet)}) { Text("收藏",style=textStyle) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun LibraryScreen(
-    title: String,
-    entries: List<LibraryEntry>,
-    emptyText: String,
-    openLabel: String = "打开",
-    downloadLabel: String = "继续下载",
-    onOpen: (MagnetResult) -> Unit,
-    onDownload: (MagnetResult) -> Unit
-) {
-    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 18.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Spacer(Modifier.height(12.dp))
-        if (entries.isEmpty()) {
-            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
-                Text(emptyText, Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge)
-            }
-        } else {
-            LazyColumn(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(entries, key = { it.source }) { entry ->
-                    Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(16.dp)) {
-                        Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(entry.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-                            if (entry.status.isNotBlank()) Text(entry.status, style = MaterialTheme.typography.bodySmall, color = teal)
-                            if (entry.totalBytes > 0) {
-                                LinearProgressIndicator(
-                                    progress = { (entry.downloadedBytes.toFloat() / entry.totalBytes).coerceIn(0f, 1f) },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                Text("${formatLibraryBytes(entry.downloadedBytes)} / ${formatLibraryBytes(entry.totalBytes)}", style = MaterialTheme.typography.labelSmall)
-                            }
-                            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                OutlinedButton(onClick = { onOpen(MagnetResult(entry.title, entry.source)) }, modifier = Modifier.weight(1f).height(50.dp)) { Text(openLabel) }
-                                Button(onClick = { onDownload(MagnetResult(entry.title, entry.source)) }, modifier = Modifier.weight(1f).height(50.dp)) { Text(downloadLabel) }
-                            }
-                        }
-                    }
-                }
             }
         }
     }
