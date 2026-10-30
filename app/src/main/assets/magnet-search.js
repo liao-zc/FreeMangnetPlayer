@@ -22,7 +22,7 @@
   }
   function details(node, uri) {
     const text=clean(node && node.textContent).replace(/magnet:\?[^\s<>]+/ig,'').replace(/https?:\/\/[^\s<>]+/ig,'');
-    const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=/(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|GB|MB|KB|TB|B|字节)/i.exec(text);
+    const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=/(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|TiB|GB|MB|KB|TB|B|\u5b57\u8282)(?![a-z0-9])/i.exec(text);
     let bytes=m?+m[1]:0, sizeText='';
     if(sizeMatch){const unit=sizeMatch[2].toUpperCase();const power=unit.startsWith('T')?4:unit.startsWith('G')?3:unit.startsWith('M')?2:unit.startsWith('K')?1:0;
       sizeText=sizeMatch[1].replace(',','.')+sizeMatch[2];if(!bytes)bytes=Math.round(parseFloat(sizeMatch[1].replace(',','.'))*Math.pow(unit.includes('I')?1024:1000,power));}
@@ -35,7 +35,8 @@
     let dn=''; const m=/(?:[?&])dn=([^&]+)/i.exec(uri);
     if(m)try{dn=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){}
     const data=details(node,uri), old=metadata.get(uri);
-    const value={title:clean(title)||dn||'待获取文件名',source:uri,...data};
+    const label=clean(title), validTitle=/magnet:\?|^https?:|^link_blocked$/i.test(label)?'':label;
+    const value={title:validTitle||dn||'待获取文件名',source:uri,...data};
     if(old){if(!data.bytes && old.bytes) {value.bytes=old.bytes;value.sizeText=old.sizeText;} if(value.title==='待获取文件名')value.title=old.title;}
     if(old && JSON.stringify(old)===JSON.stringify(value))return;
     emitted.add(uri);metadata.set(uri,value);window.FreeMagnetResults.onResults(JSON.stringify([value]));
