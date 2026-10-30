@@ -9,7 +9,7 @@ results=[]
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
 for index,target in enumerate(targets,1):
     # Each cold run has no earlier cached bytes or learned resource peers.
-    adb('shell','am','force-stop',PACKAGE);adb('shell','pm','clear',PACKAGE)
+    adb('shell','am','force-stop',PACKAGE);adb('shell','pm','clear',PACKAGE);adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
     magnet='magnet:?xt=urn:btih:'+target['hash']
     start=time.monotonic();first=None;samples=[]
     adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(magnet),'--es','mode','play')

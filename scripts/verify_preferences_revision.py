@@ -29,6 +29,9 @@ def control(name):
             b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
             if node.get('resource-id','').endswith('/'+name):return
         time.sleep(.3)
+    screenshot('preferences-failed-'+name+'.png')
+    (OUT/'preferences-failed-ui.xml').write_text(adb('shell','cat','/sdcard/window.xml'),encoding='utf-8')
+    (OUT/'preferences-failed-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
     raise AssertionError(name)
 
 adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','open-tab',shlex.quote('播放'))
@@ -39,7 +42,7 @@ assert next(n for n in prefs() if n.get('name')=='font-face').get('value',next(n
 record('song-font-and-large-preset-persist')
 find_and_tap('标准');find_and_tap('楷体');screenshot('preferences-03-kai-font.png');record('kai-font-applied')
 find_and_tap('黑体');find_and_tap('返回首页')
-adb('shell','pm','clear',PACKAGE)
+adb('shell','pm','clear',PACKAGE);adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
 fixture=json.loads(Path('optimization-fixture.json').read_text(encoding='utf-8'))[0]
 index=next(i for i,f in enumerate(fixture['files']) if f['path'].endswith('Episode-01.mp4'))
 source=fixture['magnet']+'&so='+str(index)+'&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent'
