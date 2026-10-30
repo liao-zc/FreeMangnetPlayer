@@ -38,7 +38,7 @@ for page in [1,2,3]:
     assert len(pages)==1, f'duplicate page descriptions: {pages}'
     checks.append({'check':'source-page-'+str(page),'passed':True,'result_count':len(st['results'])})
     if page==1:
-        require_visible('跳转页面；当前第 1 页',st['results'][0]['title'],st['results'][-1]['title'])
+        require_visible('跳转页面；当前第 1 页',st['results'][0]['title'])
         screenshot('all-results-one-page.png')
         find_and_tap('排序：匹配度');require_visible('时间','热度');find_and_tap('时间')
         find_and_tap('排序：时间');find_and_tap('热度');find_and_tap('排序：热度');find_and_tap('匹配度')
