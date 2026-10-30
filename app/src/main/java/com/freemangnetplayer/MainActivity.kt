@@ -176,11 +176,11 @@ class MainActivity : ComponentActivity() {
                         val hash = Regex("(?i)xt=urn:btih:([0-9a-f]{40})").find(result.magnet)?.groupValues?.get(1)?.lowercase() ?: return@forEachIndexed
                         val total = TorrentTasks.tasks[hash]?.files?.sumOf { it.size } ?: 0L
                         val files = TorrentTasks.tasks[hash]?.files.orEmpty()
-                        val largest = files.filter { it.video }.maxByOrNull { it.size } ?: files.maxByOrNull { it.size }
-                        if (total > 0L || largest != null) results[index] = result.copy(
+                        val parsedFormat = torrentResourceFormat(files, result.magnet)
+                        if (total > 0L || parsedFormat.isNotBlank()) results[index] = result.copy(
                             bytes = total.takeIf { it > 0L } ?: result.bytes,
                             sizeText = if (total > 0L) formatLibraryBytes(total) else result.sizeText,
-                            format = largest?.let { detectResourceFormat(it.path, result.magnet) }?.takeIf { it.isNotBlank() } ?: result.format
+                            format = parsedFormat.ifBlank { result.format }
                         )
                     }
                 }
@@ -808,7 +808,7 @@ private fun magnetTitle(magnet: String): String = runCatching {
     if (dn.isNullOrBlank()) "磁力资源" else java.net.URLDecoder.decode(dn, "UTF-8")
 }.getOrDefault("磁力资源")
 
-private fun detectResourceFormat(name: String, magnet: String): String {
+internal fun detectResourceFormat(name: String, magnet: String): String {
     val dn = runCatching { Regex("(?:[?&])dn=([^&]+)", RegexOption.IGNORE_CASE).find(magnet)?.groupValues?.get(1)?.let { java.net.URLDecoder.decode(it, "UTF-8") }.orEmpty() }.getOrDefault("")
     val source = "$name $dn"
     val extensions = (MediaFormats.extensions + setOf("zip", "rar", "7z", "tar", "gz", "bz2", "xz", "iso", "pdf", "srt", "ass", "ssa", "vtt", "mp3", "flac", "wav", "aac", "m4a", "doc", "docx", "xls", "xlsx", "ppt", "pptx"))
@@ -822,6 +822,12 @@ private fun detectResourceFormat(name: String, magnet: String): String {
         extension == "pdf" || extension in setOf("doc", "docx", "xls", "xlsx", "ppt", "pptx") -> ".$extension".uppercase() + "（文档）"
         else -> ".$extension".uppercase() + "（可下载）"
     }
+}
+
+internal fun torrentResourceFormat(files: List<TaskFile>, magnet: String): String {
+    val primary = files.filter { MediaFormats.isVideo(it.path) }.maxByOrNull { it.size }
+        ?: files.maxByOrNull { it.size }
+    return primary?.let { detectResourceFormat(it.path, magnet) }.orEmpty()
 }
 
 /** Accept a pasted URL, HTML entity or encoded URL; canonicalize base32 BTIH. */
