@@ -25,9 +25,11 @@ class ResourceFormatTest {
         assertEquals(".MP4", detectResourceFormat("资源", "$magnet&dn=episode%2Emp4"))
     }
 
-    @Test fun routesMkvThroughCompatibleDecoderForDeviceSpecificCodecSupport() {
+    @Test fun retriesMkvWithCompatibleDecoderOnlyWhenHardwarePathCannotRender() {
         org.junit.Assert.assertTrue(MediaFormats.isVideo("Spider-Man.mkv"))
-        org.junit.Assert.assertTrue(MediaFormats.useSoftware("Spider-Man.mkv"))
+        org.junit.Assert.assertFalse(MediaFormats.useSoftware("Spider-Man.mkv"))
+        org.junit.Assert.assertTrue(MediaFormats.shouldRetryWithSoftware("Spider-Man.mkv"))
         org.junit.Assert.assertFalse(MediaFormats.useSoftware("clip.mp4"))
+        org.junit.Assert.assertFalse(MediaFormats.shouldRetryWithSoftware("clip.mp4"))
     }
 }
