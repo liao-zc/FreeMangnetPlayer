@@ -11,7 +11,7 @@ def wait(page,count):
         s=state()
         if s.get('page')==page and len(s.get('results',[]))==count:return s
         time.sleep(1)
-    raise AssertionError(state())
+    raise AssertionError({'state':state(),'scan':adb('shell','run-as',PACKAGE,'cat','files/search-scan.json')})
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
 adb('shell','am','force-stop',PACKAGE)
 prefs='''<map><string name="search-name">分页测试</string><string name="search-url">http://10.0.2.2:8899/search?q=%s</string><string name="custom-name">分页测试</string><string name="custom-url">http://10.0.2.2:8899/search?q=%s</string></map>'''

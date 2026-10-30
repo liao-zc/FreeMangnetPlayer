@@ -377,6 +377,7 @@ class MainActivity : ComponentActivity() {
                                             if(index>=0) { val old=results[index];results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","视频"),heat=row.optString("heat")) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
+                                        if(debug) java.io.File(filesDir,"search-scan.json").writeText(row.toString())
                                         if(generation==searchTrigger && !searchComplete) {
                                             scannerReady=row.optBoolean("complete");if(row.optInt("totalPages")>0) sourcePages=row.getInt("totalPages")
                                             row.optJSONArray("pages")?.let { array -> for(i in 0 until array.length()) {val link=array.getJSONObject(i);pageUrls[link.getInt("page")]=link.getString("url") } }
