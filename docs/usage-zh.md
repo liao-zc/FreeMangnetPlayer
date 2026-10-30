@@ -17,7 +17,17 @@
 
 ![v0.2.6 从磁播页直达的磁播设置](screenshots/current-ui/09-magnet-entry-settings.png)
 
+![v0.2.6 搜索引擎管理](screenshots/current-ui/11-search-engine-management.png)
+
+![v0.2.6 编辑 BDFlix 搜索引擎](screenshots/current-ui/12-search-engine-default.png)
+
 可在磁播设置中进入搜索引擎管理页，编辑名称、网站首页和关键词模板，删除不需要的源，或添加自定义源。最多 10 个；搜索结果页的返回键回到关键词页。无 Peer 且无有效数据持续 3 分钟时，任务和列表会保留醒目的资源节点提示，下载/缓存计数不包含该项；可显式点“重新尝试”。磁力本身不提供做种开始时间，页面显示的是搜索源提供的资源上架时间（若源有提供）。
+
+搜索结果页提供工具栏返回与系统返回；两者都会回到仍保留关键词的搜索页。下面两张图为 Android 15 模拟器本轮实际操作截图。
+
+![v0.2.6 搜索结果工具栏返回关键词页](screenshots/current-ui/13-search-toolbar-returns-to-keyword.png)
+
+![v0.2.6 系统返回关键词页](screenshots/current-ui/14-search-system-back-returns-to-keyword.png)
 
 
 ## 电视直播
@@ -29,6 +39,8 @@
 ![v0.2.6 电视直播频道页](screenshots/current-ui/07-live-channels.png)
 
 ![v0.2.6 从设置分类进入的直播源配置](screenshots/current-ui/08-live-source-settings.png)
+
+![v0.2.6 从直播频道页进入的相同源配置](screenshots/current-ui/10-live-module-settings.png)
 
 
 
