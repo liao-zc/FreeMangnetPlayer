@@ -407,3 +407,27 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 性能验证要求实际首帧、视频尺寸和播放进度，而不只检查 playing 标志。受控速度不代表十条公网资源一定达到相同速度；十条仍分别执行未下载完成时首帧和持续播放检查。以上新运行未结束，未发布新版 APK。
 
 Peer 地址修复的 Android 实际回归已通过：[41009900336](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009900336) 的十项测试均无失败，包括带协议 IPv4、IPv6 和非法地址检查。其后续完整界面流程仍失败；该运行未包含 POSIX 后端，不能宣称整套回归通过。
+
+### POSIX 后端 Android 15 回归：17 项功能检查通过
+
+[完整运行 41010382300](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010382300) 成功。10 项 Android 测试无失败；17 项实际 App 检查全部通过，包含在部分下载时登记多个缓存文件、下一集切换、下载列表、缓存重启恢复/重开播放、360p 已有轨道、批量删除；分页 10 项、字体/收藏/历史 11 项也通过。此运行采用 POSIX 磁盘后端，App 完成受控 Android 15 进程重启后的缓存重开，未因 MediaProvider/FUSE 再次丢失任务。
+
+受控多文件缓存列表：
+
+![POSIX 多视频已选择缓存](screenshots/current/posix-retained-files.png)
+
+完成重启后从缓存继续播放：
+
+![POSIX 缓存重启后](screenshots/current/posix-cache-after-restart.png)
+
+测试视频是受控的开源 Big Buck Bunny 片段，不是用户给出的十条公网影片。
+
+### POSIX 磁盘后端不限速受控视频吞吐
+
+性能运行 [41010526508](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010526508) 实际播放了受控 179,628,504 字节视频：首帧时累计下载 18,419,353 字节（约 10.3%），播放器位置 908ms、渲染高度 360，payload 速度采样 1,919,531 B/s；峰值 payload 6,989,835 B/s。App 与种子均设为不限速，真实首帧时累计有效负载 13,291,161 字节，播放开始早于完整下载。完整性能脚本最后的公网冷启动检查因断开的页面未显示折叠区“网络诊断”按钮而失败；速度、边下边播、全屏、画中画、SHA-256 等先前项目已完成。已修正滚动检查并重跑。
+
+![受控视频真实画面及内置进度控制](screenshots/current/posix-controlled-video-frame.png)
+
+[性能首帧及吞吐数据](evidence/posix-performance-verification.json)。该受控高速种子不代表用户十条资源拥有相同做种能力或速度。
+
+POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Android 运行仍在执行，独立 native 测试无元数据/下载数据结果继续保留。
