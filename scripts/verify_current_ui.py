@@ -87,6 +87,7 @@ def main():
     if 'https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u' not in capture.visible_text():
         raise RuntimeError('The IPTV source editor opened from live TV does not show the shared default URL')
     capture.adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
+    capture.adb('shell', 'am', 'force-stop', capture.PACKAGE)
     capture.adb('shell', 'am', 'start', '-W', '-n', f'{capture.PACKAGE}/.MainActivity', '--es', 'test-query', 'OmniNavigationCheck')
     time.sleep(3)
     capture.require_visible('搜索结果', '返回搜索')
