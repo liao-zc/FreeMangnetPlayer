@@ -219,12 +219,12 @@ class MainActivity : ComponentActivity() {
                 }
 
                 LaunchedEffect(Unit) { if (!requestedQuery.isNullOrBlank()) beginSearch() }
-                LaunchedEffect(searchState, results.size, pageNumber, nextPage) {
+                LaunchedEffect(searchState, results.toList(), pageNumber, nextPage, sourcePages, searchComplete) {
                     if (debug && searchTrigger > 0) {
                         val rows = JSONArray()
                         results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet).put("bytes",it.bytes).put("sizeText",it.sizeText).put("type",it.type).put("heat",it.heat)) }
                         java.io.File(filesDir, "search-check.json").writeText(JSONObject().put("engine", activeProvider)
-                            .put("page", pageNumber).put("next", nextPage).put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
+                            .put("page", pageNumber).put("totalPages",sourcePages).put("complete",searchComplete).put("next", nextPage).put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
                     }
                 }
 
@@ -380,7 +380,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                      } }, onMagnet = { title, link ->
                                         runOnUiThread {
-                                            if (generation == searchTrigger && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
+                                            if (generation == searchTrigger && !searchComplete && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
                                                 results.add(MagnetResult(title.ifBlank { magnetTitle(link) }, link))
                                                 searchState = "results"
                                                 searchMessage = ""

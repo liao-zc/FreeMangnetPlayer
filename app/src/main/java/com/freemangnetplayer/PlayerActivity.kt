@@ -198,7 +198,9 @@ class PlayerActivity : ComponentActivity() {
                         }
                         if (current.files.isNotEmpty()) Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             OutlinedButton(onClick = {
-                                playerMessage = if (TorrentTasks.retainCache(current)) "已保存为缓存，切换资源后继续保留" else "已达到最大缓存数量，请清理缓存或修改设置"
+                                val retained=TorrentTasks.retainCache(current)
+                                if(retained && player==null && !requested) requestPlayback(false)
+                                playerMessage = if (retained) "已保存为缓存，切换资源后继续保留" else "已达到最大缓存数量，请清理缓存或修改设置"
                                 android.widget.Toast.makeText(this@PlayerActivity, playerMessage, android.widget.Toast.LENGTH_SHORT).show()
                             }, modifier = Modifier.weight(1f).height(48.dp)) { Text(if (current.retainedCache) "已缓存" else "缓存") }
                             OutlinedButton(onClick = {
@@ -478,8 +480,10 @@ class PlayerActivity : ComponentActivity() {
         val favorite=LibraryStore.readFavorites(this).any { it.source==link }
         view.findViewById<android.widget.ImageButton>(R.id.player_favorite)?.apply { setImageResource(if(favorite)R.drawable.ic_heart_filled else R.drawable.ic_heart_outline);contentDescription=if(favorite)"取消收藏" else "收藏视频" }
         if(f!=null) {
-            val duration=player?.duration?.takeIf{it>0} ?: 0L
-            val height=player?.videoSize?.height ?: 0
+            MediaFacts.save(this,link,player?.duration ?: 0,player?.videoSize?.height ?: 0)
+            val known=MediaFacts.read(this,link)
+            val duration=player?.duration?.takeIf{it>0} ?: known.first
+            val height=player?.videoSize?.height?.takeIf{it>0} ?: known.second
             val percent=(f.done.toDouble()*100/f.size.coerceAtLeast(1)).coerceIn(0.0,100.0)
             view.findViewById<TextView>(R.id.player_resource_info)?.apply {
                 text="${if(duration>0)historyTime(duration) else "读取时长"} · ${if(height>0) "${height}P" else "读取分辨率"} · ${bytes(f.size)} · ${"%.1f".format(percent)}%"
@@ -488,6 +492,7 @@ class PlayerActivity : ComponentActivity() {
             view.findViewById<android.widget.ProgressBar>(R.id.player_cache_progress)?.progress=(percent*10).toInt()
             if(player?.isPlaying==true && System.currentTimeMillis()-lastHistoryAt>5000) {lastHistoryAt=System.currentTimeMillis();LibraryStore.addPlayback(this,f.path.substringAfterLast('/'),link,player?.currentPosition ?: 0,duration)}
         }
+        for((id,size) in listOf(R.id.player_position to 12f,R.id.player_duration to 12f,R.id.player_speed to 13f,R.id.player_quality to 11f,R.id.player_resource_info to 11f)) view.findViewById<TextView>(id)?.apply { typeface=DisplaySettings.typeface(this@PlayerActivity);setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP,size*DisplaySettings.scale(this@PlayerActivity)) }
         val current=player ?: return
         if (scrubbing) return
         val duration = current.duration.takeIf { it > 0 } ?: 0L
