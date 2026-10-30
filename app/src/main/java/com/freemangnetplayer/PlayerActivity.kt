@@ -114,11 +114,11 @@ class PlayerActivity : ComponentActivity() {
                                 if (attached && applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) { runCatching {
                                     val peerRows = JSONArray()
                                     runCatching {
-                                        current.handle?.takeIf { it.isValid }?.peerInfo()?.take(16)?.forEach { peer ->
+                                        synchronized(current.nativeLock) { current.handle?.takeIf { it.isValid }?.peerInfo()?.take(16)?.forEach { peer ->
                                             peerRows.put(JSONObject().put("address", peer.ip()).put("client", peer.client())
                                                 .put("progressPpm", peer.progressPpm()).put("downloaded", peer.totalDownload())
                                                 .put("rate", peer.downSpeed()).put("flags", peer.flags()).put("source", peer.source().toInt()))
-                                        }
+                                        } }
                                     }
                                     val rows = JSONArray()
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }

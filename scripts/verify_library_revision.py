@@ -17,6 +17,8 @@ def wait(fn,timeout=120):
     (OUT/'library-wait-failure.json').write_text(json.dumps(failure,ensure_ascii=False,indent=2),encoding='utf-8')
     (OUT/'library-wait-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
     screenshot('library-wait-failure.png')
+    (OUT/'library-failure-logcat.txt').write_text(adb('logcat','-d','-v','threadtime'),encoding='utf-8')
+    (OUT/'library-process-exits.txt').write_text(adb('shell','dumpsys','activity','exit-info',PACKAGE),encoding='utf-8')
     raise AssertionError(failure)
 def record(name,**data):
     checks.append({'check':name,'passed':True,**data});(OUT/'library-verification.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
@@ -64,9 +66,11 @@ def poll(fn,timeout=30):
     (OUT/'library-failure.json').write_text(json.dumps(failure,ensure_ascii=False,indent=2),encoding='utf-8')
     (OUT/'library-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
     screenshot('library-failure.png')
+    (OUT/'library-failure-logcat.txt').write_text(adb('logcat','-d','-v','threadtime'),encoding='utf-8')
+    (OUT/'library-process-exits.txt').write_text(adb('shell','dumpsys','activity','exit-info',PACKAGE),encoding='utf-8')
     raise AssertionError(failure)
 
-adb('install','-r','app/build/outputs/apk/debug/app-debug.apk');adb('shell','pm','clear',PACKAGE)
+adb('install','-r','app/build/outputs/apk/debug/app-debug.apk');adb('shell','pm','clear',PACKAGE);adb('logcat','-c')
 adb('shell','wm','size','1080x2400');adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
 fixture=json.loads(Path('optimization-fixture.json').read_text())[0]
 episode=next(i for i,f in enumerate(fixture['files']) if f['path'].endswith('Episode-01.mp4'))
