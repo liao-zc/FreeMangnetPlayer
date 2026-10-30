@@ -339,6 +339,7 @@ object TorrentTasks {
                     task.total = task.files.filter { it.index in task.selected || (task.streaming && it.index == task.playingIndex) }.sumOf { it.size }
                     task.complete = task.total > 0 && task.done >= task.total
                     task.peers = snapshot.second.numPeers(); task.rate = snapshot.second.downloadRate()
+                    val previousPayloadBytes = task.payloadBytes
                     task.payloadRate = snapshot.second.downloadPayloadRate(); task.payloadBytes = snapshot.second.totalPayloadDownload()
                     task.seeds = snapshot.second.numSeeds(); task.connectionCount = snapshot.second.numConnections()
                     if (task.peers > 0 && task.peerAt == 0L) task.peerAt = System.currentTimeMillis()
@@ -347,9 +348,9 @@ object TorrentTasks {
                     task.downloadLimit = task.engine?.actualDownloadLimit ?: 0
                     task.uploadLimit = task.engine?.actualUploadLimit ?: 0
                     task.networkMessage = task.engine?.networkMessage.orEmpty()
-                    if (task.payloadRate >= 1024) task.lastPayloadAt = System.currentTimeMillis()
+                    if (task.payloadBytes > previousPayloadBytes) task.lastPayloadAt = System.currentTimeMillis()
                     if (!task.transportFallbackUsed && task.outgoingUtp && !task.paused && !task.queued && !task.complete &&
-                        task.peers > 0 && System.currentTimeMillis() - task.lastPayloadAt > 10_000) {
+                        task.peers > 0 && System.currentTimeMillis() - maxOf(task.lastPayloadAt, task.peerAt) > 30_000) {
                         task.transportFallbackUsed = true; task.transportRecoveryAt = System.currentTimeMillis()
                         task.engine?.preferTcp(handle); task.outgoingUtp = false
                         connectExplicitPeers(task, handle)
