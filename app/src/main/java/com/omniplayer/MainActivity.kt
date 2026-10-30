@@ -754,8 +754,9 @@ private fun SearchResultsScreen(
     LaunchedEffect(page, keyword) { list.scrollToItem(0) }
     Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("$keyword · 第 $page 页${if (totalPages > 0) " / $totalPages" else ""}", style = MaterialTheme.typography.bodySmall,
-                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            IconButton(onClick = onPrevious, enabled = page > 1, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.ArrowBack, "上一页") }
+            Text("$keyword · ${if (totalPages > 0) "$page / $totalPages" else "第 $page"} 页", style = MaterialTheme.typography.bodySmall,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转页面；当前第 $page 页" })
             Box {
                 IconButton(onClick = { sortMenu = true }, modifier = Modifier.semantics { contentDescription = "排序：$sortMode" }) { Icon(Icons.Default.Sort, "排序") }
                 DropdownMenu(expanded = sortMenu, onDismissRequest = { sortMenu = false }) {
@@ -763,16 +764,11 @@ private fun SearchResultsScreen(
                         text = { Text(if (sortMode == option) "✓ $option" else option) }, onClick = { sortMode = option; sortMenu = false }) }
                 }
             }
+            IconButton(onClick = onNext, enabled = nextAvailable, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
         }
         if (state == "loading" || message == "搜索中") LinearProgressIndicator(Modifier.fillMaxWidth())
         if (state in listOf("error", "timeout") || message == "搜索未完成") Text("搜索未完成", color = MaterialTheme.colorScheme.error)
         if (results.isNotEmpty()) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                IconButton(onClick = onPrevious, enabled = page > 1, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.ArrowBack, "上一页") }
-                Text("${if (totalPages > 0) "$page / $totalPages" else "第 $page"} 页", style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转页面；当前第 $page 页" })
-                IconButton(onClick = onNext, enabled = nextAvailable, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
-            }
             LazyColumn(Modifier.weight(1f), state = list, verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 items(sortedResults, key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
             }

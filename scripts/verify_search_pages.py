@@ -1,4 +1,4 @@
-import json,shlex,time,xml.etree.ElementTree as ET
+import json,re,shlex,time,xml.etree.ElementTree as ET
 from pathlib import Path
 from capture_usage_screenshots import adb,find_and_tap,require_visible,screenshot,PACKAGE,OUT
 
@@ -34,6 +34,8 @@ for page in [1,2,3]:
     ui=ET.fromstring(adb('shell','cat','/sdcard/window.xml'))
     assert sum(1 for n in ui.iter('node') if n.attrib.get('text')=='搜索结果')==1,'duplicate search-result heading'
     assert sum(1 for n in ui.iter('node') if n.attrib.get('text')=='设置' or n.attrib.get('content-desc')=='设置')<=1,'duplicate settings button'
+    pages=[n.attrib.get('text','') for n in ui.iter('node') if re.search(r'\d+\s*/\s*\d+\s*页',n.attrib.get('text',''))]
+    assert len(pages)==1, f'duplicate page descriptions: {pages}'
     checks.append({'check':'source-page-'+str(page),'passed':True,'result_count':len(st['results'])})
     if page==1:
         require_visible('跳转页面；当前第 1 页',st['results'][0]['title'],st['results'][-1]['title'])
