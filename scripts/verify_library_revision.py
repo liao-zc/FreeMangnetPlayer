@@ -35,7 +35,9 @@ def control(name):
         t=tree();n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
         if n is not None:tap(n);time.sleep(.4);return
         surface=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
+        if surface is None: surface=next((n for n in t.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
         if surface is not None:tap(surface)
+        else: adb('shell','input','tap','540','450')
         time.sleep(.3)
     raise AssertionError('Missing visible built-in control '+name)
 def open_cache(title):

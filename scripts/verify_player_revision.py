@@ -48,7 +48,9 @@ def controller(id=None):
         target=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'player_position')) and visible_action(n)),None)
         if target is not None: return root,target
         surface=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface') and visible_action(n)),None)
+        if surface is None: surface=next((n for n in root.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
         if surface is not None: tap(surface)
+        else: adb('shell','input','tap','540','450')
         time.sleep(.2)
     raise AssertionError('Video/controller did not become visible after orientation transition')
 def control(id):
