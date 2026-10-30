@@ -4,7 +4,7 @@
   const clean = x => (x || '').replace(/\s+/g, ' ').trim();
   const resourceName=x=>{const t=clean(x);return /magnet:\?|^https?:|^link_blocked$|^(?:(?:磁力|magnet)(?:下载|链接)?|下载|复制|播放|查看详[情细]|详情|详细|查看|更多|点击查看|点击下载)$/i.test(t)?'':t;};
   const decode = x => { const e = document.createElement('textarea'); e.innerHTML = x; return e.value; };
-  let running = false, pending = 0; const metadata = new Map();
+  let running = false, pending = 0; const linkErrors=[]; const metadata = new Map();
   function nextUrl() {
     const anchors = [...document.querySelectorAll('a[href]')];
     const explicit = anchors.find(a => a.rel === 'next' || /^(下一页|下页|下一頁|next(?:\s*page)?|›|»|>)$/i.test(clean(a.textContent || a.getAttribute('aria-label'))) || /\bnext\b/i.test(a.className));
@@ -19,7 +19,7 @@
   function info() {
     const pages=[...document.querySelectorAll('.pagination a[href],.pager a[href],.pages a[href],a.page-numbers[href]')].map(a=>({page:parseInt(clean(a.textContent),10),url:a.href})).filter(p=>p.page>0);
     const text=clean(document.body.textContent);const totalMatch=/(?:共|total)\s*(\d+)\s*(?:页|pages)/i.exec(text);
-    window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,errors:[...failed],pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest('.pagination,.pager,.pages,.page-numbers'),rel:a.rel})),complete:document.readyState==="complete"}));
+    window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,errors:[...failed],linkErrors:linkErrors,running:running,pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest('.pagination,.pager,.pages,.page-numbers'),rel:a.rel})),complete:document.readyState==="complete"&&!running&&pending===0}));
   }
   function details(node, uri) {
     const chunks=[];if(node){const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);let part;while((part=walker.nextNode()))if(!part.parentElement.closest('script,style,noscript'))chunks.push(part.textContent);}
@@ -57,16 +57,20 @@
     while((m=pattern.exec(html))) {if(!emitted.has(decode(m[0])))emit(m[0],fallback,null);}
   }
   window.__fmpScan=function(){
-    if(window.__fmpStopped)return;parse(document,document.title); if(running){info();return;} running=true;
+    if(window.__fmpStopped)return;parse(document,document.title); if(running&&pending>0){info();return;} running=true;
     const links=[...document.querySelectorAll('a[href]')].filter(a=>{
       try{
-        return /^https?:$/.test(a.protocol)&&a.origin===location.origin&&a.href!==location.href&&!visited.has(a.href)&&
-          !a.closest('.pagination,.pager,.pages,.page-numbers')&&a.rel!=='next'&&a.rel!=='prev'&&
-          !/^(首页|上一页|下一页|上页|下页|返回|登录|注册|next|previous|\d+)$/i.test(clean(a.textContent))&&
-          clean(a.textContent||a.title).length>0;
-      }catch(_){return false;}
+        const tests={protocol:/^https?:$/.test(a.protocol),origin:a.origin===location.origin,
+          different:a.href!==location.href,unvisited:!visited.has(a.href),
+          notPager:!a.closest('.pagination,.pager,.pages,.page-numbers'),
+          notNext:a.rel!=='next'&&a.rel!=='prev',
+          name:!/^(首页|上一页|下一页|上页|下页|返回|登录|注册|next|previous|\d+)$/i.test(clean(a.textContent)),
+          text:clean(a.textContent||a.title).length>0};
+        if(a.href.indexOf('detail')>=0)linkErrors.push(JSON.stringify({href:a.href,tests:tests}));
+        return Object.values(tests).every(Boolean);
+      }catch(e){linkErrors.push(String(e));return false;}
     });
-    const urls=[...new Map(links.map(a=>[a.href,a])).values()]; pending=urls.length; info();
+    const urls=[...new Map(links.map(a=>[a.href,a])).values()]; pending=urls.length; linkErrors.push('detail-candidates='+urls.length); if(!pending){running=false;info();return;} info();
     async function worker(){
       while(urls.length){
         const a=urls.shift();visited.add(a.href);const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
@@ -75,7 +79,7 @@
         }catch(_){failed.add(a.href);}finally{clearTimeout(timer);pending--;info();}
       }
     }
-    Promise.all(Array.from({length:6},worker)).finally(()=>{running=false;info();});
+    Promise.all(Array.from({length:6},worker)).then(()=>{running=false;info();},e=>{linkErrors.push('worker:'+String(e));running=false;info();});
   };
   window.__fmpScan();
   const observer=new MutationObserver(()=>window.__fmpScan());
