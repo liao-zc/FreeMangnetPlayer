@@ -505,4 +505,4 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ### 历史验收保留及本轮边界
 
-此前 IPTV 9 项点检和 BT/搜索/字体/播放等历史结果仍保留于本报告；指定十条公网磁力仍记录为 0/10 起播，不因本轮直播 UI 改动而更改。本轮 Android 真机 IPTV 播放、PiP 系统行为、网络速度显示和触摸/遥控交互均未完成设备实测。编译和文档验证结果将在 GitHub Actions 完成后补记。
+此前 IPTV 9 项点检和 BT/搜索/字体/播放等历史结果仍保留于本报告；指定十条公网磁力仍记录为 0/10 起播，不因本轮直播 UI 改动而更改。本轮 Android 真机 IPTV 播放、PiP 系统行为、网络速度显示和触摸/遥控交互均未完成设备实测。GitHub Actions 已通过：Android `assembleDebug`、通用/ARM64/ARMv7 APK 打包与 Release 发布成功（[构建记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41031735784)）；UTF-8/Markdown 文档可读性检查通过（[检查记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41031735965)）。v0.2.3 APK 下载：[ARM64](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-arm64-v8a.apk) · [ARMv7](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-armeabi-v7a.apk) · [通用版](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3.apk)。设备实播仍待验。
