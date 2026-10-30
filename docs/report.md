@@ -549,7 +549,7 @@ v0.2.4 及更早版本的公网 BT 十条仍为 0/10 起播等历史结果，详
 
 | # | 要求 | 实现与当前验证状态 |
 |---|---|---|
-| 1 | 本地项目文件夹改名 OmniPlayer | 本轮尝试从父目录重命名，Windows 因目录正被当前进程占用而拒绝（`MoveDirectoryItemIOError`）；本地路径仍为 `FreeMagnetPlayer`，需关闭占用该目录的应用后重命名。|
+| 1 | 本地项目文件夹改名 OmniPlayer | 本轮尝试从父目录重命名，Windows 因目录正被当前进程占用而拒绝（`MoveDirectoryItemIOError`）；本地路径仍为 `OmniPlayer`，需关闭占用该目录的应用后重命名。|
 | 2 | 无法播放资源持续提示，并在下载/缓存/收藏中保留提示 | BT 任务仅在已取元数据、所选视频无校验数据/无 payload、Peer 与连接均为 0 且持续 3 分钟后标记“暂无可用资源节点”；警告写入任务与本地列表记录，列表项突出显示。下载/缓存列表展示数量排除此类条目，调度名额也忽略已告警任务。新增显式“重新尝试”按钮，提示不会自行消失。Android Instrumentation 与库/播放器回归流程通过：规则断言无 Peer/无有效字节持续 3 分钟后才标记；告警保存到收藏、播放、下载和缓存记录；告警任务不占调度名额；列表数量从告警条目中排除。报告的记录链接见本节开头。|
 | 3 | 六个搜索源可编辑、删除，默认 BDFlix，最多 10 个，保留配置 | 增加独立搜索引擎管理页面；旧六个内置源和旧版单个自定义源在首次迁移时合并保留。支持改名称/主页/搜索模板、删源、选默认、增至 10 个，并限制至少保留一个；Manifest 已注册页面。Android Store 测试通过：旧六源名称保留；可改名和删除；拒绝超过 10 个；设置页真实显示 BDFlix 为默认。模拟器截图见 `11-search-engine-management.png`、`12-search-engine-default.png`。|
 | 4 | 从搜索结果逐级返回 | 搜索结果页顶部返回及系统返回均回到关键词搜索页；设置页的搜索引擎管理返回磁播设置，磁播设置再回上一页。Android 15 模拟器已分别操作工具栏返回与系统返回，二者都回到保留 `OmniNavigationCheck` 的搜索页；搜索源设置也逐级返回磁播设置。截图见 `13-search-toolbar-returns-to-keyword.png`、`14-search-system-back-returns-to-keyword.png`。|
@@ -567,7 +567,7 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 
 | # | 检查项 | 当前结果 |
 |---|---|---|
-| 1 | 本地工作区目录改名为 OmniPlayer | 已在 `C:\Users\gnsfb\Downloads\OmniPlayer` 创建本地工作区，其源码文件已同步到 GitHub 功能分支当前状态。原目录 `C:\Users\gnsfb\Downloads\FreeMagnetPlayer` 仍被当前 Windows 进程占用，不能在此会话删除/改名；新目录可直接打开继续开发，旧目录目前仍保留。|
+| 1 | 本地工作区目录改名为 OmniPlayer | 已在 `C:\Users\gnsfb\Downloads\OmniPlayer` 创建本地工作区，其源码文件已同步到 GitHub 功能分支当前状态。原目录 `C:\Users\gnsfb\Downloads\OmniPlayer` 仍被当前 Windows 进程占用，不能在此会话删除/改名；新目录可直接打开继续开发，旧目录目前仍保留。|
 | 2 | 无节点资源的明显、持久提示及计数排除 | v0.2.6 Instrumentation 已验证：满足无 Peer/无有效数据 3 分钟条件后提示写入任务与收藏、播放、下载、缓存记录；明确重试前不自动清除；无法播放项不占下载/缓存任务数。此次改动未重测 BT 网络可用性。|
 | 3 | 六个搜索源可编辑/删除、BDFlix 默认、最多 10 个并保留旧配置 | v0.2.6 Android Store/模拟器检查通过；搜索源配置保持本地迁移数据。此次未改变搜索引擎逻辑。|
 | 4 | 搜索结果逐级返回 | v0.2.6 Android 15 模拟器分别检查工具栏返回和系统返回，均返回保留关键词的搜索页；详情/设置流程逐级返回。此次未改变导航逻辑。|
@@ -602,3 +602,29 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 新版冷启动运行 [41098936356](https://github.com/liao-zc/OmniPlayer/actions/runs/41098936356) 在 119.95 秒内取得元数据（4.44 秒）、发现 2 个 Peer/Seed，累计接收 11,885,752 字节，峰值 220,328 B/s；piece 0 在约 10.1 秒已校验，但没有首帧，播放器时长/分辨率仍为空。Android logcat 明确出现 `TorrentSession: Ignoring alert with invalid torrent handle: CACHE_FLUSHED`。`CACHE_FLUSHED` 是存储会话级告警，原监听器先按 torrent handle 校验并丢弃它，导致读取器等待已校验分片落盘通知时一直不前进。现已把 `CACHE_FLUSHED` 处理移至无效句柄过滤之前，并将缓存刷新代数加入播放诊断；修复后的同链冷启动尚未取得结果：工作流 [41100291676](https://github.com/liao-zc/OmniPlayer/actions/runs/41100291676) 与修复版构建 [41100286464](https://github.com/liao-zc/OmniPlayer/actions/runs/41100286464) 已触发，但截至 2026-10-31 01:50（UTC+8）job 没有任何步骤记录，GitHub API 的 `updated_at` 停在 2026-10-31 01:39（UTC+8）；不能算构建或播放通过。失败态实测截图：[修复前屏幕](screenshots/current/v0.2.8-spiderman-before-flush-fix.png)。
 
 最新真实运行截图：[Spider-Man 等待状态](screenshots/current/v0.2.8-spiderman-waiting.png)。截图来自本轮 APK 的 Android 15 模拟器；画面是播放器缓冲态，没有伪装成影片画面。完整逐秒 BT/解码证据保留在 Actions 附件。此前 10 条指定磁力完整 APK 冷启动验收已完成：[运行 41096478789](https://github.com/liao-zc/OmniPlayer/actions/runs/41096478789)，10/10 均未首帧起播；同轮 Spider-Man 目标收取 16,809,827 字节、7 个 Peer/2 个 Seed，piece 0 在 7.25 秒校验，但 119.81 秒无画面。逐条数据见[验收 JSON](evidence/v0.2.8-public-playback-41096478789.json)，真实无画面截图见[截图](screenshots/current/v0.2.8-spiderman-ten-run-no-frame.png)。这是 `CACHE_FLUSHED` 修复前的版本；修复提交 `e3a886d` 的新版同链复测仍在 GitHub Actions 队列/运行中。当前蜘蛛侠磁力仍未通过“真实首帧且连续播放”验收，本版本不发布为已修复。
+
+## v0.2.9 update/player work (2026-10-31)
+
+This section records the current code changes. It is not a claim that the Android build or device acceptance passed.
+
+| Requirement | Code state | Verification |
+|---|---|---|
+| Automatic update check preference; latest public GitHub Release check at app start; one prompt per process; manual check in Settings | Implemented against the GitHub Releases API | Not built or device-tested in this environment |
+| Download and install an update while preserving the current screen during download | DownloadManager downloads in background; installer launches after completion | Android installer confirmation is mandatory for ordinary apps; not device-tested |
+| Relaunch after package replacement | Package-replaced receiver attempts to launch the app | OS background-launch behavior is device/version dependent; not device-tested |
+| Preserve settings and app-private data | Existing package ID retained; app data is not cleared by the updater | Requires same signing key and an in-place Android install; not tested |
+| Import IPTV playlist from a device file | Picker copies an M3U file into private storage and stores its local URI | Not built or device-tested |
+| Full-screen magnet controls | Removed the separate cache progress strip; cache percentage remains in resource text beside the timed seek bar | Source inspection only |
+| Seek-directed cache and fill the remaining file afterward | Playback seek reprioritizes the torrent piece range; tail completion switches to a pass that fills earlier missing pieces | Not built or network-tested |
+| Audio and subtitle track selection | Media3 track chooser and automatic same-directory SRT/VTT subtitle configuration added | LibVLC fallback track chooser is not implemented; not built or device-tested |
+| Download reuses cached torrent data | Existing libtorrent storage migration path retained | Source inspection only; no fresh test |
+| PiP for magnet and live playback | Existing activity declarations and controls retained | Source inspection only |
+| One-line channel/file labels; remove home settings entry | Home settings entry removed; player title set to one line | Source inspection only |
+| All market formats | Not promised: codec/profile/hardware support varies by Android device; Media3 plus LibVLC covers common formats | Unsupported codecs remain possible |
+| Choose arbitrary cache/download directories using Android folder picker | Not implemented: libtorrent currently writes through filesystem paths, while arbitrary SAF document providers expose URI streams | Open limitation |
+
+### Build and remote status
+
+- No local Java, Gradle, or Android Debug Bridge executable is available in this Windows session, so no new APK was built and no emulator/phone test was run.
+- `git fetch` to GitHub timed out. The remote branch could not be refreshed or pushed during this pass. The local branch was already ahead of its cached remote-tracking ref by 17 commits before the changes in this section; it must be reconciled with the live remote before publication.
+- The previous exact-magnet run remains **0/10 first-frame starts** before the later cache-flush event-order fix; post-fix playback was not verified. This work does not change that result or claim otherwise.

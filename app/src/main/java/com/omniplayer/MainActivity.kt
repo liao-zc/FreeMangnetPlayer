@@ -56,6 +56,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
@@ -99,8 +102,14 @@ class MainActivity : ComponentActivity() {
         navigateHome?.invoke()
     }
 
+    override fun onResume() {
+        super.onResume()
+        PendingUpdateInstaller.resume(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) UpdatePromptGate.promptedThisProcess = false
         TorrentTasks.initialize(this)
         val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()?.let(::normalizeMagnetUri)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -118,6 +127,23 @@ class MainActivity : ComponentActivity() {
                 onSurface = ink
             )) {
                 val canvas = DisplaySettings.background(this@MainActivity)
+                var availableUpdate by remember { mutableStateOf<AppUpdater.Release?>(null) }
+                val updateScope = rememberCoroutineScope()
+                LaunchedEffect(Unit) {
+                    val updatePrefs = SettingsStore.prefs(this@MainActivity)
+                    while (true) {
+                        if (updatePrefs.getBoolean("auto-update-check", false) && !UpdatePromptGate.promptedThisProcess) {
+                            runCatching { withContext(Dispatchers.IO) { AppUpdater.latest(this@MainActivity) } }
+                                .onSuccess { release ->
+                                    if (release != null) {
+                                        UpdatePromptGate.promptedThisProcess = true
+                                        availableUpdate = release
+                                    }
+                                }
+                        }
+                        delay(30 * 60 * 1000L)
+                    }
+                }
                 var keyword by remember { mutableStateOf(requestedQuery.orEmpty()) }
                 var magnet by remember { mutableStateOf("") }
                 var searchProviders by remember { mutableStateOf(SearchEngineStore.load(this@MainActivity)) }
@@ -328,12 +354,7 @@ class MainActivity : ComponentActivity() {
                                 NavigationBarItem(selected = selectedTab == "下载", onClick = { selectedTab = "下载"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("下载") })
                                 NavigationBarItem(selected = selectedTab == "收藏", onClick = { selectedTab = "收藏"; reloadLibrary() }, icon = { Icon(Icons.Default.Bookmarks, null) }, label = { Text("收藏") })
                             }
-                            if (!magnetSection) NavigationBarItem(
-                                selected = false,
-                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
-                                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                                label = { Text("设置") }
-                            )
+
                         }
                     }
                 ) { insets ->
@@ -347,7 +368,7 @@ class MainActivity : ComponentActivity() {
                                 Card(Modifier.fillMaxWidth().height(148.dp).clickable { startActivity(Intent(this@MainActivity, IptvActivity::class.java)) }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
                                     Row(Modifier.fillMaxSize().padding(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                                         Text("📺", fontSize = 38.sp)
-                                        Column { Text("电视直播", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("分类浏览 · 搜台 · 收藏播放", style = MaterialTheme.typography.bodyMedium) }
+                                        Column { Text("电视直播", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("频道直播 · 收藏常看频道", style = MaterialTheme.typography.bodyMedium) }
                                     }
                                 }
                                 Card(Modifier.fillMaxWidth().height(148.dp).clickable { selectedTab = "搜索" }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
@@ -356,7 +377,6 @@ class MainActivity : ComponentActivity() {
                                         Column { Text("磁力播放", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("搜索 · 解析 · 下载 · 播放", style = MaterialTheme.typography.bodyMedium) }
                                     }
                                 }
-                                OutlinedButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) { Icon(Icons.Default.Settings, null); Spacer(Modifier.width(8.dp)); Text("统一设置") }
                             }
                             "搜索结果" -> SearchResultsScreen(
                                 page = pageNumber,
@@ -587,6 +607,18 @@ class MainActivity : ComponentActivity() {
 
                 if (error.isNotBlank() && selectedTab != "搜索") {
                     LaunchedEffect(error) { error = "" }
+                }
+                availableUpdate?.let { update ->
+                    AlertDialog(
+                        onDismissRequest = { availableUpdate = null },
+                        title = { Text("发现 OmniPlayer 新版本 ${update.version}") },
+                        text = { Text("更新包下载后会打开 Android 系统安装确认页。安装需要系统确认；完成后会尝试重新打开应用。应用设置和私有缓存会保留。") },
+                        confirmButton = { TextButton(onClick = {
+                            updateScope.launch(Dispatchers.IO) { runCatching { AppUpdater.enqueue(this@MainActivity, update) } }
+                            availableUpdate = null
+                        }) { Text("下载并更新") } },
+                        dismissButton = { TextButton(onClick = { availableUpdate = null }) { Text("稍后") } }
+                    )
                 }
             }
         }

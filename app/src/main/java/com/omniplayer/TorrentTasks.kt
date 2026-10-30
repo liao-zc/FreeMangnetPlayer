@@ -88,6 +88,7 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     @Volatile var streamRangeStart = -1
     @Volatile var streamRangeEnd = -1
     @Volatile var sequentialStartupActive = false
+    @Volatile var tailRefillPending = false
     var viewers = 0
     @Volatile var handle: TorrentHandle? = null
     @Volatile var engine: TorrentSession? = null
@@ -376,7 +377,24 @@ object TorrentTasks {
                             compareByDescending<TaskFile> { it.index in task.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()?.index ?: -1
                         applyPriorities(task)
                     } else task.files = snapshot.first
-                    if (task.streaming && task.sequentialStartupActive && task.streamRangeStart >= 0) {
+                    if (task.streaming && task.tailRefillPending && task.streamRangeEnd >= 0) {
+                        synchronized(task.nativeLock) {
+                            if (handle.isValid && handle.havePiece(task.streamRangeEnd)) {
+                                val info = handle.torrentFile()
+                                val file = task.files.firstOrNull { it.index == task.playingIndex }
+                                if (info != null && file != null) {
+                                    val first = (info.files().fileOffset(file.index) / info.pieceLength()).toInt()
+                                    handle.setSequentialRange(first, task.streamRangeEnd)
+                                    handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+                                    task.streamRangeStart = first
+                                    task.tailRefillPending = false
+                                    task.sequentialStartupActive = false
+                                    task.status = "播放位置至片尾已缓存，正在补齐前段缺失数据"
+                                }
+                            }
+                        }
+                    }
+                    if (task.streaming && task.sequentialStartupActive && !task.tailRefillPending && task.streamRangeStart >= 0) {
                         synchronized(task.nativeLock) {
                             if (handle.isValid && handle.havePiece(task.streamRangeStart)) {
                                 // Once the header is verified, honor random-access
@@ -559,9 +577,37 @@ object TorrentTasks {
         // Temporary file switches set their own selection in switchStreamFile.
         if (!task.download && !task.retainedCache && task.selected.isEmpty()) task.selected = setOf(index)
         task.streaming = true; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
+        task.tailRefillPending = false
         task.sequentialStartupActive = true
         applyPriorities(task)
         if (task.selectionPaused) { task.selectionPaused = false; resume(task) }
+        persist()
+    }
+    fun prioritizeSeek(task: TorrentTask, positionMs: Long, durationMs: Long) {
+        if (durationMs <= 0 || positionMs <= 0) return
+        val file = task.files.firstOrNull { it.index == task.playingIndex } ?: return
+        val handle = task.handle ?: return
+        synchronized(task.nativeLock) {
+            if (!handle.isValid) return
+            val info = handle.torrentFile() ?: return
+            val fileOffset = info.files().fileOffset(file.index)
+            val first = (fileOffset / info.pieceLength()).toInt()
+            val last = ((fileOffset + file.size - 1) / info.pieceLength()).toInt()
+            val bytePosition = fileOffset + (file.size.toDouble() * (positionMs.toDouble() / durationMs).coerceIn(0.0, 1.0)).toLong()
+            val wantedPiece = (bytePosition / info.pieceLength()).toInt().coerceIn(first, last)
+            task.streamRangeStart = wantedPiece
+            task.streamRangeEnd = last
+            task.sequentialStartupActive = false
+            task.tailRefillPending = true
+            handle.clearPieceDeadlines()
+            handle.setSequentialRange(wantedPiece, last)
+            handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+            if (!handle.havePiece(wantedPiece)) {
+                handle.piecePriority(wantedPiece, Priority.TOP_PRIORITY)
+                handle.setPieceDeadline(wantedPiece, 0)
+            }
+        }
+        task.status = "正在优先缓存当前播放位置至片尾"
         persist()
     }
     private fun allWantedFilesPresent(task: TorrentTask): Boolean {

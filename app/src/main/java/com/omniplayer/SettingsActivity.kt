@@ -22,8 +22,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class SettingsActivity : ComponentActivity() {
+    private var attemptedPendingUpdate = false
     private val fontPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) runCatching {
             val temp=java.io.File(filesDir,"font-import.tmp")
@@ -42,6 +46,11 @@ class SettingsActivity : ComponentActivity() {
         val prefs = SettingsStore.prefs(this)
         setContent {
             AppTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF087F79))) {
+                var updateRelease by remember { mutableStateOf<AppUpdater.Release?>(null) }
+                var updateStatus by remember { mutableStateOf("") }
+                var checkingUpdate by remember { mutableStateOf(false) }
+                var autoUpdate by remember { mutableStateOf(prefs.getBoolean("auto-update-check", false)) }
+                val updateScope = rememberCoroutineScope()
                 val entrySection = intent.getStringExtra("section") ?: "menu"
                 var section by remember { mutableStateOf(entrySection) }
                 var download by remember { mutableStateOf(SettingsStore.root(this, true).absolutePath) }
@@ -73,6 +82,7 @@ class SettingsActivity : ComponentActivity() {
                         IconButton(onClick = { if (section == entrySection) finish() else section = "menu" }) { Icon(Icons.Default.ArrowBack, if (section == entrySection) "返回" else "返回设置分类") }
                         Text(when(section) { "magnet" -> "磁播设置"; "general" -> "通用设置"; "about" -> "软件说明"; else -> "设置" }, style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.weight(1f))
+                        if (section != "about") TextButton(onClick = { section = "about" }) { Text("软件更新") }
                         TextButton(onClick = { finish() }) { Text("首页") }
                     }
                     when (section) {
@@ -87,8 +97,45 @@ class SettingsActivity : ComponentActivity() {
                             HorizontalDivider()
                             BackgroundSettings()
                         }
-                        "about" -> Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        "about" -> Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             Text("OmniPlayer", style = MaterialTheme.typography.headlineSmall)
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Column(Modifier.weight(1f)) {
+                                    Text("自动检查并提醒更新", style = MaterialTheme.typography.titleMedium)
+                                    Text("每次启动最多提醒一次；关闭后仍可手动检查。", style = MaterialTheme.typography.bodySmall)
+                                }
+                                Switch(checked = autoUpdate, onCheckedChange = {
+                                    autoUpdate = it
+                                    prefs.edit().putBoolean("auto-update-check", it).apply()
+                                })
+                            }
+                            OutlinedButton(enabled = !checkingUpdate, onClick = {
+                                checkingUpdate = true
+                                updateStatus = "正在检查 GitHub Releases…"
+                                updateScope.launch {
+                                    val result = runCatching { withContext(Dispatchers.IO) { AppUpdater.latest(this@SettingsActivity) } }
+                                    checkingUpdate = false
+                                    result.onSuccess { release ->
+                                        updateRelease = release
+                                        updateStatus = if (release == null) "已是最新版本，或远端尚无正式 APK。" else "发现版本 ${release.version}。"
+                                    }.onFailure { updateStatus = "检查失败：${it.localizedMessage}" }
+                                }
+                            }, modifier = Modifier.fillMaxWidth().height(50.dp)) { Text(if (checkingUpdate) "检查中…" else "立即检查更新") }
+                            Text(updateStatus, style = MaterialTheme.typography.bodySmall)
+                            updateRelease?.let { release -> AlertDialog(
+                                onDismissRequest = { updateRelease = null },
+                                title = { Text("更新到 ${release.version}？") },
+                                text = { Text("更新包下载完成后将由 Android 系统安装。系统要求用户确认；应用私有设置与缓存会保留。") },
+                                confirmButton = { TextButton(onClick = {
+                                    updateScope.launch(Dispatchers.IO) {
+                                        runCatching { AppUpdater.enqueue(this@SettingsActivity, release) }
+                                            .onSuccess { withContext(Dispatchers.Main) { updateStatus = "更新包已加入下载，完成后会提示安装。" } }
+                                            .onFailure { withContext(Dispatchers.Main) { updateStatus = "下载失败：${it.localizedMessage}" } }
+                                    }
+                                    updateRelease = null
+                                }) { Text("下载并更新") },
+                                dismissButton = { TextButton(onClick = { updateRelease = null }) { Text("取消") } }
+                            ) }
                             Text("版本：${pkg.versionName}（versionCode $version）")
                             Text("最近更新：$updated")
                             Text("电视直播与磁力播放工具", style = MaterialTheme.typography.bodyMedium)
@@ -132,6 +179,16 @@ class SettingsActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (attemptedPendingUpdate || Build.VERSION.SDK_INT < 26 || !packageManager.canRequestPackageInstalls()) return
+        val path = SettingsStore.prefs(this).getString("pending-update-apk", null) ?: return
+        val apk = java.io.File(path).takeIf { it.isFile } ?: return
+        attemptedPendingUpdate = true
+        SettingsStore.prefs(this).edit().remove("pending-update-apk").apply()
+        runCatching { startActivity(AppUpdater.installerIntent(this, apk)) }
     }
 }
 

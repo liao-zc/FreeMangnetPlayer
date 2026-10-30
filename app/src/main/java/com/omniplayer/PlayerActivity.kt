@@ -180,7 +180,7 @@ class PlayerActivity : ComponentActivity() {
                             Text(current?.unplayableReason.orEmpty().ifBlank { playerMessage.ifBlank { "正在等待首个可读分片…" } }, color = if (current?.unplayableReason.orEmpty().isNotBlank()) Color(0xFFFF8A80) else Color.White)
                             activeFile?.let { file ->
                                 val fraction = (file.done.toFloat() / file.size.coerceAtLeast(1)).coerceIn(0f, 1f)
-                                Text(file.path.substringAfterLast('/'), color = Color.White, maxLines = 2)
+                                Text(file.path.substringAfterLast('/'), color = Color.White, maxLines = 1)
                                 LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
                                 Text("${bytes(file.done)} / ${bytes(file.size)} · ${current?.peers ?: 0} 个节点 · ${bytes(current?.payloadRate?.toLong() ?: 0L)}/秒", color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
                                 Text("时长与分辨率将在首个完整分片可读后显示", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
@@ -393,7 +393,20 @@ class PlayerActivity : ComponentActivity() {
             }
         })
         player = media
-        if (!realMedia) media.setMediaItem(MediaItem.fromUri(Uri.fromFile(File(task.folder, file.path))))
+        if (!realMedia) {
+            val directory = file.path.substringBeforeLast('/', "")
+            val subtitleItems = task.files.filter { candidate ->
+                candidate.path.substringBeforeLast('/', "") == directory &&
+                    candidate.path.substringAfterLast('.', "").lowercase() in setOf("srt", "vtt")
+            }.map { subtitle ->
+                val mime = if (subtitle.path.endsWith(".vtt", true)) MimeTypes.TEXT_VTT else MimeTypes.APPLICATION_SUBRIP
+                MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(File(task.folder, subtitle.path)))
+                    .setMimeType(mime).setLanguage("und").setSelectionFlags(C.SELECTION_FLAG_AUTOSELECT).build()
+            }
+            val item = MediaItem.Builder().setMediaId(file.path).setUri(Uri.fromFile(File(task.folder, file.path)))
+                .setSubtitleConfigurations(subtitleItems).build()
+            media.setMediaItem(item)
+        }
         if (media is ExoPlayer) media.trackSelectionParameters = media.trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true).build()
         qualityHeight = 0
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
@@ -506,6 +519,7 @@ class PlayerActivity : ComponentActivity() {
                 findViewById<View>(R.id.player_next).setOnClickListener { playNextStored() }
                 findViewById<View>(R.id.player_favorite).setOnClickListener { toggleFavorite() }
                 findViewById<View>(R.id.player_quality).setOnClickListener { onQuality() }
+                findViewById<View>(R.id.player_tracks).setOnClickListener { showTrackMenu() }
                 findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
                     override fun onScrubStart(timeBar: androidx.media3.ui.TimeBar, position: Long) {
                         scrubbing = true; resumeAfterScrub = this@PlayerActivity.player?.playWhenReady == true
@@ -515,7 +529,10 @@ class PlayerActivity : ComponentActivity() {
                         findViewById<TextView>(R.id.player_position).text = formatTime(position)
                     }
                     override fun onScrubStop(timeBar: androidx.media3.ui.TimeBar, position: Long, canceled: Boolean) {
-                        if (!canceled) this@PlayerActivity.player?.seekTo(position)
+                        if (!canceled) {
+                            this@PlayerActivity.player?.seekTo(position)
+                            task?.let { TorrentTasks.prioritizeSeek(it, position, this@PlayerActivity.player?.duration ?: 0L) }
+                        }
                         scrubbing = false
                         if (resumeAfterScrub) this@PlayerActivity.player?.play()
                     }
@@ -534,6 +551,40 @@ class PlayerActivity : ComponentActivity() {
         val seconds = (value.coerceAtLeast(0) / 1000)
         return if (seconds >= 3600) "%d:%02d:%02d".format(seconds / 3600, seconds / 60 % 60, seconds % 60)
         else "%02d:%02d".format(seconds / 60, seconds % 60)
+    }
+    private fun showTrackMenu() {
+        val exo = player as? ExoPlayer
+        if (exo == null) {
+            android.widget.Toast.makeText(this, "当前播放内核暂不支持轨道选择", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        android.app.AlertDialog.Builder(this).setTitle("音轨与字幕")
+            .setItems(arrayOf("选择音轨", "选择字幕")) { _, which ->
+                showTrackPicker(exo, if (which == 0) C.TRACK_TYPE_AUDIO else C.TRACK_TYPE_TEXT)
+            }.show()
+    }
+    private fun showTrackPicker(exo: ExoPlayer, type: Int) {
+        val choices = mutableListOf<Pair<androidx.media3.common.Tracks.Group, Int>>()
+        val labels = mutableListOf(if (type == C.TRACK_TYPE_TEXT) "关闭字幕" else "自动选择")
+        exo.currentTracks.groups.filter { it.type == type }.forEach { group ->
+            for (i in 0 until group.length) if (group.isTrackSupported(i)) {
+                val format = group.getTrackFormat(i)
+                val label = format.label?.takeIf(String::isNotBlank) ?: format.language?.takeIf(String::isNotBlank) ?: "轨道 ${choices.size + 1}"
+                choices += group to i
+                labels += label
+            }
+        }
+        android.app.AlertDialog.Builder(this).setTitle(if (type == C.TRACK_TYPE_TEXT) "字幕轨道" else "音轨")
+            .setItems(labels.toTypedArray()) { _, index ->
+                val builder = exo.trackSelectionParameters.buildUpon().clearOverridesOfType(type)
+                if (index == 0) builder.setTrackTypeDisabled(type, type == C.TRACK_TYPE_TEXT)
+                else {
+                    builder.setTrackTypeDisabled(type, false)
+                    val (group, track) = choices[index - 1]
+                    builder.addOverride(TrackSelectionOverride(group.mediaTrackGroup, listOf(track)))
+                }
+                exo.trackSelectionParameters = builder.build()
+            }.show()
     }
     private fun refreshProgress() {
         val view=activeView ?: return

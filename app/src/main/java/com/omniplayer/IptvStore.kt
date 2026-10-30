@@ -68,7 +68,7 @@ object IptvStore {
 
     fun saveSources(context: Context, sources: List<IptvSource>) {
         val rows = JSONArray()
-        sources.filter { it.name.isNotBlank() && (it.url.startsWith("https://", true) || it.url.startsWith("http://", true)) }.forEach { rows.put(JSONObject().put("name", it.name.trim()).put("url", it.url.trim())) }
+        sources.filter { it.name.isNotBlank() && (it.url.startsWith("https://", true) || it.url.startsWith("http://", true) || it.url.startsWith("file:", true)) }.forEach { rows.put(JSONObject().put("name", it.name.trim()).put("url", it.url.trim())) }
         context.getSharedPreferences(PREFS, 0).edit().putString("sources", rows.toString()).apply()
     }
 

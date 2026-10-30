@@ -249,6 +249,7 @@ class IptvActivity : ComponentActivity() {
 }
 
 private fun fetchM3u(url: String): String {
+    if (url.startsWith("file:", true)) return java.io.File(java.net.URI(url)).readText(Charsets.UTF_8)
     val connection = URL(url).openConnection() as HttpURLConnection
     connection.connectTimeout = 15_000; connection.readTimeout = 30_000; connection.instanceFollowRedirects = true
     return connection.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
@@ -268,6 +269,15 @@ private fun measureConnection(url: String): String = runCatching {
 }.getOrElse { "连接失败：${it.localizedMessage ?: "网络不可达"}" }
 
 class IptvSettingsActivity : ComponentActivity() {
+    private var acceptPickedPlaylist: ((String) -> Unit)? = null
+    private val playlistPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) runCatching {
+            val folder = java.io.File(filesDir, "iptv-sources").apply { mkdirs() }
+            val target = java.io.File(folder, "playlist-${System.currentTimeMillis()}.m3u")
+            contentResolver.openInputStream(uri)!!.use { input -> target.outputStream().use { input.copyTo(it) } }
+            acceptPickedPlaylist?.invoke(target.toURI().toString())
+        }.onFailure { android.widget.Toast.makeText(this, "无法导入播放列表：${it.localizedMessage}", android.widget.Toast.LENGTH_LONG).show() }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -287,13 +297,17 @@ class IptvSettingsActivity : ComponentActivity() {
                                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     OutlinedTextField(source.name, { value -> entries = entries.toMutableList().also { it[index] = it[index].copy(name = value) } }, Modifier.fillMaxWidth(), label = { Text("直播源名称") }, singleLine = true)
                                     OutlinedTextField(source.url, { value -> entries = entries.toMutableList().also { it[index] = it[index].copy(url = value) } }, Modifier.fillMaxWidth(), label = { Text("M3U / M3U8 地址") })
+                                    OutlinedButton(onClick = {
+                                        acceptPickedPlaylist = { localUrl -> entries = entries.toMutableList().also { it[index] = it[index].copy(url = localUrl) } }
+                                        playlistPicker.launch(arrayOf("application/x-mpegURL", "audio/x-mpegurl", "text/plain", "application/octet-stream"))
+                                    }, modifier = Modifier.fillMaxWidth()) { Text("选择手机中的 M3U 文件") }
                                     if (entries.size > 1) TextButton(onClick = { entries = entries.toMutableList().also { it.removeAt(index) } }) { Text("删除此直播源") }
                                 }
                             }
                         }
                     }
                     Button(onClick = {
-                        val valid = entries.filter { it.name.isNotBlank() && (it.url.startsWith("https://") || it.url.startsWith("http://")) }
+                        val valid = entries.filter { it.name.isNotBlank() && (it.url.startsWith("https://") || it.url.startsWith("http://") || it.url.startsWith("file:")) }
                         if (valid.isEmpty()) message = "至少需要一个有效的 HTTP(S) 直播源"
                         else { IptvStore.saveSources(this@IptvSettingsActivity, valid); message = "已保存 ${valid.size} 个直播源" }
                     }, Modifier.fillMaxWidth().height(52.dp)) { Text("保存直播源") }
