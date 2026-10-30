@@ -3,7 +3,10 @@ package com.omniplayer
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.view.Surface
+import android.view.SurfaceHolder
 import android.view.SurfaceView
+import android.view.TextureView
 import androidx.media3.common.*
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
@@ -14,6 +17,7 @@ import org.json.JSONObject
 
 /** Media3 control-compatible software decoder for RealMedia containers. */
 internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskFile) : SimpleBasePlayer(Looper.getMainLooper()) {
+    private val torrentTask = task
     private val stream = TorrentHttpStream(task, file)
     private val library = LibVLC(context.applicationContext, arrayListOf("--network-caching=300", "--file-caching=300", "--no-video-title-show"))
     private val decoder = MediaPlayer(library)
@@ -28,6 +32,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     private var videoSize = VideoSize.UNKNOWN
     private var rendered = false
     private var output: Any? = null
+    private var ownedOutputSurface: Surface? = null
     private var pendingSeek: Long? = null
     private var playingEventAt = 0L
     @Volatile private var lastEvent = "created"
@@ -44,6 +49,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     fun debugInfo() = stream.debugInfo().put("vlcLastEvent", lastEvent).put("vlcLastAction", lastAction)
         .put("vlcIsPlaying", decoder.isPlaying).put("vlcVideoTracks", decoder.videoTracksCount)
         .put("vlcAudioTracks", decoder.audioTracksCount).put("vlcLengthMs", decoder.length)
+        .put("videoOutputClass", output?.javaClass?.name.orEmpty()).put("vlcViewsAttached", decoder.vlcVout.areViewsAttached())
 
     init {
         val media = Media(library, stream.uri)
@@ -102,26 +108,50 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     }
     override fun handleSetVideoOutput(videoOutput: Any): ListenableFuture<*> {
         if (output === videoOutput) return Futures.immediateVoidFuture()
-        decoder.vlcVout.detachViews(); output = videoOutput
-        if (videoOutput is SurfaceView) {
-            decoder.vlcVout.setVideoView(videoOutput)
-            videoOutput.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
-                if (!released && output === videoOutput) decoder.vlcVout.setWindowSize((right-left).coerceAtLeast(1), (bottom-top).coerceAtLeast(1))
+        decoder.vlcVout.detachViews(); ownedOutputSurface?.release(); ownedOutputSurface = null; output = videoOutput
+        when (videoOutput) {
+            is SurfaceView -> {
+                decoder.vlcVout.setVideoView(videoOutput)
+                videoOutput.addOnLayoutChangeListener { _, left, top, right, bottom, _, _, _, _ ->
+                    if (!released && output === videoOutput) decoder.vlcVout.setWindowSize((right-left).coerceAtLeast(1), (bottom-top).coerceAtLeast(1))
+                }
+                decoder.vlcVout.attachViews { _, width, height, _, _, sarNum, sarDen -> onVlcVideoLayout(width, height, sarNum, sarDen) }
+                decoder.vlcVout.setWindowSize(videoOutput.width.coerceAtLeast(1), videoOutput.height.coerceAtLeast(1))
             }
-            decoder.vlcVout.attachViews { _, width, height, _, _, sarNum, sarDen ->
-                main.post { if (!released) { videoSize = VideoSize(width, height, 0, if (sarDen > 0) sarNum.toFloat()/sarDen else 1f); rendered = true; invalidateState() } }
+            is SurfaceHolder -> {
+                decoder.vlcVout.setVideoSurface(videoOutput.surface, videoOutput)
+                decoder.vlcVout.attachViews { _, width, height, _, _, sarNum, sarDen -> onVlcVideoLayout(width, height, sarNum, sarDen) }
             }
-            decoder.vlcVout.setWindowSize(videoOutput.width.coerceAtLeast(1), videoOutput.height.coerceAtLeast(1))
+            is Surface -> {
+                decoder.vlcVout.setVideoSurface(videoOutput, null)
+                decoder.vlcVout.attachViews { _, width, height, _, _, sarNum, sarDen -> onVlcVideoLayout(width, height, sarNum, sarDen) }
+            }
+            is TextureView -> videoOutput.surfaceTexture?.let { texture ->
+                val surface = Surface(texture)
+                ownedOutputSurface = surface
+                decoder.vlcVout.setVideoSurface(surface, null)
+                decoder.vlcVout.attachViews { _, width, height, _, _, sarNum, sarDen -> onVlcVideoLayout(width, height, sarNum, sarDen) }
+            }
         }
         return Futures.immediateVoidFuture()
     }
+    private fun onVlcVideoLayout(width: Int, height: Int, sarNum: Int, sarDen: Int) {
+        main.post {
+            if (!released) {
+                videoSize = VideoSize(width, height, 0, if (sarDen > 0) sarNum.toFloat()/sarDen else 1f)
+                rendered = true
+                if (torrentTask.renderedFrameAt == 0L) torrentTask.renderedFrameAt = System.currentTimeMillis()
+                invalidateState()
+            }
+        }
+    }
     override fun handleClearVideoOutput(videoOutput: Any?): ListenableFuture<*> {
-        if (videoOutput == null || output === videoOutput) { decoder.vlcVout.detachViews(); output = null }
+        if (videoOutput == null || output === videoOutput) { decoder.vlcVout.detachViews(); output = null; ownedOutputSurface?.release(); ownedOutputSurface = null }
         return Futures.immediateVoidFuture()
     }
     override fun handleRelease(): ListenableFuture<*> {
         released = true; wanted = false; main.removeCallbacks(refresh)
-        stream.close(); decoder.setEventListener(null); decoder.vlcVout.detachViews(); decoder.stop(); decoder.release(); library.release()
+        stream.close(); decoder.setEventListener(null); decoder.vlcVout.detachViews(); ownedOutputSurface?.release(); ownedOutputSurface = null; decoder.stop(); decoder.release(); library.release()
         return Futures.immediateVoidFuture()
     }
 }
