@@ -625,6 +625,6 @@ This section records the current code changes. It is not a claim that the Androi
 
 ### Build and remote status
 
-- This Windows session has no local Java, Gradle, or Android Debug Bridge executable. GitHub Actions Android APK build **passed** on run [41106664965](https://github.com/liao-zc/OmniPlayer/actions/runs/41106664965), after correcting a missing FileProvider XML resource and removing a reference to the intentionally removed cache progress view. The workflow artifact is available from that run; no release was published. No emulator/phone test was run.
-- The update was synchronized through the GitHub API because Git fetch timed out. Local project file contents were checked against remote tree `ee7bb94828de5c2099260ce270bd31c4bdd35370`; repository metadata in the local `.git` directory still has an older commit pointer.
+- This Windows session has no local Java, Gradle, or Android Debug Bridge executable. GitHub Actions Android APK build **passed** on run [41107548311](https://github.com/liao-zc/OmniPlayer/actions/runs/41107548311). Earlier builds exposed a missing FileProvider XML resource and a stale cache progress view reference; both were fixed before this successful build. The workflow artifact is attached to the run; no release was published. No emulator/phone test was run.
+- The update was synchronized through the GitHub API because Git fetch timed out. A raw Git blob check found the local project files byte-for-byte equal to the remote tree after synchronization. Local `.git` branch metadata still points to an older commit.
 - The previous exact-magnet run remains **0/10 first-frame starts** before the later cache-flush event-order fix; post-fix playback was not verified. This work does not change that result or claim otherwise.
