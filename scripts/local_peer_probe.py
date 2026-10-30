@@ -10,7 +10,7 @@ try:
     text=urllib.request.urlopen('https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt',timeout=20).read().decode()
     trackers=list(dict.fromkeys(trackers+[x.strip() for x in text.splitlines() if x.startswith(('udp://','https://','http://'))]))[:80]
 except Exception as e:print('Tracker list fetch:',e,flush=True)
-settings={'listen_interfaces':'0.0.0.0:0,[::]:0','download_rate_limit':0,'upload_rate_limit':0,'connections_limit':600,'connection_speed':40,'enable_dht':True,'enable_lsd':True,'enable_upnp':True,'enable_natpmp':True,'enable_incoming_tcp':True,'enable_outgoing_tcp':True,'enable_incoming_utp':True,'enable_outgoing_utp':True,'announce_to_all_trackers':True,'announce_to_all_tiers':True,'dht_bootstrap_nodes':'router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881'}
+settings={'listen_interfaces':'0.0.0.0:0,[::]:0','download_rate_limit':0,'upload_rate_limit':0,'connections_limit':600,'connection_speed':40,'enable_dht':True,'enable_lsd':False,'enable_upnp':True,'enable_natpmp':True,'enable_incoming_tcp':True,'enable_outgoing_tcp':True,'enable_incoming_utp':True,'enable_outgoing_utp':True,'announce_to_all_trackers':True,'announce_to_all_tiers':True,'dht_bootstrap_nodes':'router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881'}
 if a.bind: settings.update(listen_interfaces=a.bind+':0',outgoing_interfaces=a.bind)
 settings['alert_mask']=int(lt.alert.category_t.all_categories)
 session=lt.session(settings);rows=[];handles=[];seen=set();start=time.monotonic();events=[]
