@@ -8,10 +8,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.json.JSONArray
 import org.json.JSONObject
@@ -71,7 +75,9 @@ class SearchEngineSettingsActivity : ComponentActivity() {
                 var message by remember { mutableStateOf("") }
                 Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        TextButton(onClick = { finish() }) { Text("‹ 返回磁播设置") }
+                        IconButton(onClick = { finish() }, modifier = Modifier.semantics { contentDescription = "返回磁播设置" }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        }
                         Text("搜索引擎管理", style = MaterialTheme.typography.titleLarge)
                     }
                     Text("可编辑或删除当前引擎，最多 10 个。搜索地址模板可用 %s 表示关键词；留空时会尝试填写网页搜索框。", style = MaterialTheme.typography.bodySmall)
