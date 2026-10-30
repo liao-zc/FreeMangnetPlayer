@@ -522,7 +522,7 @@ open class TorrentSession(
         if (!handle.isValid || handle.torrentFile() != null) return
         val info = TorrentInfo.bdecode(bytes)
         if (info.infoHash() != handle.infoHash()) return
-        // 1.2 bindings cannot set metadata in place. Preserve tracker URLs/tiers
+        // The bindings do not expose in-place metadata injection. Preserve tracker URLs/tiers
         // and connected endpoints BEFORE replacing the owning handle.
         val oldTrackers = handle.trackers()
         rememberTrackers(bytes)
@@ -530,7 +530,8 @@ open class TorrentSession(
         val restoredInfo = TorrentInfo.bdecode(info.bencode(oldTrackers.map { it.url() }))
         handle.peerInfo().forEach { peer -> runCatching {
             val endpoint = peer.ip()
-            knownPeers[endpoint] = TcpEndpoint(endpoint.substringBeforeLast(':').removePrefix("[").removeSuffix("]"), endpoint.substringAfterLast(':').toInt())
+            val address = parsePeerAddress(endpoint) ?: return@runCatching
+            knownPeers[endpoint] = TcpEndpoint(address.first, address.second)
         } }
         restoredTrackers = 0 // Count actual new-handle trackers in onAddTorrent.
         metadataReplacements++
