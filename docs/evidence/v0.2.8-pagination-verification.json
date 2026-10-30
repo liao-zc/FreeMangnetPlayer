@@ -1,0 +1,35 @@
+[
+  {
+    "check": "source-page-1",
+    "passed": true,
+    "result_count": 39
+  },
+  {
+    "check": "single-page-controls-and-time-heat-match-sorting",
+    "passed": true,
+    "result_count": 39
+  },
+  {
+    "check": "source-page-2",
+    "passed": true,
+    "result_count": 17
+  },
+  {
+    "check": "source-page-3",
+    "passed": true,
+    "result_count": 0
+  },
+  {
+    "check": "previous-page",
+    "passed": true,
+    "result_count": 17
+  },
+  {
+    "check": "jump-to-known-page",
+    "passed": true
+  },
+  {
+    "check": "back-restores-search-not-home",
+    "passed": true
+  }
+]

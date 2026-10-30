@@ -1,6 +1,6 @@
 # OmniPlayer
 
-OmniPlayer is an Android app for IPTV live TV and magnet-link search, playback, downloads, cache, and favorites. Current release: **v0.2.7**; next build: **v0.2.8** (verification in progress).
+OmniPlayer is an Android app for IPTV live TV and magnet-link search, playback, downloads, cache, and favorites. Current release: **v0.2.7**; **v0.2.8** is under verification and is not yet released.
 
 - Android display name: **OmniPlayer**
 - GitHub repository: [liao-zc/OmniPlayer](https://github.com/liao-zc/OmniPlayer)
@@ -14,4 +14,4 @@ OmniPlayer is an Android app for IPTV live TV and magnet-link search, playback, 
 
 The default IPTV playlist is `https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u`. `https://iptv-org.github.io/iptv/index.m3u` is included as an alternate source. Playback availability depends on each source, network, Android version, and device codecs.
 
-Search results now use a single source-page control and one sort menu for match, date, or heat. Live playback adds watch history with multi-delete and a grouped channel list below the player. The search engine settings support editing, deleting, and up to 10 sources, with BDFlix selected by default. If a torrent stays without usable peers or data, the app keeps a visible warning on its saved entries and excludes it from download/cache counts. Search results return to the previous keyword page and show the site's publication time when available plus the largest video file's format; other file types remain downloadable. Details and item-by-item verification status are in the [current report](docs/report.md).
+The v0.2.8 work in progress adds one-row previous/next page controls, a single sort menu for match/date/heat, IPTV watch history with multi-delete, and a grouped channel list below the live player. A fallback decoder is attempted when an MKV fails to render its first frame on the device decoder. These changes are not a release claim: emulator checks and the exact Spider-Man magnet cold-start test are still running. Magnet creation/seed time is not encoded in the URI; results can show only the search source publication date. Details and item-by-item verification status are in the [current report](docs/report.md).
