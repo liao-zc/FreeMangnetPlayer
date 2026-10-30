@@ -85,7 +85,7 @@ def main():
     report.append({'check': 'pasted-tracker-free-magnet-metadata', 'passed': True,
         'seconds': metadata_seconds, 'source': fixture['direct_magnet'], 'state': metadata})
     find_and_tap('▶ 播放')
-    first = wait(lambda s: s.get('playing'))
+    first = wait(lambda s: s.get('playing') and s.get('renderedFrameAt', 0)>0 and s.get('videoHeight', 0)>0 and s.get('position', 0)>500)
     first_seconds = time.monotonic() - started
     screenshot('perf-04-unlimited-playing.png')
     samples = [metadata, first]
