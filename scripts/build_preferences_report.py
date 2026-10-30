@@ -79,7 +79,11 @@ text+=f"\n同默认 Tracker 的独立客户端：{sum(r['final'].get('metadata',
 text+='\n节点数量与速度为本轮环境观测，不等于资源在所有网络中不可用。独立 native 客户端配置同一默认 Tracker 清单另做 180 秒观测；运行时、连接方式和观测时间与 Android 不同，不能把它当成同设备的另一款播放器测试。完整数据见证据。\n'
 text+='\n### 原指定磁力\n\n'
 control=public[10];s=control['final'];text+=f"`{control['magnet']}`：元数据 {'有' if s.get('metadata') else '无'}，有效字节 {s.get('payloadBytes',0)}，起播 {'通过' if control['passed'] else '未通过'}。继续保留为固定验收资源。\n"
-text+='\n## 六个真实搜索源\n\n| 引擎 | 浏览器磁力数 | App 磁力数 | 可比性与偏差 |\n| --- | --- | --- | --- |\n'
+text+='\n## 与 Magnet_player 的对照范围
+
+对标仓库：https://github.com/zaidielykelee/Magnet_player 。此前其 APK 在 ARM 转译模拟器中无法稳定运行，尚未完成两款 App 的同设备起播和速度对照；本报告没有将独立 native 客户端冒充对标 App，也没有虚构对方播放画面。此项仍需可运行对标 App 的设备才能验收。
+
+## 六个真实搜索源\n\n| 引擎 | 浏览器磁力数 | App 磁力数 | 可比性与偏差 |\n| --- | --- | --- | --- |\n'
 for r in search:
  state=f"{r['differenceRatio']*100:.1f}%" if r['comparable'] else '无法核验（访问失败或无有效基线）'
  text+=f"| {r['engine']} | {r['browserHashCount']} | {r['appHashCount']} | {state} |\n"
