@@ -522,4 +522,4 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 | 8 | 改进复制磁力入口 | 保留用户此前要求的目标文件磁力复制功能；移除列表文字按钮，改成每个文件旁边的复制图标，文件选择弹窗也提供单项复制图标。源码检查通过。|
 | 9 | 电视与磁播默认视频画面尺寸/位置一致 | 两个播放器的非全屏视频区域均设为屏幕内容区顶部、宽度充满、高度 240dp；全屏仍按各播放器全屏操作生效。源码检查通过，设备视觉对照待验。|
 
-此前各轮直播、BT、搜索、字体和历史需求点检均保留；十条指定公网磁力此前 0/10 起播的结果仍有效，不受本轮设置/导航改动影响。当前环境没有 Android 设备，本轮 UI 交互、颜色跨屏即时生效、播放器画面实际对齐及清理文件回归尚未进行真机验收。构建及文档检查结果待 v0.2.4 GitHub Actions 完成后补记。
+此前各轮直播、BT、搜索、字体和历史需求点检均保留；十条指定公网磁力此前 0/10 起播的结果仍有效，不受本轮设置/导航改动影响。当前环境没有 Android 设备，本轮 UI 交互、颜色跨屏即时生效、播放器画面实际对齐及清理文件回归尚未进行真机验收。首次构建检查发现缺少 `dp` 与 `LocalContext` 导入，已修复后重新构建。最终 GitHub Actions 构建成功（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41035397603)）：Android `assembleDebug`、通用/ARM64/ARMv7 APK 打包和 Release 发布均通过；UTF-8 与 GitHub Markdown 可读性检查通过（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41035397388)）。APK：[ARM64](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4-arm64-v8a.apk) · [ARMv7](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4-armeabi-v7a.apk) · [通用](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4.apk)。
