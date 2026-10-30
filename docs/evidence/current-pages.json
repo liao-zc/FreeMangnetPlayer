@@ -5,197 +5,341 @@
     "state": {
       "engine": "分页测试",
       "page": 1,
+      "totalPages": 3,
+      "complete": false,
       "next": "http://10.0.2.2:8899/search?page=2",
       "query": "哪吒",
       "state": "results",
-      "message": "本页已读取完成",
+      "message": "",
       "results": [
         {
           "title": "资源文件 0",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-0"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-0",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 1",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-1"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-1",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 2",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-2"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-2",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 3",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-3"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-3",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 4",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-4"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-4",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 5",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-5"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-5",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 6",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-6"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-6",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 7",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-7"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-7",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 8",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-8"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-8",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 9",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-9"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-9",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 10",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-10"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-10",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 11",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-11"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-11",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 12",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-12"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-12",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 13",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-13"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-13",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 14",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-14"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-14",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 15",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-15"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-15",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 16",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-16"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-16",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 17",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-17"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-17",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 18",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-18"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-18",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 19",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-19"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-19",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 20",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-20"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-20",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 21",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-21"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-21",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 22",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-22"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-22",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 23",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-23"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-23",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 24",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-24"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-24",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 25",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-25"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-25",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 26",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-26"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-26",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 27",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-27"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-27",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 28",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-28"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-28",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 29",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-29"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-29",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 30",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-30"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-30",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 31",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-31"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-31",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 32",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-32"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-32",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 33",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-33"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-33",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 34",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-34"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-34",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 35",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-35"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-35",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "资源文件 36",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-36"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page1-36",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
-          "title": "磁力下载",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=detail-a"
+          "title": "完全不同的文件名甲",
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=detail-a",
+          "bytes": 1500000,
+          "sizeText": "1.5MB",
+          "type": "剧集",
+          "heat": "9.0"
         },
         {
-          "title": "磁力下载",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=detail-b"
+          "title": "不同译名乙",
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=detail-b",
+          "bytes": 1500000,
+          "sizeText": "1.5MB",
+          "type": "剧集",
+          "heat": "9.0"
         }
       ]
     },
     "expected_count": 39
   },
   {
-    "check": "local-ten-result-screen-1",
+    "check": "local-twenty-result-screen-1",
     "passed": true,
     "source_page": 1,
     "screen": 1,
     "total_results": 39
   },
   {
-    "check": "local-ten-result-screen-2",
+    "check": "local-twenty-result-screen-2",
     "passed": true,
     "source_page": 1,
     "screen": 2,
-    "total_results": 39
-  },
-  {
-    "check": "local-ten-result-screen-3",
-    "passed": true,
-    "source_page": 1,
-    "screen": 3,
-    "total_results": 39
-  },
-  {
-    "check": "local-ten-result-screen-4",
-    "passed": true,
-    "source_page": 1,
-    "screen": 4,
     "total_results": 39
   },
   {
@@ -208,78 +352,148 @@
     "state": {
       "engine": "分页测试",
       "page": 2,
+      "totalPages": 3,
+      "complete": false,
       "next": "http://10.0.2.2:8899/search?page=3",
       "query": "哪吒",
       "state": "results",
-      "message": "本页已读取完成",
+      "message": "",
       "results": [
         {
           "title": "第二页文件 0",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-0"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-0",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 1",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-1"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-1",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 2",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-2"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-2",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 3",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-3"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-3",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 4",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-4"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-4",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 5",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-5"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-5",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 6",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-6"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-6",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 7",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-7"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-7",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 8",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-8"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-8",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 9",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-9"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-9",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 10",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-10"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-10",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 11",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-11"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-11",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 12",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-12"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-12",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 13",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-13"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-13",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 14",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-14"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-14",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 15",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-15"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-15",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 16",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-16"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-16",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         }
       ]
     },
@@ -291,10 +505,12 @@
     "state": {
       "engine": "分页测试",
       "page": 3,
+      "totalPages": 3,
+      "complete": false,
       "next": "",
       "query": "哪吒",
-      "state": "empty",
-      "message": "本页已读取完成",
+      "state": "loading",
+      "message": "搜索中",
       "results": []
     },
     "expected_count": 0
@@ -305,81 +521,159 @@
     "state": {
       "engine": "分页测试",
       "page": 2,
+      "totalPages": 3,
+      "complete": false,
       "next": "http://10.0.2.2:8899/search?page=3",
       "query": "哪吒",
       "state": "results",
-      "message": "正在读取第 2 页…",
+      "message": "搜索中",
       "results": [
         {
           "title": "第二页文件 0",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-0"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-0",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 1",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-1"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-1",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 2",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-2"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-2",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 3",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-3"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-3",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 4",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-4"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-4",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 5",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-5"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-5",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 6",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-6"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-6",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 7",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-7"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-7",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 8",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-8"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-8",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 9",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-9"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-9",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 10",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-10"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-10",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 11",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-11"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-11",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 12",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-12"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-12",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 13",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-13"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-13",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 14",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-14"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-14",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 15",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-15"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-15",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         },
         {
           "title": "第二页文件 16",
-          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-16"
+          "magnet": "magnet:?xt=urn:btih:2362347540b27d8a4142af2bbe0a071f26a3b7a1&dn=page2-16",
+          "bytes": 2300000000,
+          "sizeText": "2.3GB",
+          "type": "电影",
+          "heat": "8.5"
         }
       ]
     }
+  },
+  {
+    "check": "website-page-jump-three-and-one",
+    "passed": true
+  },
+  {
+    "check": "local-result-page-jump",
+    "passed": true
   },
   {
     "check": "empty-page-and-back-responsive",
