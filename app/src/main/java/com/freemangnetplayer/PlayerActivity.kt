@@ -258,7 +258,7 @@ class PlayerActivity : ComponentActivity() {
                                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                                             Text(file.path.substringAfterLast('/'), Modifier.weight(1f), maxLines = 1)
                                             IconButton(onClick = { copyFileMagnet(current, file) }) { Icon(Icons.Default.ContentCopy, "复制此文件磁力链接") }
-                                            if (file.video) IconButton(onClick = { switchVideo(current, file.index); fileDialog = false }) { Icon(Icons.Default.PlayArrow, "切换播放") }
+                                            if (file.video) IconButton(onClick = { switchVideo(current, file.index); fileDialog = false }) { Icon(Icons.Default.PlayArrow, "切换播放：${file.path.substringAfterLast('/')}") }
                                         }
                                     } }
                                 }
