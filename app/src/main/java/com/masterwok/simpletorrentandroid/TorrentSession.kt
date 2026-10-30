@@ -34,7 +34,10 @@ open class TorrentSession(
      */
     var listener: TorrentSessionListener? = null
 
-    private val sessionParams = SessionParams(torrentSessionOptions.settingsPack)
+    // Android shared storage may be backed by FUSE. mmap I/O triggered a verified
+    // MediaProvider abort and killed clients accessing /storage/emulated/0.
+    // The upstream POSIX backend supports Android drivers without mmap.
+    private val sessionParams = SessionParams(torrentSessionOptions.settingsPack).apply { setPosixDiskIO() }
     private val alertListener = TorrentSessionAlertListener(this)
 
     private val sessionManager = SessionManager(torrentSessionOptions.enableLogging)
