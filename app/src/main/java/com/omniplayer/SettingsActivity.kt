@@ -133,7 +133,7 @@ class SettingsActivity : ComponentActivity() {
                                             .onFailure { withContext(Dispatchers.Main) { updateStatus = "下载失败：${it.localizedMessage}" } }
                                     }
                                     updateRelease = null
-                                }) { Text("下载并更新") },
+                                }) { Text("下载并更新") } },
                                 dismissButton = { TextButton(onClick = { updateRelease = null }) { Text("取消") } }
                             ) }
                             Text("版本：${pkg.versionName}（versionCode $version）")
