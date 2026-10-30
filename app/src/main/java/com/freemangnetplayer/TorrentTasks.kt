@@ -300,6 +300,8 @@ object TorrentTasks {
                                 synchronized(task.nativeLock) {
                                     if (handle.isValid && handle.torrentFile() == null) {
                                         task.handle = null
+                                        task.outgoingUtp = false
+                                        task.transportRecoveryAt = System.currentTimeMillis()
                                         currentEngine?.supplyMetadata(handle, bytes)
                                     }
                                 }

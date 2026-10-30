@@ -506,6 +506,11 @@ open class TorrentSession(
         } }
         restoredTrackers = oldTrackers.size
         metadataReplacements++
+        // Rebuilt metadata handles reconnect via TCP first. A half-open uTP
+        // metadata connection must not prevent the fresh handle fetching data.
+        val transport = SettingsPack()
+        transport.setBoolean(org.libtorrent4j.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
+        sessionManager.applySettings(transport)
         val hash = info.infoHash()
         sessionManager.remove(handle)
         val deadline = android.os.SystemClock.elapsedRealtime() + 3000
