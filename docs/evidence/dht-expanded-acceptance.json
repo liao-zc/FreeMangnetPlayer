@@ -1,0 +1,575 @@
+{
+  "action": "https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41014121591",
+  "testedCommit": "c491877",
+  "result": "0 of 10 passed sustained playback while incomplete; one user resource rendered a 1080p frame after 101.0 seconds but did not meet sustained-playback acceptance",
+  "rows": [
+    {
+      "category": "电影",
+      "hash": "B3D7179216306E63081AC0DDA84A714B183263F4",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 1496194537,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "HANDSHAKE",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://4.154.246.52:9217",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 131242,
+          "source": 3
+        }
+      ]
+    },
+    {
+      "category": "电影",
+      "hash": "D455858E4FCA306FCF315B1229CAF4AC4E065DBA",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": false,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 0,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "METADATA",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": []
+    },
+    {
+      "category": "电影",
+      "hash": "6E00F1E081B67749B48141D38950BF6343BC5F10",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 1,
+      "seeds": 0,
+      "totalBytes": 3109957467,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "WAITING_VERIFIED_PIECE",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://46.151.8.54:9219",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://41.46.76.182:9219",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://39.112.55.120:9219",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://180.149.231.14:9219",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://124.144.43.111:9219",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://68.199.73.84:18525",
+          "client": "BitTorrent 7.9.9",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 24,
+          "flags": 1179706,
+          "source": 2
+        },
+        {
+          "address": "tcp://188.255.121.64:9219",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ]
+    },
+    {
+      "category": "动漫",
+      "hash": "665ED0FDA70B0AAFBE2ABE656EE0EA9DAE975389",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 426989752,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "HANDSHAKE",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://121.133.208.61:9216",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ]
+    },
+    {
+      "category": "动漫",
+      "hash": "840B33399D8C3AC57CF1CD9346ABE31236DDB4C1",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": false,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 0,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "METADATA",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://4.154.246.52:35205",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://20.97.198.243:56356",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 131242,
+          "source": 3
+        }
+      ]
+    },
+    {
+      "category": "动漫",
+      "hash": "571BB0140930A9B46DBA127D2F23B3EAF6B53530",
+      "passed": false,
+      "firstFrameSeconds": 101.03682297,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 1,
+      "seeds": 1,
+      "totalBytes": 4645783403,
+      "downloadedBytes": 32691199,
+      "payloadBytes": 32705684,
+      "payloadRateBytesPerSecond": 374491,
+      "stage": "TRANSFERRING",
+      "videoHeight": 1080,
+      "positionMs": 17817,
+      "peerDetails": [
+        {
+          "address": "tcp://117.172.19.176:1715",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://20.97.198.243:56353",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://172.203.195.211:47129",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://39.176.134.167:18529",
+          "client": "qBittorrent/5.0.4",
+          "progressPpm": 1000000,
+          "downloaded": 32881906,
+          "rate": 402463,
+          "flags": 140339,
+          "source": 19
+        }
+      ]
+    },
+    {
+      "category": "剧集",
+      "hash": "FCF228066E11199A85F97AFC023A39BAA482C5B6",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 671238670,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "HANDSHAKE",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://221.163.14.56:9217",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://151.51.84.168:9217",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://185.187.207.84:9217",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://176.142.255.177:9217",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://2.215.42.19:9217",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://156.205.87.168:9217",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ]
+    },
+    {
+      "category": "剧集",
+      "hash": "DA0AF5B9CE6BA74445F32576E7C90DD004A89A7F",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 2027719809,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "HANDSHAKE",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://78.163.188.197:9222",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://20.97.198.243:56357",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 131242,
+          "source": 19
+        },
+        {
+          "address": "tcp://45.71.63.41:9222",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://103.149.147.133:9222",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://4.154.246.52:9222",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 131242,
+          "source": 19
+        },
+        {
+          "address": "tcp://213.194.149.91:9222",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://91.227.105.182:9222",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://172.203.195.211:47128",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 131242,
+          "source": 19
+        }
+      ]
+    },
+    {
+      "category": "剧集",
+      "hash": "C79263E0F308865FBF3A9613F1B2A8DEF1EBAAAA",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": false,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 0,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "METADATA",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://135.232.232.21:63513",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://79.40.98.217:9223",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://57.154.217.179:42215",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        }
+      ]
+    },
+    {
+      "category": "纪录片",
+      "hash": "A56FB49D397F177938F8BC5BFBAA7D032DCD074A",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 236713395,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "HANDSHAKE",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://84.229.199.177:9216",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ]
+    },
+    {
+      "category": "原指定资源",
+      "hash": "2362347540B27D8A4142AF2BBE0A071F26A3B7A1",
+      "passed": false,
+      "firstFrameSeconds": null,
+      "sustainedPlayback": false,
+      "metadata": true,
+      "peers": 0,
+      "seeds": 0,
+      "totalBytes": 1573322851,
+      "downloadedBytes": 0,
+      "payloadBytes": 0,
+      "payloadRateBytesPerSecond": 0,
+      "stage": "HANDSHAKE",
+      "videoHeight": 0,
+      "positionMs": 0,
+      "peerDetails": [
+        {
+          "address": "tcp://118.33.141.108:9218",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://114.230.238.55:9218",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://8.134.176.89:9218",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://101.68.112.196:9218",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://79.115.155.131:9218",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://186.249.145.183:9218",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://218.158.83.235:9218",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ]
+    }
+  ]
+}
