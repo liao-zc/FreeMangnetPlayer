@@ -40,6 +40,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -671,6 +672,7 @@ private fun SearchResultsScreen(
     var localPage by remember(page,keyword) { mutableIntStateOf(1) }
     var jump by remember { mutableStateOf("") };var jumpError by remember { mutableStateOf("") }
     var localJump by remember(page) { mutableStateOf("") }
+    var jumpDialog by remember { mutableStateOf("") }
     val localPages=((results.size+19)/20).coerceAtLeast(1);val shown=localPage.coerceAtMost(localPages)
     val list=androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(shown,page) { list.scrollToItem(0) }
@@ -683,11 +685,7 @@ private fun SearchResultsScreen(
             Text(if(totalPages>0) "第 $page / $totalPages 页" else "第 $page 页 · 已发现 ${knownPages.maxOrNull() ?: page} 页",style=MaterialTheme.typography.bodySmall)
             TextButton(onClick=onNext,enabled=nextAvailable) { Text("下一页") }
         }
-        Row(verticalAlignment=Alignment.CenterVertically) {
-            OutlinedTextField(jump,{jump=it.filter(Char::isDigit).take(6)},label={Text("跳转网站页")},singleLine=true,modifier=Modifier.weight(1f))
-            TextButton(onClick={val n=jump.toIntOrNull();if(n!=null && n in knownPages) {onJump(n);jumpError=""} else jumpError="尚未取得该页地址"}) { Text("跳转") }
-        }
-        if(jumpError.isNotEmpty()) Text(jumpError,style=MaterialTheme.typography.bodySmall)
+        TextButton(onClick={jumpDialog="网站"}) { Text("跳转网站页",style=MaterialTheme.typography.bodySmall) }
         if(state=="loading" || message=="搜索中") { LinearProgressIndicator(Modifier.fillMaxWidth());Text("搜索中") }
         if(state in listOf("error","timeout") || message=="搜索未完成") Text("搜索未完成",color=MaterialTheme.colorScheme.error)
         if(results.isNotEmpty()) {
@@ -696,10 +694,7 @@ private fun SearchResultsScreen(
                 Text("结果 $shown / $localPages 页 · ${results.size} 条",style=MaterialTheme.typography.bodySmall)
                 TextButton(onClick={localPage=shown+1},enabled=shown<localPages) { Text("? 20 ?") }
             }
-            Row(verticalAlignment=Alignment.CenterVertically) {
-                OutlinedTextField(localJump,{localJump=it.filter(Char::isDigit).take(5)},label={Text("跳转结果页（1–$localPages）")},singleLine=true,modifier=Modifier.weight(1f))
-                TextButton(onClick={localJump.toIntOrNull()?.takeIf{it in 1..localPages}?.let{localPage=it}}) { Text("跳转结果页") }
-            }
+            TextButton(onClick={jumpDialog="结果"}) { Text("跳转结果页",style=MaterialTheme.typography.bodySmall) }
             LazyColumn(Modifier.weight(1f),state=list,verticalArrangement=Arrangement.spacedBy(4.dp)) {
                 items(results.drop((shown-1)*20).take(20),key={it.magnet}) { item -> MagnetResultCard(item,onParse,onDownload) }
             }
@@ -708,6 +703,20 @@ private fun SearchResultsScreen(
             Button(onClick=onRetry) { Text("重试搜索") };OutlinedButton(onClick=onBack) { Text("返回首页") }
         } else TextButton(onClick=onCancel) { Text("取消搜索并返回") }
     }
+    if(jumpDialog.isNotEmpty()) {
+        val requester=remember { androidx.compose.ui.focus.FocusRequester() }
+        val keyboard=androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+        LaunchedEffect(jumpDialog) { requester.requestFocus();keyboard?.show() }
+        AlertDialog(onDismissRequest={jumpDialog=""},title={Text(if(jumpDialog=="网站") "跳转网站页" else "跳转结果页")},text={Column {
+            OutlinedTextField(if(jumpDialog=="网站")jump else localJump,{value -> if(jumpDialog=="网站")jump=value.filter(Char::isDigit).take(6) else localJump=value.filter(Char::isDigit).take(6)},
+                label={Text(if(jumpDialog=="网站") "输入网站页码" else "跳转结果页（1–$localPages）")},singleLine=true,modifier=Modifier.focusRequester(requester),keyboardOptions=KeyboardOptions(keyboardType=androidx.compose.ui.text.input.KeyboardType.Number))
+            if(jumpError.isNotEmpty())Text(jumpError)
+        }},confirmButton={TextButton(onClick={
+            if(jumpDialog=="网站") { val n=jump.toIntOrNull();if(n!=null && n in knownPages) {onJump(n);jumpDialog="";jumpError=""} else jumpError="尚未取得该页地址" }
+            else {val n=localJump.toIntOrNull();if(n!=null && n in 1..localPages) {localPage=n;jumpDialog="";jumpError=""} else jumpError="页码需为 1–$localPages"}
+        }) {Text("跳转")}},dismissButton={TextButton(onClick={jumpDialog=""}) {Text("取消")}})
+    }
+
 }
 
 @Composable
