@@ -14,8 +14,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.json.JSONArray
 import org.json.JSONObject
@@ -75,8 +73,8 @@ class SearchEngineSettingsActivity : ComponentActivity() {
                 var message by remember { mutableStateOf("") }
                 Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = { finish() }, modifier = Modifier.semantics { contentDescription = "返回磁播设置" }) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        IconButton(onClick = { finish() }) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "返回磁播设置")
                         }
                         Text("搜索引擎管理", style = MaterialTheme.typography.titleLarge)
                     }
