@@ -374,6 +374,7 @@ open class TorrentSession(
         sessionManager.download(
                 magnetUrl // Native parser decodes parameters; decoding the full URL corrupts trackers.
                 , downloadLocation
+                , TorrentFlags.DEFAULT_FLAGS
         )
     }
 

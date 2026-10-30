@@ -30,11 +30,11 @@ android { namespace = "com.freemangnetplayer"; compileSdk = 35
 // together; mixing JNI and Java versions is unsupported.
 configurations.configureEach {
     resolutionStrategy.force(
-        "com.frostwire:jlibtorrent:1.2.19.0",
-        "com.frostwire:jlibtorrent-android-arm:1.2.19.0",
-        "com.frostwire:jlibtorrent-android-arm64:1.2.19.0",
-        "com.frostwire:jlibtorrent-android-x86:1.2.19.0",
-        "com.frostwire:jlibtorrent-android-x86_64:1.2.19.0"
+        "com.frostwire:jlibtorrent:2.0.15.0",
+        "com.frostwire:jlibtorrent-android-arm:2.0.15.0",
+        "com.frostwire:jlibtorrent-android-arm64:2.0.15.0",
+        "com.frostwire:jlibtorrent-android-x86:2.0.15.0",
+        "com.frostwire:jlibtorrent-android-x86_64:2.0.15.0"
     )
 }
 
@@ -57,9 +57,9 @@ dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
     // The small MIT session bridge is included as source so handle ownership
     // and native compatibility fixes can be reviewed and compiled together.
-    implementation("com.frostwire:jlibtorrent:1.2.19.0")
-    implementation("com.frostwire:jlibtorrent-android-arm:1.2.19.0")
-    implementation("com.frostwire:jlibtorrent-android-arm64:1.2.19.0")
-    implementation("com.frostwire:jlibtorrent-android-x86:1.2.19.0")
-    implementation("com.frostwire:jlibtorrent-android-x86_64:1.2.19.0")
+    implementation("com.frostwire:jlibtorrent:2.0.15.0")
+    implementation("com.frostwire:jlibtorrent-android-arm:2.0.15.0")
+    implementation("com.frostwire:jlibtorrent-android-arm64:2.0.15.0")
+    implementation("com.frostwire:jlibtorrent-android-x86:2.0.15.0")
+    implementation("com.frostwire:jlibtorrent-android-x86_64:2.0.15.0")
 }
