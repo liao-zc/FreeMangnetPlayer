@@ -374,7 +374,7 @@ open class TorrentSession(
         sessionManager.download(
                 magnetUrl // Native parser decodes parameters; decoding the full URL corrupts trackers.
                 , downloadLocation
-                , TorrentFlags.DEFAULT_FLAGS
+                , com.frostwire.jlibtorrent.swig.torrent_flags_t()
         )
     }
 
@@ -511,7 +511,7 @@ open class TorrentSession(
         val deadline = android.os.SystemClock.elapsedRealtime() + 3000
         while (sessionManager.find(hash)?.isValid == true && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(20)
         check(sessionManager.find(hash)?.isValid != true) { "Previous metadata task is still being removed" }
-        sessionManager.download(info, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList())
+        sessionManager.download(info, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList(), com.frostwire.jlibtorrent.swig.torrent_flags_t())
     }
 
     /**

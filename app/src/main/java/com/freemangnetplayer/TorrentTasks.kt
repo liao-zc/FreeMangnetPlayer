@@ -226,7 +226,7 @@ object TorrentTasks {
                         downloadRateLimit = 0, uploadRateLimit = 0, connectionsLimit = 300)
                     options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881")
                     // 16 MiB per active session; queue limits already bound memory usage.
-                    options.settingsPack.cacheSize(1024)
+                    // libtorrent 2 uses the OS page cache instead of the removed 1.x cache_size.
                     options.settingsPack.setInteger(settings_pack.int_types.cache_expiry.swigValue(), 1)
                     options.settingsPack.listenInterfaces("0.0.0.0:0,[::]:0")
                     options.settingsPack.setInteger(settings_pack.int_types.connection_speed.swigValue(), 30)
