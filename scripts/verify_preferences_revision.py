@@ -38,7 +38,7 @@ find_and_tap('大');find_and_tap('宋体');screenshot('preferences-02-song-large
 assert next(n for n in prefs() if n.get('name')=='font-face').get('value',next(n for n in prefs() if n.get('name')=='font-face').text)=='宋体'
 record('song-font-and-large-preset-persist')
 find_and_tap('标准');find_and_tap('楷体');screenshot('preferences-03-kai-font.png');record('kai-font-applied')
-find_and_tap('黑体');find_and_tap('返回主页')
+find_and_tap('黑体');find_and_tap('返回首页')
 adb('shell','pm','clear',PACKAGE)
 fixture=json.loads(Path('optimization-fixture.json').read_text(encoding='utf-8'))[0]
 index=next(i for i,f in enumerate(fixture['files']) if f['path'].endswith('Episode-01.mp4'))
