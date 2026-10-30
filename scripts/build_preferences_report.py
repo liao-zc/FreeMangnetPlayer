@@ -73,6 +73,7 @@ text=f'''# FreeMangnetPlayer {v}：15 项需求点检报告
 '''
 for r in public[:10]:
  s=r['final'];text+=f"| {r['category']} | `{r['hash']}` | {'有' if s.get('metadata') else '无'} | {s.get('peers',0)} | {s.get('payloadBytes',0)} | {r['peakPayloadBytesPerSecond']/1e6:.3f} | {round(r['firstFrameSeconds'],2) if r['firstFrameSeconds'] is not None else '未起播'} | {'通过' if r['passed'] else '未通过'} |\n"
+text+=f"\n同默认 Tracker 的独立客户端：{sum(r['final'].get('metadata',False) for r in native)}/10 取得元数据，{sum(r['final'].get('payloadBytes',0)>0 for r in native)}/10 收到有效视频数据。App 在本轮环境中也未收到目标资源数据；暂未定位为单一网络或程序原因，90% 起播要求仍未解决。\n"
 text+='\n节点数量与速度为本轮环境观测，不等于资源在所有网络中不可用。独立 native 客户端配置同一默认 Tracker 清单另做 180 秒观测；运行时、连接方式和观测时间与 Android 不同，不能把它当成同设备的另一款播放器测试。完整数据见证据。\n'
 text+='\n### 原指定磁力\n\n'
 control=public[10];s=control['final'];text+=f"`{control['magnet']}`：元数据 {'有' if s.get('metadata') else '无'}，有效字节 {s.get('payloadBytes',0)}，起播 {'通过' if control['passed'] else '未通过'}。继续保留为固定验收资源。\n"
@@ -80,6 +81,7 @@ text+='\n## 六个真实搜索源\n\n| 引擎 | 浏览器磁力数 | App 磁力�
 for r in search:
  state=f"{r['differenceRatio']*100:.1f}%" if r['comparable'] else '无法核验（访问失败或无有效基线）'
  text+=f"| {r['engine']} | {r['browserHashCount']} | {r['appHashCount']} | {state} |\n"
+for i in range(1,7):text+=f'\n### 搜索源 {i} 对照截图\n\n![独立浏览器 {i}](screenshots/current/search-browser-{i}.png)\n\n![App 搜索 {i}](screenshots/current/search-real-search-app-{i}.png)\n'
 text+='\n统计使用唯一磁力哈希集合，不能证明所有网页资源行都对应磁力。未把两个访问失败的零结果当成“结果一致”。\n'
 text+='\n## 操作说明和 App 实际截图\n'
 shots=[('字体设置','preferences-preferences-01-font-settings.png','从底部设置进入“显示与字体”，选择四档字号或拖动滑块。'),('宋体与大字号','preferences-preferences-02-song-large.png','选择宋体和大字号；黑体、楷体及自定义导入位于同一模块。'),('楷体','preferences-preferences-03-kai-font.png','选择楷体查看实际字体。'),('播放器收藏','preferences-preferences-04-filled-favorite.png','点播放器右上角爱心添加收藏；再点取消。'),('可选画质','preferences-preferences-05-supported-quality-menu.png','点内置画质按钮，仅列出已识别的可选轨道。'),('媒体信息及缓存进度','preferences-preferences-06-media-cache-information.png','缓存后在播放器控制栏查看真实时长、分辨率、大小和缓存百分比。'),('收藏批量下载','preferences-preferences-07-selected-favorite-download.png','收藏页全选或多选后下载，进入下载列表查看。'),('播放历史','preferences-preferences-08-playback-history.png','播放页进入历史记录，切换搜索、播放、下载、缓存类别；支持删除记录和清空。'),('缓存重启入口','library-library-05-cache-after-restart.png','缓存后从“播放 → 缓存视频”重新打开指定文件。'),('20 条分页第 1 屏','preferences-local-results-1.png','显示文件名称、大小、类型、热度；分页栏提供上一屏、下一屏和跳页。'),('20 条分页第 2 屏','preferences-local-results-2.png','同一个网站页 39 条分为两屏，没有截断。'),('结果页跳转','preferences-local-jump-page-2.png','点“跳页”，输入目标页码并确认。'),('不限速实际播放','performance-perf-04-unlimited-playing.png','受控不限速做种，实际播放和有效载荷速度。')]
@@ -90,6 +92,7 @@ text+='\n### 十条资源逐条截图\n'
 for i in range(1,11):text+=f'\n![公网资源 {i}](screenshots/current/public-public-{i:02d}.png)\n'
 text+='\n## 详细检查和测试入口\n\n| 检查项 | 结果 |\n| --- | --- |\n'
 for r in lib+pref+pages:text+=f"| `{r['check']}` | 通过 |\n"
+text+='\n回归流程按已完成子项记录；旧 library/吞吐流程曾在后续 UI 脚本失败，不能把整个旧流程标为通过。吞吐重试曾因多行输入框未完全清空而贴入残留字符，已改为全选后替换。最终专项流程状态以对应 Actions 链接为准。\n'
 text+='\nAndroid 设备测试另校验字体真实加载、字号持久化、各类历史数量上限、时间倒序、播放进度及收藏存储切换。\n'
 for key,run in runs.items():text+=f'\n- [{key} 测试过程]({url}/actions/runs/{run})\n'
 text+='\n[字体/历史证据](evidence/current-preferences.json) · [分页](evidence/current-pages.json) · [十条公网资源](evidence/current-public.json) · [独立客户端](evidence/current-native.json) · [吞吐](evidence/current-performance.json) · [真实搜索](evidence/current-search.json)\n\n当前报告及截图替换旧版本资料；旧 Git 历史和 Release 保留。Markdown 使用 UTF-8 明文，发布后核对 GitHub 字节和渲染，另提供内嵌图片 HTML。\n'
