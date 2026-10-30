@@ -330,12 +330,13 @@ object TorrentTasks {
                     }
                 }
                 val peerDiscovery = launch(Dispatchers.IO) {
-                    delay(6000)
+                    delay(3000)
                     while (isActive && task.engine === currentEngine && !task.cancelled) {
-                        if (!task.paused && !task.queued && !task.complete && task.payloadRate < 1024) {
+                        if (!task.paused && !task.queued && !task.complete &&
+                            System.currentTimeMillis() - task.lastPayloadAt > 5_000) {
                             task.handle?.takeIf { it.isValid }?.let { handle -> runCatching { currentEngine?.discoverPeers(handle) } }
                         }
-                        delay(20_000)
+                        delay(10_000)
                     }
                 }
                 var ticks = 0

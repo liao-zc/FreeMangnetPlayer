@@ -517,7 +517,8 @@ open class TorrentSession(
     }
     fun discoverPeers(handle: TorrentHandle) {
         val hash = handle.infoHash()
-        sessionManager.dhtGetPeers(hash, 5)?.forEach { endpoint -> knownPeers[endpoint.toString()] = endpoint }
+        // A larger response gives the caller more live candidates when a swarm is sparse.
+        sessionManager.dhtGetPeers(hash, 20)?.forEach { endpoint -> knownPeers[endpoint.toString()] = endpoint }
         if (handle.isValid) reconnectKnownPeers(handle)
     }
     /** HTTP metadata is a parallel fallback, never a prerequisite for P2P startup. */
