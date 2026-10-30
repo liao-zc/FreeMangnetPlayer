@@ -2,9 +2,9 @@
 
 日期：2026-10-30。测试环境：Android 15 / API 35 x86_64 模拟器；安装实际 APK，并通过 UI 操作、播放器状态与磁盘数据校验。截图均来自运行中的 App 或独立浏览器。ARM 手机、平板及电视尚需真机验证。
 
-- [ARM64 安装包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.6/OmniPlayer-v0.2.6-arm64-v8a.apk)
-- [离线图文报告](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.2.6)
-- [源码包](https://github.com/liao-zc/OmniPlayer/archive/refs/tags/v0.2.6.zip)
+- [ARM64 安装包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.7/OmniPlayer-v0.2.7-arm64-v8a.apk)
+- [GitHub Release 页面](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.2.7)
+- [源码包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.7/OmniPlayer-v0.2.7-source.zip)
 
 ## 验收结论
 
@@ -572,14 +572,14 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 | 3 | 六个搜索源可编辑/删除、BDFlix 默认、最多 10 个并保留旧配置 | v0.2.6 Android Store/模拟器检查通过；搜索源配置保持本地迁移数据。此次未改变搜索引擎逻辑。|
 | 4 | 搜索结果逐级返回 | v0.2.6 Android 15 模拟器分别检查工具栏返回和系统返回，均返回保留关键词的搜索页；详情/设置流程逐级返回。此次未改变导航逻辑。|
 | 5 | 资源时间、最大视频格式与其他文件类型可下载 | v0.2.6 回归覆盖视频扩展名优先、无视频时的最大文件格式标记、压缩包标记及 magnet `dn` 扩展名回退。日期显示来自搜索网站的上架时间；magnet 本身不含做种开始时间。此次未改变解析逻辑。|
-| 6 | 项目与可见产物统一 OmniPlayer 命名 | Gradle 根项目改为 `OmniPlayer`；源码和测试包迁至 `com.omniplayer` namespace；唤醒锁、日志标签、报告生成脚本和 LICENSE 改用 OmniPlayer；新任务目录使用 `OmniPlayerTasks`。Android `applicationId` 有意保留旧值用于原位升级。APK 和 tag 源码归档由发布工作流命名为 `OmniPlayer-v0.2.7*`。构建及迁移 Instrumentation 结果待 GitHub Actions。|
-| 7 | README 与完整点检报告可在 GitHub 查看 | README 增加当前功能摘要、下载、使用说明和报告入口；本报告补充本轮命名/兼容结果并把顶部过期下载链接改为当前 OmniPlayer 资源。UTF-8/Markdown 检查待 GitHub Actions。|
+| 6 | 项目与可见产物统一 OmniPlayer 命名 | Gradle 根项目改为 `OmniPlayer`；源码和测试包迁至 `com.omniplayer` namespace；唤醒锁、日志标签、报告生成脚本和 LICENSE 改用 OmniPlayer；新任务目录使用 `OmniPlayerTasks`。Android `applicationId` 有意保留旧值用于原位升级。APK 和 tag 源码归档由发布工作流命名为 `OmniPlayer-v0.2.7*`。Android 构建成功（[v0.2.7 发布流程](https://github.com/liao-zc/OmniPlayer/actions/runs/41069048708)）；Android Instrumentation 包括旧任务目录迁移检查通过。全套 UI 脚本回归未通过：控制栏按钮自动化仍无法定位“画质”控件，详情见 [模拟器回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41070978080)。|
+| 7 | README 与完整点检报告可在 GitHub 查看 | README 增加当前功能摘要、下载、使用说明和报告入口；本报告补充本轮命名/兼容结果并把顶部过期下载链接改为当前 OmniPlayer 资源。README、使用说明和点检报告的 GitHub Markdown/UTF-8 检查通过（[运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41070968761)）。|
 | 8 | 历史要求和未通过项是否如实保留 | 报告保留此前各轮明细，不把旧版截图称作本轮实测。最近一次指定公网磁力多资源验收仍未达到用户要求的 90% 起播，公网可达 Peer 受资源做种状态影响；IPTV 指定源的真机持续播放也未在本轮重新验证。|
 
 ### 旧数据迁移说明
 
-新下载与缓存目录使用 `OmniPlayerTasks`。首次访问时，如果对应任务的旧 `FreeMangnetPlayerTasks` 目录存在而新目录不存在，应用尝试在同一个存储根目录内重命名并保留数据；如果设备拒绝重命名，则继续使用旧目录，删除任务时两种目录名都受路径校验保护。该迁移 Instrumentation 会在本轮 Android 任务中执行。
+新下载与缓存目录使用 `OmniPlayerTasks`。首次访问时，如果对应任务的旧 `FreeMangnetPlayerTasks` 目录存在而新目录不存在，应用尝试在同一个存储根目录内重命名并保留数据；如果设备拒绝重命名，则继续使用旧目录，删除任务时两种目录名都受路径校验保护。该迁移 Instrumentation 在 GitHub Actions `connectedDebugAndroidTest` 中通过（运行记录：[模拟器任务](https://github.com/liao-zc/OmniPlayer/actions/runs/41070978080)；UI 回归后续步骤单独失败）。
 
 ### 本轮验证结果
 
-本地 Windows 环境没有 Java，因此未在本机编译。GitHub Actions 的 Android 构建、任务目录迁移 Instrumentation、Markdown/UTF-8 检查完成后，将把对应运行链接与结果补记于此。10 条公网磁力和电视真机可播放性不属于重命名回归，不能用编译成功替代网络/设备验收。
+本地 Windows 环境没有 Java，因此未在本机编译。GitHub Actions 已完成 Android 构建与发布；`connectedDebugAndroidTest` 通过（其中新增任务目录迁移 Instrumentation 通过）；README/Markdown 校验通过。之后的完整库/UI 回归脚本失败在 `player_quality` 自动点击定位，不能称该脚本整套通过。10 条公网磁力和电视真机可播放性不属于重命名回归，不能用编译成功替代网络/设备验收。
