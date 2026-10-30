@@ -283,3 +283,19 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 [字体/历史证据](evidence/current-preferences.json) · [分页](evidence/current-pages.json) · [十条公网资源](evidence/current-public.json) · [独立客户端](evidence/current-native.json) · [吞吐](evidence/current-performance.json) · [真实搜索](evidence/current-search.json)
 
 当前报告及截图替换旧版本资料；旧 Git 历史和 Release 保留。Markdown 使用 UTF-8 明文，发布后核对 GitHub 字节和渲染，另提供内嵌图片 HTML。
+
+
+## 正在进行的文件名与公网连接修复（2026-10-30）
+
+本节为排查记录，十条公网磁力尚未通过边下边播验收。
+
+- 操作文案“查看详情”“查看详细”等不再作为资源名称；优先保留有效网页文件名，缺失时使用磁力 dn。多个磁力共用的页面总大小不再分配给每条结果。
+- 删除添加磁力之前无限等待 DHT 就绪的逻辑，让 Tracker 连接立即启动；DHT 在路由节点可用后继续工作。
+- 使用本机 libtorrent 2.1.1，关闭下载和上传限速，分别测试全部网卡与绑定实际 WLAN。两组客户端通过局域网发现互相连接产生的节点不计为公网有效资源节点；后续诊断关闭局域网发现。
+- 分页回归第一次失败：有效网页文件名被磁力 dn 替代。已恢复网页有效文件名优先并重跑。第一次失败不能记为通过。
+- 最新 Ubuntu 对照种子的 HTTPS Tracker 已返回节点，实际有效数据仍需继续观察。HTTPS 可访问不等于 BT 下载通过。
+- 本轮源码已同步 GitHub；尚未发布新 APK，v0.1.16 的旧测试结果不代表本轮修复已通过。
+
+正在执行的回归：[搜索分页](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000403214)、[十条磁力真实播放](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000002632)、[列表与播放功能](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000014234)。
+
+优化依据：[libtorrent 流式分片调度说明](https://www.libtorrent.org/streaming.html)。该说明要求按播放读取位置设置紧急分片 deadline；单纯顺序下载不能保证首个分片被最快节点处理。

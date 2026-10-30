@@ -8,7 +8,7 @@ session=lt.session(settings);info=lt.torrent_info(a.torrent)
 params=lt.add_torrent_params();params.ti=info;params.save_path=str((out/'data').resolve());params.flags &= ~lt.torrent_flags.paused;params.flags &= ~lt.torrent_flags.auto_managed
 h=session.add_torrent(params);rows=[];events=[];start=time.monotonic()
 while time.monotonic()-start<a.seconds:
- s=h.status();rows.append(dict(seconds=round(time.monotonic()-start,2),peers=s.num_peers,payload=s.total_payload_download,rate=s.download_payload_rate))
+ s=h.status();rows.append(dict(seconds=round(time.monotonic()-start,2),peers=s.num_peers,payload=s.total_payload_download,rate=s.download_payload_rate,peerDetails=[dict(endpoint=str(peer.ip),flags=int(peer.flags),source=int(peer.source)) for peer in h.get_peer_info()]))
  for alert in session.pop_alerts():
   if any(t in type(alert).__name__ for t in ['tracker_reply','tracker_error','listen_failed']):events.append(str(alert))
  (out/'results.json').write_text(json.dumps(dict(name=info.name(),hash=str(info.info_hash()),settings=settings,samples=rows,events=events),indent=2),encoding='utf-8')
