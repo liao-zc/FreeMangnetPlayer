@@ -14,6 +14,7 @@ data class IptvChannel(
     val id: String,
     val legacyId: String = ""
 )
+data class IptvWatch(val channel: IptvChannel, val watchedAt: Long)
 
 object IptvSession {
     @Volatile var channels: List<IptvChannel> = emptyList()
@@ -24,6 +25,27 @@ object IptvStore {
     const val IPTV_ORG_URL = "https://iptv-org.github.io/iptv/index.m3u"
     private const val PREFS = "iptv-player"
     private const val FAVORITE_ROWS = "favorite-channels"
+    private const val WATCH_ROWS = "watch-history"
+
+    fun watchHistory(context: Context): List<IptvWatch> = runCatching {
+        val rows = JSONArray(context.getSharedPreferences(PREFS, 0).getString(WATCH_ROWS, "[]"))
+        buildList { for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { row ->
+            val channel = row.toChannel()
+            if (channel.url.startsWith("http://") || channel.url.startsWith("https://")) add(IptvWatch(channel, row.optLong("watchedAt")))
+        } }.sortedByDescending { it.watchedAt }
+    }.getOrDefault(emptyList())
+
+    fun recordWatch(context: Context, channel: IptvChannel) {
+        val rows = (watchHistory(context).filterNot { it.channel.id == channel.id } + IptvWatch(channel, System.currentTimeMillis()))
+            .sortedByDescending { it.watchedAt }.take(100)
+        val json = JSONArray(); rows.forEach { json.put(it.channel.toJson().put("watchedAt", it.watchedAt)) }
+        context.getSharedPreferences(PREFS, 0).edit().putString(WATCH_ROWS, json.toString()).apply()
+    }
+
+    fun removeWatchHistory(context: Context, ids: Set<String>) {
+        val rows = JSONArray(); watchHistory(context).filterNot { it.channel.id in ids }.forEach { rows.put(it.channel.toJson().put("watchedAt", it.watchedAt)) }
+        context.getSharedPreferences(PREFS, 0).edit().putString(WATCH_ROWS, rows.toString()).apply()
+    }
 
     fun sources(context: Context): List<IptvSource> {
         val prefs = context.getSharedPreferences(PREFS, 0)
@@ -124,4 +146,5 @@ object IptvStore {
     }
 
     private fun IptvChannel.toJson() = JSONObject().put("id", id).put("legacyId", legacyId).put("name", name).put("url", url).put("group", group).put("logo", logo)
+    private fun JSONObject.toChannel() = IptvChannel(optString("name"), optString("url"), optString("group", "其他"), optString("logo"), optString("id"), optString("legacyId"))
 }

@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
@@ -41,6 +43,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
@@ -324,7 +327,7 @@ class MainActivity : ComponentActivity() {
                                 NavigationBarItem(selected = selectedTab == "下载", onClick = { selectedTab = "下载"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("下载") })
                                 NavigationBarItem(selected = selectedTab == "收藏", onClick = { selectedTab = "收藏"; reloadLibrary() }, icon = { Icon(Icons.Default.Bookmarks, null) }, label = { Text("收藏") })
                             }
-                            NavigationBarItem(
+                            if (!magnetSection) NavigationBarItem(
                                 selected = false,
                                 onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
                                 icon = { Icon(Icons.Default.Settings, contentDescription = null) },
@@ -357,8 +360,8 @@ class MainActivity : ComponentActivity() {
                             "搜索结果" -> SearchResultsScreen(
                                 page = pageNumber,
                                 totalPages=sourcePages,
-                                onJump={ number -> changePage(number,pageUrls[number].orEmpty()) },
                                 knownPages=pageUrls.keys.toSet(),
+                                onJump={ number -> changePage(number,pageUrls[number].orEmpty()) },
                                 nextAvailable = nextPage.isNotBlank(),
                                 onPrevious = { changePage(pageNumber - 1, pageUrls[pageNumber - 1].orEmpty()) },
                                 onNext = { changePage(pageNumber + 1, nextPage) },
@@ -735,56 +738,75 @@ private fun SearchResultsScreen(
     onParse: (MagnetResult) -> Unit, onDownload: (MagnetResult) -> Unit
 ) {
     val context = LocalContext.current
-    var localPage by remember(page,keyword) { mutableIntStateOf(1) }
-    var jump by remember { mutableStateOf("") };var jumpError by remember { mutableStateOf("") }
-    var localJump by remember(page) { mutableStateOf("") }
-    var jumpDialog by remember { mutableStateOf("") }
-    val localPages=((results.size+19)/20).coerceAtLeast(1);val shown=localPage.coerceAtMost(localPages)
-    val list=androidx.compose.foundation.lazy.rememberLazyListState()
-    LaunchedEffect(shown,page) { list.scrollToItem(0) }
-    Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(12.dp)) {
-        Row(verticalAlignment=Alignment.CenterVertically) {
-            TextButton(onClick=onBack) { Text("‹ 返回") };Column { Text("搜索结果",style=MaterialTheme.typography.titleLarge);Text(keyword,style=MaterialTheme.typography.bodySmall) }
+    var sortMenu by remember { mutableStateOf(false) }
+    var sortMode by remember(keyword, engine) { mutableStateOf("匹配度") }
+    var jumpDialog by remember { mutableStateOf(false) }
+    var jumpPage by remember { mutableStateOf("") }
+    var jumpError by remember { mutableStateOf("") }
+    val list = androidx.compose.foundation.lazy.rememberLazyListState()
+    val sortedResults = remember(results.toList(), sortMode) {
+        when (sortMode) {
+            "时间" -> results.sortedWith(compareByDescending<MagnetResult> { parsePublishedDate(it.publishedAt) }.thenByDescending { it.title.length })
+            "热度" -> results.sortedWith(compareByDescending<MagnetResult> { parseHeat(it.heat) }.thenBy { it.title })
+            else -> results.sortedWith(compareByDescending<MagnetResult> { item -> keyword.lowercase().split(' ').count { word -> word.isNotBlank() && item.title.lowercase().contains(word) } }.thenByDescending { it.title.length })
         }
-        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
-            TextButton(onClick=onPrevious,enabled=page>1) { Text("上一页") }
-            Text(if(totalPages>0) "第 $page / $totalPages 页" else "第 $page 页 · 已发现 ${knownPages.maxOrNull() ?: page} 页",style=MaterialTheme.typography.bodySmall)
-            TextButton(onClick=onNext,enabled=nextAvailable) { Text("下一页") }
-            TextButton(onClick={jumpDialog="网站"},modifier=Modifier.semantics { contentDescription="跳转网站页" }) { Text("跳页") }
+    }
+    LaunchedEffect(page, keyword) { list.scrollToItem(0) }
+    Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(horizontal = 12.dp, vertical = 6.dp)) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text("$keyword · 第 $page 页${if (totalPages > 0) " / $totalPages" else ""}", style = MaterialTheme.typography.bodySmall,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
+            Box {
+                IconButton(onClick = { sortMenu = true }, modifier = Modifier.semantics { contentDescription = "排序：$sortMode" }) { Icon(Icons.Default.Sort, "排序") }
+                DropdownMenu(expanded = sortMenu, onDismissRequest = { sortMenu = false }) {
+                    listOf("匹配度", "时间", "热度").forEach { option -> DropdownMenuItem(
+                        text = { Text(if (sortMode == option) "✓ $option" else option) }, onClick = { sortMode = option; sortMenu = false }) }
+                }
+            }
         }
-        if(state=="loading" || message=="搜索中") { LinearProgressIndicator(Modifier.fillMaxWidth());Text("搜索中") }
-        if(state in listOf("error","timeout") || message=="搜索未完成") Text("搜索未完成",color=MaterialTheme.colorScheme.error)
-        if(results.isNotEmpty()) {
-            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
-                TextButton(onClick={localPage=shown-1},enabled=shown>1) { Text("前 20 条") }
-                Text("结果 $shown / $localPages 页 · ${results.size} 条",style=MaterialTheme.typography.bodySmall)
-                TextButton(onClick={localPage=shown+1},enabled=shown<localPages) { Text("后 20 条") }
-                TextButton(onClick={jumpDialog="结果"},modifier=Modifier.semantics { contentDescription="跳转结果页" }) { Text("跳页") }
+        if (state == "loading" || message == "搜索中") LinearProgressIndicator(Modifier.fillMaxWidth())
+        if (state in listOf("error", "timeout") || message == "搜索未完成") Text("搜索未完成", color = MaterialTheme.colorScheme.error)
+        if (results.isNotEmpty()) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                IconButton(onClick = onPrevious, enabled = page > 1, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.ArrowBack, "上一页") }
+                Text("${if (totalPages > 0) "$page / $totalPages" else "第 $page"} 页", style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转页面；当前第 $page 页" })
+                IconButton(onClick = onNext, enabled = nextAvailable, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
             }
-            LazyColumn(Modifier.weight(1f),state=list,verticalArrangement=Arrangement.spacedBy(4.dp)) {
-                items(results.drop((shown-1)*20).take(20),key={it.magnet}) { item -> MagnetResultCard(item,onParse,onDownload) }
+            LazyColumn(Modifier.weight(1f), state = list, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                items(sortedResults, key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
             }
-        } else if(state!="loading") {
-            Text(if(state=="empty") "没有搜索结果" else "搜索未完成",Modifier.padding(16.dp))
-            Button(onClick=onRetry) { Text("重试搜索") };OutlinedButton(onClick=onBack) { Text("返回搜索") }
-        } else TextButton(onClick=onCancel) { Text("取消搜索并返回") }
+        } else if (state != "loading") {
+            Text(if (state == "empty") "没有搜索结果" else "搜索未完成", Modifier.padding(16.dp))
+            Button(onClick = onRetry) { Text("重试搜索") }
+        } else TextButton(onClick = onCancel) { Text("取消搜索并返回") }
     }
-    if(jumpDialog.isNotEmpty()) {
-        val requester=remember { androidx.compose.ui.focus.FocusRequester() }
-        val keyboard=androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
-        LaunchedEffect(jumpDialog) { delay(100);requester.requestFocus();keyboard?.show() }
-        AlertDialog(onDismissRequest={jumpDialog=""},title={Text(if(jumpDialog=="网站") "跳转网站页" else "跳转结果页")},text={Column {
-            OutlinedTextField(if(jumpDialog=="网站")jump else localJump,{value -> if(jumpDialog=="网站")jump=value.filter(Char::isDigit).take(6) else localJump=value.filter(Char::isDigit).take(6)},
-                label={Text(if(jumpDialog=="网站") "输入网站页码" else "跳转结果页（1–$localPages）")},singleLine=true,modifier=Modifier.focusRequester(requester),keyboardOptions=KeyboardOptions(keyboardType=androidx.compose.ui.text.input.KeyboardType.Number))
-            if(jumpError.isNotEmpty())Text(jumpError)
-        }},confirmButton={TextButton(onClick={
-            if(jumpDialog=="网站") { val n=jump.toIntOrNull();if(n!=null && n in knownPages) {onJump(n);jumpDialog="";jumpError=""} else jumpError="尚未取得该页地址" }
-            else {val n=localJump.toIntOrNull();if(n!=null && n in 1..localPages) {localPage=n;jumpDialog="";jumpError=""} else jumpError="页码需为 1–$localPages"}
-        }) {Text("跳转")}},dismissButton={TextButton(onClick={jumpDialog=""}) {Text("取消")}})
+    if (jumpDialog) {
+        val requester = remember { androidx.compose.ui.focus.FocusRequester() }
+        val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+        LaunchedEffect(Unit) { delay(100); requester.requestFocus(); keyboard?.show() }
+        AlertDialog(onDismissRequest = { jumpDialog = false }, title = { Text("跳转搜索页") },
+            text = { Column {
+                OutlinedTextField(jumpPage, { jumpPage = it.filter(Char::isDigit).take(6) }, label = { Text("输入页码") }, singleLine = true,
+                    modifier = Modifier.focusRequester(requester), keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
+                if (jumpError.isNotBlank()) Text(jumpError, color = MaterialTheme.colorScheme.error)
+                Text("可跳转已发现页面：${knownPages.sorted().joinToString().ifBlank { "暂无" }}", style = MaterialTheme.typography.bodySmall)
+            } },
+            confirmButton = { TextButton(onClick = {
+                val target = jumpPage.toIntOrNull()
+                if (target != null && target in knownPages) { onJump(target); jumpDialog = false }
+                else jumpError = "该页地址尚未发现，请先用上一页或下一页浏览"
+            }) { Text("跳转") } },
+            dismissButton = { TextButton(onClick = { jumpDialog = false }) { Text("取消") } })
     }
-
 }
 
+private fun parseHeat(value: String): Double = Regex("[0-9]+(?:\\.[0-9]+)?").find(value)?.value?.toDoubleOrNull() ?: -1.0
+private fun parsePublishedDate(value: String): Long = runCatching {
+    val m = Regex("(20\\d{2})[-/.年](\\d{1,2})[-/.月](\\d{1,2})").find(value) ?: return@runCatching 0L
+    val (y, mo, d) = m.destructured
+    java.time.LocalDate.of(y.toInt(), mo.toInt(), d.toInt()).toEpochDay()
+}.getOrDefault(0L)
 @Composable
 private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit, onDownload: (MagnetResult) -> Unit) {
     val c=androidx.compose.ui.platform.LocalContext.current

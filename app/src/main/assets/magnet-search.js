@@ -33,7 +33,19 @@
       const match=/(?:发布时间|发布日期|发布于|上传时间|添加时间|创建时间|日期|时间)\s*[:：]?\s*((?:19|20)\d{2}[-/.年]\d{1,2}[-/.月]\d{1,2}日?(?:[ T]\d{1,2}:\d{2}(?::\d{2})?)?|刚刚|今天|昨天|前天|\d+\s*(?:分钟|小时|天|周|个月|年)前)/.exec(clean(node.textContent));
       value=match&&match[1];
     }
-    return clean(value).replace(/T(?=\d{2}:)/,' ').replace(/Z$/,' UTC');
+    return resourceDay(value);
+  }
+  function resourceDay(input) {
+    const value=clean(input); if(!value)return '';
+    const date=/(19|20)\d{2}[-/.年](\d{1,2})[-/.月](\d{1,2})/.exec(value);
+    if(date){const year=/(?:19|20)\d{2}/.exec(value)?.[0]||'';return `${year}-${String(date[2]).padStart(2,'0')}-${String(date[3]).padStart(2,'0')}`;}
+    const now=new Date(), relative=/(\d+)\s*(分钟|小时|天|周|个月|年)前/.exec(value);
+    if(/刚刚|今天/.test(value))return now.toISOString().slice(0,10);
+    if(/昨天/.test(value))now.setDate(now.getDate()-1);
+    else if(/前天/.test(value))now.setDate(now.getDate()-2);
+    else if(relative){const n=+relative[1],unit=relative[2];if(unit==='分钟'||unit==='小时'){}else if(unit==='天')now.setDate(now.getDate()-n);else if(unit==='周')now.setDate(now.getDate()-7*n);else if(unit==='个月')now.setMonth(now.getMonth()-n);else now.setFullYear(now.getFullYear()-n);}
+    else return value;
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   }
   function details(node, uri) {
     const chunks=[];if(node){const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);let part;while((part=walker.nextNode()))if(!part.parentElement.closest('script,style,noscript'))chunks.push(part.textContent);}
