@@ -53,7 +53,10 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
 
     init {
         val media = Media(library, stream.uri)
-        media.setHWDecoderEnabled(false, false)
+        // High-resolution HEVC (including Dolby Vision releases) is too costly
+        // to decode in software on many Android TV/phone CPUs. Prefer MediaCodec
+        // and let LibVLC fall back itself when the device lacks a compatible one.
+        media.setHWDecoderEnabled(true, false)
         decoder.media = media; media.release()
         decoder.setEventListener { event ->
             lastEvent = event.type.toString()

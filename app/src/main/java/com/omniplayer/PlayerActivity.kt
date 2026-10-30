@@ -393,15 +393,29 @@ class PlayerActivity : ComponentActivity() {
         qualityHeight = 0
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
         if (!realMedia && MediaFormats.shouldRetryWithSoftware(file.path)) {
-            window.decorView.postDelayed({
-                if (!isDestroyed && player === media && task.renderedFrameAt == 0L) {
-                    savedPosition = media.currentPosition
-                    releasePlayer()
-                    playerMessage = "设备解码器尚未渲染画面，正在切换兼容解码器…"
-                    startPlayback(task, file, forceSoftware = true)
-                }
-            }, 8_000)
+            scheduleSoftwareFallback(media, task, file, android.os.SystemClock.elapsedRealtime())
         }
+    }
+    private fun scheduleSoftwareFallback(media: ExoPlayer, task: TorrentTask, file: TaskFile, startedAt: Long, firstPieceAt: Long = 0L) {
+        window.decorView.postDelayed({
+            if (isDestroyed || player !== media || task.renderedFrameAt != 0L) return@postDelayed
+            val firstPieceVerified = synchronized(task.nativeLock) {
+                val handle = task.handle?.takeIf { it.isValid }
+                val info = handle?.torrentFile()
+                if (handle == null || info == null || info.pieceLength() <= 0) false
+                else handle.havePiece((info.files().fileOffset(file.index) / info.pieceLength()).toInt())
+            }
+            val now = android.os.SystemClock.elapsedRealtime()
+            val verifiedAt = if (firstPieceVerified) firstPieceAt.takeIf { it > 0L } ?: now else 0L
+            if (verifiedAt > 0L && now - verifiedAt >= 15_000L) {
+                savedPosition = media.currentPosition
+                releasePlayer()
+                playerMessage = "设备硬件解码器未输出首帧，正在尝试兼容解码…"
+                startPlayback(task, file, forceSoftware = true)
+            } else if (now - startedAt < 180_000L) {
+                scheduleSoftwareFallback(media, task, file, startedAt, verifiedAt)
+            }
+        }, 2_000)
     }
     private fun openStored(target: TorrentTask, file: TaskFile) {
         val current = task ?: return
