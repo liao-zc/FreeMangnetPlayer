@@ -188,26 +188,28 @@ object TorrentTasks {
         if (!initialized) return
         trimCaches()
         if (!serviceRunning) return
-        var active = tasks.values.count { (it.engine != null || it.job?.isActive == true) && !it.queued && !it.paused && !it.complete && !it.cancelled }
-        val limit = SettingsStore.maxDownloads(context)
-        if (active > limit) {
-            for (task in tasks.values.filter { (it.engine != null || it.job?.isActive == true) && !it.queued && !it.paused && !it.complete && !it.cancelled }.sortedBy { it.viewers > 0 }) {
-                if (active <= limit) break
-                task.queued = true; task.engine?.pause(); task.status = "排队中：并发数量已调整"; active--
+        for (download in listOf(true, false)) {
+            var active = TaskLanePolicy.activeCount(tasks.values, download)
+            val limit = if (download) SettingsStore.maxDownloads(context) else SettingsStore.maxCaches(context)
+            if (active > limit) {
+                for (task in tasks.values.filter { it.download == download && TaskLanePolicy.active(it) }.sortedBy { it.viewers > 0 }) {
+                    if (active <= limit) break
+                    task.queued = true; task.engine?.pause(); task.status = "排队中：并发数量已调整"; active--
+                }
             }
-        }
-        for (task in tasks.values.sortedByDescending { it.viewers > 0 }) {
-            if (task.cancelled || task.stopping || task.clearing || task.paused || task.moving) continue
-            if (task.engine != null) {
-                if (task.queued && (active < limit || task.complete)) { task.queued = false; resumeEngine(task); if (!task.complete) active++ }
-                continue
+            for (task in tasks.values.filter { it.download == download }.sortedByDescending { it.viewers > 0 }) {
+                if (task.cancelled || task.stopping || task.clearing || task.paused || task.moving) continue
+                if (task.engine != null) {
+                    if (task.queued && (active < limit || task.complete)) { task.queued = false; resumeEngine(task); if (!task.complete) active++ }
+                    continue
+                }
+                if (task.job?.isActive == true || (task.complete && task.viewers == 0)) continue
+                if (active >= limit && !task.complete) { task.queued = true; task.status = "排队中：已达到该类任务数量 $limit"; continue }
+                task.queued = false
+                task.status = "正在连接种子并获取文件信息…"
+                if (!task.complete) active++
+                start(task)
             }
-            if (task.job?.isActive == true || (task.complete && task.viewers == 0)) continue
-            if (active >= limit && !task.complete) { task.queued = true; task.status = "排队中：已达到最大同时下载数量 $limit"; continue }
-            task.queued = false
-            task.status = "正在连接种子并获取文件信息…"
-            if (!task.complete) active++
-            start(task)
         }
         persist()
     }
@@ -552,8 +554,9 @@ object TorrentTasks {
         if (task.clearing) return
         task.cancelled = false; task.paused = false
         if (task.stopping || task.moving) { task.queued = true; persist(); return }
-        val active = tasks.values.count { it !== task && (it.engine != null || it.job?.isActive == true) && !it.paused && !it.queued && !it.complete && !it.cancelled }
-        task.queued = !task.complete && active >= SettingsStore.maxDownloads(context)
+        val active = TaskLanePolicy.activeCount(tasks.values.filter { it !== task }, task.download)
+        val limit = if (task.download) SettingsStore.maxDownloads(context) else SettingsStore.maxCaches(context)
+        task.queued = !task.complete && active >= limit
         if (!task.queued) resumeEngine(task)
         schedule(); persist()
     }

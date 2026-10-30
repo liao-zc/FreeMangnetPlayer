@@ -11,9 +11,9 @@ class Handler(BaseHTTPRequestHandler):
         u=urllib.parse.urlparse(self.path);p=int(urllib.parse.parse_qs(u.query).get('page',['1'])[0])
         if u.path.startswith('/detail/'):
             title,magnet=details[int(u.path.rsplit('/',1)[-1])]
-            body='<title>'+title+'</title><span>1.5MB 剧集 热度：9.0</span><a href="'+html.escape(magnet,quote=True)+'">查看详情</a>'
+            body='<title>'+title+'</title><time datetime=2025-03-01>2025-03-01</time><span>1.5MB 剧集 热度：9.0</span><a href="'+html.escape(magnet,quote=True)+'">查看详情</a>'
         else:
-            body='<title>搜索测试页</title><div>共3页</div><nav class="pagination">'+''.join('<a href="/search?page='+str(n)+'">'+str(n)+'</a>' for n in [1,2,3])+'</nav>' + ''.join('<article><h2>'+title+'</h2><span>2.3GB 电影 热度：8.5</span><a href="'+html.escape(magnet,quote=True)+'">查看详情</a></article>' for title,magnet in pages[p])
+            body='<title>搜索测试页</title><div>共3页</div><nav class="pagination">'+''.join('<a href="/search?page='+str(n)+'">'+str(n)+'</a>' for n in [1,2,3])+'</nav>' + ''.join('<article><h2>'+title+'</h2><time datetime=2026-10-29>2026-10-29</time><span>2.3GB 电影 热度：8.5</span><a href="'+html.escape(magnet,quote=True)+'">查看详情</a></article>' for title,magnet in pages[p])
             if p==1:body+=''.join('<article><a href="/detail/'+str(i)+'">'+d[0]+'</a></article>' for i,d in enumerate(details))
             if p<3:body+='<nav class="pagination"><a rel="next" href="/search?page='+str(p+1)+'">下一页</a></nav>'
         body+='<footer>页面总计 34.03GB</footer>'

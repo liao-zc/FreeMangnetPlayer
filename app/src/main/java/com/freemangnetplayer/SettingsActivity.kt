@@ -68,9 +68,9 @@ class SettingsActivity : ComponentActivity() {
                         getExternalFilesDirs(null).filterNotNull().forEach { base ->
                             OutlinedButton(onClick = { download = "${base.absolutePath}/MyDownloads"; cache = "${base.absolutePath}/MyCache" }, modifier = Modifier.fillMaxWidth()) { Text("使用 ${base.absolutePath}") }
                         }
-                        OutlinedTextField(downloads, { downloads = it }, label = { Text("最大同时下载数量（1–8，含缓存）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                        OutlinedTextField(caches, { caches = it }, label = { Text("最大缓存任务数量（1–100）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                        Text("超出并发数的任务排队；缓存上限限制新增主动缓存。切换资源会清理临时播放数据，主动缓存和下载文件保留。", style = MaterialTheme.typography.bodySmall)
+                        OutlinedTextField(downloads, { downloads = it }, label = { Text("最大同时下载数量（1–8，不含缓存）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                        OutlinedTextField(caches, { caches = it }, label = { Text("最大缓存任务数量（1–100，单独计算）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                        Text("下载和缓存分别计算、分别排队；缓存上限也限制新增主动缓存。切换资源会清理临时播放数据，主动缓存和下载文件保留。", style = MaterialTheme.typography.bodySmall)
                         Text("搜索引擎", style = MaterialTheme.typography.titleMedium)
                         Box {
                             OutlinedButton(onClick = { menu = true }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("默认搜索引擎：$engine") }

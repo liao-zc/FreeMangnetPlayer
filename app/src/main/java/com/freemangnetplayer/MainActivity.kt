@@ -61,7 +61,7 @@ data class SearchProvider(
 )
 
 
-private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "视频", val heat: String = "")
+private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "视频", val heat: String = "", val publishedAt: String = "")
 
 val builtInProviders = listOf(
     SearchProvider("clg.im", "https://clg.im/"),
@@ -225,7 +225,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(searchState, results.toList(), pageNumber, nextPage, sourcePages, searchComplete) {
                     if (debug && searchTrigger > 0) {
                         val rows = JSONArray()
-                        results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet).put("bytes",it.bytes).put("sizeText",it.sizeText).put("type",it.type).put("heat",it.heat)) }
+                        results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet).put("bytes",it.bytes).put("sizeText",it.sizeText).put("type",it.type).put("heat",it.heat).put("publishedAt",it.publishedAt)) }
                         java.io.File(filesDir, "search-check.json").writeText(JSONObject().put("engine", activeProvider)
                             .put("page", pageNumber).put("totalPages",sourcePages).put("complete",searchComplete).put("next", nextPage).put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
                     }
@@ -374,7 +374,7 @@ class MainActivity : ComponentActivity() {
                                         if(generation==searchTrigger && selectedTab=="搜索结果" && !searchComplete) {
                                             val link=normalizeMagnetUri(row.optString("source"))
                                             val index=results.indexOfFirst { it.magnet==link }
-                                            if(index>=0) { val old=results[index];results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","视频"),heat=row.optString("heat")) }
+                                            if(index>=0) { val old=results[index];results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","视频"),heat=row.optString("heat"),publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt }) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(debug) java.io.File(filesDir,"search-scan.json").writeText(row.toString())
@@ -735,6 +735,7 @@ private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit
         Column(Modifier.fillMaxWidth().padding(horizontal=10.dp,vertical=6.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
             Text(item.title.ifBlank { "待获取文件名" },style=textStyle)
             Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "等待元数据大小" }} · ${item.type} · 热度 ${item.heat.ifBlank { "未提供评分" }}",style=textStyle)
+            Text("资源时间："+item.publishedAt.ifBlank { "来源未提供" },style=textStyle)
             Row {
                 TextButton(onClick={onParse(item)}) { Text("播放",style=textStyle) }
                 TextButton(onClick={onDownload(item)}) { Text("下载 / 缓存",style=textStyle) }
