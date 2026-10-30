@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.draw.shadow
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -46,6 +47,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 
 private val iptvTeal = Color(0xFF087F79)
 
@@ -222,20 +231,47 @@ class IptvPlayerActivity : ComponentActivity() {
         val channelId = intent.getStringExtra("channel-id").orEmpty()
         setContent {
             AppTheme(colorScheme = darkColorScheme(primary = iptvTeal)) {
-                var player by remember { mutableStateOf<androidx.media3.exoplayer.ExoPlayer?>(null) }
+                var player by remember { mutableStateOf<ExoPlayer?>(null) }
                 var favorite by remember { mutableStateOf(channelId in IptvStore.favorites(this@IptvPlayerActivity)) }
                 var fullScreen by remember { mutableStateOf(false) }
-                DisposableEffect(url) {
-                    val exo = androidx.media3.exoplayer.ExoPlayer.Builder(this@IptvPlayerActivity).build()
-                    exo.setMediaItem(androidx.media3.common.MediaItem.fromUri(url)); exo.prepare(); exo.playWhenReady = true; player = exo
-                    onDispose { exo.release(); player = null }
+                var playbackError by remember { mutableStateOf("") }
+                var retry by remember { mutableIntStateOf(0) }
+                var buffering by remember { mutableStateOf(true) }
+                DisposableEffect(url, retry) {
+                    val http = DefaultHttpDataSource.Factory().setUserAgent("Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36")
+                    val exo = ExoPlayer.Builder(this@IptvPlayerActivity).setMediaSourceFactory(DefaultMediaSourceFactory(http)).build()
+                    val listener = object : Player.Listener {
+                        override fun onPlayerError(error: PlaybackException) {
+                            playbackError = error.localizedMessage ?: "频道流无法播放"
+                            buffering = false
+                        }
+                        override fun onPlaybackStateChanged(state: Int) {
+                            buffering = state == Player.STATE_BUFFERING || state == Player.STATE_IDLE
+                            if (state == Player.STATE_READY) playbackError = ""
+                        }
+                    }
+                    exo.addListener(listener)
+                    player = exo
+                    playbackError = ""; buffering = true
+                    val item = MediaItem.Builder().setUri(url).apply {
+                        if (url.substringBefore('?').substringBefore('#').endsWith(".m3u8", true)) setMimeType(MimeTypes.APPLICATION_M3U8)
+                    }.build()
+                    exo.setMediaItem(item); exo.prepare(); exo.playWhenReady = true
+                    onDispose { exo.removeListener(listener); exo.release(); if (player === exo) player = null }
                 }
                 BackHandler { finish() }
                 Box(Modifier.fillMaxSize().background(Color.Black)) {
                     AndroidView(factory = { context ->
-                        androidx.media3.ui.PlayerView(context).apply { useController = true; setShowBuffering(androidx.media3.ui.PlayerView.SHOW_BUFFERING_ALWAYS) }
+                        PlayerView(context).apply { useController = true; setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS) }
                     }, update = { it.player = player }, modifier = Modifier.fillMaxSize())
-                    Row(Modifier.align(Alignment.TopCenter).fillMaxWidth().background(Color(0x66000000)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (playbackError.isNotBlank()) Surface(Modifier.align(Alignment.Center).padding(28.dp), color = Color(0xEE202124), shape = RoundedCornerShape(16.dp)) {
+                        Column(Modifier.padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("此频道暂时无法播放", color = Color.White, style = MaterialTheme.typography.titleMedium)
+                            Text(playbackError, color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
+                            Button(onClick = { retry++ }) { Text("重试") }
+                        }
+                    } else if (buffering) CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
+                    Row(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 38.dp).fillMaxWidth().background(Color(0xCC202124), RoundedCornerShape(18.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { finish() }) { Icon(Icons.Default.ArrowBack, "返回", tint = Color.White) }
                         Text(channelName, Modifier.weight(1f), color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
                         IconButton(onClick = { IptvStore.setFavorite(this@IptvPlayerActivity, IptvChannel(channelName, url, intent.getStringExtra("group").orEmpty(), intent.getStringExtra("channel-logo").orEmpty(), channelId), !favorite); favorite = !favorite }) {

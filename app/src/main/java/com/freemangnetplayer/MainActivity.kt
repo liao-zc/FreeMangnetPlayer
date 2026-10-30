@@ -156,6 +156,15 @@ class MainActivity : ComponentActivity() {
                     playbacks.addAll(LibraryStore.readPlaybacks(this@MainActivity))
                 }
 
+                fun syncSearchResultSizes() {
+                    results.forEachIndexed { index, result ->
+                        if (result.bytes > 0L) return@forEachIndexed
+                        val hash = Regex("(?i)xt=urn:btih:([0-9a-f]{40})").find(result.magnet)?.groupValues?.get(1)?.lowercase() ?: return@forEachIndexed
+                        val total = TorrentTasks.tasks[hash]?.files?.sumOf { it.size } ?: 0L
+                        if (total > 0L) results[index] = result.copy(bytes = total, sizeText = formatLibraryBytes(total))
+                    }
+                }
+
                 DisposableEffect(lifecycleOwner) {
                     val observer = LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) {
@@ -172,7 +181,7 @@ class MainActivity : ComponentActivity() {
                     onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                 }
 
-                LaunchedEffect(Unit) { while (true) { reloadLibrary(); delay(1500) } }
+                LaunchedEffect(Unit) { while (true) { reloadLibrary(); syncSearchResultSizes(); delay(1500) } }
 
                 LaunchedEffect(searchTrigger) {
                     if (searchTrigger == 0) return@LaunchedEffect
@@ -396,7 +405,7 @@ class MainActivity : ComponentActivity() {
                                         if(generation==searchTrigger && selectedTab=="搜索结果" && !searchComplete) {
                                             val link=normalizeMagnetUri(row.optString("source"))
                                             val index=results.indexOfFirst { it.magnet==link }
-                                            if(index>=0) { val old=results[index];results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","视频"),heat=row.optString("heat"),publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt }) }
+                                            if(index>=0) { val old=results[index];val foundBytes=row.optLong("bytes");val foundSize=row.optString("sizeText");results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=foundBytes.takeIf { it>0L } ?: old.bytes,sizeText=foundSize.takeIf { it.isNotBlank() } ?: old.sizeText,type=row.optString("type","视频"),heat=row.optString("heat").ifBlank { old.heat },publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt }) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(debug) java.io.File(filesDir,"search-scan.json").writeText(row.toString())
@@ -756,7 +765,7 @@ private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit
     Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=Color.White)) {
         Column(Modifier.fillMaxWidth().padding(horizontal=10.dp,vertical=6.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
             Text(item.title.ifBlank { "待获取文件名" },style=textStyle)
-            Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "等待元数据大小" }} · ${item.type} · 热度 ${item.heat.ifBlank { "未提供评分" }}",style=textStyle)
+            Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "搜索源未提供大小；解析后读取" }} · ${item.type} · 热度 ${item.heat.ifBlank { "未提供评分" }}",style=textStyle)
             Text("资源时间："+item.publishedAt.ifBlank { "来源未提供" },style=textStyle)
             Row {
                 TextButton(onClick={onParse(item)}) { Text("播放",style=textStyle) }

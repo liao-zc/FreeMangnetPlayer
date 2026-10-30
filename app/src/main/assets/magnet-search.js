@@ -37,9 +37,10 @@
   }
   function details(node, uri) {
     const chunks=[];if(node){const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);let part;while((part=walker.nextNode()))if(!part.parentElement.closest('script,style,noscript'))chunks.push(part.textContent);}
-    const text=clean(chunks.join(' ')).replace(/magnet:\?[^\s<>]+/ig,'').replace(/https?:\/\/[^\s<>]+/ig,'');
+    const attributes=node?[...node.querySelectorAll('[data-size],[data-filesize],[data-file-size],[aria-label],[title]')].map(x=>[x.getAttribute('data-size'),x.getAttribute('data-filesize'),x.getAttribute('data-file-size'),x.getAttribute('aria-label'),x.getAttribute('title')].filter(Boolean).join(' ')).join(' '):'';
+    const text=clean(chunks.join(' ')+' '+attributes).replace(/magnet:\?[^\s<>]+/ig,'').replace(/https?:\/\/[^\s<>]+/ig,'');
     const occurrences=node?(node.innerHTML.match(/magnet:\?/ig)||[]).length:0;
-    const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=occurrences>1?null:/(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|TiB|GB|MB|KB|TB|B|\u5b57\u8282)(?![a-z0-9])/i.exec(text);
+    const m=/(?:[?&])xl=(\d+)/i.exec(uri), labeled=/(?:\u5927\u5c0f|size|file\s*size|\u6587\u4ef6\u5927\u5c0f)\s*[:：]?\s*(\d+(?:[.,]\d+)?)\s*(TiB|GiB|MiB|KiB|TB|GB|MB|KB|B|T|G|M|K|\u5b57\u8282)(?![a-z0-9])/i.exec(text), generic=/(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*(TiB|GiB|MiB|KiB|TB|GB|MB|KB|B|T|G|M|K|\u5b57\u8282)(?![a-z0-9])/i.exec(text), sizeMatch=labeled||(occurrences<=2?generic:null);
     let bytes=m?+m[1]:0, sizeText='';
     if(sizeMatch){const unit=sizeMatch[2].toUpperCase();const power=unit.startsWith('T')?4:unit.startsWith('G')?3:unit.startsWith('M')?2:unit.startsWith('K')?1:0;
       sizeText=sizeMatch[1].replace(',','.')+sizeMatch[2];if(!bytes)bytes=Math.round(parseFloat(sizeMatch[1].replace(',','.'))*Math.pow(unit.includes('I')?1024:1000,power));}
@@ -61,7 +62,8 @@
   function parse(doc, fallback) {
     [...doc.querySelectorAll('a[href],[data-magnet],input[value],textarea')].forEach(a=>{
       const uri=a.getAttribute('data-magnet')||a.getAttribute('href')||a.value||'';
-      const row=a.closest('article,.result,.search-item,.item,li,tr,.card,.panel');
+      let row=a.closest('article,.result,.search-item,.item,li,tr,.card,.panel');
+      if(!row){let parent=a;for(let depth=0;depth<6&&parent.parentElement;depth++){parent=parent.parentElement;const text=clean(parent.textContent);const magnets=parent.querySelectorAll('a[href^="magnet:"],[data-magnet]').length;if(text.length<2400&&magnets<=2&&/(?:\u5927\u5c0f|size|file\s*size|\u6587\u4ef6\u5927\u5c0f|\d+(?:[.,]\d+)?\s*(?:TiB|GiB|MiB|KiB|TB|GB|MB|KB)\b)/i.test(text)){row=parent;break;}}}
       const heading=row && row.querySelector('h1,h2,h3,h4,.title,.name,.item-title,.result-title,.search-title');
       const name=[heading && heading.textContent,a.textContent,a.title,fallback,doc!==document?doc.title:''].map(resourceName).find(Boolean)||'';
       emit(uri,name,row || (doc!==document?doc.body:null));
