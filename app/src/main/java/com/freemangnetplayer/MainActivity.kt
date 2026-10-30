@@ -157,8 +157,10 @@ class MainActivity : ComponentActivity() {
                     val observer = LifecycleEventObserver { _, event ->
                         if (event == Lifecycle.Event.ON_RESUME) {
                             reloadLibrary()
+                            if (requestedEngine == null) {
                             selectedName = prefs.getString("search-name", "clg.im") ?: "clg.im"
                             selectedUrl = prefs.getString("search-url", "https://clg.im/") ?: "https://clg.im/"
+                            }
                             customName = prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索"
                             customUrl = prefs.getString("custom-url", "") ?: ""
                         }

@@ -45,9 +45,9 @@
     [...doc.querySelectorAll('a[href],[data-magnet],input[value],textarea')].forEach(a=>{
       const uri=a.getAttribute('data-magnet')||a.getAttribute('href')||a.value||'';
       const row=a.closest('article,.result,.search-item,.item,li,tr,.card,.panel');
-      const heading=row && row.querySelector('h1,h2,h3,h4,.title');
-      const label=clean(a.title||a.textContent);
-      const name=heading?heading.textContent:/^(?:(?:磁力|magnet)(?:下载|链接)?|下载|复制|播放)$/i.test(label)?fallback:label||fallback;
+      const heading=row && row.querySelector('h1,h2,h3,h4,.title,.name,.item-title,.result-title,.search-title');
+      const usable=x=>{const t=clean(x);return /magnet:\?|^https?:|^link_blocked$|^(?:(?:磁力|magnet)(?:下载|链接)?|下载|复制|播放)$/i.test(t)?'':t;};
+      const name=[heading && heading.textContent,a.textContent,a.title,fallback,doc!==document?doc.title:''].map(usable).find(Boolean)||'';
       emit(uri,name,row || (doc!==document?doc.body:null));
     });
     const pattern=/magnet:\?[^"'<>\s]+/ig; let m;

@@ -19,6 +19,7 @@ for i,browser in enumerate(baseline,1):
     text=visible_text()
     assert '查看本页原网页' not in text and '来自' not in text and '正在连接' not in text,text
     screenshot('real-search-app-'+str(i)+'.png')
+    assert s.get('engine')==browser['engine'], 'Search ran with the wrong engine: '+str(s.get('engine'))
     hashes={canonical_hash(r['magnet']) for r in s.get('results',[])}-{None};expected=set(browser['hashes'])
     comparable=not browser.get('error') and s.get('state') in ['results','empty'] and s.get('complete')
     # Empty pages with access challenges are not proof of successful search.
