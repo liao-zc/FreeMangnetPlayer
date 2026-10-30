@@ -44,6 +44,8 @@ text=f'''# FreeMangnetPlayer {v}：15 项需求点检报告
 
 本轮字体、历史记录、分页、播放器信息栏及本地收藏功能有实际测试证据。不限速受控做种测试有效载荷峰值 **{rate:.2f}MB/s**，App 限速值为 0；公网十条资源实际起播 **{passed}/10**，{'达到' if passed>=9 else '**未达到**'} 90% 要求。受控测试不能证明任何公网资源都能维持最低 2MB/s。
 
+受控影片首次起播 {throughput['first_play_seconds']:.2f} 秒，当时已下载 {100*throughput['first_play_state']['downloaded']/throughput['first_play_state']['total']:.1f}%；没有按固定百分比限制起播，但仍须等到所请求的真实分片可读。
+
 ## 按用户编号逐项点检
 
 | 编号 | 要求及修改 | 验证结果与边界 |
