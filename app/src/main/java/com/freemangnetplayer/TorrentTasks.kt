@@ -88,7 +88,7 @@ object TorrentTasks {
     private lateinit var context: Context
     private var initialized = false
     var serviceRunning = false
-    private val trackers = listOf(
+    @Volatile private var trackers = listOf(
         "udp://tracker.opentrackr.org:1337/announce", "https://tracker.tamersunion.org:443/announce",
         "udp://open.stealth.si:80/announce", "udp://tracker.torrent.eu.org:451/announce",
         "udp://exodus.desync.com:6969/announce", "udp://open.demonii.com:1337/announce",
@@ -98,6 +98,19 @@ object TorrentTasks {
         context = c.applicationContext
         if (initialized) return
         initialized = true
+        trackers = (trackers + TrackerDirectory.cached(context)).distinct()
+        scope.launch {
+            val refreshed = withContext(Dispatchers.IO) { TrackerDirectory.refresh(context) }
+            trackers = (trackers + refreshed).distinct().take(56)
+            tasks.values.toList().forEach { task -> synchronized(task.nativeLock) {
+                val handle = task.handle
+                if (handle != null && handle.isValid && !task.cancelled) {
+                    val existing = handle.trackers().map { it.url() }.toSet()
+                    trackers.filterNot { it in existing }.forEach { handle.addTracker(AnnounceEntry(it)) }
+                    if (!task.paused) handle.forceReannounce()
+                }
+            } }
+        }
         val saved = runCatching { JSONArray(SettingsStore.prefs(c).getString("torrent-tasks", "[]")) }.getOrDefault(JSONArray())
         for (i in 0 until saved.length()) runCatching {
             val row = saved.getJSONObject(i)
