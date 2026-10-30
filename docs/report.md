@@ -76,39 +76,27 @@
 
 ### 搜索源 1 对照截图
 
-![独立浏览器 1](screenshots/current/search-browser-1.png)
 
-![App 搜索 1](screenshots/current/search-real-search-app-1.png)
 
 ### 搜索源 2 对照截图
 
-![独立浏览器 2](screenshots/current/search-browser-2.png)
 
-![App 搜索 2](screenshots/current/search-real-search-app-2.png)
 
 ### 搜索源 3 对照截图
 
-![独立浏览器 3](screenshots/current/search-browser-3.png)
 
-![App 搜索 3](screenshots/current/search-real-search-app-3.png)
 
 ### 搜索源 4 对照截图
 
-![独立浏览器 4](screenshots/current/search-browser-4.png)
 
-![App 搜索 4](screenshots/current/search-real-search-app-4.png)
 
 ### 搜索源 5 对照截图
 
-![独立浏览器 5](screenshots/current/search-browser-5.png)
 
-![App 搜索 5](screenshots/current/search-real-search-app-5.png)
 
 ### 搜索源 6 对照截图
 
-![独立浏览器 6](screenshots/current/search-browser-6.png)
 
-![App 搜索 6](screenshots/current/search-real-search-app-6.png)
 
 统计使用唯一磁力哈希集合，不能证明所有网页资源行都对应磁力。浏览器基线取标题含关键词的详情，App 还遍历部分同源其他详情，因此 Pomo 的结果范围偏大；其他源的零结果仍需继续排查访问和详情适配。真实六源一致性尚未通过，不能把额外无关结果视为更好。未把两个访问失败的零结果当成“结果一致”。
 
@@ -284,29 +272,30 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 
 当前报告及截图替换旧版本资料；旧 Git 历史和 Release 保留。Markdown 使用 UTF-8 明文，发布后核对 GitHub 字节和渲染，另提供内嵌图片 HTML。
 
+## 本轮修复与真实验收进展（2026-10-30）
 
-## 正在进行的文件名与公网连接修复（2026-10-30）
+### 文件名、大小和分页：通过受控网页回归
 
-本节为排查记录，十条公网磁力尚未通过边下边播验收。
+[完整运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41002883131) 的 10 项检查全部通过。页面链接文字统一为“查看详情”，页脚为“页面总计 34.03GB”；App 仍显示各资源的真实名称，37 个直接链接各为 2.3GB，2 个详情资源各为 1.5MB。39 条全部取得，无遗漏。网站翻页、每屏 20 条、页码跳转及空页返回均通过。
 
-- 操作文案“查看详情”“查看详细”等不再作为资源名称；优先保留有效网页文件名，缺失时使用磁力 dn。多个磁力共用的页面总大小不再分配给每条结果。
-- 删除添加磁力之前无限等待 DHT 就绪的逻辑，让 Tracker 连接立即启动；DHT 在路由节点可用后继续工作。
-- 使用本机 libtorrent 2.1.1，关闭下载和上传限速，分别测试全部网卡与绑定实际 WLAN。两组客户端通过局域网发现互相连接产生的节点不计为公网有效资源节点；后续诊断关闭局域网发现。
-- 分页回归第一次失败：有效网页文件名被磁力 dn 替代。已恢复网页有效文件名优先并重跑。第一次失败不能记为通过。
-- 最新 Ubuntu 对照种子的 HTTPS Tracker 已返回节点，实际有效数据仍需继续观察。HTTPS 可访问不等于 BT 下载通过。
-- 本轮源码已同步 GitHub；尚未发布新 APK，v0.1.16 的旧测试结果不代表本轮修复已通过。
+原因修复：页面加载过程中的首次扫描可能尚无详情链接；扫描期间不能提前宣布搜索完成。现已等待页面加载完成和所有详情请求结束，再确认搜索完成。
 
-正在执行的回归：[搜索分页](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000403214)、[十条磁力真实播放](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000002632)、[列表与播放功能](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000014234)。
+以下是运行中的实际 App 截图，素材为受控搜索网页，用于验证名称和大小提取，不是公网影片播放截图：
 
-优化依据：[libtorrent 流式分片调度说明](https://www.libtorrent.org/streaming.html)。该说明要求按播放读取位置设置紧急分片 deadline；单纯顺序下载不能保证首个分片被最快节点处理。
+![最新搜索结果第 1 屏](screenshots/current/preferences-local-results-1.png)
+![最新搜索结果第 2 屏](screenshots/current/preferences-local-results-2.png)
+![最新结果页跳转](screenshots/current/preferences-local-jump-page-2.png)
 
+### 十条公网磁力：尚未通过
 
-### 新版引擎评估进展
+删除 DHT 无限等待后的[真实 APK 测试](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000002632) 为 0/10 起播，10 条有效视频数据均为 0；其中 7 条取得元数据。文件列表不能代表收到视频。
 
-独立分支 [improve/modern-bt-engine](https://github.com/liao-zc/FreeMangnetPlayer/tree/improve/modern-bt-engine) 使用 Maven Central 已发布的 libtorrent4j 2.1.0-39，四种 JNI 架构与 Java 版本一致。已适配元数据导出、Tracker 参数及优先级接口；用累计有效接收字节识别下载进展，避免把低于 1KB/s 的下载误判为无进展。
+本机 libtorrent 2.1.1 绑定 WLAN 的约 597 秒测试同样未取得十条资源的元数据和有效数据。三个 DHT 引导入口与两个 UDP Tracker 的直接探测均超时；公开 Ubuntu 对照种子通过 HTTPS Tracker 发现节点并收到 1,572,864 字节。这些结果说明存在可用 BT 路径，同时 UDP 发现入口仍需排查，不能把全部失败直接归因于文件或 APP 限速。
 
-[新版 APK 的十条播放测试](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41001410886) 已通过 assembleDebug，模拟器验收仍在进行。编译通过不代表播放通过，该分支尚未并入 main，也未发布新版本。
+### 新版引擎：仍在修复回归，尚未发布
 
-本机绑定 WLAN 的十条诊断运行约 597 秒：10 条均未取得元数据，视频有效下载字节均为 0。公开 Ubuntu 最新对照种子取得 1,572,864 字节实际数据，证明当前环境存在可用 BT 传输路径，不能直接据此认定十条目标种子无节点。
+[独立分支](https://github.com/liao-zc/FreeMangnetPlayer/tree/improve/modern-bt-engine) 使用 libtorrent4j 2.1.0-39，Java 与四种架构 JNI 同版本，已成功编译和打包。新增不阻塞磁力启动的公共 Tracker 刷新与本地缓存；用累计接收字节判断进展，避免慢速数据被判为停滞。
 
-搜索分页仍漏抓 2 个详情页（37/39），已增加真实过滤异常与工作线程状态诊断并继续重跑，尚未通过本轮完整分页验收。
+受控做种测试发现元数据补充并替换句柄后连接未恢复、有效字节为 0，该回归尚未通过。已改为替换句柄后先经 TCP 重连，无连接时再恢复 uTP，正在[重新测试](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41003279966)。该分支尚未并入 main，新版本 APK 尚未发布。
+
+验收已升级：十条必须全部在文件未下载完时渲染视频，并持续推进播放至少 20 秒。之前“90% 通过”或仅有播放状态的判据不再作为本任务的完成条件。
