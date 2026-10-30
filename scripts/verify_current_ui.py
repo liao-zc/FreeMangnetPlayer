@@ -38,7 +38,7 @@ def main():
     capture.find_and_tap('BD电影首发站')
     capture.require_visible('BD电影首发站', '默认')
     shot('12-search-engine-default.png', ('BD电影首发站', '保存搜索引擎'))
-    capture.adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
+    capture.find_and_tap('返回磁播设置')
     time.sleep(2)
     capture.find_and_tap('保存磁播设置')
     capture.require_visible('磁播设置已保存')
