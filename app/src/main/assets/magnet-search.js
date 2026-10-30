@@ -66,7 +66,7 @@
           clean(a.textContent||a.title).length>0;
       }catch(e){linkErrors.push(String(e));return false;}
     });
-    const urls=[...new Map(links.map(a=>[a.href,a])).values()]; pending=urls.length; info();
+    const urls=[...new Map(links.map(a=>[a.href,a])).values()]; pending=urls.length; linkErrors.push('detail-candidates='+urls.length); info();
     async function worker(){
       while(urls.length){
         const a=urls.shift();visited.add(a.href);const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
@@ -75,7 +75,7 @@
         }catch(_){failed.add(a.href);}finally{clearTimeout(timer);pending--;info();}
       }
     }
-    Promise.all(Array.from({length:6},worker)).finally(()=>{running=false;info();});
+    Promise.all(Array.from({length:6},worker)).then(()=>{running=false;info();},e=>{linkErrors.push('worker:'+String(e));running=false;info();});
   };
   window.__fmpScan();
   const observer=new MutationObserver(()=>window.__fmpScan());
