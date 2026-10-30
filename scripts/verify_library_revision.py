@@ -56,7 +56,7 @@ def entries(key):
     n=next((n for n in prefs() if n.get('name')==key),None);return json.loads(n.text or '[]') if n is not None else []
 def caches():return entries('cache-entries')
 def restart(tab='播放'):
-    adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','open-tab',shlex.quote(tab));time.sleep(3)
+    adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote(tab));time.sleep(3)
 def poll(fn,timeout=30):
     end=time.monotonic()+timeout
     while time.monotonic()<end:
@@ -75,7 +75,7 @@ adb('shell','wm','size','1080x2400');adb('shell','pm','grant',PACKAGE,'android.p
 fixture=json.loads(Path('optimization-fixture.json').read_text())[0]
 episode=next(i for i,f in enumerate(fixture['files']) if f['path'].endswith('Episode-01.mp4'))
 source=fixture['magnet']+'&so='+str(episode)+'&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent'
-adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(source),'--es','mode','play')
+adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(source),'--es','mode','play')
 played=wait(lambda s:s.get('playing') and s.get('position',0)>800)
 assert played['qualityHeight']==0;record('default-original-quality',state=played)
 control('player_quality');require_visible('原画质');screenshot('library-01-quality-options.png');find_and_tap('原画质')

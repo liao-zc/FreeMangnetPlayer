@@ -55,7 +55,7 @@ def tap_exact(label):
     raise AssertionError('Exact action unavailable: '+label)
 
 adb('shell','wm','size','1080x2400')
-adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','open-tab',shlex.quote('门户'))
+adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote('门户'))
 find_and_tap('统一设置');find_and_tap('通用设置');require_visible('显示与字体','小','✓ 标准','大','超大','黑体','宋体','楷体')
 screenshot('preferences-01-font-settings.png');record('display-font-module-and-four-presets')
 find_and_tap('大');find_and_tap('宋体');screenshot('preferences-02-song-large.png')
@@ -67,7 +67,7 @@ adb('shell','pm','clear',PACKAGE);adb('shell','pm','grant',PACKAGE,'android.perm
 fixture=json.loads(Path('optimization-fixture.json').read_text(encoding='utf-8'))[0]
 index=next(i for i,f in enumerate(fixture['files']) if f['path'].endswith('Episode-01.mp4'))
 source=fixture['magnet']+'&so='+str(index)+'&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent'
-adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(source),'--es','mode','play')
+adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(source),'--es','mode','play')
 s=wait(lambda s:s.get('playing') and s.get('duration',0)>0 and s.get('videoHeight',0)>0)
 control('player_favorite');poll(lambda:bool(entries('favorite-entries')));screenshot('preferences-04-filled-favorite.png');record('favorite-heart-adds-current-video')
 control('player_favorite');poll(lambda:not entries('favorite-entries'));record('favorite-heart-second-tap-removes')
@@ -77,7 +77,7 @@ control('player_quality');require_visible('原画质');screenshot('preferences-0
 time.sleep(6);s=state();assert s['duration']>0 and s['videoHeight']>0
 screenshot('preferences-06-media-cache-information.png');record('actual-duration-resolution-size-and-cache-progress',state=s)
 assert entries('history-播放') and entries('history-缓存');record('play-and-cache-history-created')
-adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','open-tab',shlex.quote('收藏'))
+adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote('收藏'))
 find_and_tap('全选');find_and_tap('下载所选');find_and_tap('下载');require_visible('下载任务')
 assert entries('download-entries');assert entries('history-下载');screenshot('preferences-07-selected-favorite-download.png');record('favorite-select-all-download-visible-in-library',entries=entries('download-entries'))
 find_and_tap('播放');find_and_tap('历史记录');require_visible('历史记录','清空搜索记录','清空全部记录')

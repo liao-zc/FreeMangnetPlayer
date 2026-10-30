@@ -40,7 +40,7 @@ def clear_app():
     adb('shell', 'am', 'force-stop', PACKAGE)
     adb('shell', 'pm', 'clear', PACKAGE)
     adb('shell', 'pm', 'grant', PACKAGE, 'android.permission.POST_NOTIFICATIONS')
-    adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.MainActivity')
+    adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/com.omniplayer.MainActivity')
     time.sleep(2)
 
 def close_diagnostic():

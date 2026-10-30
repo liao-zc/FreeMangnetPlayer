@@ -24,7 +24,7 @@ def main():
     capture.adb('install', '-r', 'app/build/outputs/apk/debug/app-debug.apk')
     capture.adb('shell', 'wm', 'size', '1080x2400')
     capture.adb('shell', 'pm', 'clear', capture.PACKAGE)
-    capture.adb('shell', 'am', 'start', '-W', '-n', f'{capture.PACKAGE}/.MainActivity')
+    capture.adb('shell', 'am', 'start', '-W', '-n', f'{capture.PACKAGE}/com.omniplayer.MainActivity')
     import time
     time.sleep(7)
     shot('01-home.png', ('电视直播', '磁力播放', '统一设置'))
@@ -92,7 +92,7 @@ def main():
         raise RuntimeError('The IPTV source editor opened from live TV does not show the shared default URL')
     capture.adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
     capture.adb('shell', 'am', 'force-stop', capture.PACKAGE)
-    capture.adb('shell', 'am', 'start', '-W', '-n', f'{capture.PACKAGE}/.MainActivity', '--es', 'test-query', 'OmniNavigationCheck')
+    capture.adb('shell', 'am', 'start', '-W', '-n', f'{capture.PACKAGE}/com.omniplayer.MainActivity', '--es', 'test-query', 'OmniNavigationCheck')
     time.sleep(3)
     capture.require_visible('搜索结果', '返回搜索')
     capture.find_and_tap('返回搜索')

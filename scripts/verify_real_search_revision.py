@@ -8,7 +8,7 @@ baseline=json.loads((OUT/'browser-baseline.json').read_text(encoding='utf-8'));r
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
 for i,browser in enumerate(baseline,1):
     adb('shell','am','force-stop',PACKAGE)
-    adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','test-engine',shlex.quote(browser['engine']),'--es','test-query',shlex.quote('哪吒'))
+    adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','test-engine',shlex.quote(browser['engine']),'--es','test-query',shlex.quote('哪吒'))
     end=time.monotonic()+48;s={}
     while time.monotonic()<end:
         try:s=json.loads(adb('shell','run-as',PACKAGE,'cat','files/search-check.json'))

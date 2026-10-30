@@ -15,7 +15,7 @@ report = []
 def launch(query=None, engine=None, magnet=None, mode="parse"):
     adb("shell", "am", "force-stop", PACKAGE)
     adb("shell", "run-as", PACKAGE, "rm", "-f", "files/torrent-check.json", "files/search-check.json")
-    args = ["am", "start", "-W", "-n", f"{PACKAGE}/.MainActivity"]
+    args = ["am", "start", "-W", "-n", f"{PACKAGE}/com.omniplayer.MainActivity"]
     if query:
         args += ["--es", "test-query", shlex.quote(query), "--es", "test-engine", shlex.quote(engine)]
     if magnet:

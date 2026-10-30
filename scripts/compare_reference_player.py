@@ -52,7 +52,7 @@ if install.returncode==0:
     (OUT/'comparison-probe.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
     adb('shell','am','force-stop',ref)
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
-adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(USER_MAGNET),'--es','mode','play')
+adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(USER_MAGNET),'--es','mode','play')
 start=time.monotonic();samples=[]
 for i in range(24):
     time.sleep(5)

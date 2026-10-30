@@ -12,7 +12,7 @@ for index,target in enumerate(targets,1):
     adb('shell','am','force-stop',PACKAGE);adb('shell','pm','clear',PACKAGE);adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
     magnet='magnet:?xt=urn:btih:'+target['hash']
     start=time.monotonic();first=None;firstPosition=None;firstSnapshot=None;sustained=False;samples=[]
-    adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(magnet),'--es','mode','play')
+    adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(magnet),'--es','mode','play')
     while time.monotonic()-start<120:
         try:s=json.loads(adb('shell','run-as',PACKAGE,'cat','files/torrent-check.json'))
         except Exception:s={}

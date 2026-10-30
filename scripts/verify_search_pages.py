@@ -17,7 +17,7 @@ adb('shell','am','force-stop',PACKAGE)
 prefs='''<map><string name="search-name">分页测试</string><string name="search-url">http://10.0.2.2:8899/search?q=%s</string><string name="custom-name">分页测试</string><string name="custom-url">http://10.0.2.2:8899/search?q=%s</string></map>'''
 Path('search-test-prefs.xml').write_text(prefs,encoding='utf-8');adb('push','search-test-prefs.xml','/data/local/tmp/search-test-prefs.xml')
 adb('shell','run-as',PACKAGE,'sh','-c',shlex.quote('mkdir -p shared_prefs; cat /data/local/tmp/search-test-prefs.xml > shared_prefs/player-settings.xml'))
-adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','test-query',shlex.quote('哪吒'),'--es','test-engine',shlex.quote('分页测试'))
+adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','test-query',shlex.quote('哪吒'),'--es','test-engine',shlex.quote('分页测试'))
 expected=json.loads(Path('search-pages-expected.json').read_text(encoding='utf-8'));checks=[]
 for page in [1,2,3]:
     st=wait(page,len(expected[str(page)]))

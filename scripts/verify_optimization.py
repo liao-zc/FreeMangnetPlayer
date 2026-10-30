@@ -36,7 +36,7 @@ def wait(predicate, timeout=120):
     raise RuntimeError('Condition failed: ' + json.dumps(diagnostic(), ensure_ascii=False))
 
 def open_torrent(fixture, mode='parse'):
-    adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.MainActivity', '-a', 'android.intent.action.VIEW', '-d', shlex.quote(fixture['magnet']), '--es', 'mode', mode)
+    adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/com.omniplayer.MainActivity', '-a', 'android.intent.action.VIEW', '-d', shlex.quote(fixture['magnet']), '--es', 'mode', mode)
     time.sleep(3)
     return wait(lambda s: s.get('id') == fixture['id'] and (s.get('metadata') or s.get('queued')))
 
@@ -68,12 +68,12 @@ def main():
     adb('install', '-r', 'app/build/outputs/apk/debug/app-debug.apk')
     adb('shell', 'pm', 'grant', PACKAGE, 'android.permission.POST_NOTIFICATIONS')
     adb('shell', 'wm', 'size', '1080x2400')
-    adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.MainActivity')
+    adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/com.omniplayer.MainActivity')
     time.sleep(4)
     from capture_usage_screenshots import visible_text
     if "Quickstep isn't responding" in visible_text():
         find_and_tap('Wait')
-        adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.MainActivity')
+        adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/com.omniplayer.MainActivity')
         time.sleep(5)
     require_visible('设置', '解析资源', '播放', '下载', '收藏')
     screenshot('opt-01-home.png')
