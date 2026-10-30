@@ -484,7 +484,7 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ### 构建、仓库检查与限制
 
-- 本轮将版本推进为 **0.2.2**；GitHub Actions tag 构建发布状态待本轮提交后确认。
+- 本轮将版本推进为 **0.2.2**；GitHub Actions 构建及发布已通过（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41029450862)）：通用、ARM64、ARMv7 APK 均完成打包并上传到 [v0.2.2 Release](https://github.com/liao-zc/FreeMangnetPlayer/releases/tag/v0.2.2)。文档可读性检查也通过（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41029451045)）。
 - 当前 Windows 环境未检测到 Java，因此本地无法运行 Android Gradle 构建；需以 CI `assembleDebug` 通过作为 APK 可编译证据。
 - 已做源码路径核对；尚无连接 Android 手机、电视或平板进行本轮 IPTV 播放交互测试。
 - “频道列表解析成功”不等同于源站持续提供直播。若播放在固定时长结束，设备日志中的 HLS playlist、`#EXT-X-ENDLIST`、HTTP 状态及 Media3 错误是进一步区分源站短片/失效地址与客户端解析问题所需证据。
