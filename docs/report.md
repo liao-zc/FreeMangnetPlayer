@@ -375,3 +375,19 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 [逐条状态与采样记录](evidence/modern-public-acceptance.json)保留最终文件列表和每次采样的播放、节点、字节指标；完整未裁剪文件可从上述运行的 public-playback-acceptance 附件下载，避免在仓库重复保存每次采样的全部文件列表。固定第十一条 236234… 同样未起播。本轮结果仍不能证明资源在其他网络没有做种，也不能证明仅调整本机调度就能解决；带 Peer 数据和断连原因的新测试继续执行。
 
 文件选择的截图已明确：全选时弹窗的文件勾选有效，关闭后选择恢复为单个当前视频。直接 Android 检查七项全部通过，包括重复 playFile 不覆盖多选，故仍需查找其他覆盖路径。新增有限长度的选择变化调用记录和 Activity 实例标识，用实际调用位置定位，而不是继续猜测。
+
+### Peer 诊断和选择状态重建的实际发现
+
+[Peer 诊断运行 41007252723](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007252723) 已结束，十条仍无有效视频数据、无首帧。多条已握手连接自报 dht-spy/1.0，资源拥有比例 0、下载字节 0；另有 Transmission、qBittorrent、BitTorrent 连接以及大量 TCP/uTP 超时或对端重置。不能将这些节点与真正供给视频分片的节点混为一谈，也不能据本次测试推断所有网络都无做种。
+
+新引擎返回 Peer 地址格式为 tcp://IP:port。元数据替换恢复逻辑以前仅按 IP:port 切割，未移除协议前缀，导致构造重连地址失败。实验分支已按 URI 解析 IPv4、IPv6 及协议前缀，保留地址和端口，拒绝非法端口和地址；新增三个 Android 回归测试。
+
+[Peer 原始字段及断连记录摘要](evidence/modern-peer-diagnostics.json)保留每个地址观察到的客户端和数据比例，以及不同的错误事件。完整逐秒文件从对应 Actions 附件下载。
+
+[选择调用追踪 41008640791](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41008640791) 在失败时只记录到 MainActivity.onCreate → TorrentTasks.initialize 从已保存状态载入 [4]；全选时的修改记录已消失，表明过程中发生任务/进程重建，尚不能仅凭此确定退出原因。新回归保存 logcat 和 Android process exit-info，进一步定位重建原因。
+
+- [进程退出原因回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009537644)
+- [Peer 地址修复与功能回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009900336)
+- [修复后的十条磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009904571)
+
+以上新回归仍在运行，尚未认定修复通过或发布新版 APK。
