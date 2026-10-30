@@ -451,4 +451,8 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ![扩展 DHT 后实际收到视频数据并渲染的 1080p 画面](screenshots/current/expanded-dht-real-first-frame.png)
 
-[逐条节点、字节、首帧和播放状态](evidence/dht-expanded-acceptance.json) 保留了本轮完整摘要。候选 Peer 数和种子数不能单独视为可播放；验收仍以校验后的下载数据和真实画面为准。
+[逐条节点、字节、首帧和播放状态](evidence/dht-expanded-acceptance.json) 保留了本轮完整摘要。候选 Peer 数和种子数不能单独视为可播放；验收仍以校验后的下载数据和真实画面为准。\n\n### 加密 Peer 查询后的第二轮结果
+
+[第二轮 Android 15 验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41017234456) 使用提交 d6a6097，构建成功；十条用户磁力仍为 **0/10 首帧、0/10 连续播放**，固定验证磁力也没有收到视频字节。相比上一轮唯一曾渲染画面的哈希，本轮也未发现在线供片端。逐项元数据、Peer、字节和阶段记录见 [dht-retry-acceptance.json](evidence/dht-retry-acceptance.json)。
+
+两次冷启动 Android 实测表明，DHT 引导节点扩展曾帮助找到一个临时在线做种端，但更频繁、更大批量的 DHT 查询没有稳定带来可用 Peer。当前剩余的关键条件是资源发布者或做种者在线并能提供通过校验的分片；若 swarm 无在线供片端，客户端无法从磁力哈希恢复视频内容。故十条验收仍未完成，不生成 APK。
