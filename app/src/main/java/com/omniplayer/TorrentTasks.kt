@@ -563,8 +563,10 @@ object TorrentTasks {
         val offset = info.files().fileOffset(file.index)
         val first = (offset / info.pieceLength()).toInt()
         val last = ((offset + file.size - 1) / info.pieceLength()).toInt()
-        // Force the selected stream's header pieces ahead of background download.
-        // Deadlines alone were not enough for some large MKV torrents.
+        // Prioritize the active file in order so unrelated pieces in a huge
+        // torrent cannot starve its header. Keep deadlines for immediate requests.
+        handle.setSequentialRange(first, last)
+        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
         for (piece in first..minOf(first + 3, last)) if (!handle.havePiece(piece)) {
             handle.piecePriority(piece, Priority.TOP_PRIORITY)
             handle.setPieceDeadline(piece, 0)
