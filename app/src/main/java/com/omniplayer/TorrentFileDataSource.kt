@@ -84,12 +84,19 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
             if (!handle.isValid || Thread.currentThread().isInterrupted) throw IOException("读取已取消")
             val info = handle.torrentFile() ?: throw IOException("元数据不可用")
             if (lastPrefetched != piece) {
+                if (lastPrefetched >= 0 && !handle.havePiece(lastPrefetched)) {
+                    handle.piecePriority(lastPrefetched, Priority.DEFAULT)
+                }
                 handle.piecePriority(piece, Priority.TOP_PRIORITY)
                 handle.setPieceDeadline(piece, 0)
                 debugDeadlinePiece = piece
-                val window = (16 * 1024 * 1024 / pieceLength).toInt().coerceIn(4, 128)
-                val end = minOf(piece + window, ((torrentEnd - 1) / pieceLength).toInt())
-                for (next in piece..end) if (!handle.havePiece(next)) handle.setPieceDeadline(next, (next - piece) * 150)
+                // Request only the current piece urgently. Large simultaneous
+                // windows can leave every piece partial, so the player keeps
+                // waiting for a verified header despite plenty of total bytes.
+                val end = minOf(piece + 2, ((torrentEnd - 1) / pieceLength).toInt())
+                for (next in piece + 1..end) if (!handle.havePiece(next)) {
+                    handle.setPieceDeadline(next, 5_000 * (next - piece))
+                }
                 lastPrefetched = piece
             }
             debugPieceAvailable = handle.havePiece(piece)

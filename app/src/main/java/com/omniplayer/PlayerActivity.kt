@@ -98,6 +98,9 @@ class PlayerActivity : ComponentActivity() {
         setContent {
             AppTheme(colorScheme = lightColorScheme(primary = Color(0xFF087F79), background = Color(0xFFF3F8FA))) {
                 val current = task
+                var playbackUiTick by remember(current) { mutableIntStateOf(0) }
+                LaunchedEffect(current) { while (true) { playbackUiTick++; delay(500) } }
+                val activeFile = remember(current, playbackUiTick) { current?.files?.firstOrNull { it.index == current.playingIndex } }
                 var favorite by remember { mutableStateOf(LibraryStore.readFavorites(this).any { it.source == source }) }
                 var fileDialog by remember { mutableStateOf(false) }
                 var qualityDialog by remember { mutableStateOf(false) }
@@ -126,6 +129,18 @@ class PlayerActivity : ComponentActivity() {
                                     }
                                     val rows = JSONArray()
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
+                                    val startupPieces = JSONArray()
+                                    synchronized(current.nativeLock) {
+                                        current.handle?.takeIf { it.isValid }?.let { handle ->
+                                            runCatching {
+                                                val pieces = handle.status(TorrentHandle.QUERY_PIECES).pieces()
+                                                val first = current.streamRangeStart.coerceAtLeast(0)
+                                                for (piece in first..minOf(first + 7, current.streamRangeEnd)) {
+                                                    startupPieces.put(JSONObject().put("index", piece).put("verified", piece < pieces.size() && pieces.getBit(piece)))
+                                                }
+                                            }
+                                        }
+                                    }
                                     File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", current.source).put("id", current.id)
                                         .put("metadata", current.files.isNotEmpty()).put("peers", current.peers).put("downloaded", current.done).put("total", current.total)
                                         .put("stage", current.discoveryStage).put("metadataMilliseconds", if (current.metadataAt > 0) current.metadataAt - current.startedAt else -1)
@@ -138,6 +153,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
                                         .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("transportFallbackUsed", current.transportFallbackUsed).put("metadataReplacements", current.engine?.metadataReplacements ?: 0).put("restoredTrackers", current.engine?.restoredTrackers ?: 0).put("networkMessage", current.networkMessage)
+                                        .put("streaming", current.streaming).put("streamRangeStart", current.streamRangeStart).put("streamRangeEnd", current.streamRangeEnd).put("startupPieces", startupPieces)
                                         .put("playerClass", player?.javaClass?.simpleName.orEmpty()).put("playerDebug", (player as? VlcTorrentPlayer)?.debugInfo() ?: JSONObject())
                                         .put("videoHeight", player?.videoSize?.height ?: 0).put("qualityHeight", qualityHeight).put("storedQueue", JSONArray().also { a -> StoredVideos.queue(current).forEach { row -> a.put(JSONObject().put("task", row.first.id).put("index", row.second.index).put("done", row.second.done).put("size", row.second.size)) } }).put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
@@ -152,10 +168,17 @@ class PlayerActivity : ComponentActivity() {
                 if (fullscreen || floating) {
                     Box(Modifier.fillMaxSize().background(Color.Black)) {
                         VideoSurface(Modifier.fillMaxSize(), onQuality = { qualityDialog = true }, onFiles = { fileDialog = true })
-                        if (player == null && !floating) Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                        if ((player == null || current?.renderedFrameAt == 0L) && !floating) Column(Modifier.align(Alignment.Center).padding(horizontal = 28.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
                             if (requested) CircularProgressIndicator(color = Color.White)
                             else TextButton(onClick = { requestPlayback(true) }) { Text("重试播放", color = Color.White) }
-                            Text(current?.unplayableReason.orEmpty().ifBlank { playerMessage.ifBlank { "正在等待播放分片…" } }, color = if (current?.unplayableReason.orEmpty().isNotBlank()) Color(0xFFFF8A80) else Color.White)
+                            Text(current?.unplayableReason.orEmpty().ifBlank { playerMessage.ifBlank { "正在等待首个可读分片…" } }, color = if (current?.unplayableReason.orEmpty().isNotBlank()) Color(0xFFFF8A80) else Color.White)
+                            activeFile?.let { file ->
+                                val fraction = (file.done.toFloat() / file.size.coerceAtLeast(1)).coerceIn(0f, 1f)
+                                Text(file.path.substringAfterLast('/'), color = Color.White, maxLines = 2)
+                                LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
+                                Text("${bytes(file.done)} / ${bytes(file.size)} · ${current?.peers ?: 0} 个节点 · ${bytes(current?.payloadRate?.toLong() ?: 0L)}/秒", color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
+                                Text("时长与分辨率将在首个完整分片可读后显示", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                            }
                         }
                     }
                 } else {
@@ -178,9 +201,19 @@ class PlayerActivity : ComponentActivity() {
                             VideoSurface(Modifier.fillMaxWidth().height(240.dp), onQuality = { qualityDialog = true }, onFiles = { fileDialog = true })
                         } else {
                             Card(Modifier.fillMaxWidth().height(240.dp)) { Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待可播放缓存…" else "选择视频后播放或下载")
+                                Text(if (current.cancelled) "任务已取消" else if (requested) "正在等待首个可读分片…" else "选择视频后播放或下载")
                                 Text(playerMessage, style = MaterialTheme.typography.bodySmall)
                             } }
+                        }
+                        activeFile?.let { file ->
+                            val fraction = (file.done.toFloat() / file.size.coerceAtLeast(1)).coerceIn(0f, 1f)
+                            Card(Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                                Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Text(file.path.substringAfterLast('/'), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
+                                    LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
+                                    Text("${bytes(file.done)} / ${bytes(file.size)}（${"%.1f".format(fraction * 100)}%） · ${current.peers} 个节点 · ${bytes(current.payloadRate.toLong())}/秒 · ${player?.duration?.takeIf { it > 0 }?.let(::formatTime) ?: "等待时长"} · ${player?.videoSize?.height?.takeIf { it > 0 }?.let { "${it}P" } ?: "等待分辨率"}", style = MaterialTheme.typography.labelSmall, color = Color(0xFF444444))
+                                }
+                            }
                         }
                         Card(Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {

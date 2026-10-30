@@ -85,6 +85,8 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     val nativeLock = Any()
     var selectionPaused = false
     var streaming = false
+    @Volatile var streamRangeStart = -1
+    @Volatile var streamRangeEnd = -1
     var viewers = 0
     @Volatile var handle: TorrentHandle? = null
     @Volatile var engine: TorrentSession? = null
@@ -540,7 +542,7 @@ object TorrentTasks {
     }
     fun playFile(task: TorrentTask, index: Int) {
         if (index in task.deletedFiles) return
-        if (task.playingIndex != index) task.handle?.clearPieceDeadlines()
+        task.handle?.let { handle -> synchronized(task.nativeLock) { if (handle.isValid) handle.clearPieceDeadlines() } }
         // Decoder preparation or retry must not erase an explicit multi-file selection.
         // Temporary file switches set their own selection in switchStreamFile.
         if (!task.download && !task.retainedCache && task.selected.isEmpty()) task.selected = setOf(index)
@@ -555,23 +557,27 @@ object TorrentTasks {
     }
     private fun applyPriorities(task: TorrentTask) {
         val handle = task.handle ?: return
-        if (task.files.isEmpty() || (task.selected.isEmpty() && !task.streaming)) return
-        handle.prioritizeFiles(Array((task.files.maxOfOrNull { it.index } ?: -1) + 1) { if (it !in task.deletedFiles && (it in task.selected || (task.streaming && it == task.playingIndex))) Priority.DEFAULT else Priority.IGNORE })
-        val info = handle.torrentFile() ?: return
-        if (!task.streaming) return
-        val file = task.files.firstOrNull { it.index == task.playingIndex } ?: return
-        val offset = info.files().fileOffset(file.index)
-        val first = (offset / info.pieceLength()).toInt()
-        val last = ((offset + file.size - 1) / info.pieceLength()).toInt()
-        // Prioritize the active file in order so unrelated pieces in a huge
-        // torrent cannot starve its header. Keep deadlines for immediate requests.
-        handle.setSequentialRange(first, last)
-        handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
-        for (piece in first..minOf(first + 3, last)) if (!handle.havePiece(piece)) {
-            handle.piecePriority(piece, Priority.TOP_PRIORITY)
-            handle.setPieceDeadline(piece, 0)
+        synchronized(task.nativeLock) {
+            if (!handle.isValid || task.files.isEmpty() || (task.selected.isEmpty() && !task.streaming)) return
+            handle.prioritizeFiles(Array((task.files.maxOfOrNull { it.index } ?: -1) + 1) { if (it !in task.deletedFiles && (it in task.selected || (task.streaming && it == task.playingIndex))) Priority.DEFAULT else Priority.IGNORE })
+            val info = handle.torrentFile() ?: return
+            if (!task.streaming) return
+            val file = task.files.firstOrNull { it.index == task.playingIndex } ?: return
+            val offset = info.files().fileOffset(file.index)
+            val first = (offset / info.pieceLength()).toInt()
+            val last = ((offset + file.size - 1) / info.pieceLength()).toInt()
+            task.streamRangeStart = first
+            task.streamRangeEnd = last
+            // Finish the header piece first. Urgent deadlines on four 8 MiB
+            // pieces and the file tail scattered blocks before any piece was
+            // complete enough for the decoder to read.
+            handle.setSequentialRange(first, last)
+            handle.setFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+            if (!handle.havePiece(first)) {
+                handle.piecePriority(first, Priority.TOP_PRIORITY)
+                handle.setPieceDeadline(first, 0)
+            }
         }
-        for (piece in maxOf(first, last - 7)..last) if (!handle.havePiece(piece)) handle.setPieceDeadline(piece, 500)
     }
     fun download(task: TorrentTask) {
         recordHistory(task,"下载")
