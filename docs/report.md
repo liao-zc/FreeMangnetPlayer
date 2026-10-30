@@ -567,13 +567,13 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 
 | # | 检查项 | 当前结果 |
 |---|---|---|
-| 1 | 本地工作区目录改名为 OmniPlayer | 已在 `C:\Users\gnsfb\Downloads\OmniPlayer` 创建与 GitHub 同一提交的本地工作区。原目录 `C:\Users\gnsfb\Downloads\FreeMagnetPlayer` 仍被当前 Windows 进程占用，不能在此会话删除/改名；新目录可直接打开继续开发，旧目录目前仍保留。|
+| 1 | 本地工作区目录改名为 OmniPlayer | 已在 `C:\Users\gnsfb\Downloads\OmniPlayer` 创建本地工作区，其源码文件已同步到 GitHub 功能分支当前状态。原目录 `C:\Users\gnsfb\Downloads\FreeMagnetPlayer` 仍被当前 Windows 进程占用，不能在此会话删除/改名；新目录可直接打开继续开发，旧目录目前仍保留。|
 | 2 | 无节点资源的明显、持久提示及计数排除 | v0.2.6 Instrumentation 已验证：满足无 Peer/无有效数据 3 分钟条件后提示写入任务与收藏、播放、下载、缓存记录；明确重试前不自动清除；无法播放项不占下载/缓存任务数。此次改动未重测 BT 网络可用性。|
 | 3 | 六个搜索源可编辑/删除、BDFlix 默认、最多 10 个并保留旧配置 | v0.2.6 Android Store/模拟器检查通过；搜索源配置保持本地迁移数据。此次未改变搜索引擎逻辑。|
 | 4 | 搜索结果逐级返回 | v0.2.6 Android 15 模拟器分别检查工具栏返回和系统返回，均返回保留关键词的搜索页；详情/设置流程逐级返回。此次未改变导航逻辑。|
 | 5 | 资源时间、最大视频格式与其他文件类型可下载 | v0.2.6 回归覆盖视频扩展名优先、无视频时的最大文件格式标记、压缩包标记及 magnet `dn` 扩展名回退。日期显示来自搜索网站的上架时间；magnet 本身不含做种开始时间。此次未改变解析逻辑。|
 | 6 | 项目与可见产物统一 OmniPlayer 命名 | Gradle 根项目改为 `OmniPlayer`；源码和测试包迁至 `com.omniplayer` namespace；唤醒锁、日志标签、报告生成脚本和 LICENSE 改用 OmniPlayer；新任务目录使用 `OmniPlayerTasks`。Android `applicationId` 有意保留旧值用于原位升级。APK 和 tag 源码归档由发布工作流命名为 `OmniPlayer-v0.2.7*`。Android 构建成功（[v0.2.7 发布流程](https://github.com/liao-zc/OmniPlayer/actions/runs/41069048708)）；Android Instrumentation 包括旧任务目录迁移检查通过。全套 UI 脚本回归未通过：控制栏按钮自动化仍无法定位“画质”控件，详情见 [模拟器回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41072170116)。|
-| 7 | README 与完整点检报告可在 GitHub 查看 | README 增加当前功能摘要、下载、使用说明和报告入口；本报告补充本轮命名/兼容结果并把顶部过期下载链接改为当前 OmniPlayer 资源。README、使用说明和点检报告的 GitHub Markdown/UTF-8 检查通过（[运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41070968761)）。|
+| 7 | README 与完整点检报告可在 GitHub 查看 | README 增加当前功能摘要、下载、使用说明和报告入口；本报告补充本轮命名/兼容结果并把顶部过期下载链接改为当前 OmniPlayer 资源。README、使用说明和点检报告的 GitHub Markdown/UTF-8 检查通过（[运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41073327249)）。|
 | 8 | 历史要求和未通过项是否如实保留 | 报告保留此前各轮明细，不把旧版截图称作本轮实测。最近一次指定公网磁力多资源验收仍未达到用户要求的 90% 起播，公网可达 Peer 受资源做种状态影响；IPTV 指定源的真机持续播放也未在本轮重新验证。|
 
 ### 旧数据迁移说明
