@@ -64,6 +64,7 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     var outgoingUtp by mutableStateOf(false)
     var transportFallbackUsed = false
     var transportRecoveryAt = 0L
+    var renderedFrameAt = 0L
     var lastPayloadAt = System.currentTimeMillis()
     var retainedCache by mutableStateOf(false)
     val nativeLock = Any()

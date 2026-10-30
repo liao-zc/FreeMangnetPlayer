@@ -121,7 +121,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("verifiedPieceMilliseconds", if (current.verifiedPieceAt > 0) current.verifiedPieceAt - current.startedAt else -1)
                                         .put("playbackMilliseconds", if (current.playbackAt > 0) current.playbackAt - current.startedAt else -1).put("rebufferCount", current.rebufferCount)
                                         .put("files", rows).put("decoder", if (player is VlcTorrentPlayer) "LibVLC" else "Media3").put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
-                                        .put("playRequested", requested).put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
+                                        .put("renderedFrameAt", current.renderedFrameAt).put("playRequested", requested).put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
@@ -303,7 +303,11 @@ class PlayerActivity : ComponentActivity() {
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 15000, 300, 750).build())
             .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }, task.nativeLock) })).build()
         var playedOnce = false
+        task.renderedFrameAt = 0L
         media.addListener(object : Player.Listener {
+            override fun onRenderedFirstFrame() {
+                if (player === media && task.renderedFrameAt == 0L) task.renderedFrameAt = System.currentTimeMillis()
+            }
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 if (isPlaying) { playedOnce = true; if (task.playbackAt == 0L) task.playbackAt = System.currentTimeMillis(); playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, file.path.substringAfterLast('/'), StoredVideos.fileSource(task, file)) }
             }
