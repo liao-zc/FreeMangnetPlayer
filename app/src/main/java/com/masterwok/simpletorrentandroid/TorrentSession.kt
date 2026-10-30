@@ -86,6 +86,15 @@ open class TorrentSession(
         @Synchronized
         override fun alert(alert: Alert<*>) {
             try {
+                // CACHE_FLUSHED is a session-level storage alert and may not
+                // carry a valid torrent handle. Process it before rejecting
+                // stale/handle-less torrent alerts; stream readers wait for
+                // this generation to know a verified piece is readable on disk.
+                if (alert.type() == AlertType.CACHE_FLUSHED) {
+                    torrentSession.get()?.let { it.cacheFlushGeneration++ }
+                    return
+                }
+
                 if (alert.isTorrentAlert() && !alert.hasValidTorrentHandle()) {
                     Log.w(Tag, "Ignoring alert with invalid torrent handle: ${alert.type()}")
                     return
@@ -104,7 +113,6 @@ open class TorrentSession(
                     AlertType.TORRENT_PAUSED -> torrentSession.get()?.onTorrentPaused(alert as TorrentPausedAlert)
                     AlertType.TORRENT_FINISHED -> torrentSession.get()?.onTorrentFinished(alert as TorrentFinishedAlert)
                     AlertType.TORRENT_ERROR -> torrentSession.get()?.onTorrentError(alert as TorrentErrorAlert)
-                    AlertType.CACHE_FLUSHED -> torrentSession.get()?.let { it.cacheFlushGeneration++ }
                     AlertType.TRACKER_ERROR, AlertType.LISTEN_FAILED -> torrentSession.get()?.networkMessage = alert.toString()
                     AlertType.PEER_ERROR, AlertType.PEER_DISCONNECTED -> torrentSession.get()?.recordPeerEvent(alert.toString())
                     AlertType.ADD_TORRENT -> torrentSession.get()?.onAddTorrent(alert as AddTorrentAlert)

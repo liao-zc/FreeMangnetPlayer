@@ -597,4 +597,8 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 | 6 | 非全屏直播播放器下方充分利用空间，按分组切台并显示台标、名称和连接耗时 | 代码提供分组筛选、频道滚动列表、图标/名称及连接响应耗时，点选后在播放页切台；当前没有真实 IPTV 端点的本轮真机连续播放记录，需在用户设备/有效直播源上验收。 |
 | 7 | 搜索来源真实可用性 | 六个来源独立浏览器与 App 搜索回归工作流通过（运行 41089962821）。网站挑战、网络区域或站点改版仍会影响某次搜索；分页仅以页面实际发现的链接为准。 |
 
+### 磁力首片已校验但播放器仍无画面的根因定位
+
+新版冷启动运行 [41098936356](https://github.com/liao-zc/OmniPlayer/actions/runs/41098936356) 在 119.95 秒内取得元数据（4.44 秒）、发现 2 个 Peer/Seed，累计接收 11,885,752 字节，峰值 220,328 B/s；piece 0 在约 10.1 秒已校验，但没有首帧，播放器时长/分辨率仍为空。Android logcat 明确出现 `TorrentSession: Ignoring alert with invalid torrent handle: CACHE_FLUSHED`。`CACHE_FLUSHED` 是存储会话级告警，原监听器先按 torrent handle 校验并丢弃它，导致读取器等待已校验分片落盘通知时一直不前进。现已把 `CACHE_FLUSHED` 处理移至无效句柄过滤之前，并将缓存刷新代数加入播放诊断；修复后的同链冷启动验收待执行。失败态实测截图：[修复前屏幕](screenshots/current/v0.2.8-spiderman-before-flush-fix.png)。
+
 最新真实运行截图：[Spider-Man 等待状态](screenshots/current/v0.2.8-spiderman-waiting.png)。截图来自本轮 APK 的 Android 15 模拟器；画面是播放器缓冲态，没有伪装成影片画面。完整逐秒 BT/解码证据保留在 Actions 附件。用户此前提供的 10 条磁力正在新 workflow [运行 41096478789](https://github.com/liao-zc/OmniPlayer/actions/runs/41096478789)逐条做冷启动验收，完成后本报告追加每条首帧、起播时间、有效字节、持续播放和最终状态。当前蜘蛛侠磁力仍未通过“真实首帧且连续播放”验收，本版本不发布为已修复。
