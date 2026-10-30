@@ -46,6 +46,8 @@ text=f'''# FreeMangnetPlayer {v}：15 项需求点检报告
 
 受控影片首次起播 {throughput['first_play_seconds']:.2f} 秒，当时已下载 {100*throughput['first_play_state']['downloaded']/throughput['first_play_state']['total']:.1f}%；没有按固定百分比限制起播，但仍须等到所请求的真实分片可读。
 
+字体/历史与队列截图使用做种端限速的受控素材，以便观察尚未完成的缓存；这不是 App 限速。不限速吞吐由另一轮独立测量验证，所有 App 下载/上传限速值均为 0。
+
 ## 按用户编号逐项点检
 
 | 编号 | 要求及修改 | 验证结果与边界 |
