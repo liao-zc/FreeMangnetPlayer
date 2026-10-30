@@ -22,6 +22,7 @@ expected=json.loads(Path('search-pages-expected.json').read_text(encoding='utf-8
 for page in [1,2,3]:
     st=wait(page,len(expected[str(page)]))
     assert all(r.get('bytes')== (1500000 if 'detail-' in r['magnet'] else 2300000000) for r in st['results']), 'Resource sizes differ from fixture metadata'
+    assert all(r.get('publishedAt')==('2025-03-01' if 'detail-' in r['magnet'] else '2026-10-29') for r in st['results']), 'Resource publication date differs from source metadata'
     actual={r['magnet'] for r in st['results']};wanted={r[1].replace('2362347540B27D8A4142AF2BBE0A071F26A3B7A1','2362347540b27d8a4142af2bbe0a071f26a3b7a1') for r in expected[str(page)]}
     assert actual==wanted,(actual-wanted,wanted-actual)
     expected_names={magnet.replace('2362347540B27D8A4142AF2BBE0A071F26A3B7A1','2362347540b27d8a4142af2bbe0a071f26a3b7a1'):name for name,magnet in expected[str(page)]}
