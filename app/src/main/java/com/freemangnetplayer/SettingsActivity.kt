@@ -39,7 +39,8 @@ class SettingsActivity : ComponentActivity() {
         val prefs = SettingsStore.prefs(this)
         setContent {
             AppTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF087F79))) {
-                var section by remember { mutableStateOf("menu") }
+                val entrySection = intent.getStringExtra("section") ?: "menu"
+                var section by remember { mutableStateOf(entrySection) }
                 var download by remember { mutableStateOf(SettingsStore.root(this, true).absolutePath) }
                 var cache by remember { mutableStateOf(SettingsStore.root(this, false).absolutePath) }
                 var downloads by remember { mutableStateOf(SettingsStore.maxDownloads(this).toString()) }
@@ -56,8 +57,8 @@ class SettingsActivity : ComponentActivity() {
 
                 Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(onClick = { if (section == "menu") finish() else section = "menu" }) { Icon(Icons.Default.ArrowBack, if (section == "menu") "返回首页" else "返回设置分类") }
-                        Text(if (section == "menu") "设置" else when(section) { "magnet" -> "磁播设置"; "general" -> "通用设置"; else -> "设置" }, style = MaterialTheme.typography.titleLarge)
+                        IconButton(onClick = { if (section == entrySection) finish() else section = "menu" }) { Icon(Icons.Default.ArrowBack, if (section == entrySection) "返回" else "返回设置分类") }
+                        Text(when(section) { "magnet" -> "磁播设置"; "general" -> "通用设置"; "about" -> "软件说明"; else -> "设置" }, style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.weight(1f))
                         TextButton(onClick = { finish() }) { Text("首页") }
                     }
@@ -65,16 +66,19 @@ class SettingsActivity : ComponentActivity() {
                         "menu" -> Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             SettingCategory("直播设置", "直播源管理", onClick = { startActivity(Intent(this@SettingsActivity, IptvSettingsActivity::class.java)) })
                             SettingCategory("磁播设置", "存储位置 · 搜索源 · 并发任务", onClick = { section = "magnet" })
-                            SettingCategory("通用设置", "字体 · 背景颜色 · 软件版本", onClick = { section = "general" })
+                            SettingCategory("通用设置", "字体 · 背景颜色", onClick = { section = "general" })
+                            SettingCategory("软件说明", "版本与更新时间", onClick = { section = "about" })
                         }
                         "general" -> Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                             FontSettings { fontPicker.launch(arrayOf("font/*", "application/octet-stream", "application/x-font-ttf", "application/x-font-opentype")) }
                             HorizontalDivider()
                             BackgroundSettings()
-                            HorizontalDivider()
-                            Text("软件信息", style = MaterialTheme.typography.titleMedium)
-                            Text("OmniPlayer 版本：${pkg.versionName}（$version）")
+                        }
+                        "about" -> Column(Modifier.weight(1f).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                            Text("OmniPlayer", style = MaterialTheme.typography.headlineSmall)
+                            Text("版本：${pkg.versionName}（versionCode $version）")
                             Text("最近更新：$updated")
+                            Text("电视直播与磁力播放工具", style = MaterialTheme.typography.bodyMedium)
                         }
                         "magnet" -> Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("存储位置", style = MaterialTheme.typography.titleMedium)

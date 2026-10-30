@@ -2,9 +2,9 @@
 
 日期：2026-10-30。测试环境：Android 15 / API 35 x86_64 模拟器；安装实际 APK，并通过 UI 操作、播放器状态与磁盘数据校验。截图均来自运行中的 App 或独立浏览器。ARM 手机、平板及电视尚需真机验证。
 
-- [ARM64 安装包](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-arm64-v8a.apk)
-- [离线图文报告](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-report.html)
-- [源码包](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-source.zip)
+- [ARM64 安装包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-arm64-v8a.apk)
+- [离线图文报告](https://github.com/liao-zc/OmniPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-report.html)
+- [源码包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-source.zip)
 
 ## 验收结论
 
@@ -254,19 +254,19 @@
 
 Android 设备测试另校验字体真实加载、字号持久化、各类历史数量上限、时间倒序、播放进度及收藏存储切换。
 
-- [library 测试过程](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40986851277)
+- [library 测试过程](https://github.com/liao-zc/OmniPlayer/actions/runs/40986851277)
 
-- [preferences 测试过程](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40990866522)
+- [preferences 测试过程](https://github.com/liao-zc/OmniPlayer/actions/runs/40990866522)
 
-- [pages 测试过程](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40994181448)
+- [pages 测试过程](https://github.com/liao-zc/OmniPlayer/actions/runs/40994181448)
 
-- [public 测试过程](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40986864228)
+- [public 测试过程](https://github.com/liao-zc/OmniPlayer/actions/runs/40986864228)
 
-- [native 测试过程](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40988375209)
+- [native 测试过程](https://github.com/liao-zc/OmniPlayer/actions/runs/40988375209)
 
-- [performance 测试过程](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40988171757)
+- [performance 测试过程](https://github.com/liao-zc/OmniPlayer/actions/runs/40988171757)
 
-- [search 测试过程](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/40994186837)
+- [search 测试过程](https://github.com/liao-zc/OmniPlayer/actions/runs/40994186837)
 
 [字体/历史证据](evidence/current-preferences.json) · [分页](evidence/current-pages.json) · [十条公网资源](evidence/current-public.json) · [独立客户端](evidence/current-native.json) · [吞吐](evidence/current-performance.json) · [真实搜索](evidence/current-search.json)
 
@@ -276,7 +276,7 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 
 ### 文件名、大小和分页：通过受控网页回归
 
-[完整运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41002883131) 的 10 项检查全部通过。页面链接文字统一为“查看详情”，页脚为“页面总计 34.03GB”；App 仍显示各资源的真实名称，37 个直接链接各为 2.3GB，2 个详情资源各为 1.5MB。39 条全部取得，无遗漏。网站翻页、每屏 20 条、页码跳转及空页返回均通过。
+[完整运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41002883131) 的 10 项检查全部通过。页面链接文字统一为“查看详情”，页脚为“页面总计 34.03GB”；App 仍显示各资源的真实名称，37 个直接链接各为 2.3GB，2 个详情资源各为 1.5MB。39 条全部取得，无遗漏。网站翻页、每屏 20 条、页码跳转及空页返回均通过。
 
 原因修复：页面加载过程中的首次扫描可能尚无详情链接；扫描期间不能提前宣布搜索完成。现已等待页面加载完成和所有详情请求结束，再确认搜索完成。
 
@@ -288,15 +288,15 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 
 ### 十条公网磁力：尚未通过
 
-删除 DHT 无限等待后的[真实 APK 测试](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000002632) 为 0/10 起播，10 条有效视频数据均为 0；其中 7 条取得元数据。文件列表不能代表收到视频。
+删除 DHT 无限等待后的[真实 APK 测试](https://github.com/liao-zc/OmniPlayer/actions/runs/41000002632) 为 0/10 起播，10 条有效视频数据均为 0；其中 7 条取得元数据。文件列表不能代表收到视频。
 
 本机 libtorrent 2.1.1 绑定 WLAN 的约 597 秒测试同样未取得十条资源的元数据和有效数据。三个 DHT 引导入口与两个 UDP Tracker 的直接探测均超时；公开 Ubuntu 对照种子通过 HTTPS Tracker 发现节点并收到 1,572,864 字节。这些结果说明存在可用 BT 路径，同时 UDP 发现入口仍需排查，不能把全部失败直接归因于文件或 APP 限速。
 
 ### 新版引擎：仍在修复回归，尚未发布
 
-[独立分支](https://github.com/liao-zc/FreeMangnetPlayer/tree/improve/modern-bt-engine) 使用 libtorrent4j 2.1.0-39，Java 与四种架构 JNI 同版本，已成功编译和打包。新增不阻塞磁力启动的公共 Tracker 刷新与本地缓存；用累计接收字节判断进展，避免慢速数据被判为停滞。
+[独立分支](https://github.com/liao-zc/OmniPlayer/tree/improve/modern-bt-engine) 使用 libtorrent4j 2.1.0-39，Java 与四种架构 JNI 同版本，已成功编译和打包。新增不阻塞磁力启动的公共 Tracker 刷新与本地缓存；用累计接收字节判断进展，避免慢速数据被判为停滞。
 
-受控做种测试发现元数据补充并替换句柄后连接未恢复、有效字节为 0，该回归尚未通过。已改为替换句柄后先经 TCP 重连，无连接时再恢复 uTP，正在[重新测试](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41003279966)。该分支尚未并入 main，新版本 APK 尚未发布。
+受控做种测试发现元数据补充并替换句柄后连接未恢复、有效字节为 0，该回归尚未通过。已改为替换句柄后先经 TCP 重连，无连接时再恢复 uTP，正在[重新测试](https://github.com/liao-zc/OmniPlayer/actions/runs/41003279966)。该分支尚未并入 main，新版本 APK 尚未发布。
 
 验收已升级：十条必须全部在文件未下载完时渲染视频，并持续推进播放至少 20 秒。之前“90% 通过”或仅有播放状态的判据不再作为本任务的完成条件。
 
@@ -306,13 +306,13 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 
 资源名称下显示来源提供的发布时间。读取资源行的 time 标签、明确的发布时间字段或详情页发布时间；保留“昨天”等来源原文，不把搜索时间或整页时间当作每条资源的发布时间。来源没有发布时间时显示“来源未提供”，不编造日期。
 
-[发布时间回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41004109559) 的 10 项检查全部通过：受控页面 39 个资源，37 条日期为 2026-10-29，2 条详情页日期为 2025-03-01；名称、大小、20 条分页、页码跳转及空页返回同步通过。上面的三张搜索截图已替换为这次实际 App 截图。受控网站验证提取逻辑，不代表六个公网来源都提供日期。
+[发布时间回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41004109559) 的 10 项检查全部通过：受控页面 39 个资源，37 条日期为 2026-10-29，2 条详情页日期为 2025-03-01；名称、大小、20 条分页、页码跳转及空页返回同步通过。上面的三张搜索截图已替换为这次实际 App 截图。受控网站验证提取逻辑，不代表六个公网来源都提供日期。
 
 ### 最大下载数量不包含缓存
 
 下载任务与缓存/播放任务分开计算、排队和恢复。默认同时下载上限为 5；缓存采用设置中的独立缓存任务上限。暂停、完成、取消和排队任务不计入活动名额。设置标签明确标注“不含缓存”和“单独计算”。
 
-[Android 测试](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41004735689) 已通过，覆盖 5 个活动下载与 10 个活动缓存分别计数、排队缓存不挤占下载、暂停/完成/取消不占名额。第一次测试夹具未将 queued 设为 false，误把全部夹具当作排队任务；已修正夹具后重新通过，未放宽断言。
+[Android 测试](https://github.com/liao-zc/OmniPlayer/actions/runs/41004735689) 已通过，覆盖 5 个活动下载与 10 个活动缓存分别计数、排队缓存不挤占下载、暂停/完成/取消不占名额。第一次测试夹具未将 queued 设为 false，误把全部夹具当作排队任务；已修正夹具后重新通过，未放宽断言。
 
 ### PowerShell 格式化错误
 
@@ -322,11 +322,11 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 
 ### BT 仍在验证
 
-现代引擎元数据替换后丢失 Tracker 的原因已定位：TorrentInfo 不保留顶层 Tracker，重新添加任务时必须显式恢复 URL 和 tier。实验分支现已恢复到新句柄，并以新句柄实际 Tracker 集合验证恢复数量。[最新受控回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005592483) 正在执行，尚不能声明解决或发布验收版 APK。十条磁力仍要求全部实际渲染首帧、在文件未下载完成时起播并持续播放。
+现代引擎元数据替换后丢失 Tracker 的原因已定位：TorrentInfo 不保留顶层 Tracker，重新添加任务时必须显式恢复 URL 和 tier。实验分支现已恢复到新句柄，并以新句柄实际 Tracker 集合验证恢复数量。[最新受控回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41005592483) 正在执行，尚不能声明解决或发布验收版 APK。十条磁力仍要求全部实际渲染首帧、在文件未下载完成时起播并持续播放。
 
 ### 最新运行结果：受控起播通过，缓存后续检查失败
 
-[现代引擎回归 41005802769](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005802769) 已完成。Android 五项存储/字体/任务名额测试通过；受控 Episode-01.mp4 实际起播：总大小 12,590,316 字节，采样时已下载 1,354,314 字节，首帧时间戳非零，视频高度 180，播放进度 913ms，总时长 180 秒，有效传输字节 1,166,686。此采样证明受控文件未下载完成时能起播，不证明连续 20 秒无卡顿或十条公网磁力通过。metadataReplacements 为 0，不能用此样本证明元数据替换路径已恢复。
+[现代引擎回归 41005802769](https://github.com/liao-zc/OmniPlayer/actions/runs/41005802769) 已完成。Android 五项存储/字体/任务名额测试通过；受控 Episode-01.mp4 实际起播：总大小 12,590,316 字节，采样时已下载 1,354,314 字节，首帧时间戳非零，视频高度 180，播放进度 913ms，总时长 180 秒，有效传输字节 1,166,686。此采样证明受控文件未下载完成时能起播，不证明连续 20 秒无卡顿或十条公网磁力通过。metadataReplacements 为 0，不能用此样本证明元数据替换路径已恢复。
 
 后续“全选后缓存记录至少两条”检查失败，整套回归仍未通过；已增加选择状态断言以及缓存失败的任务状态、记录和 UI 快照，继续定位。
 
@@ -336,28 +336,28 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 
 画面为受控测试视频，不是用户十条电影的验收截图。
 
-[最新十条磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005807792) 仍在执行 Android 逐条检查；独立 native 探测已经结束，十条均无元数据且有效视频字节为 0。native 工作流步骤成功仅表示探测脚本执行完成，不表示资源播放通过。
+[最新十条磁力验收](https://github.com/liao-zc/OmniPlayer/actions/runs/41005807792) 仍在执行 Android 逐条检查；独立 native 探测已经结束，十条均无元数据且有效视频字节为 0。native 工作流步骤成功仅表示探测脚本执行完成，不表示资源播放通过。
 
-[缓存定位回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41006619134) 已启动。
+[缓存定位回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41006619134) 已启动。
 
 ### 持续排查：多文件选择与 Peer 数据供给
 
-[选择状态回归 41006619134](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41006619134) 明确在“全选后两个 Episode 均被选中”处失败。代码检查发现 playFile 在准备/重试时覆盖多选，实验分支已保留显式选择；但[修复后的 41006843768](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41006843768) 仍在相同断言失败，当前修复不足以解决界面操作问题，不能标记缓存全选通过。
+[选择状态回归 41006619134](https://github.com/liao-zc/OmniPlayer/actions/runs/41006619134) 明确在“全选后两个 Episode 均被选中”处失败。代码检查发现 playFile 在准备/重试时覆盖多选，实验分支已保留显式选择；但[修复后的 41006843768](https://github.com/liao-zc/OmniPlayer/actions/runs/41006843768) 仍在相同断言失败，当前修复不足以解决界面操作问题，不能标记缓存全选通过。
 
 新增两个直接 Android 回归检查：重复播放准备保持多选，以及无选择时初始化当前文件；同时捕获弹窗点击全选前后的实际截图、超时 UI 和任务状态，继续定位界面点击与页面重建。
 
-- [直接选择回归及完整功能检查](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007551092)
-- [弹窗截图与超时快照检查](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007647713)
+- [直接选择回归及完整功能检查](https://github.com/liao-zc/OmniPlayer/actions/runs/41007551092)
+- [弹窗截图与超时快照检查](https://github.com/liao-zc/OmniPlayer/actions/runs/41007647713)
 
 磁力诊断增加最多 16 个 Peer 的地址、客户端、拥有资源比例、下载字节、速度和连接标志，以及最多 20 条断连/错误事件，仅写入调试状态。这些字段帮助区分发现地址、完成握手和真正供给视频数据，不把短暂连接数当作播放成功。
 
-[含 Peer 诊断的十条验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007252723) 正在执行。前一轮 41005807792 也仍在运行，保留其独立结果，未因观察等待而重启或宣布失败。
+[含 Peer 诊断的十条验收](https://github.com/liao-zc/OmniPlayer/actions/runs/41007252723) 正在执行。前一轮 41005807792 也仍在运行，保留其独立结果，未因观察等待而重启或宣布失败。
 
 再次检查对标仓库 zaidielykelee/Magnet_player，当前树仍只有 README.md，无法进行 BT 源码级比较；未将其他客户端探测冒充对标 App 的同设备效果。
 
 ### Tracker 恢复后的十条真实验收：仍为 0/10
 
-[完整运行 41005807792](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005807792) 已结束。十条分别冷启动检查，所有资源有效视频字节为 0、首帧时间戳为 0；7 条取得元数据，3 条未取得。两条最终显示种子数 1，但仍没有收到数据。Tracker 集合恢复数量不是起播证据。
+[完整运行 41005807792](https://github.com/liao-zc/OmniPlayer/actions/runs/41005807792) 已结束。十条分别冷启动检查，所有资源有效视频字节为 0、首帧时间戳为 0；7 条取得元数据，3 条未取得。两条最终显示种子数 1，但仍没有收到数据。Tracker 集合恢复数量不是起播证据。
 
 | 资源哈希 | 元数据 | 最终 Peer / 种子 | 视频字节 | 结果 |
 | --- | --- | --- | --- | --- |
@@ -378,39 +378,39 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 
 ### Peer 诊断和选择状态重建的实际发现
 
-[Peer 诊断运行 41007252723](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007252723) 已结束，十条仍无有效视频数据、无首帧。多条已握手连接自报 dht-spy/1.0，资源拥有比例 0、下载字节 0；另有 Transmission、qBittorrent、BitTorrent 连接以及大量 TCP/uTP 超时或对端重置。不能将这些节点与真正供给视频分片的节点混为一谈，也不能据本次测试推断所有网络都无做种。
+[Peer 诊断运行 41007252723](https://github.com/liao-zc/OmniPlayer/actions/runs/41007252723) 已结束，十条仍无有效视频数据、无首帧。多条已握手连接自报 dht-spy/1.0，资源拥有比例 0、下载字节 0；另有 Transmission、qBittorrent、BitTorrent 连接以及大量 TCP/uTP 超时或对端重置。不能将这些节点与真正供给视频分片的节点混为一谈，也不能据本次测试推断所有网络都无做种。
 
 新引擎返回 Peer 地址格式为 tcp://IP:port。元数据替换恢复逻辑以前仅按 IP:port 切割，未移除协议前缀，导致构造重连地址失败。实验分支已按 URI 解析 IPv4、IPv6 及协议前缀，保留地址和端口，拒绝非法端口和地址；新增三个 Android 回归测试。
 
 [Peer 原始字段及断连记录摘要](evidence/modern-peer-diagnostics.json)保留每个地址观察到的客户端和数据比例，以及不同的错误事件。完整逐秒文件从对应 Actions 附件下载。
 
-[选择调用追踪 41008640791](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41008640791) 在失败时只记录到 MainActivity.onCreate → TorrentTasks.initialize 从已保存状态载入 [4]；全选时的修改记录已消失，表明过程中发生任务/进程重建，尚不能仅凭此确定退出原因。新回归保存 logcat 和 Android process exit-info，进一步定位重建原因。
+[选择调用追踪 41008640791](https://github.com/liao-zc/OmniPlayer/actions/runs/41008640791) 在失败时只记录到 MainActivity.onCreate → TorrentTasks.initialize 从已保存状态载入 [4]；全选时的修改记录已消失，表明过程中发生任务/进程重建，尚不能仅凭此确定退出原因。新回归保存 logcat 和 Android process exit-info，进一步定位重建原因。
 
-- [进程退出原因回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009537644)
-- [Peer 地址修复与功能回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009900336)
-- [修复后的十条磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009904571)
+- [进程退出原因回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41009537644)
+- [Peer 地址修复与功能回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41009900336)
+- [修复后的十条磁力验收](https://github.com/liao-zc/OmniPlayer/actions/runs/41009904571)
 
 以上新回归仍在运行，尚未认定修复通过或发布新版 APK。
 
 ### 定位导致缓存选择丢失的系统存储崩溃
 
-[进程退出回归 41009537644](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009537644) 已结束。logcat 记录 Android 15 MediaProvider/FUSE 进程的 SIGABRT：active_nodes_.find(node) 检查失败；随后 vold 明确执行“Killing all processes referencing /storage/emulated/0”。App 的退出记录是 SIGNALED，系统中断了下载/播放进程。该次证据指向共享存储系统进程崩溃，不能把它当作 App Java 异常或声称已解决。
+[进程退出回归 41009537644](https://github.com/liao-zc/OmniPlayer/actions/runs/41009537644) 已结束。logcat 记录 Android 15 MediaProvider/FUSE 进程的 SIGABRT：active_nodes_.find(node) 检查失败；随后 vold 明确执行“Killing all processes referencing /storage/emulated/0”。App 的退出记录是 SIGNALED，系统中断了下载/播放进程。该次证据指向共享存储系统进程崩溃，不能把它当作 App Java 异常或声称已解决。
 
 [系统崩溃及进程退出摘录](evidence/fuse-process-restart.txt)，完整 logcat 在该 Actions 附件中。
 
 上游 [SessionParams.setPosixDiskIO](https://github.com/aldenml/libtorrent4j/blob/master/src/main/java/org/libtorrent4j/SessionParams.java) 明确用于不支持内存映射或 Android 驱动异常的场景。实验分支改用此 POSIX 后端，避免默认 mmap 存储，并在调试状态输出实际选用后端。下载/上传限速仍为 0，未设置速度上限；POSIX 的性能及系统崩溃是否消失必须由实际测试确认。
 
-- [POSIX 多文件、缓存、字体及搜索回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010382300)
-- [POSIX 十条真实磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010386326)
-- [不限速受控视频性能验证](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010526508)
+- [POSIX 多文件、缓存、字体及搜索回归](https://github.com/liao-zc/OmniPlayer/actions/runs/41010382300)
+- [POSIX 十条真实磁力验收](https://github.com/liao-zc/OmniPlayer/actions/runs/41010386326)
+- [不限速受控视频性能验证](https://github.com/liao-zc/OmniPlayer/actions/runs/41010526508)
 
 性能验证要求实际首帧、视频尺寸和播放进度，而不只检查 playing 标志。受控速度不代表十条公网资源一定达到相同速度；十条仍分别执行未下载完成时首帧和持续播放检查。以上新运行未结束，未发布新版 APK。
 
-Peer 地址修复的 Android 实际回归已通过：[41009900336](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009900336) 的十项测试均无失败，包括带协议 IPv4、IPv6 和非法地址检查。其后续完整界面流程仍失败；该运行未包含 POSIX 后端，不能宣称整套回归通过。
+Peer 地址修复的 Android 实际回归已通过：[41009900336](https://github.com/liao-zc/OmniPlayer/actions/runs/41009900336) 的十项测试均无失败，包括带协议 IPv4、IPv6 和非法地址检查。其后续完整界面流程仍失败；该运行未包含 POSIX 后端，不能宣称整套回归通过。
 
 ### POSIX 后端 Android 15 回归：17 项功能检查通过
 
-[完整运行 41010382300](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010382300) 成功。10 项 Android 测试无失败；17 项实际 App 检查全部通过，包含在部分下载时登记多个缓存文件、下一集切换、下载列表、缓存重启恢复/重开播放、360p 已有轨道、批量删除；分页 10 项、字体/收藏/历史 11 项也通过。此运行采用 POSIX 磁盘后端，App 完成受控 Android 15 进程重启后的缓存重开，未因 MediaProvider/FUSE 再次丢失任务。
+[完整运行 41010382300](https://github.com/liao-zc/OmniPlayer/actions/runs/41010382300) 成功。10 项 Android 测试无失败；17 项实际 App 检查全部通过，包含在部分下载时登记多个缓存文件、下一集切换、下载列表、缓存重启恢复/重开播放、360p 已有轨道、批量删除；分页 10 项、字体/收藏/历史 11 项也通过。此运行采用 POSIX 磁盘后端，App 完成受控 Android 15 进程重启后的缓存重开，未因 MediaProvider/FUSE 再次丢失任务。
 
 受控多文件缓存列表：
 
@@ -424,7 +424,7 @@ Peer 地址修复的 Android 实际回归已通过：[41009900336](https://githu
 
 ### POSIX 磁盘后端不限速受控视频吞吐
 
-性能运行 [41010526508](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010526508) 实际播放了受控 179,628,504 字节视频：首帧时累计下载 18,419,353 字节（约 10.3%），播放器位置 908ms、渲染高度 360，payload 速度采样 1,919,531 B/s；峰值 payload 6,989,835 B/s。App 与种子均设为不限速，真实首帧时累计有效负载 13,291,161 字节，播放开始早于完整下载。完整性能脚本最后的公网冷启动检查因断开的页面未显示折叠区“网络诊断”按钮而失败；速度、边下边播、全屏、画中画、SHA-256 等先前项目已完成。已修正滚动检查并重跑。
+性能运行 [41010526508](https://github.com/liao-zc/OmniPlayer/actions/runs/41010526508) 实际播放了受控 179,628,504 字节视频：首帧时累计下载 18,419,353 字节（约 10.3%），播放器位置 908ms、渲染高度 360，payload 速度采样 1,919,531 B/s；峰值 payload 6,989,835 B/s。App 与种子均设为不限速，真实首帧时累计有效负载 13,291,161 字节，播放开始早于完整下载。完整性能脚本最后的公网冷启动检查因断开的页面未显示折叠区“网络诊断”按钮而失败；速度、边下边播、全屏、画中画、SHA-256 等先前项目已完成。已修正滚动检查并重跑。
 
 ![受控视频真实画面及内置进度控制](screenshots/current/posix-controlled-video-frame.png)
 
@@ -434,7 +434,7 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ### POSIX 后端十条磁力真实验收：0/10 起播
 
-[完整运行 41010386326](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010386326) 已结束。Android 正式测试 APK 使用 POSIX 后端逐条检查十条用户磁力。**0/10 取得视频数据，0/10 实际渲染首帧**；7 条通过 HTTPS 元数据补充显示文件名，3 条未取得元数据；所有下载字节、播放位置和首帧记录均为 0。分别采样到 Peer 的资源，没有形成可下载的已校验分片。
+[完整运行 41010386326](https://github.com/liao-zc/OmniPlayer/actions/runs/41010386326) 已结束。Android 正式测试 APK 使用 POSIX 后端逐条检查十条用户磁力。**0/10 取得视频数据，0/10 实际渲染首帧**；7 条通过 HTTPS 元数据补充显示文件名，3 条未取得元数据；所有下载字节、播放位置和首帧记录均为 0。分别采样到 Peer 的资源，没有形成可下载的已校验分片。
 
 同一工作流里的独立 libtorrent 2.0.12 native 探测十条也均未取得元数据、有效数据为 0。native 探测客户端不同，说明该次运行的公开发现链同样没有足够证据证明这些磁力在外网提供资源。此结果不能证明别处一定没有做种，也不能计入“通过”。
 
@@ -445,7 +445,7 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ### 扩展 DHT 引导节点后的复测：仍未达到十条验收
 
-[本次 Android 15 实际 APK 验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41014121591) 使用提交 c491877，覆盖用户提供的十条磁力及固定验证磁力。APK 构建成功；十条用户磁力中 **0/10 达到“未完成下载时连续播放”的验收标准**。
+[本次 Android 15 实际 APK 验收](https://github.com/liao-zc/OmniPlayer/actions/runs/41014121591) 使用提交 c491877，覆盖用户提供的十条磁力及固定验证磁力。APK 构建成功；十条用户磁力中 **0/10 达到“未完成下载时连续播放”的验收标准**。
 
 此次将 DHT 引导节点由 3 个扩展为 7 个。结果相较前一轮有所改善：有一条资源 571bb0140930a9b46dba127d2f23b3eaf6b53530 实际连接到 qBittorrent 做种端，收到有效数据并渲染 1080p 视频帧。首帧耗时约 101 秒，首帧时已下载约 25.4 MB / 4.65 GB；运行截图显示约 31.9 MB / 4.3 GB，约 0.7%，因此它没有等到 20% 才开始播放。测试在 120 秒观察窗口结束时播放位置约 17.8 秒，未达到脚本要求的 20 秒连续播放时长，故不计为通过。其余九条均未出现真实画面。扩展引导节点改善了至少一条资源的发现结果，但目前首帧等待仍慢，且十条总体验收失败。
 
@@ -455,7 +455,7 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ### 加密 Peer 查询后的第二轮结果
 
-[第二轮 Android 15 验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41017234456) 使用提交 d6a6097，构建成功；十条用户磁力仍为 **0/10 首帧、0/10 连续播放**，固定验证磁力也没有收到视频字节。相比上一轮唯一曾渲染画面的哈希，本轮也未发现在线供片端。逐项元数据、Peer、字节和阶段记录见 [dht-retry-acceptance.json](evidence/dht-retry-acceptance.json)。
+[第二轮 Android 15 验收](https://github.com/liao-zc/OmniPlayer/actions/runs/41017234456) 使用提交 d6a6097，构建成功；十条用户磁力仍为 **0/10 首帧、0/10 连续播放**，固定验证磁力也没有收到视频字节。相比上一轮唯一曾渲染画面的哈希，本轮也未发现在线供片端。逐项元数据、Peer、字节和阶段记录见 [dht-retry-acceptance.json](evidence/dht-retry-acceptance.json)。
 
 两次冷启动 Android 实测表明，DHT 引导节点扩展曾帮助找到一个临时在线做种端，但更频繁、更大批量的 DHT 查询没有稳定带来可用 Peer。当前剩余的关键条件是资源发布者或做种者在线并能提供通过校验的分片；若 swarm 无在线供片端，客户端无法从磁力哈希恢复视频内容。故十条验收仍未完成，不生成 APK。
 
@@ -484,7 +484,7 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ### 构建、仓库检查与限制
 
-- 本轮将版本推进为 **0.2.2**；GitHub Actions 构建及发布已通过（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41029450862)）：通用、ARM64、ARMv7 APK 均完成打包并上传到 [v0.2.2 Release](https://github.com/liao-zc/FreeMangnetPlayer/releases/tag/v0.2.2)。文档可读性检查也通过（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41029451045)）。
+- 本轮将版本推进为 **0.2.2**；GitHub Actions 构建及发布已通过（[运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41029450862)）：通用、ARM64、ARMv7 APK 均完成打包并上传到 [v0.2.2 Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.2.2)。文档可读性检查也通过（[运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41029451045)）。
 - 当前 Windows 环境未检测到 Java，因此本地无法运行 Android Gradle 构建；需以 CI `assembleDebug` 通过作为 APK 可编译证据。
 - 已做源码路径核对；尚无连接 Android 手机、电视或平板进行本轮 IPTV 播放交互测试。
 - “频道列表解析成功”不等同于源站持续提供直播。若播放在固定时长结束，设备日志中的 HLS playlist、`#EXT-X-ENDLIST`、HTTP 状态及 Media3 错误是进一步区分源站短片/失效地址与客户端解析问题所需证据。
@@ -505,7 +505,7 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 ### 历史验收保留及本轮边界
 
-此前 IPTV 9 项点检和 BT/搜索/字体/播放等历史结果仍保留于本报告；指定十条公网磁力仍记录为 0/10 起播，不因本轮直播 UI 改动而更改。本轮 Android 真机 IPTV 播放、PiP 系统行为、网络速度显示和触摸/遥控交互均未完成设备实测。GitHub Actions 已通过：Android `assembleDebug`、通用/ARM64/ARMv7 APK 打包与 Release 发布成功（[构建记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41031735784)）；UTF-8/Markdown 文档可读性检查通过（[检查记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41031735965)）。v0.2.3 APK 下载：[ARM64](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-arm64-v8a.apk) · [ARMv7](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-armeabi-v7a.apk) · [通用版](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3.apk)。设备实播仍待验。
+此前 IPTV 9 项点检和 BT/搜索/字体/播放等历史结果仍保留于本报告；指定十条公网磁力仍记录为 0/10 起播，不因本轮直播 UI 改动而更改。本轮 Android 真机 IPTV 播放、PiP 系统行为、网络速度显示和触摸/遥控交互均未完成设备实测。GitHub Actions 已通过：Android `assembleDebug`、通用/ARM64/ARMv7 APK 打包与 Release 发布成功（[构建记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41031735784)）；UTF-8/Markdown 文档可读性检查通过（[检查记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41031735965)）。v0.2.3 APK 下载：[ARM64](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-arm64-v8a.apk) · [ARMv7](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-armeabi-v7a.apk) · [通用版](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3.apk)。设备实播仍待验。
 ## OmniPlayer v0.2.4 设置与导航调整点检（2026-10-30）
 
 ### 本轮要求逐项点检
@@ -522,4 +522,24 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 | 8 | 改进复制磁力入口 | 保留用户此前要求的目标文件磁力复制功能；移除列表文字按钮，改成每个文件旁边的复制图标，文件选择弹窗也提供单项复制图标。源码检查通过。|
 | 9 | 电视与磁播默认视频画面尺寸/位置一致 | 两个播放器的非全屏视频区域均设为屏幕内容区顶部、宽度充满、高度 240dp；全屏仍按各播放器全屏操作生效。源码检查通过，设备视觉对照待验。|
 
-此前各轮直播、BT、搜索、字体和历史需求点检均保留；十条指定公网磁力此前 0/10 起播的结果仍有效，不受本轮设置/导航改动影响。当前环境没有 Android 设备，本轮 UI 交互、颜色跨屏即时生效、播放器画面实际对齐及清理文件回归尚未进行真机验收。首次构建检查发现缺少 `dp` 与 `LocalContext` 导入，已修复后重新构建。最终 GitHub Actions 构建成功（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41035397603)）：Android `assembleDebug`、通用/ARM64/ARMv7 APK 打包和 Release 发布均通过；UTF-8 与 GitHub Markdown 可读性检查通过（[运行记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41035397388)）。APK：[ARM64](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4-arm64-v8a.apk) · [ARMv7](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4-armeabi-v7a.apk) · [通用](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4.apk)。
+此前各轮直播、BT、搜索、字体和历史需求点检均保留；十条指定公网磁力此前 0/10 起播的结果仍有效，不受本轮设置/导航改动影响。当前环境没有 Android 设备，本轮 UI 交互、颜色跨屏即时生效、播放器画面实际对齐及清理文件回归尚未进行真机验收。首次构建检查发现缺少 `dp` 与 `LocalContext` 导入，已修复后重新构建。最终 GitHub Actions 构建成功（[运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41035397603)）：Android `assembleDebug`、通用/ARM64/ARMv7 APK 打包和 Release 发布均通过；UTF-8 与 GitHub Markdown 可读性检查通过（[运行记录](https://github.com/liao-zc/OmniPlayer/actions/runs/41035397388)）。APK：[ARM64](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4-arm64-v8a.apk) · [ARMv7](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4-armeabi-v7a.apk) · [通用](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.4/OmniPlayer-v0.2.4.apk)。
+## OmniPlayer v0.2.5 仓库、设置与默认直播源点检（2026-10-30）
+
+### 本轮逐项结果
+
+| # | 用户要求 | 本轮修改与验收结果 |
+|---|---|---|
+| 1 | README 与 GitHub 仓库统一命名 OmniPlayer | GitHub 仓库已重命名为 [`liao-zc/OmniPlayer`](https://github.com/liao-zc/OmniPlayer)，本地 origin 已切换到新仓库地址。Android applicationId 仍为 `com.freemangnetplayer`，保留原安装升级与本机数据身份。README 已更新仓库链接、产品名及 v0.2.5 下载链接。服务端改名已由 GitHub API 查询确认；推送和 release 尚待本轮 CI。|
+| 2 | 确认上轮报告和截图是否过时、重新点检 | 确认 v0.2.4 报告所列大部分截图来自早期需求回归，并非 v0.2.4 本轮新采集，不能视为本轮 UI 截图。历史报告明确保留为历史记录；本轮新增 `current-ui` 模拟器流程，待 Actions 实际运行后再补入真实截图和运行链接。未运行前不宣称 UI 已通过。|
+| 3 | 首页底部移除磁力播放入口 | 首页模式不再绘制独立磁播底栏项；首页磁播功能卡片仍可进入模块。磁播模块内搜索、播放、下载、收藏导航保留。源码检查通过，模拟器点击验收待 `current-ui`。|
+| 4 | 磁播和直播各自设置只显示本类配置，并与外部设置同步 | 统一设置入口仍列直播、磁播、通用、软件说明分类。磁播模块顶部“设置”现在直接打开磁播配置；直播页面齿轮及统一设置“直播设置”仍进入同一个 `IptvStore` 源编辑器。配置读写仍使用各自本地 SharedPreferences。源码检查通过；本轮跨入口保存后复读由 `current-ui` 待验。|
+| 5 | 更改默认 IPTV 源，保留 IPTV Org 备用源 | `IptvStore.DEFAULT_URL` 已改为 `https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u`，IPTV Org 地址保留为备用。首次升级迁移加入两条内置源并选中 IPTV_ALL，原有自定义源保留。代码已修改；新装/升级模拟器配置检查待运行。|
+| 6 | 版本信息从通用设置移入软件说明 | 通用设置只保留字体和背景；设置菜单增加独立“软件说明”，显示 OmniPlayer、版本号和更新时间。源码检查通过；模拟器页面内容检查待 `current-ui`。|
+
+### 截图与证据说明
+
+旧版指南曾直接引用 `performance-*`、`preferences-*` 等文件。它们确实是此前版本的截图，不是本次工作采集；不得据此判定本轮界面。当前模拟器尚未执行，所以本表里涉及 UI、跨入口同步、首次默认源呈现的内容均为“待模拟器验收”，不冒充已通过。成功运行后会把本轮截图放进 `docs/screenshots/current-ui/` 并在指南及本节直接链接。
+
+v0.2.4 及更早版本的公网 BT 十条仍为 0/10 起播等历史结果，详见本报告既有专项记录；本轮设置/UI 改动不修改这些结果，也未重测 BT 网络链路。
+
+版本目标推进至 **v0.2.5**（versionCode 23）。本地 Windows 环境没有 Java/Android 设备，本地 Gradle 和设备实播无法运行；等待 GitHub Actions Android 构建、Markdown 检查和模拟器验收。APK 下载地址在构建 Release 成功前尚不可用。

@@ -1,5 +1,5 @@
 {
-  "action": "https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41014121591",
+  "action": "https://github.com/liao-zc/OmniPlayer/actions/runs/41014121591",
   "testedCommit": "c491877",
   "result": "0 of 10 passed sustained playback while incomplete; one user resource rendered a 1080p frame after 101.0 seconds but did not meet sustained-playback acceptance",
   "rows": [

@@ -18,7 +18,7 @@ assert throughput['passed'] and throughput['peak_payload_bytes_per_second']>=2*1
 tests=list(Path(a.preferences).rglob('TEST-*.xml'))
 assert tests and sum(int(ET.parse(f).getroot().get('tests','0')) for f in tests)>=3
 assert all(int(ET.parse(f).getroot().get('failures','0'))==0 and int(ET.parse(f).getroot().get('errors','0'))==0 for f in tests)
-runs=json.loads(a.runs);url='https://github.com/liao-zc/FreeMangnetPlayer';v='v0.1.16'
+runs=json.loads(a.runs);url='https://github.com/liao-zc/OmniPlayer';v='v0.1.16'
 keep={'docs/report.md','docs/usage-zh.md'};images=root/'docs/screenshots/current';images.mkdir(parents=True,exist_ok=True)
 for base,file,prefix in [(a.library,'library-verification.json','library-'),(a.preferences,'preferences-verification.json','preferences-'),(a.public,'public-acceptance.json','public-'),(a.performance,'performance-verification.json','performance-'),(a.search,'real-search-comparison.json','search-')]:
  directory=find(base,file).parent

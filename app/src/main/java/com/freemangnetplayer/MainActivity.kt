@@ -289,7 +289,7 @@ class MainActivity : ComponentActivity() {
                         if (magnetSection) TopAppBar(
                             title = { Text(if (selectedTab == "搜索结果") "搜索结果" else "磁力播放") },
                             navigationIcon = { IconButton(onClick = { selectedTab = "门户" }) { Icon(Icons.Default.ArrowBack, "返回主页") } },
-                            actions = { TextButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }) { Text("设置") } }
+                            actions = { TextButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "magnet")) }) { Text("设置") } }
                         )
                     },
                     bottomBar = {
@@ -305,8 +305,6 @@ class MainActivity : ComponentActivity() {
                                 NavigationBarItem(selected = selectedTab == "播放" || selectedTab == "缓存", onClick = { selectedTab = "播放"; reloadLibrary() }, icon = { Icon(Icons.Default.PlayArrow, null) }, label = { Text("播放") })
                                 NavigationBarItem(selected = selectedTab == "下载", onClick = { selectedTab = "下载"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("下载") })
                                 NavigationBarItem(selected = selectedTab == "收藏", onClick = { selectedTab = "收藏"; reloadLibrary() }, icon = { Icon(Icons.Default.Bookmarks, null) }, label = { Text("收藏") })
-                            } else {
-                                NavigationBarItem(selected = false, onClick = { selectedTab = "搜索" }, icon = { Icon(Icons.Default.Search, null) }, label = { Text("磁力播放") })
                             }
                             NavigationBarItem(
                                 selected = false,

@@ -12,7 +12,7 @@ on:
         description: Test scope
         default: player-revision
         type: choice
-        options: [player-revision, performance, optimization, full, user-resources, engines, titles]
+        options: [current-ui, player-revision, performance, optimization, full, user-resources, engines, titles]
 permissions:
   contents: write
 jobs:
@@ -95,11 +95,11 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           emulator-boot-timeout: 600
           disable-animations: true
-          script: adb install -r ui-inspector/build/outputs/apk/debug/ui-inspector-debug.apk; if [ "$FMP_TEST_MODE" = user-resources ]; then /usr/bin/python3 scripts/verify_public_acceptance.py; elif [ "$FMP_TEST_MODE" = player-revision ]; then /usr/bin/python3 scripts/verify_player_revision.py; elif [ "$FMP_TEST_MODE" = performance ]; then /usr/bin/python3 scripts/verify_performance.py; elif [ "$FMP_TEST_MODE" = optimization ]; then /usr/bin/python3 scripts/verify_optimization.py; else /usr/bin/python3 scripts/verify_real_app.py; fi
+          script: adb install -r ui-inspector/build/outputs/apk/debug/ui-inspector-debug.apk; if [ "$FMP_TEST_MODE" = current-ui ]; then /usr/bin/python3 scripts/verify_current_ui.py; elif [ "$FMP_TEST_MODE" = user-resources ]; then /usr/bin/python3 scripts/verify_public_acceptance.py; elif [ "$FMP_TEST_MODE" = player-revision ]; then /usr/bin/python3 scripts/verify_player_revision.py; elif [ "$FMP_TEST_MODE" = performance ]; then /usr/bin/python3 scripts/verify_performance.py; elif [ "$FMP_TEST_MODE" = optimization ]; then /usr/bin/python3 scripts/verify_optimization.py; else /usr/bin/python3 scripts/verify_real_app.py; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: FreeMangnetPlayer-usage-screenshots
+          name: OmniPlayer-usage-screenshots
           path: |
             manual-shots/
             fixture.log

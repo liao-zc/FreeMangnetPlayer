@@ -14,7 +14,7 @@ parser.add_argument('--html', required=True)
 parser.add_argument('--evidence-prefix', default='optimization')
 args = parser.parse_args()
 root = Path(__file__).resolve().parent.parent
-repo = 'liao-zc/FreeMangnetPlayer'
+repo = 'liao-zc/OmniPlayer'
 token = subprocess.check_output(['gh', 'auth', 'token'], text=True).strip()
 headers = {'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28'}
 

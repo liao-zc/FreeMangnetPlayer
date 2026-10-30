@@ -6,7 +6,7 @@ def gh(*args,data=None):
         if p.returncode==0:return p.stdout
         time.sleep(2**attempt)
     raise RuntimeError(p.stderr.decode('utf-8',errors='replace'))
-repo='liao-zc/FreeMangnetPlayer'
+repo='liao-zc/OmniPlayer'
 for path in ['README.md','docs/usage-zh.md','docs/report.md']:
     committed=subprocess.check_output(['git','show','HEAD:'+path])
     remote=json.loads(gh('api',f'repos/{repo}/contents/{path}'));raw=base64.b64decode(remote['content']);assert raw==committed,path

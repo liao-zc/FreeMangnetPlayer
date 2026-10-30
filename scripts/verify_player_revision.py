@@ -270,7 +270,7 @@ def main():
     adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
     adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity'); time.sleep(2)
     user_observation('v0.1.13')
-    urllib.request.urlretrieve('https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.12/FreeMangnetPlayer-v0.1.12.apk','previous-app.apk')
+    urllib.request.urlretrieve('https://github.com/liao-zc/OmniPlayer/releases/download/v0.1.12/FreeMangnetPlayer-v0.1.12.apk','previous-app.apk')
     adb('shell','am','force-stop',PACKAGE); adb('shell','pm','clear',PACKAGE)
     adb('install','-r','-d','previous-app.apk'); adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
     adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity'); time.sleep(2)

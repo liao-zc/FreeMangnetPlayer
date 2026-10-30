@@ -24,7 +24,7 @@ def embed(match):
 
 body = re.sub(r'src="([^":]+\.png)"', embed, body)
 body = re.sub(r'href="(?!https?:|#)([^"]+)"',
-              lambda m: 'href="https://github.com/liao-zc/FreeMangnetPlayer/blob/main/docs/' + m.group(1) + '"', body)
+              lambda m: 'href="https://github.com/liao-zc/OmniPlayer/blob/main/docs/' + m.group(1) + '"', body)
 html = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>FreeMangnetPlayer 实测报告</title><style>

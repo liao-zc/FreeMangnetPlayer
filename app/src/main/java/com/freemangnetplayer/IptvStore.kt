@@ -20,14 +20,28 @@ object IptvSession {
 }
 
 object IptvStore {
-    const val DEFAULT_URL = "https://iptv-org.github.io/iptv/index.m3u"
+    const val DEFAULT_URL = "https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u"
+    const val IPTV_ORG_URL = "https://iptv-org.github.io/iptv/index.m3u"
     private const val PREFS = "iptv-player"
     private const val FAVORITE_ROWS = "favorite-channels"
 
     fun sources(context: Context): List<IptvSource> {
-        val rows = runCatching { JSONArray(context.getSharedPreferences(PREFS, 0).getString("sources", "[]")) }.getOrDefault(JSONArray())
+        val prefs = context.getSharedPreferences(PREFS, 0)
+        val rows = runCatching { JSONArray(prefs.getString("sources", "[]")) }.getOrDefault(JSONArray())
         val saved = buildList { for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { add(IptvSource(it.optString("name"), it.optString("url"))) } }
-        return saved.ifEmpty { listOf(IptvSource("IPTV Org", DEFAULT_URL)) }
+        if (!prefs.getBoolean("default-sources-v2-migrated", false)) {
+            val migrated = (saved + listOf(IptvSource("IPTV_ALL", DEFAULT_URL), IptvSource("IPTV Org", IPTV_ORG_URL)))
+                .distinctBy { it.url.trim().lowercase() }
+            val editor = prefs.edit().putBoolean("default-sources-v2-migrated", true).putString("selected-source", "IPTV_ALL")
+            if (saved.isNotEmpty()) {
+                val json = JSONArray()
+                migrated.forEach { json.put(JSONObject().put("name", it.name).put("url", it.url)) }
+                editor.putString("sources", json.toString())
+            }
+            editor.apply()
+            return migrated
+        }
+        return saved.ifEmpty { listOf(IptvSource("IPTV_ALL", DEFAULT_URL), IptvSource("IPTV Org", IPTV_ORG_URL)) }
     }
 
     fun saveSources(context: Context, sources: List<IptvSource>) {
