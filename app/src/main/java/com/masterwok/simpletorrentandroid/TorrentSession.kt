@@ -187,7 +187,7 @@ open class TorrentSession(
                 torrentHandle.addTracker(AnnounceEntry(url).apply { this.tier(tier.toShort()) })
             }
         }
-        restoredTrackers = torrentHandle.trackers().count { it.url() in knownTrackers }
+        restoredTrackers = torrentHandle.trackers().count { knownTrackers.containsKey(it.url()) }
         reconnectKnownPeers(torrentHandle)
         listener?.onAddTorrent(
                 torrentHandle
