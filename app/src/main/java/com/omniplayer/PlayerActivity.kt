@@ -603,7 +603,6 @@ class PlayerActivity : ComponentActivity() {
                 text="${if(duration>0)historyTime(duration) else "读取时长"} · ${if(height>0) "${height}P" else "读取分辨率"} · ${bytes(f.size)} · ${"%.1f".format(percent)}%"
                 typeface=DisplaySettings.typeface(this@PlayerActivity)
             }
-            view.findViewById<android.widget.ProgressBar>(R.id.player_cache_progress)?.progress=(percent*10).toInt()
             if(player?.isPlaying==true && System.currentTimeMillis()-lastHistoryAt>5000) {lastHistoryAt=System.currentTimeMillis();LibraryStore.addPlayback(this,f.path.substringAfterLast('/'),link,player?.currentPosition ?: 0,duration)}
         }
         for((id,size) in listOf(R.id.player_position to 12f,R.id.player_duration to 12f,R.id.player_speed to 13f,R.id.player_quality to 11f,R.id.player_resource_info to 11f)) view.findViewById<TextView>(id)?.apply { typeface=DisplaySettings.typeface(this@PlayerActivity);setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP,size*DisplaySettings.scale(this@PlayerActivity)) }
