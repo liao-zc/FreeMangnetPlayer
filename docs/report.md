@@ -590,7 +590,7 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 | # | 用户反馈 | 修改与实测 | 结果 |
 |---|---|---|---|
 | 1 | Spider-Man 4K MKV 已缓存数 MB，但播放器无画面/信息 | 修正 BT 起播优先级：首个 8 MiB piece 独占紧急优先级；首片校验后撤销顺序下载模式，允许解码器请求 MKV 尾部 cue/index 分片。播放器等待页现在显示文件名、文件大小、已缓存字节/百分比、节点数、实时速率及“时长/分辨率等待”状态。硬解等待分片时不再因 15 秒无首帧而自动切 LibVLC；只有硬解明确报错才切兼容解码。构建通过：[Android APK build](https://github.com/liao-zc/OmniPlayer/actions/runs/41095400542)。冷启动 120 秒测试失败：[运行 41095400961](https://github.com/liao-zc/OmniPlayer/actions/runs/41095400961)。该轮只收到 430,007 字节，峰值 5,790 B/s，首片未校验、无时长/分辨率/首帧。前一轮 [运行 41094174624](https://github.com/liao-zc/OmniPlayer/actions/runs/41094174624) 收到 15,465,474 字节、首片校验成功，但 piece 1970（MKV 文件尾索引）未校验，播放器仍未起播。不能把“有节点、收到数据或首片完成”当成播放通过。 |
-| 2 | 搜索结果翻页按钮无法点击、分页说明重复且希望只有一套排序入口 | 当前搜索结果页只有一行页码、上一页/下一页图标和一个排序菜单（匹配度/时间/热度）；不显示前/后 20 页按钮。Android 15 模拟器受控分页回归通过：[运行 41092918727](https://github.com/liao-zc/OmniPlayer/actions/runs/41092918727)。当页按钮只在搜索器发现对应的下一页地址后启用；站点没有分页链接、拦截或要求人工验证时，客户端不能生成不存在的页地址。六个搜索源的真实搜索回归通过：[运行 41089962821](https://github.com/liao-zc/OmniPlayer/actions/runs/41089962821)；该测试检查搜索抓取，不等价于六个源每一个分页都已逐页人工验收。 |
+| 2 | 搜索结果翻页按钮无法点击、分页说明重复且希望只有一套排序入口 | 当前搜索结果页只有一行页码、上一页/下一页图标和一个排序菜单（匹配度/时间/热度）；不显示前/后 20 页按钮。Android 15 模拟器分页回归通过：[运行 41097603494](https://github.com/liao-zc/OmniPlayer/actions/runs/41097603494)：第 1 页 39 条、第 2 页 17 条、第 3 页 0 条；上一页、跳转到已发现页面、排序切换、空结果和返回搜索页均通过。新截图：[第 1 页](screenshots/current/v0.2.8-pagination-page-1.png)、[第 2 页](screenshots/current/v0.2.8-pagination-page-2.png)、[空第 3 页](screenshots/current/v0.2.8-pagination-page-3.png)、[排序选项](screenshots/current/v0.2.8-sort-options.png)、[上一页结果](screenshots/current/v0.2.8-pagination-back.png)。当页按钮只在搜索器发现对应的下一页地址后启用；站点没有分页链接、拦截或要求人工验证时，客户端不能生成不存在的页地址。六个搜索源的真实搜索回归通过：[运行 41089962821](https://github.com/liao-zc/OmniPlayer/actions/runs/41089962821)；该测试检查搜索抓取，不等价于六个源每一个分页都已逐页人工验收。 |
 | 3 | 搜索结果重复标题、返回按钮和设置入口重复 | 结果页保留一个页面标题和一个回到搜索表单的返回操作；分页上/下一页使用较轻的左右箭头图标，与页面返回键明确区分。设置只有磁力模块顶部入口，没有重复的底部设置项。源码结构已核对；本轮未新增该 UI 的截图，不能称为本轮设备截图验收。 |
 | 4 | 搜索结果排序 | 一个排序按钮展开匹配度、来源日期、热度三种规则；日期显示搜索源发布日期，格式精确到日。magnet URI 本身不包含做种开始日期；搜索源没有发布日期时不伪造日期。受控模拟器分页/排序检查见[运行 41092918727](https://github.com/liao-zc/OmniPlayer/actions/runs/41092918727)及既有排序菜单截图 [v0.2.8-search-sort-menu.png](screenshots/current/v0.2.8-search-sort-menu.png)。 |
 | 5 | IPTV 观看历史及单个/多个删除 | `IptvStore` 保存观看频道快照，观看历史列表支持单条选择、全选和批量删除；频道源删除后历史仍保留独立的频道 URL/台标/分组快照。Instrumentation 的存储单删/多删步骤通过；包含这些测试的 workflow 后续 UI 检查因未找到 `player_quality` 控件而失败，故这里只认定存储测试通过，不将整个 workflow 标为通过：[运行 41089963816](https://github.com/liao-zc/OmniPlayer/actions/runs/41089963816)。 |
@@ -598,24 +598,3 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 | 7 | 搜索来源真实可用性 | 六个来源独立浏览器与 App 搜索回归工作流通过（运行 41089962821）。网站挑战、网络区域或站点改版仍会影响某次搜索；分页仅以页面实际发现的链接为准。 |
 
 最新真实运行截图：[Spider-Man 等待状态](screenshots/current/v0.2.8-spiderman-waiting.png)。截图来自本轮 APK 的 Android 15 模拟器；画面是播放器缓冲态，没有伪装成影片画面。完整逐秒 BT/解码证据保留在 Actions 附件。用户此前提供的 10 条磁力正在新 workflow [运行 41096478789](https://github.com/liao-zc/OmniPlayer/actions/runs/41096478789)逐条做冷启动验收，完成后本报告追加每条首帧、起播时间、有效字节、持续播放和最终状态。当前蜘蛛侠磁力仍未通过“真实首帧且连续播放”验收，本版本不发布为已修复。
-## OmniPlayer v0.2.8：磁力起播、搜索控件与 IPTV 历史
-
-版本目标：0.2.8 / versionCode 26。以下是本轮代码和已完成的自动化验收。公网磁力的实际起播结果以单独记录为准。
-
-| # | 要求 | 实现与校验 |
-|---|---|---|
-| 1 | 指定 Spider-Man MKV 已收到约 7.4 MB，但播放器无画面/信息 | MKV 优先使用设备硬件解码；8 秒没有首帧则切换 LibVLC 兼容解码。Android 15 APK 构建通过。用户给出的完整 magnet 冷启动 120 秒实际失败：[运行 41082074816](https://github.com/liao-zc/OmniPlayer/actions/runs/41082074816)。播放器连到 2 个 peer/seed 并接收 54,792,716 字节（约 0.33% 的 16.53 GB 视频，峰值 533,646 B/s），但 LibVLC 回退后 `playing=false`、时长未知、视频高度 0、首帧时间为 0。不是节点缺失，也没有声称可播。第二轮实际 APK 记录到 VLC 请求 `bytes=0-`，本地 Range 服务返回 HTTP 206，但 BT 读源发出 0 字节。第三轮进一步确认：视频 offset 0 对应 piece 0（8 MiB），两台完整做种端在 120 秒送来 55,508,709 字节，但 piece 0 仍未校验；`TOP_PRIORITY` 和 deadline 0 未改变结果。三轮均无首帧、时长或视频尺寸。实测黑屏截图：[冷启动画面](screenshots/current/v0.2.8-spiderman-no-frame.png)；[三轮逐项数据](evidence/v0.2.8-spiderman-playback.json)，最新失败运行 [41085333645](https://github.com/liao-zc/OmniPlayer/actions/runs/41085333645)。当前修复尝试将活动文件设为 libtorrent 顺序下载范围，让开头分片先到；仍待新 APK 复测。 |
-| 2 | 搜索资源日期精确到日 | 搜索源明确提供的绝对/相对发布日期统一显示 `YYYY-MM-DD`。磁力 URI 和 info-hash 不含做种创建时间；没有来源日期时显示“来源未提供”，不拿当前搜索时间冒充做种日。 |
-| 3 | 搜索翻页控件可用且简洁 | 去掉“前/后 20 页”，只保留一行页码、上一页/下一页图标；按钮使用搜索站点已发现的页面地址，无地址时禁用。Android 15 模拟器验证第 1 页 39 条、第 2 页 17 条、第 3 页 0 条；上一页、跳到已发现页、空结果返回搜索页均通过。记录：[运行 41080171319](https://github.com/liao-zc/OmniPlayer/actions/runs/41080171319)，[逐项数据](evidence/v0.2.8-pagination-verification.json)。 |
-| 4 | 搜索排序按钮 | 单个排序图标内含匹配度、时间、热度三个规则。受控搜索页上三种规则均可选，截图确认搜索结果页只有一个“搜索结果”标题和一个返回箭头：[实际模拟器排序菜单截图](screenshots/current/v0.2.8-search-sort-menu.png)。 |
-| 5 | IPTV 观看历史及批量删除 | 独立历史保存频道名、组别、播放地址、台标快照和观看日期；保留最近 100 条，列表支持多选/全选删除。`connectedDebugAndroidTest` 完成通过（运行 41079573687 中 Gradle connected 测试步骤通过）。删除源后记录仍保留的行为由存储快照实现；不同电视/平板上的实际操作尚未真机验收。 |
-| 6 | 非全屏直播播放器下方显示分组频道列表 | 播放页增加分组筛选和可滚动频道列表，条目显示台标、名称、分组与网络响应耗时，点击即可换台。代码已实现；本轮没有可用设备/直播端点完成真实电视流切台和延迟校验，仍待设备验收。 |
-| 7 | README、报告和清理 | README 标出 v0.2.8 尚未发布；本报告保留唯一一节本轮结果，清除了重复追加的过期 v0.2.8 草稿。公网验收工作流新增单磁力模式。分页 JSON 和模拟器截图随报告提交。Markdown 检查通过：[运行 41080166664](https://github.com/liao-zc/OmniPlayer/actions/runs/41080166664)。 |
-
-### 本轮构建与验收边界
-
-Android `assembleDebug` / `assembleDebugAndroidTest` 与 `connectedDebugAndroidTest` 均通过（[运行 41079573687](https://github.com/liao-zc/OmniPlayer/actions/runs/41079573687)）。同一工作流后续的通用偏好页 UI 脚本在定位 `player_favorite` 自动化控件时失败；它没有推翻 Gradle 测试或独立分页回归，但该偏好 UI 脚本不能报告为通过。分页和排序使用独立模拟器回归，结果通过。
-
-单磁力运行 41082074816 已结束，结论为未起播。更早的长串运行 41079866177 使用旧提交且已取消，不把它计为验收结果。本轮同 workflow 的独立 libtorrent 探测完成：用户原先十条磁力里 9 条没有元数据，1 条虽有元数据但有效下载字节为 0；这不代表 Spider-Man 目标，因为该资源的 Android App 实测确有 peer 与 payload。当前诊断代码尚未构建，下一轮需要用新 App 同一资源复测；本报告不把黑屏截图伪装成视频画面。
-
-![搜索排序菜单的 Android 15 模拟器截图](screenshots/current/v0.2.8-search-sort-menu.png)
