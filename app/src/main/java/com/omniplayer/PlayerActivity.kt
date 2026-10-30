@@ -392,7 +392,7 @@ class PlayerActivity : ComponentActivity() {
         if (media is ExoPlayer) media.trackSelectionParameters = media.trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true).build()
         qualityHeight = 0
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
-        if (!realMedia && MediaFormats.shouldRetryWithSoftware(file.path)) {
+        if (!realMedia && media is ExoPlayer && MediaFormats.shouldRetryWithSoftware(file.path)) {
             scheduleSoftwareFallback(media, task, file, android.os.SystemClock.elapsedRealtime())
         }
     }
