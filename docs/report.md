@@ -549,7 +549,7 @@ v0.2.4 及更早版本的公网 BT 十条仍为 0/10 起播等历史结果，详
 
 | # | 要求 | 实现与当前验证状态 |
 |---|---|---|
-| 1 | 本地项目文件夹改名 OmniPlayer | 待本轮验证/推送结束后，在父目录将工作区目录改为 `OmniPlayer`；尚未执行。|
+| 1 | 本地项目文件夹改名 OmniPlayer | 本轮尝试从父目录重命名，Windows 因目录正被当前进程占用而拒绝（`MoveDirectoryItemIOError`）；本地路径仍为 `FreeMagnetPlayer`，需关闭占用该目录的应用后重命名。|
 | 2 | 无法播放资源持续提示，并在下载/缓存/收藏中保留提示 | BT 任务仅在已取元数据、所选视频无校验数据/无 payload、Peer 与连接均为 0 且持续 3 分钟后标记“暂无可用资源节点”；警告写入任务与本地列表记录，列表项突出显示。下载/缓存列表展示数量排除此类条目，调度名额也忽略已告警任务。新增显式“重新尝试”按钮，提示不会自行消失。Android Instrumentation 与库/播放器回归流程通过：规则断言无 Peer/无有效字节持续 3 分钟后才标记；告警保存到收藏、播放、下载和缓存记录；告警任务不占调度名额；列表数量从告警条目中排除。报告的记录链接见本节开头。|
 | 3 | 六个搜索源可编辑、删除，默认 BDFlix，最多 10 个，保留配置 | 增加独立搜索引擎管理页面；旧六个内置源和旧版单个自定义源在首次迁移时合并保留。支持改名称/主页/搜索模板、删源、选默认、增至 10 个，并限制至少保留一个；Manifest 已注册页面。Android Store 测试通过：旧六源名称保留；可改名和删除；拒绝超过 10 个；设置页真实显示 BDFlix 为默认。模拟器截图见 `11-search-engine-management.png`、`12-search-engine-default.png`。|
 | 4 | 从搜索结果逐级返回 | 搜索结果页顶部返回及系统返回均回到关键词搜索页；设置页的搜索引擎管理返回磁播设置，磁播设置再回上一页。Android 15 模拟器已分别操作工具栏返回与系统返回，二者都回到保留 `OmniNavigationCheck` 的搜索页；搜索源设置也逐级返回磁播设置。截图见 `13-search-toolbar-returns-to-keyword.png`、`14-search-system-back-returns-to-keyword.png`。|
@@ -560,4 +560,4 @@ v0.2.4 及更早版本的公网 BT 十条仍为 0/10 起播等历史结果，详
 
 本轮没有声称解决无做种者/无 Peer 的客观网络问题。3 分钟无节点只会触发明确的当前不可播放提示，并从下载/缓存名额中排除；它不能令没有在线资源节点的磁力凭空产生数据。用户可手动重新尝试以重新进行 Peer 发现。指定公网磁力资源的实际起播能力需要可达 Peer，本轮 UI 与逻辑改动不构成十条资源播放通过的证据。
 
-v0.2.6 目标为 versionCode 24。Android 编译、Android 15 界面、Instrumentation、BT 多文件库回归、资源格式测试及 Markdown 检查通过。Release APK 待打包。当前指南含 14 张本轮模拟器截图。
+v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentation、BT 多文件库回归、资源格式测试及 Markdown 检查通过。GitHub Actions 发布成功：[v0.2.6 Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.2.6)，含通用、arm64-v8a、armeabi-v7a APK 及源码包。当前指南含 14 张本轮模拟器截图。
