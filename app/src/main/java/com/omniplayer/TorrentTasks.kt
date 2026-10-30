@@ -87,6 +87,7 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     var streaming = false
     @Volatile var streamRangeStart = -1
     @Volatile var streamRangeEnd = -1
+    @Volatile var sequentialStartupActive = false
     var viewers = 0
     @Volatile var handle: TorrentHandle? = null
     @Volatile var engine: TorrentSession? = null
@@ -375,6 +376,17 @@ object TorrentTasks {
                             compareByDescending<TaskFile> { it.index in task.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()?.index ?: -1
                         applyPriorities(task)
                     } else task.files = snapshot.first
+                    if (task.streaming && task.sequentialStartupActive && task.streamRangeStart >= 0) {
+                        synchronized(task.nativeLock) {
+                            if (handle.isValid && handle.havePiece(task.streamRangeStart)) {
+                                // Once the header is verified, honor random-access
+                                // requests (notably MKV cues at EOF) instead of
+                                // forcing the picker to keep downloading in order.
+                                handle.unsetFlags(TorrentFlags.SEQUENTIAL_DOWNLOAD)
+                                task.sequentialStartupActive = false
+                            }
+                        }
+                    }
                     task.done = task.files.filter { it.index in task.selected || (task.streaming && it.index == task.playingIndex) }.sumOf { it.done }
                     task.total = task.files.filter { it.index in task.selected || (task.streaming && it.index == task.playingIndex) }.sumOf { it.size }
                     task.complete = task.total > 0 && task.done >= task.total
@@ -547,6 +559,7 @@ object TorrentTasks {
         // Temporary file switches set their own selection in switchStreamFile.
         if (!task.download && !task.retainedCache && task.selected.isEmpty()) task.selected = setOf(index)
         task.streaming = true; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
+        task.sequentialStartupActive = true
         applyPriorities(task)
         if (task.selectionPaused) { task.selectionPaused = false; resume(task) }
         persist()
@@ -568,6 +581,7 @@ object TorrentTasks {
             val last = ((offset + file.size - 1) / info.pieceLength()).toInt()
             task.streamRangeStart = first
             task.streamRangeEnd = last
+            task.sequentialStartupActive = true
             // Finish the header piece first. Urgent deadlines on four 8 MiB
             // pieces and the file tail scattered blocks before any piece was
             // complete enough for the decoder to read.
