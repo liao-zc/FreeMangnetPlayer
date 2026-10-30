@@ -11,7 +11,7 @@ import java.io.File
 class TaskLanePolicyTest {
     private fun task(download: Boolean, index: Int) =
         TorrentTask("lane-$download-$index", "magnet:?xt=urn:btih:2362347540B27D8A4142AF2BBE0A071F26A3B7A1",
-            "Task $index", File("/data/local/tmp/lane-$index"), download).apply { job = Job() }
+            "Task $index", File("/data/local/tmp/lane-$index"), download).apply { queued = false; job = Job() }
     @Test fun cacheAndPlaybackNeverConsumeDownloadSlots() {
         val values = (0 until 5).map { task(true, it) } + (0 until 10).map { task(false, it) }
         assertEquals(5, TaskLanePolicy.activeCount(values, true))
