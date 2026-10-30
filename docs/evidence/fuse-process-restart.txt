@@ -1,0 +1,43 @@
+10-30 05:43:35.681  1394  1582 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 1582 (Thread-3), pid 1394 (rs.media.module)
+10-30 05:43:35.954  2603  2603 F DEBUG   : Abort message: 'Check failed: active_nodes_.find(node) != active_nodes_.end() '
+10-30 05:43:36.011   160   160 I vold    : Killing all processes referencing /storage/emulated/0
+10-30 05:44:50.482  3401  3435 F libc    : Fatal signal 6 (SIGABRT), code -1 (SI_QUEUE) in tid 3435 (emulated;0), pid 3401 (rs.media.module)
+10-30 05:44:51.271  3872  3872 F DEBUG   : Abort message: 'Check failed: active_nodes_.find(node) != active_nodes_.end() '
+10-30 05:44:51.429   160   163 I vold    : Killing all processes referencing /storage/emulated/0
+
+ACTIVITY MANAGER PROCESS EXIT INFO (dumpsys activity exit-info)
+Last Timestamp of Persistence Into Persistent Storage: 2026-10-30 05:43:26.233
+  package: com.freemangnetplayer
+    Historical Process Exit for uid=10151
+        ApplicationExitInfo #0:
+          timestamp=2026-10-30 05:45:08.168 pid=4279 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #1:
+          timestamp=2026-10-30 05:45:02.953 pid=4105 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #2:
+          timestamp=2026-10-30 05:44:57.768 pid=3886 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=15
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #3:
+          timestamp=2026-10-30 05:44:52.336 pid=3136 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=2
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #4:
+          timestamp=2026-10-30 05:43:51.773 pid=2970 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #5:
+          timestamp=2026-10-30 05:43:46.630 pid=2800 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=9
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #6:
+          timestamp=2026-10-30 05:43:41.491 pid=2632 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=15
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null
+        ApplicationExitInfo #7:
+          timestamp=2026-10-30 05:43:36.341 pid=2489 realUid=10151 packageUid=10151 definingUid=10151 user=0
+          process=com.freemangnetplayer reason=2 (SIGNALED) subreason=0 (UNKNOWN) status=2
+          importance=100 pss=0.00 rss=0.00 description=null state=empty trace=null

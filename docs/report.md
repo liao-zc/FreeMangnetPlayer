@@ -391,3 +391,19 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 - [修复后的十条磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009904571)
 
 以上新回归仍在运行，尚未认定修复通过或发布新版 APK。
+
+### 定位导致缓存选择丢失的系统存储崩溃
+
+[进程退出回归 41009537644](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009537644) 已结束。logcat 记录 Android 15 MediaProvider/FUSE 进程的 SIGABRT：active_nodes_.find(node) 检查失败；随后 vold 明确执行“Killing all processes referencing /storage/emulated/0”。App 的退出记录是 SIGNALED，系统中断了下载/播放进程。该次证据指向共享存储系统进程崩溃，不能把它当作 App Java 异常或声称已解决。
+
+[系统崩溃及进程退出摘录](evidence/fuse-process-restart.txt)，完整 logcat 在该 Actions 附件中。
+
+上游 [SessionParams.setPosixDiskIO](https://github.com/aldenml/libtorrent4j/blob/master/src/main/java/org/libtorrent4j/SessionParams.java) 明确用于不支持内存映射或 Android 驱动异常的场景。实验分支改用此 POSIX 后端，避免默认 mmap 存储，并在调试状态输出实际选用后端。下载/上传限速仍为 0，未设置速度上限；POSIX 的性能及系统崩溃是否消失必须由实际测试确认。
+
+- [POSIX 多文件、缓存、字体及搜索回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010382300)
+- [POSIX 十条真实磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010386326)
+- [不限速受控视频性能验证](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010526508)
+
+性能验证要求实际首帧、视频尺寸和播放进度，而不只检查 playing 标志。受控速度不代表十条公网资源一定达到相同速度；十条仍分别执行未下载完成时首帧和持续播放检查。以上新运行未结束，未发布新版 APK。
+
+Peer 地址修复的 Android 实际回归已通过：[41009900336](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009900336) 的十项测试均无失败，包括带协议 IPv4、IPv6 和非法地址检查。其后续完整界面流程仍失败；该运行未包含 POSIX 后端，不能宣称整套回归通过。
