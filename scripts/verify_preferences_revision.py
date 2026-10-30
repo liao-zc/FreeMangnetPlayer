@@ -4,6 +4,14 @@ from pathlib import Path
 from capture_usage_screenshots import adb,find_and_tap,require_visible,screenshot,PACKAGE,OUT
 
 checks=[]
+def poll(fn,timeout=15):
+    end=time.monotonic()+timeout
+    while time.monotonic()<end:
+        if fn():return
+        time.sleep(.3)
+    screenshot('preferences-persistence-failure.png')
+    raise AssertionError('UI operation did not persist')
+
 def record(name,**data):
     checks.append(dict(check=name,passed=True,**data));(OUT/'preferences-verification.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
 def prefs():return ET.fromstring(adb('shell','run-as',PACKAGE,'cat','shared_prefs/player-settings.xml'))
@@ -27,7 +35,7 @@ def control(name):
         if node is None:node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface')),None)
         if node is not None:
             b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
-            if node.get('resource-id','').endswith('/'+name):return
+            if node.get('resource-id','').endswith('/'+name):time.sleep(.5);return
         time.sleep(.3)
     screenshot('preferences-failed-'+name+'.png')
     (OUT/'preferences-failed-ui.xml').write_text(adb('shell','cat','/sdcard/window.xml'),encoding='utf-8')
@@ -48,8 +56,8 @@ index=next(i for i,f in enumerate(fixture['files']) if f['path'].endswith('Episo
 source=fixture['magnet']+'&so='+str(index)+'&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent'
 adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(source),'--es','mode','play')
 s=wait(lambda s:s.get('playing') and s.get('duration',0)>0 and s.get('videoHeight',0)>0)
-control('player_favorite');assert entries('favorite-entries');screenshot('preferences-04-filled-favorite.png');record('favorite-heart-adds-current-video')
-control('player_favorite');assert not entries('favorite-entries');record('favorite-heart-second-tap-removes')
+control('player_favorite');poll(lambda:bool(entries('favorite-entries')));screenshot('preferences-04-filled-favorite.png');record('favorite-heart-adds-current-video')
+control('player_favorite');poll(lambda:not entries('favorite-entries'));record('favorite-heart-second-tap-removes')
 control('player_favorite')
 find_and_tap('缓存');wait(lambda s:s.get('retainedCache'))
 control('player_quality');require_visible('原画质');screenshot('preferences-05-supported-quality-menu.png');find_and_tap('原画质')
