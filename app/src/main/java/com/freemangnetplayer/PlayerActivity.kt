@@ -154,7 +154,7 @@ class PlayerActivity : ComponentActivity() {
                         if (player == null && !floating) Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                             if (requested) CircularProgressIndicator(color = Color.White)
                             else TextButton(onClick = { requestPlayback(true) }) { Text("重试播放", color = Color.White) }
-                            Text(current.unplayableReason.ifBlank { playerMessage.ifBlank { "正在等待播放分片…" } }, color = if (current.unplayableReason.isNotBlank()) Color(0xFFFF8A80) else Color.White)
+                            Text(current?.unplayableReason.orEmpty().ifBlank { playerMessage.ifBlank { "正在等待播放分片…" } }, color = if (current?.unplayableReason.orEmpty().isNotBlank()) Color(0xFFFF8A80) else Color.White)
                         }
                     }
                 } else {
