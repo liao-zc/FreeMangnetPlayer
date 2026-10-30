@@ -455,4 +455,6 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 
 [第二轮 Android 15 验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41017234456) 使用提交 d6a6097，构建成功；十条用户磁力仍为 **0/10 首帧、0/10 连续播放**，固定验证磁力也没有收到视频字节。相比上一轮唯一曾渲染画面的哈希，本轮也未发现在线供片端。逐项元数据、Peer、字节和阶段记录见 [dht-retry-acceptance.json](evidence/dht-retry-acceptance.json)。
 
-两次冷启动 Android 实测表明，DHT 引导节点扩展曾帮助找到一个临时在线做种端，但更频繁、更大批量的 DHT 查询没有稳定带来可用 Peer。当前剩余的关键条件是资源发布者或做种者在线并能提供通过校验的分片；若 swarm 无在线供片端，客户端无法从磁力哈希恢复视频内容。故十条验收仍未完成，不生成 APK。
+两次冷启动 Android 实测表明，DHT 引导节点扩展曾帮助找到一个临时在线做种端，但更频繁、更大批量的 DHT 查询没有稳定带来可用 Peer。当前剩余的关键条件是资源发布者或做种者在线并能提供通过校验的分片；若 swarm 无在线供片端，客户端无法从磁力哈希恢复视频内容。故十条验收仍未完成，不生成 APK。\n\n### 本轮 Tracker 错误摘录
+
+逐条日志记录了本次测试网络中的 Tracker 异常，例如 tracker.ilibr.org 被标记为 unreachable，explodie.org 的 UDP announce 超时；部分资源虽恢复了 25 个 Tracker 地址，仍未连接到提供视频分片的 Peer。这些是本轮执行环境观察到的错误，不代表所有网络或所有 Tracker 永远不可用。

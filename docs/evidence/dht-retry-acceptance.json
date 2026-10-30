@@ -33,7 +33,11 @@
           "flags": 131242,
           "source": 19
         }
-      ]
+      ],
+      "dhtNodes": 121,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - b3d717 (udp://tracker.ilibr.org:6969/announce)[[::]:45283-v1] skipping tracker announce (unreachable) \"\" (3)"
     },
     {
       "category": "电影",
@@ -109,7 +113,11 @@
           "flags": 170,
           "source": 2
         }
-      ]
+      ],
+      "dhtNodes": 47,
+      "connections": null,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - d45585 (udp://explodie.org:6969/announce)[0.0.0.0:44423-v1] timed out \"\" (3)"
     },
     {
       "category": "电影",
@@ -131,7 +139,11 @@
           "flags": 1048634,
           "source": 2
         }
-      ]
+      ],
+      "dhtNodes": 111,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 6e00f1 (udp://tracker.ilibr.org:6969/announce)[[::]:43747-v1] skipping tracker announce (unreachable) \"\" (3)"
     },
     {
       "category": "动漫",
@@ -180,7 +192,11 @@
           "flags": 170,
           "source": 2
         }
-      ]
+      ],
+      "dhtNodes": 129,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 665ed0 (udp://tracker.ilibr.org:6969/announce)[[::]:37957-v1] skipping tracker announce (unreachable) \"\" (3)"
     },
     {
       "category": "动漫",
@@ -274,7 +290,11 @@
           "flags": 170,
           "source": 1
         }
-      ]
+      ],
+      "dhtNodes": 85,
+      "connections": null,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 840b33 (udp://exodus.desync.com:6969/announce)[0.0.0.0:42605-v1] timed out \"\" (2)"
     },
     {
       "category": "动漫",
@@ -286,7 +306,11 @@
       "stage": "DISCOVERY",
       "firstFrameSeconds": null,
       "passed": false,
-      "peerDetails": []
+      "peerDetails": [],
+      "dhtNodes": 114,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 571bb0 (udp://explodie.org:6969/announce)[0.0.0.0:43735-v1] timed out \"\" (3)"
     },
     {
       "category": "剧集",
@@ -335,7 +359,11 @@
           "flags": 170,
           "source": 2
         }
-      ]
+      ],
+      "dhtNodes": 99,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - fcf228 (udp://tracker.ilibr.org:6969/announce)[[::]:36485-v1] skipping tracker announce (unreachable) \"\" (3)"
     },
     {
       "category": "剧集",
@@ -456,7 +484,11 @@
           "flags": 170,
           "source": 2
         }
-      ]
+      ],
+      "dhtNodes": 107,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da0af5 (udp://explodie.org:6969/announce)[0.0.0.0:36185-v1] timed out \"\" (3)"
     },
     {
       "category": "剧集",
@@ -487,7 +519,11 @@
           "flags": 131242,
           "source": 3
         }
-      ]
+      ],
+      "dhtNodes": 104,
+      "connections": null,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - c79263 (udp://explodie.org:6969/announce)[0.0.0.0:33805-v1] timed out \"\" (3)"
     },
     {
       "category": "纪录片",
@@ -527,7 +563,11 @@
           "flags": 131242,
           "source": 19
         }
-      ]
+      ],
+      "dhtNodes": 101,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - a56fb4 (udp://tracker.ilibr.org:6969/announce)[[::]:41981-v1] skipping tracker announce (unreachable) \"\" (3)"
     },
     {
       "category": "原指定资源",
@@ -648,7 +688,11 @@
           "flags": 131242,
           "source": 19
         }
-      ]
+      ],
+      "dhtNodes": 92,
+      "connections": null,
+      "restoredTrackers": 25,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 236234 (udp://tracker.ilibr.org:6969/announce)[[::]:39719-v1] skipping tracker announce (unreachable) \"\" (3)"
     }
   ]
 }
