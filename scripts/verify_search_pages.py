@@ -40,7 +40,7 @@ for page in [1,2,3]:
     if page==1:
         require_visible('跳转页面；当前第 1 页',st['results'][0]['title'])
         screenshot('all-results-one-page.png')
-        find_and_tap('排序：匹配度');require_visible('时间','热度');find_and_tap('时间')
+        find_and_tap('排序：匹配度');require_visible('时间','热度');screenshot('sort-options.png');find_and_tap('时间')
         find_and_tap('排序：时间');find_and_tap('热度');find_and_tap('排序：热度');find_and_tap('匹配度')
         checks.append({'check':'single-page-controls-and-time-heat-match-sorting','passed':True,'result_count':len(st['results'])})
     if page<3:find_and_tap('下一页')
