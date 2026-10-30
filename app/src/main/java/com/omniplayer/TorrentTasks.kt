@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import android.content.Context
 import android.content.Intent
@@ -158,8 +158,8 @@ object TorrentTasks {
         require(tasks[id]?.clearing != true) { "当前资源正在清理，请稍后重试解析" }
         val task = tasks[id] ?: run {
             // Reuse existing download data before cache data; libtorrent verifies pieces.
-            val downloadFolder = File(SettingsStore.root(c, true), "FreeMangnetPlayerTasks/$id")
-            val cacheFolder = File(SettingsStore.root(c, false), "FreeMangnetPlayerTasks/$id")
+            val downloadFolder = SettingsStore.taskFolder(c, true, id)
+            val cacheFolder = SettingsStore.taskFolder(c, false, id)
             val folder = if (hasData(downloadFolder)) downloadFolder else if (hasData(cacheFolder)) cacheFolder
                 else SettingsStore.taskFolder(c, download, id)
             TorrentTask(id, source, title.ifBlank { "磁力资源" }, folder, download).also { tasks[id] = it }
@@ -190,7 +190,7 @@ object TorrentTasks {
         if (task.paused && task.files.isEmpty() && !task.clearing) { task.paused = false; task.queued = true }
         if (download) {
             recordHistory(task,"下载")
-            if (!task.download || task.folder.canonicalPath == File(SettingsStore.root(c, false), "FreeMangnetPlayerTasks/$id").canonicalPath) {
+            if (!task.download || task.folder.canonicalPath == SettingsStore.taskFolder(c, false, id).canonicalPath) {
                 task.destination = SettingsStore.taskFolder(c, true, id)
             }
             task.download = true; task.retainedCache = true
@@ -650,7 +650,7 @@ object TorrentTasks {
                 if (delete) {
                     val folders = listOfNotNull(task.folder, task.destination).map { it.canonicalFile }.distinct()
                     for (folder in folders) {
-                        require(folder.name == task.id && folder.parentFile?.name == "FreeMangnetPlayerTasks")
+                        require(folder.name == task.id && folder.parentFile?.name in setOf("OmniPlayerTasks", "FreeMangnetPlayerTasks"))
                         require(!folder.exists() || folder.deleteRecursively()) { "任务文件删除失败：$folder" }
                     }
                 }

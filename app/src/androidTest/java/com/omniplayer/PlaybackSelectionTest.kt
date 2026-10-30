@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4

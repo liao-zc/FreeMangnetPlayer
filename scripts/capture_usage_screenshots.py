@@ -91,7 +91,7 @@ def main() -> None:
     adb("install", "-r", "app/build/outputs/apk/debug/app-debug.apk")
     adb("shell", "wm", "size", "1080x2400")
     adb("shell", "am", "force-stop", PACKAGE)
-    adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/.MainActivity")
+    adb("shell", "am", "start", "-W", "-n", f"{PACKAGE}/com.omniplayer.MainActivity")
     time.sleep(7)
     require_visible("输入影片或资源名称", "粘贴磁力链接", "解析资源", "搜索", "播放", "下载", "收藏")
     screenshot("01-home-keyword.png")
@@ -132,7 +132,7 @@ def main() -> None:
     adb("shell", "input", "keyevent", "KEYCODE_BACK")
     screenshot("05-magnet-entry.png")
     test_magnet = "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"
-    adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", test_magnet, "-n", f"{PACKAGE}/.MainActivity")
+    adb("shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", test_magnet, "-n", f"{PACKAGE}/com.omniplayer.MainActivity")
     time.sleep(5)
     require_visible("正在解析磁力资源", "正在连接种子")
     screenshot("06-torrent-progress.png")

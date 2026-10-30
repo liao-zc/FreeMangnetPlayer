@@ -60,7 +60,7 @@ for i in range(24):
     except Exception:st={}
     samples.append({'seconds':time.monotonic()-start,'state':st})
 snap('compare-04-our-resource')
-result['observations'].append({'app':'FreeMangnetPlayer','samples':samples,'actual_ui':visible_text()})
+result['observations'].append({'app':'OmniPlayer','samples':samples,'actual_ui':visible_text()})
 result['logcat']=adb('logcat','-d','-t','3000')
 (OUT/'comparison-probe.json').write_text(json.dumps(result,ensure_ascii=False,indent=2),encoding='utf-8')
 print('Actual comparison probe captured',ref,result['native_bridge'])

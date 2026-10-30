@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 /** Downloads and cache/playback tasks never consume each other's slots. */
 internal object TaskLanePolicy {

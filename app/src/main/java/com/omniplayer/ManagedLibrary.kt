@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn

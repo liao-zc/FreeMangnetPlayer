@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 /** Container recognition is separate from whether an individual codec can decode. */
 internal object MediaFormats {

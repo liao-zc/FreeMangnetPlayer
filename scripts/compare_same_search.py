@@ -61,5 +61,5 @@ for engine in engines:
         except Exception:state={}
         time.sleep(1)
     screenshot('search-ours-'+str(len(result['searches']))+'.png')
-    result['searches'].append({'app':'FreeMangnetPlayer','requested_engine':engine,'seconds':time.monotonic()-start,'state':state,'ui':visible_text()});save()
+    result['searches'].append({'app':'OmniPlayer','requested_engine':engine,'seconds':time.monotonic()-start,'state':state,'ui':visible_text()});save()
 print('Observed same-keyword search attempts; comparison requires matching actual hashes, not titles.')

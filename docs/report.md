@@ -2,9 +2,9 @@
 
 日期：2026-10-30。测试环境：Android 15 / API 35 x86_64 模拟器；安装实际 APK，并通过 UI 操作、播放器状态与磁盘数据校验。截图均来自运行中的 App 或独立浏览器。ARM 手机、平板及电视尚需真机验证。
 
-- [ARM64 安装包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-arm64-v8a.apk)
-- [离线图文报告](https://github.com/liao-zc/OmniPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-report.html)
-- [源码包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-source.zip)
+- [ARM64 安装包](https://github.com/liao-zc/OmniPlayer/releases/download/v0.2.6/OmniPlayer-v0.2.6-arm64-v8a.apk)
+- [离线图文报告](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.2.6)
+- [源码包](https://github.com/liao-zc/OmniPlayer/archive/refs/tags/v0.2.6.zip)
 
 ## 验收结论
 
@@ -561,3 +561,25 @@ v0.2.4 及更早版本的公网 BT 十条仍为 0/10 起播等历史结果，详
 本轮没有声称解决无做种者/无 Peer 的客观网络问题。3 分钟无节点只会触发明确的当前不可播放提示，并从下载/缓存名额中排除；它不能令没有在线资源节点的磁力凭空产生数据。用户可手动重新尝试以重新进行 Peer 发现。指定公网磁力资源的实际起播能力需要可达 Peer，本轮 UI 与逻辑改动不构成十条资源播放通过的证据。
 
 v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentation、BT 多文件库回归、资源格式测试及 Markdown 检查通过。GitHub Actions 发布成功：[v0.2.6 Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.2.6)，含通用、arm64-v8a、armeabi-v7a APK 及源码包。当前指南含 14 张本轮模拟器截图。
+## OmniPlayer v0.2.7：产品命名与旧任务目录兼容点检
+
+本轮针对用户要求重新核对此前的功能、报告和 README，并整理仍在生效的旧产品命名。版本目标为 0.2.7 / versionCode 25；Android 安装 ID 保留为 `com.freemangnetplayer`，避免旧安装无法覆盖升级或丢失应用私有数据。命名更新不代表磁力网络成功率提升。
+
+| # | 检查项 | 当前结果 |
+|---|---|---|
+| 1 | 本地工作区目录改名为 OmniPlayer | 当前打开的 `C:\Users\gnsfb\Downloads\FreeMagnetPlayer` 被 Windows 进程占用，直接重命名会失败。本轮会尝试创建同级 `OmniPlayer` 工作目录；如果原目录仍被占用，旧路径无法从当前会话物理移除。|
+| 2 | 无节点资源的明显、持久提示及计数排除 | v0.2.6 Instrumentation 已验证：满足无 Peer/无有效数据 3 分钟条件后提示写入任务与收藏、播放、下载、缓存记录；明确重试前不自动清除；无法播放项不占下载/缓存任务数。此次改动未重测 BT 网络可用性。|
+| 3 | 六个搜索源可编辑/删除、BDFlix 默认、最多 10 个并保留旧配置 | v0.2.6 Android Store/模拟器检查通过；搜索源配置保持本地迁移数据。此次未改变搜索引擎逻辑。|
+| 4 | 搜索结果逐级返回 | v0.2.6 Android 15 模拟器分别检查工具栏返回和系统返回，均返回保留关键词的搜索页；详情/设置流程逐级返回。此次未改变导航逻辑。|
+| 5 | 资源时间、最大视频格式与其他文件类型可下载 | v0.2.6 回归覆盖视频扩展名优先、无视频时的最大文件格式标记、压缩包标记及 magnet `dn` 扩展名回退。日期显示来自搜索网站的上架时间；magnet 本身不含做种开始时间。此次未改变解析逻辑。|
+| 6 | 项目与可见产物统一 OmniPlayer 命名 | Gradle 根项目改为 `OmniPlayer`；源码和测试包迁至 `com.omniplayer` namespace；唤醒锁、日志标签、报告生成脚本和 LICENSE 改用 OmniPlayer；新任务目录使用 `OmniPlayerTasks`。Android `applicationId` 有意保留旧值用于原位升级。APK 和 tag 源码归档由发布工作流命名为 `OmniPlayer-v0.2.7*`。构建及迁移 Instrumentation 结果待 GitHub Actions。|
+| 7 | README 与完整点检报告可在 GitHub 查看 | README 增加当前功能摘要、下载、使用说明和报告入口；本报告补充本轮命名/兼容结果并把顶部过期下载链接改为当前 OmniPlayer 资源。UTF-8/Markdown 检查待 GitHub Actions。|
+| 8 | 历史要求和未通过项是否如实保留 | 报告保留此前各轮明细，不把旧版截图称作本轮实测。最近一次指定公网磁力多资源验收仍未达到用户要求的 90% 起播，公网可达 Peer 受资源做种状态影响；IPTV 指定源的真机持续播放也未在本轮重新验证。|
+
+### 旧数据迁移说明
+
+新下载与缓存目录使用 `OmniPlayerTasks`。首次访问时，如果对应任务的旧 `FreeMangnetPlayerTasks` 目录存在而新目录不存在，应用尝试在同一个存储根目录内重命名并保留数据；如果设备拒绝重命名，则继续使用旧目录，删除任务时两种目录名都受路径校验保护。该迁移 Instrumentation 会在本轮 Android 任务中执行。
+
+### 本轮验证结果
+
+本地 Windows 环境没有 Java，因此未在本机编译。GitHub Actions 的 Android 构建、任务目录迁移 Instrumentation、Markdown/UTF-8 检查完成后，将把对应运行链接与结果补记于此。10 条公网磁力和电视真机可播放性不属于重命名回归，不能用编译成功替代网络/设备验收。

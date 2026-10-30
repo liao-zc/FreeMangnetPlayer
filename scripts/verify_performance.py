@@ -159,7 +159,7 @@ def main():
     # Expand through the real system PiP menu, preserving the same player instance.
     windows = adb('shell', 'dumpsys', 'window', 'windows')
     sections = re.split(r'(?m)^  Window #', windows)
-    player = next(section for section in sections if 'com.freemangnetplayer.PlayerActivity' in section and 'mWindowingMode=pinned' in section)
+    player = next(section for section in sections if 'com.omniplayer.PlayerActivity' in section and 'mWindowingMode=pinned' in section)
     frame = re.search(r' frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]', player)
     assert frame, 'No actual pinned surface for opening SystemUI menu'
     x1, y1, x2, y2 = map(int, frame.groups())
@@ -181,7 +181,7 @@ def main():
         (OUT / 'pip-system-windows.txt').write_text(windows)
         assert 'Embedded{PipMenuView}' in windows or 'PipMenuActivity' in windows, 'No real SystemUI PiP menu window'
         sections = re.split(r'(?m)^  Window #', windows)
-        player = next(section for section in sections if 'com.freemangnetplayer.PlayerActivity' in section and 'mWindowingMode=pinned' in section)
+        player = next(section for section in sections if 'com.omniplayer.PlayerActivity' in section and 'mWindowingMode=pinned' in section)
         match = re.search(r' frame=\[(\d+),(\d+)\]\[(\d+),(\d+)\]', player)
         assert match, 'No pinned player surface frame'
         bounds = list(map(int, match.groups()))

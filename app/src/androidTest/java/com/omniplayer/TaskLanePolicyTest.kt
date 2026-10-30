@@ -1,8 +1,9 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.Job
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
@@ -27,6 +28,26 @@ class TaskLanePolicyTest {
         values[0].paused = true; values[1].complete = true; values[2].cancelled = true
         assertEquals(2, TaskLanePolicy.activeCount(values, true))
         values.forEach { it.job?.cancel() }
+    }
+
+    @Test fun taskFoldersUseOmniPlayerNameAndMigrateLegacyData() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val root = File(context.cacheDir, "task-folder-migration-check").apply { deleteRecursively(); mkdirs() }
+        val prefs = SettingsStore.prefs(context)
+        val previous = prefs.getString("download-path", null)
+        prefs.edit().putString("download-path", root.absolutePath).commit()
+        try {
+            val id = "migration-check"
+            val legacy = File(root, "FreeMangnetPlayerTasks/$id").apply { mkdirs() }
+            File(legacy, "resume.dat").writeText("keep")
+            val migrated = SettingsStore.taskFolder(context, true, id)
+            assertEquals("OmniPlayerTasks", migrated.parentFile?.name)
+            assertTrue(File(migrated, "resume.dat").readText() == "keep")
+            assertTrue(!legacy.exists())
+        } finally {
+            prefs.edit().putString("download-path", previous).commit()
+            root.deleteRecursively()
+        }
     }
 
     @Test fun confirmedNoDataWarningPersistsAndDoesNotConsumeDownloadOrCacheSlots() {

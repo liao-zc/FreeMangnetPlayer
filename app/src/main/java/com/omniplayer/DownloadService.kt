@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import android.app.*
 import android.content.Intent
@@ -13,7 +13,7 @@ class DownloadService : Service() {
     override fun onCreate() {
         super.onCreate()
         downloadWakeLock = getSystemService(android.os.PowerManager::class.java)
-            .newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "FreeMangnetPlayer:downloads")
+            .newWakeLock(android.os.PowerManager.PARTIAL_WAKE_LOCK, "OmniPlayer:downloads")
             .apply { setReferenceCounted(false) }
         TorrentTasks.initialize(this)
         TorrentTasks.serviceRunning = true

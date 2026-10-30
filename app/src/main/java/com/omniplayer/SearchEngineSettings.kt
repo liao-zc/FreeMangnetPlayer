@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import android.content.Context
 import android.os.Bundle

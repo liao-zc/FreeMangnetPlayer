@@ -32,13 +32,13 @@ for name,data in [('library',lib),('preferences',pref),('pages',pages),('public'
  path=e/('current-'+name+'.json');path.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding='utf-8');keep.add(path.relative_to(root).as_posix())
 keep.add('docs/evidence/current-cleanup.json')
 passed=sum(r['passed'] for r in public[:10]);rate=throughput['peak_payload_bytes_per_second']/1e6
-text=f'''# FreeMangnetPlayer {v}：15 项需求点检报告
+text=f'''# OmniPlayer {v}：15 项需求点检报告
 
 日期：2026-10-30。测试环境：Android 15 / API 35 x86_64 模拟器；安装实际 APK，并通过 UI 操作、播放器状态与磁盘数据校验。截图均来自运行中的 App 或独立浏览器。ARM 手机、平板及电视尚需真机验证。
 
-- [ARM64 安装包]({url}/releases/download/{v}/FreeMangnetPlayer-{v}-arm64-v8a.apk)
-- [离线图文报告]({url}/releases/download/{v}/FreeMangnetPlayer-{v}-report.html)
-- [源码包]({url}/releases/download/{v}/FreeMangnetPlayer-{v}-source.zip)
+- [ARM64 安装包]({url}/releases/download/{v}/OmniPlayer-{v}-arm64-v8a.apk)
+- [离线图文报告]({url}/releases/download/{v}/OmniPlayer-{v}-report.html)
+- [源码包]({url}/releases/download/{v}/OmniPlayer-{v}-source.zip)
 
 ## 验收结论
 
@@ -101,15 +101,15 @@ text+='\nAndroid 设备测试另校验字体真实加载、字号持久化、各
 for key,run in runs.items():text+=f'\n- [{key} 测试过程]({url}/actions/runs/{run})\n'
 text+='\n[字体/历史证据](evidence/current-preferences.json) · [分页](evidence/current-pages.json) · [十条公网资源](evidence/current-public.json) · [独立客户端](evidence/current-native.json) · [吞吐](evidence/current-performance.json) · [真实搜索](evidence/current-search.json)\n\n当前报告及截图替换旧版本资料；旧 Git 历史和 Release 保留。Markdown 使用 UTF-8 明文，发布后核对 GitHub 字节和渲染，另提供内嵌图片 HTML。\n'
 for name in ['report.md','usage-zh.md']:(root/'docs'/name).write_text(text,encoding='utf-8')
-(root/'README.md').write_text(f'''# FreeMangnetPlayer
+(root/'README.md').write_text(f'''# OmniPlayer
 
 安卓磁力播放器，当前版本 **{v}**。本地使用模式。
 
-- [ARM64 下载]({url}/releases/download/{v}/FreeMangnetPlayer-{v}-arm64-v8a.apk)
+- [ARM64 下载]({url}/releases/download/{v}/OmniPlayer-{v}-arm64-v8a.apk)
 - [十五项点检与实际截图](docs/report.md)
 - [操作说明](docs/usage-zh.md)
-- [离线图文报告]({url}/releases/download/{v}/FreeMangnetPlayer-{v}-report.html)
-- [源码包]({url}/releases/download/{v}/FreeMangnetPlayer-{v}-source.zip)
+- [离线图文报告]({url}/releases/download/{v}/OmniPlayer-{v}-report.html)
+- [源码包]({url}/releases/download/{v}/OmniPlayer-{v}-source.zip)
 - [第三方许可证](THIRD_PARTY_NOTICES.md)
 
 新增显示与字体、四类历史、20 条分页及跳页、媒体缓存信息、爱心收藏与收藏多选下载。受控不限速测试峰值 {rate:.2f}MB/s；公网十条起播 {passed}/10，{'达到' if passed>=9 else '未达到'} 90% 要求。公网速度、缺失资源元数据及网站总页数不作虚假保证，见报告。

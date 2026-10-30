@@ -98,7 +98,7 @@ def main():
     report.append({"check": "real-stream-before-download-complete", "passed": True, "state": streaming})
     find_and_tap("下载")
     state = wait_for(lambda s: s.get("total", 0) > 0 and s.get("downloaded", 0) >= s["total"])
-    target = f"/sdcard/Android/data/{PACKAGE}/files/Movies/FreeMangnetPlayer/{fixture['file']}"
+    target = f"/sdcard/Android/data/{PACKAGE}/files/Movies/OmniPlayer/{fixture['file']}"
     actual = adb("shell", "sha256sum", target).split()[0]
     if actual != fixture["sha256"]:
         raise RuntimeError("Downloaded video SHA256 differs from the real seed")

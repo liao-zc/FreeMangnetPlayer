@@ -8,7 +8,7 @@ import markdown
 
 ROOT = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser()
-parser.add_argument("--output", default=str(ROOT / "dist/FreeMangnetPlayer-v0.1.9-report.html"))
+parser.add_argument("--output", default=str(ROOT / "dist/OmniPlayer-v0.1.9-report.html"))
 parser.add_argument("--source", default="docs/usage-zh.md")
 args = parser.parse_args()
 source = (ROOT / args.source).resolve()
@@ -27,7 +27,7 @@ body = re.sub(r'href="(?!https?:|#)([^"]+)"',
               lambda m: 'href="https://github.com/liao-zc/OmniPlayer/blob/main/docs/' + m.group(1) + '"', body)
 html = '''<!doctype html><html lang="zh-CN"><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FreeMangnetPlayer 实测报告</title><style>
+<title>OmniPlayer 实测报告</title><style>
 body{font-family:system-ui,sans-serif;line-height:1.7;max-width:1000px;margin:24px auto;padding:0 20px;color:#14202b}
 img{display:block;max-width:100%;width:360px;height:auto;margin:20px 0;border:1px solid #ddd}
 table{border-collapse:collapse;width:100%;font-size:14px}td,th{border:1px solid #ccc;padding:8px;text-align:left}

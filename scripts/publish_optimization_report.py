@@ -28,15 +28,15 @@ def api(url, method='GET', data=None, mime=None):
         return json.loads(body) if body else None
 
 release = api(f'https://api.github.com/repos/{repo}/releases/tags/{args.version}')
-archive = subprocess.check_output(['git', 'archive', '--format=zip', f'--prefix=FreeMangnetPlayer-{args.version}/', 'HEAD'], cwd=root)
+archive = subprocess.check_output(['git', 'archive', '--format=zip', f'--prefix=OmniPlayer-{args.version}/', 'HEAD'], cwd=root)
 buffer = io.BytesIO()
 with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as bundle:
     for path in sorted((root / 'docs/evidence').glob(args.evidence_prefix + '*')):
         bundle.writestr(path.name, path.read_bytes())
 assets = {
-    f'FreeMangnetPlayer-{args.version}-report.html': (Path(args.html).read_bytes(), 'text/html; charset=utf-8'),
-    f'FreeMangnetPlayer-{args.version}-source.zip': (archive, 'application/zip'),
-    f'FreeMangnetPlayer-{args.version}-evidence.zip': (buffer.getvalue(), 'application/zip'),
+    f'OmniPlayer-{args.version}-report.html': (Path(args.html).read_bytes(), 'text/html; charset=utf-8'),
+    f'OmniPlayer-{args.version}-source.zip': (archive, 'application/zip'),
+    f'OmniPlayer-{args.version}-evidence.zip': (buffer.getvalue(), 'application/zip'),
 }
 for name, (data, mime) in assets.items():
     if data.startswith(b'E-SafeNet'):

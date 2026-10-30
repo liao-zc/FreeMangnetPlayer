@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import android.content.Context
 import android.os.Environment
@@ -22,8 +22,14 @@ object SettingsStore {
         try { probe.writeText("write-check") } finally { probe.delete() }
         return root
     }
-    fun taskFolder(c: Context, download: Boolean, id: String): File =
-        File(root(c, download), "FreeMangnetPlayerTasks/$id").apply {
-            require(isDirectory || mkdirs()) { "无法创建任务目录" }
+    fun taskFolder(c: Context, download: Boolean, id: String): File {
+        val base = root(c, download)
+        val current = File(base, "OmniPlayerTasks/$id")
+        val legacy = File(base, "FreeMangnetPlayerTasks/$id")
+        if (!current.exists() && legacy.exists()) {
+            current.parentFile?.let { if (!it.exists()) it.mkdirs() }
+            if (!legacy.renameTo(current)) return legacy
         }
+        return current.apply { require(isDirectory || mkdirs()) { "无法创建任务目录" } }
+    }
 }

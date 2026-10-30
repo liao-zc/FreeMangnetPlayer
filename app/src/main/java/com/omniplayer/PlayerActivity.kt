@@ -1,4 +1,4 @@
-package com.freemangnetplayer
+package com.omniplayer
 
 import android.app.PictureInPictureParams
 import android.content.Intent
@@ -142,7 +142,7 @@ class PlayerActivity : ComponentActivity() {
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
                                     File(filesDir, "tasks-check.json").writeText(tasks.toString())
-                                }.onFailure { android.util.Log.w("FreeMangnetPlayer", "Unable to update debug state", it) } }
+                                }.onFailure { android.util.Log.w("OmniPlayer", "Unable to update debug state", it) } }
                                 refreshProgress()
                                 delay(500)
                             }
