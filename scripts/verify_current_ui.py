@@ -87,7 +87,20 @@ def main():
     if 'https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u' not in capture.visible_text():
         raise RuntimeError('The IPTV source editor opened from live TV does not show the shared default URL')
     capture.adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
-    print('Current UI verification passed: home navigation, isolated settings pages, persisted magnet preferences across entry points, independent software info, shared live source editor, and first-run IPTV source URLs.')
+    capture.adb('shell', 'am', 'start', '-W', '-n', f'{capture.PACKAGE}/.MainActivity', '--es', 'test-query', 'OmniNavigationCheck')
+    time.sleep(3)
+    capture.require_visible('搜索结果', '返回搜索')
+    capture.find_and_tap('返回搜索')
+    capture.require_visible('搜索关键词', '输入影片或资源名称')
+    shot('13-search-toolbar-returns-to-keyword.png', ('搜索关键词', '输入影片或资源名称'))
+    capture.find_and_tap('执行关键词搜索')
+    time.sleep(3)
+    capture.require_visible('搜索结果')
+    capture.adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
+    time.sleep(1)
+    capture.require_visible('搜索关键词', '输入影片或资源名称')
+    shot('14-search-system-back-returns-to-keyword.png', ('搜索关键词', '输入影片或资源名称'))
+    print('Current UI verification passed: home navigation, isolated settings pages, persisted magnet preferences across entry points, independent software info, shared live source editor, first-run IPTV source URLs, searchable engine manager, and toolbar/system back from results to keyword search.')
 
 if __name__ == '__main__':
     main()
