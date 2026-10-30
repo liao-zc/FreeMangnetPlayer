@@ -21,6 +21,7 @@ adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','test-query',
 expected=json.loads(Path('search-pages-expected.json').read_text(encoding='utf-8'));checks=[]
 for page in [1,2,3]:
     st=wait(page,len(expected[str(page)]))
+    assert all(r.get('bytes')== (1500000 if 'detail-' in r['magnet'] else 2300000000) for r in st['results']), 'Resource sizes differ from fixture metadata'
     actual={r['magnet'] for r in st['results']};wanted={r[1].replace('2362347540B27D8A4142AF2BBE0A071F26A3B7A1','2362347540b27d8a4142af2bbe0a071f26a3b7a1') for r in expected[str(page)]}
     assert actual==wanted,(actual-wanted,wanted-actual)
     require_visible('上一页','下一页','‹ 返回');screenshot('pagination-'+str(page)+'.png')

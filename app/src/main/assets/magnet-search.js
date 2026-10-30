@@ -21,7 +21,8 @@
     window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,complete:document.readyState==="complete"}));
   }
   function details(node, uri) {
-    const text=clean(node && node.textContent).replace(/magnet:\?[^\s<>]+/ig,'').replace(/https?:\/\/[^\s<>]+/ig,'');
+    const chunks=[];if(node){const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);let part;while((part=walker.nextNode()))if(!part.parentElement.closest('script,style,noscript'))chunks.push(part.textContent);}
+    const text=clean(chunks.join(' ')).replace(/magnet:\?[^\s<>]+/ig,'').replace(/https?:\/\/[^\s<>]+/ig,'');
     const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=/(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|TiB|GB|MB|KB|TB|B|\u5b57\u8282)(?![a-z0-9])/i.exec(text);
     let bytes=m?+m[1]:0, sizeText='';
     if(sizeMatch){const unit=sizeMatch[2].toUpperCase();const power=unit.startsWith('T')?4:unit.startsWith('G')?3:unit.startsWith('M')?2:unit.startsWith('K')?1:0;
