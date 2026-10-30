@@ -350,9 +350,9 @@ class PlayerActivity : ComponentActivity() {
     }
     private fun toggleFavorite() {
         val t=task ?: return;val f=t.files.firstOrNull { it.index==t.playingIndex }
-        val link=f?.let { StoredVideos.fileSource(t,it) } ?: source
+        val link=f?.let { StoredVideos.fileSource(t,it) } ?: t.source
         val exists=LibraryStore.readFavorites(this).any { it.source==link }
-        if(exists) LibraryStore.removeEntries(this,"收藏",setOf(link)) else LibraryStore.addFavorite(this,f?.path?.substringAfterLast('/') ?: title,link)
+        if(exists) LibraryStore.removeEntries(this,"收藏",setOf(link)) else LibraryStore.addFavorite(this,f?.path?.substringAfterLast('/') ?: t.title,link)
         refreshProgress()
     }
     private fun selectQuality(height: Int) {
@@ -474,7 +474,7 @@ class PlayerActivity : ComponentActivity() {
         val view=activeView ?: return
         val t=task
         val f=t?.files?.firstOrNull { it.index==t.playingIndex }
-        val link=if(t!=null && f!=null) StoredVideos.fileSource(t,f) else source
+        val link=if(t!=null && f!=null) StoredVideos.fileSource(t,f) else t?.source.orEmpty()
         val favorite=LibraryStore.readFavorites(this).any { it.source==link }
         view.findViewById<android.widget.ImageButton>(R.id.player_favorite)?.apply { setImageResource(if(favorite)R.drawable.ic_heart_filled else R.drawable.ic_heart_outline);contentDescription=if(favorite)"取消收藏" else "收藏视频" }
         if(f!=null) {

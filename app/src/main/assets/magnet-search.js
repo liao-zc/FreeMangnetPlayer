@@ -46,7 +46,7 @@
       const row=a.closest('article,.result,.search-item,.item,li,tr,.card,.panel');
       const heading=row && row.querySelector('h1,h2,h3,h4,.title');
       const label=clean(a.title||a.textContent);
-      const name=heading?heading.textContent:/^(磁力|下载|复制|播放|magnet)(链接)?$/i.test(label)?fallback:label||fallback;
+      const name=heading?heading.textContent:/^(?:(?:磁力|magnet)(?:下载|链接)?|下载|复制|播放)$/i.test(label)?fallback:label||fallback;
       emit(uri,name,row || (doc!==document?doc.body:null));
     });
     const pattern=/magnet:\?[^"'<>\s]+/ig; let m;
