@@ -371,7 +371,7 @@ class MainActivity : ComponentActivity() {
                                         if(generation==searchTrigger && selectedTab=="搜索结果" && !searchComplete) {
                                             val link=normalizeMagnetUri(row.optString("source"))
                                             val index=results.indexOfFirst { it.magnet==link }
-                                            if(index>=0) { val old=results[index];results[index]=old.copy(bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","视频"),heat=row.optString("heat")) }
+                                            if(index>=0) { val old=results[index];results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","视频"),heat=row.optString("heat")) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(generation==searchTrigger && !searchComplete) {

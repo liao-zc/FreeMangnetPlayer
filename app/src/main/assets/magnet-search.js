@@ -21,7 +21,7 @@
     window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,complete:document.readyState==="complete"}));
   }
   function details(node, uri) {
-    const text=clean(node && node.textContent);
+    const text=clean(node && node.textContent).replace(/magnet:\?[^\s<>]+/ig,'').replace(/https?:\/\/[^\s<>]+/ig,'');
     const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=/(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|GB|MB|KB|TB|B|字节)/i.exec(text);
     let bytes=m?+m[1]:0, sizeText='';
     if(sizeMatch){const unit=sizeMatch[2].toUpperCase();const power=unit.startsWith('T')?4:unit.startsWith('G')?3:unit.startsWith('M')?2:unit.startsWith('K')?1:0;
@@ -51,7 +51,7 @@
     });
     const pattern=/magnet:\?[^"'<>\s]+/ig; let m;
     const html=doc.documentElement?doc.documentElement.outerHTML:'';
-    while((m=pattern.exec(html))) {if(!emitted.has(decode(m[0])))emit(m[0],fallback,doc.body);}
+    while((m=pattern.exec(html))) {if(!emitted.has(decode(m[0])))emit(m[0],fallback,doc!==document?doc.body:null);}
   }
   window.__fmpScan=function(){
     if(window.__fmpStopped)return;parse(document,document.title); if(running){info();return;} running=true;
