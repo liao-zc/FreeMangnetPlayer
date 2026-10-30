@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.shadow
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -55,6 +57,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -79,6 +82,8 @@ class IptvActivity : ComponentActivity() {
                 var favoritesOnly by remember { mutableStateOf(false) }
                 var favorites by remember { mutableStateOf(IptvStore.favorites(context)) }
                 var savedFavorites by remember { mutableStateOf(IptvStore.favoriteChannels(context)) }
+                var managingFavorites by remember { mutableStateOf(false) }
+                var selectedFavoriteIds by remember { mutableStateOf(emptySet<String>()) }
                 var query by remember { mutableStateOf("") }
                 var speeds by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
                 var playlistRequest by remember { mutableIntStateOf(0) }
@@ -147,6 +152,24 @@ class IptvActivity : ComponentActivity() {
                             }
                             FilterChip(selected = favoritesOnly, onClick = { favoritesOnly = !favoritesOnly }, label = { Text(if (favoritesOnly) "我的收藏" else "收藏") })
                         }
+                        if (favoritesOnly) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (!managingFavorites) {
+                                OutlinedButton(onClick = { managingFavorites = true; selectedFavoriteIds = emptySet() }) { Text("管理收藏") }
+                            } else {
+                                TextButton(onClick = {
+                                    selectedFavoriteIds = if (selectedFavoriteIds.size == savedFavorites.size) emptySet() else savedFavorites.map { it.id }.toSet()
+                                }) { Text(if (selectedFavoriteIds.size == savedFavorites.size) "取消全选" else "全选") }
+                                Button(onClick = {
+                                    val deleting = savedFavorites.filter { it.id in selectedFavoriteIds }
+                                    deleting.forEach { IptvStore.setFavorite(context, it, false) }
+                                    favorites = IptvStore.favorites(context)
+                                    savedFavorites = IptvStore.favoriteChannels(context)
+                                    selectedFavoriteIds = emptySet()
+                                    managingFavorites = false
+                                }, enabled = selectedFavoriteIds.isNotEmpty()) { Text("删除 (${selectedFavoriteIds.size})") }
+                                TextButton(onClick = { managingFavorites = false; selectedFavoriteIds = emptySet() }) { Text("完成") }
+                            }
+                        }
                         OutlinedTextField(query, { query = it }, Modifier.fillMaxWidth(), singleLine = true, label = { Text("搜索频道") })
                         Row(Modifier.fillMaxWidth().padding(vertical = 8.dp).horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                             groups.forEach { item -> FilterChip(selected = group == item, onClick = { group = item }, label = { Text(item) }) }
@@ -165,8 +188,12 @@ class IptvActivity : ComponentActivity() {
                                     }
                                 }
                                 Card(Modifier.fillMaxWidth().clickable {
-                                    IptvSession.channels = channelCatalog
-                                    startActivity(Intent(this@IptvActivity, IptvPlayerActivity::class.java).putExtra("channel-name", channel.name).putExtra("channel-url", channel.url).putExtra("channel-id", channel.id).putExtra("channel-logo", channel.logo).putExtra("group", channel.group))
+                                    if (favoritesOnly && managingFavorites) {
+                                        selectedFavoriteIds = if (channel.id in selectedFavoriteIds) selectedFavoriteIds - channel.id else selectedFavoriteIds + channel.id
+                                    } else {
+                                        IptvSession.channels = channelCatalog
+                                        startActivity(Intent(this@IptvActivity, IptvPlayerActivity::class.java).putExtra("channel-name", channel.name).putExtra("channel-url", channel.url).putExtra("channel-id", channel.id).putExtra("channel-logo", channel.logo).putExtra("group", channel.group))
+                                    }
                                 }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
                                     Row(Modifier.fillMaxWidth().padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                                         if (channel.logo.isNotBlank()) AsyncImage(channel.logo, channel.name, Modifier.size(48.dp).clip(RoundedCornerShape(8.dp)), contentScale = ContentScale.Fit)
@@ -183,7 +210,11 @@ class IptvActivity : ComponentActivity() {
                                                 speeds = speeds + (channel.id to result)
                                             }
                                         }) { Text("测速") }
-                                        IconButton(onClick = { IptvStore.setFavorite(context, channel, !saved); favorites = IptvStore.favorites(context); savedFavorites = IptvStore.favoriteChannels(context) }) {
+                                        if (favoritesOnly && managingFavorites) {
+                                            Checkbox(checked = channel.id in selectedFavoriteIds, onCheckedChange = { checked ->
+                                                selectedFavoriteIds = if (checked) selectedFavoriteIds + channel.id else selectedFavoriteIds - channel.id
+                                            })
+                                        } else IconButton(onClick = { IptvStore.setFavorite(context, channel, !saved); favorites = IptvStore.favorites(context); savedFavorites = IptvStore.favoriteChannels(context) }) {
                                             Icon(if (saved) Icons.Default.Favorite else Icons.Default.FavoriteBorder, if (saved) "从收藏中删除" else "收藏", tint = if (saved) Color(0xFFE53935) else Color.Gray)
                                         }
                                     }
@@ -254,6 +285,34 @@ class IptvSettingsActivity : ComponentActivity() {
 }
 
 class IptvPlayerActivity : ComponentActivity() {
+    private var pipMode by mutableStateOf(false)
+
+    private fun applyFullScreen(enabled: Boolean) {
+        val decor = window.decorView
+        decor.systemUiVisibility = if (enabled) (
+            android.view.View.SYSTEM_UI_FLAG_FULLSCREEN or
+                android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            ) else 0
+        requestedOrientation = if (enabled) android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            else android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && !pipMode && requestedOrientation == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            applyFullScreen(true)
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        pipMode = isInPictureInPictureMode
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val initial = IptvChannel(
@@ -272,12 +331,19 @@ class IptvPlayerActivity : ComponentActivity() {
                 var buffering by remember { mutableStateOf(true) }
                 var liveStream by remember { mutableStateOf(false) }
                 var showChannels by remember { mutableStateOf(false) }
+                var fullScreenControls by remember { mutableStateOf(false) }
+                var channelGroup by remember { mutableStateOf("全部") }
+                var receiveSpeedBps by remember { mutableLongStateOf(0L) }
                 val channelChoices = IptvSession.channels.ifEmpty { listOf(initial) }
+                val channelGroups = remember(channelChoices) { listOf("全部") + channelChoices.map { it.group.ifBlank { "其他" } }.distinct().sorted() }
+                val filteredChannelChoices = remember(channelChoices, channelGroup) {
+                    channelChoices.filter { channelGroup == "全部" || it.group.ifBlank { "其他" } == channelGroup }
+                }
 
                 fun goBack() {
                     if (fullScreen) {
                         fullScreen = false
-                        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+                        applyFullScreen(false)
                     } else finish()
                 }
 
@@ -299,9 +365,22 @@ class IptvPlayerActivity : ComponentActivity() {
                             }
                         }
                     }
+                    val analyticsListener = object : AnalyticsListener {
+                        override fun onBandwidthEstimate(
+                            eventTime: AnalyticsListener.EventTime,
+                            totalLoadTimeMs: Int,
+                            totalBytesTransferred: Long,
+                            bitrateEstimate: Long
+                        ) {
+                            if (totalLoadTimeMs > 0) {
+                                receiveSpeedBps = totalBytesTransferred * 1000L / totalLoadTimeMs
+                            }
+                        }
+                    }
                     exo.addListener(listener)
+                    exo.addAnalyticsListener(analyticsListener)
                     player = exo
-                    playbackError = ""; buffering = true; liveStream = false
+                    playbackError = ""; buffering = true; liveStream = false; receiveSpeedBps = 0L
                     val item = MediaItem.Builder().setUri(currentChannel.url).apply {
                         if (currentChannel.url.substringBefore('?').substringBefore('#').endsWith(".m3u8", true)) {
                             setMimeType(MimeTypes.APPLICATION_M3U8)
@@ -310,11 +389,17 @@ class IptvPlayerActivity : ComponentActivity() {
                         }
                     }.build()
                     exo.setMediaItem(item); exo.prepare(); exo.playWhenReady = true
-                    onDispose { exo.removeListener(listener); exo.release(); if (player === exo) player = null }
+                    onDispose { exo.removeListener(listener); exo.removeAnalyticsListener(analyticsListener); exo.release(); if (player === exo) player = null }
                 }
-                Box(Modifier.fillMaxSize().background(Color.Black)) {
+                LaunchedEffect(fullScreen) { applyFullScreen(fullScreen) }
+                Box(Modifier.fillMaxSize().background(Color.Black).pointerInput(fullScreen) {
+                    detectTapGestures(onTap = { if (fullScreen) fullScreenControls = !fullScreenControls })
+                }) {
                     AndroidView(factory = { context ->
-                        PlayerView(context).apply { useController = true; setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS) }
+                        PlayerView(context).apply {
+                            useController = false
+                            setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+                        }
                     }, update = { it.player = player }, modifier = Modifier.fillMaxSize())
                     if (playbackError.isNotBlank()) Surface(Modifier.align(Alignment.Center).padding(28.dp), color = Color(0xEE202124), shape = RoundedCornerShape(16.dp)) {
                         Column(Modifier.padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -323,11 +408,22 @@ class IptvPlayerActivity : ComponentActivity() {
                             Button(onClick = { retry++ }) { Text("重试") }
                         }
                     } else if (buffering) CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
-                    Row(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 30.dp).fillMaxWidth().padding(horizontal = 12.dp).shadow(8.dp, RoundedCornerShape(18.dp)).background(Color(0xE6202124), RoundedCornerShape(18.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (!pipMode && (!fullScreen || fullScreenControls)) Row(Modifier.align(Alignment.TopCenter).then(if (fullScreen) Modifier else Modifier.statusBarsPadding().padding(top = 12.dp)).fillMaxWidth().padding(horizontal = 12.dp).shadow(8.dp, RoundedCornerShape(18.dp)).background(Color(0xE6202124), RoundedCornerShape(18.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = ::goBack, modifier = Modifier.size(56.dp)) { Icon(Icons.Default.ArrowBack, "返回", tint = Color.White) }
                         Column(Modifier.weight(1f)) {
                             Text(currentChannel.name, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                            if (liveStream) Text("直播", color = Color(0xFF67E4B5), style = MaterialTheme.typography.labelSmall)
+                            if (liveStream) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text("直播", color = Color(0xFF67E4B5), style = MaterialTheme.typography.labelSmall)
+                                Text("·", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                                Text("${formatNetworkSpeed(receiveSpeedBps)}", color = when {
+                                    receiveSpeedBps >= 1_000_000L -> Color(0xFF69E38C)
+                                    receiveSpeedBps >= 250_000L -> Color(0xFFFFC857)
+                                    else -> Color(0xFFFF6B6B)
+                                }, style = MaterialTheme.typography.labelSmall)
+                                TextButton(onClick = { player?.seekToDefaultPosition(); player?.play() }, contentPadding = PaddingValues(horizontal = 4.dp, vertical = 0.dp)) {
+                                    Text("回到直播", color = Color.White, style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
                         }
                         IconButton(onClick = { showChannels = true }, modifier = Modifier.size(56.dp), enabled = channelChoices.size > 1) {
                             Icon(Icons.Default.List, "切换频道", tint = Color.White)
@@ -335,20 +431,37 @@ class IptvPlayerActivity : ComponentActivity() {
                         IconButton(onClick = { IptvStore.setFavorite(this@IptvPlayerActivity, currentChannel, !favorite); favorite = !favorite }, modifier = Modifier.size(56.dp)) {
                             Icon(if (favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, "收藏", tint = if (favorite) Color.Red else Color.White)
                         }
-                        IconButton(onClick = { fullScreen = !fullScreen; requestedOrientation = if (fullScreen) android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE else android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED }, modifier = Modifier.size(56.dp)) {
+                        IconButton(onClick = {
+                            fullScreen = !fullScreen
+                            fullScreenControls = false
+                        }, modifier = Modifier.size(56.dp)) {
                             Icon(if (fullScreen) Icons.Default.FullscreenExit else Icons.Default.Fullscreen, if (fullScreen) "退出全屏" else "全屏", tint = Color.White)
                         }
-                        IconButton(onClick = { if (android.os.Build.VERSION.SDK_INT >= 26) enterPictureInPictureMode(android.app.PictureInPictureParams.Builder().setAspectRatio(android.util.Rational(16, 9)).build()) }, modifier = Modifier.size(56.dp), enabled = android.os.Build.VERSION.SDK_INT >= 26) {
+                        IconButton(onClick = {
+                            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                                val params = android.app.PictureInPictureParams.Builder()
+                                    .setAspectRatio(android.util.Rational(16, 9))
+                                    .build()
+                                enterPictureInPictureMode(params)
+                            }
+                        }, modifier = Modifier.size(56.dp), enabled = android.os.Build.VERSION.SDK_INT >= 26) {
                             Icon(Icons.Default.PictureInPictureAlt, "悬浮播放", tint = Color.White)
                         }
                     }
                     if (showChannels) AlertDialog(
                         onDismissRequest = { showChannels = false },
                         title = { Text("选择频道 · ${channelChoices.size}") },
-                        text = { LazyColumn(Modifier.heightIn(max = 480.dp)) {
-                            items(channelChoices, key = { it.id }) { item ->
-                                TextButton(onClick = { currentChannel = item; showChannels = false }, modifier = Modifier.fillMaxWidth()) {
-                                    Text(if (item.id == currentChannel.id) "▶  ${item.name}" else item.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                channelGroups.forEach { item ->
+                                    FilterChip(selected = channelGroup == item, onClick = { channelGroup = item }, label = { Text(item) })
+                                }
+                            }
+                            LazyColumn(Modifier.heightIn(max = 420.dp)) {
+                                items(filteredChannelChoices, key = { it.id }) { item ->
+                                    TextButton(onClick = { currentChannel = item; showChannels = false }, modifier = Modifier.fillMaxWidth()) {
+                                        Text(if (item.id == currentChannel.id) "▶  ${item.name}" else item.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
                                 }
                             }
                         } },
@@ -358,4 +471,11 @@ class IptvPlayerActivity : ComponentActivity() {
             }
         }
     }
+}
+
+private fun formatNetworkSpeed(bytesPerSecond: Long): String = when {
+    bytesPerSecond >= 1_000_000L -> "${"%.1f".format(bytesPerSecond / 1_000_000.0)} MB/s"
+    bytesPerSecond >= 1_000L -> "${"%.0f".format(bytesPerSecond / 1_000.0)} KB/s"
+    bytesPerSecond > 0L -> "$bytesPerSecond B/s"
+    else -> "测速中"
 }
