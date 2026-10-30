@@ -1,6 +1,12 @@
 name: v16 font history favorites and pagination checks
 on:
   workflow_dispatch:
+    inputs:
+      instrumentation_only:
+        description: 'Run Android instrumentation without the full legacy UI walkthrough'
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
 jobs:
@@ -41,7 +47,9 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - uses: reactivecircus/android-emulator-runner@v2
-        env: {FMP_FAST_UI: '1'}
+        env:
+          FMP_FAST_UI: '1'
+          OMNI_INSTRUMENTATION_ONLY: ${{ inputs.instrumentation_only && '1' || '0' }}
         with:
           api-level: 35
           target: default
@@ -50,7 +58,15 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           emulator-boot-timeout: 600
           disable-animations: true
-          script: set -e; adb install -r ui-inspector/build/outputs/apk/debug/ui-inspector-debug.apk; gradle --no-daemon connectedDebugAndroidTest; adb install -r app/build/outputs/apk/debug/app-debug.apk; python3 scripts/verify_preferences_revision.py; python3 scripts/verify_search_pages.py
+          script: |
+            set -e
+            adb install -r ui-inspector/build/outputs/apk/debug/ui-inspector-debug.apk
+            gradle --no-daemon connectedDebugAndroidTest
+            if [ "$OMNI_INSTRUMENTATION_ONLY" != "1" ]; then
+              adb install -r app/build/outputs/apk/debug/app-debug.apk
+              python3 scripts/verify_preferences_revision.py
+              python3 scripts/verify_search_pages.py
+            fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
