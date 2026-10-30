@@ -57,9 +57,12 @@ class SettingsActivity : ComponentActivity() {
                 Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回首页") }
-                        Text("个性化设置", style = MaterialTheme.typography.titleLarge)
+                        Text("OmniPlayer 设置", style = MaterialTheme.typography.titleLarge)
                     }
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text("电视直播设置", style = MaterialTheme.typography.titleMedium)
+                        OutlinedButton(onClick = { startActivity(Intent(this@SettingsActivity, IptvSettingsActivity::class.java)) }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("配置 IPTV 直播源") }
+                        Text("磁力播放设置", style = MaterialTheme.typography.titleMedium)
                         FontSettings { fontPicker.launch(arrayOf("font/*", "application/octet-stream", "application/x-font-ttf", "application/x-font-opentype")) }
                         Text("存储位置", style = MaterialTheme.typography.titleMedium)
                         OutlinedTextField(download, { download = it }, label = { Text("下载目录（绝对路径）") }, singleLine = true, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "下载目录输入框" })

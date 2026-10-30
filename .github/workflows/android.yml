@@ -40,24 +40,24 @@ jobs:
           PACKAGE_REF=$(printf '%s' "$GITHUB_REF_NAME" | tr '/' '-')
           echo "PACKAGE_REF=$PACKAGE_REF" >> "$GITHUB_ENV"
           mkdir -p release-assets
-          cp app/build/outputs/apk/debug/app-debug.apk release-assets/FreeMangnetPlayer-${PACKAGE_REF}.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release-assets/OmniPlayer-${PACKAGE_REF}.apk
       - name: Build smaller ARM packages
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           for abi in arm64-v8a armeabi-v7a; do
             gradle --no-daemon assembleDebug -PtargetAbi="$abi"
-            cp app/build/outputs/apk/debug/app-debug.apk "release-assets/FreeMangnetPlayer-${PACKAGE_REF}-${abi}.apk"
+            cp app/build/outputs/apk/debug/app-debug.apk "release-assets/OmniPlayer-${PACKAGE_REF}-${abi}.apk"
           done
       - name: Package named source archive
         if: startsWith(github.ref, 'refs/tags/')
-        run: git archive --format=zip --prefix=FreeMangnetPlayer-${PACKAGE_REF}/ --output=FreeMangnetPlayer-${PACKAGE_REF}-source.zip HEAD
+        run: git archive --format=zip --prefix=OmniPlayer-${PACKAGE_REF}/ --output=OmniPlayer-${PACKAGE_REF}-source.zip HEAD
       - name: Publish GitHub release APK and source
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${GITHUB_REF_NAME}" "release-assets/FreeMangnetPlayer-${PACKAGE_REF}.apk" "release-assets/FreeMangnetPlayer-${PACKAGE_REF}-arm64-v8a.apk" "release-assets/FreeMangnetPlayer-${PACKAGE_REF}-armeabi-v7a.apk" "FreeMangnetPlayer-${PACKAGE_REF}-source.zip" --generate-notes --title "FreeMangnetPlayer ${GITHUB_REF_NAME}"
+        run: gh release create "${GITHUB_REF_NAME}" "release-assets/OmniPlayer-${PACKAGE_REF}.apk" "release-assets/OmniPlayer-${PACKAGE_REF}-arm64-v8a.apk" "release-assets/OmniPlayer-${PACKAGE_REF}-armeabi-v7a.apk" "OmniPlayer-${PACKAGE_REF}-source.zip" --generate-notes --title "OmniPlayer ${GITHUB_REF_NAME}"
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FreeMangnetPlayer-${{ env.PACKAGE_REF }}
-          path: release-assets/FreeMangnetPlayer-${{ env.PACKAGE_REF }}.apk
+          name: OmniPlayer-${{ env.PACKAGE_REF }}
+          path: release-assets/OmniPlayer-${{ env.PACKAGE_REF }}.apk

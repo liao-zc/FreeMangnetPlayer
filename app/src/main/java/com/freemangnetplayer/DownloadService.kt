@@ -36,7 +36,7 @@ class DownloadService : Service() {
         val pending = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).putExtra("open-tab", "下载"), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         fun action(value: String) = PendingIntent.getService(this, value.hashCode(), Intent(this, DownloadService::class.java).setAction(value), PendingIntent.FLAG_IMMUTABLE)
         val builder = if (Build.VERSION.SDK_INT >= 26) Notification.Builder(this, "downloads") else Notification.Builder(this)
-        val notification = builder.setSmallIcon(android.R.drawable.stat_sys_download).setContentTitle("FreeMangnetPlayer")
+        val notification = builder.setSmallIcon(android.R.drawable.stat_sys_download).setContentTitle("OmniPlayer")
             .setContentText("$active 个下载 / 缓存任务；点击管理")
             .setContentIntent(pending).setOnlyAlertOnce(true).setOngoing(active > 0)
             .addAction(Notification.Action.Builder(null, "暂停全部", action("pause")).build())

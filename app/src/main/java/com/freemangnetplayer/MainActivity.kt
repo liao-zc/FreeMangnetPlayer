@@ -105,7 +105,7 @@ class MainActivity : ComponentActivity() {
             )) {
                 var keyword by remember { mutableStateOf(requestedQuery.orEmpty()) }
                 var magnet by remember { mutableStateOf("") }
-                var selectedTab by remember { mutableStateOf(intent.getStringExtra("open-tab") ?: "搜索") }
+                var selectedTab by remember { mutableStateOf(intent.getStringExtra("open-tab") ?: if (inbound != null || !requestedQuery.isNullOrBlank()) "搜索" else "门户") }
                 var showEngineMenu by remember { mutableStateOf(false) }
                 var showCustomDialog by remember { mutableStateOf(false) }
                 var customName by remember { mutableStateOf(prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索") }
@@ -142,6 +142,8 @@ class MainActivity : ComponentActivity() {
                 BackHandler(enabled = selectedTab == "搜索结果") {
                     selectedTab = "搜索"
                 }
+                BackHandler(enabled = selectedTab == "门户") { finish() }
+                BackHandler(enabled = selectedTab in setOf("搜索", "播放", "下载", "收藏", "缓存", "历史")) { selectedTab = "门户" }
 
                 fun reloadLibrary() {
                     TorrentTasks.tasks.values.forEach { StoredVideos.sync(this@MainActivity, it) }
@@ -264,10 +266,10 @@ class MainActivity : ComponentActivity() {
                     bottomBar = {
                         NavigationBar(containerColor = Color.White) {
                             NavigationBarItem(
-                                selected = selectedTab == "搜索",
-                                onClick = { selectedTab = "搜索" },
+                                selected = selectedTab == "门户",
+                                onClick = { selectedTab = "门户" },
                                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                                label = { Text("搜索") }
+                                label = { Text("首页") }
                             )
                             NavigationBarItem(
                                 selected = selectedTab == "播放",
@@ -298,6 +300,26 @@ class MainActivity : ComponentActivity() {
                 ) { insets ->
                     Box(Modifier.fillMaxSize().background(canvas).padding(insets)) {
                         when (selectedTab) {
+                            "门户" -> Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                                Spacer(Modifier.height(22.dp))
+                                Text("OmniPlayer", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = teal)
+                                Text("电视直播与磁力播放", style = MaterialTheme.typography.titleMedium, color = ink)
+                                Spacer(Modifier.height(12.dp))
+                                Card(Modifier.fillMaxWidth().height(148.dp).clickable { startActivity(Intent(this@MainActivity, IptvActivity::class.java)) }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                                    Row(Modifier.fillMaxSize().padding(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                                        Text("📺", fontSize = 38.sp)
+                                        Column { Text("电视直播", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("浏览分类频道、收藏并播放 IPTV", style = MaterialTheme.typography.bodyMedium) }
+                                    }
+                                }
+                                Card(Modifier.fillMaxWidth().height(148.dp).clickable { selectedTab = "搜索" }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
+                                    Row(Modifier.fillMaxSize().padding(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                                        Text("🧲", fontSize = 38.sp)
+                                        Column { Text("磁力播放", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("进入原有磁力搜索、解析、播放与下载", style = MaterialTheme.typography.bodyMedium) }
+                                    }
+                                }
+                                OutlinedButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) { Icon(Icons.Default.Settings, null); Spacer(Modifier.width(8.dp)); Text("统一设置") }
+                                Text("磁力播放的原有列表入口仍在下方导航栏。", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                            }
                             "搜索结果" -> SearchResultsScreen(
                                 page = pageNumber,
                                 totalPages=sourcePages,
