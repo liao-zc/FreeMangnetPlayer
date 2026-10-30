@@ -9,6 +9,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -204,7 +205,7 @@ class IptvSettingsActivity : ComponentActivity() {
                     Button(onClick = {
                         val valid = entries.filter { it.name.isNotBlank() && (it.url.startsWith("https://") || it.url.startsWith("http://")) }
                         if (valid.isEmpty()) message = "至少需要一个有效的 HTTP(S) 直播源"
-                        else { IptvStore.saveSources(this, valid); message = "已保存 ${valid.size} 个直播源" }
+                        else { IptvStore.saveSources(this@IptvSettingsActivity, valid); message = "已保存 ${valid.size} 个直播源" }
                     }, Modifier.fillMaxWidth().height(52.dp)) { Text("保存直播源") }
                     Text(message, Modifier.padding(top = 8.dp))
                 }
