@@ -52,7 +52,7 @@ open class TorrentSession(
     }
 
     private fun isTorrentPaused(torrentHandle: TorrentHandle): Boolean =
-            torrentHandle.status().flags().and_(TorrentFlags.PAUSED).nonZero()
+            torrentHandle.status().flags().and_(TorrentFlags.PAUSED).non_zero()
                     || sessionManager.isPaused
 
     private fun isValidTorrentUri(torrentUri: Uri): Boolean {
@@ -160,7 +160,7 @@ open class TorrentSession(
             // can trigger playback before any video bytes have arrived.
             val selected = torrentHandle.getLargestFileIndex()
             torrentHandle.prioritizeFiles(Array(torrentHandle.torrentFile().numFiles()) {
-                if (it == selected) Priority.NORMAL else Priority.IGNORE
+                if (it == selected) Priority.DEFAULT else Priority.IGNORE
             })
         }
 
@@ -499,7 +499,7 @@ open class TorrentSession(
         // 1.2 bindings cannot set metadata in place. Preserve tracker URLs/tiers
         // and connected endpoints BEFORE replacing the owning handle.
         val oldTrackers = handle.trackers()
-        oldTrackers.forEach { info.addTracker(it.url(), it.tier()) }
+        val restoredInfo = TorrentInfo.bdecode(info.bencode(oldTrackers.map { it.url() }))
         handle.peerInfo().forEach { peer -> runCatching {
             val endpoint = peer.ip()
             knownPeers[endpoint] = TcpEndpoint(endpoint.substringBeforeLast(':').removePrefix("[").removeSuffix("]"), endpoint.substringAfterLast(':').toInt())
@@ -511,7 +511,7 @@ open class TorrentSession(
         val deadline = android.os.SystemClock.elapsedRealtime() + 3000
         while (sessionManager.find(hash)?.isValid == true && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(20)
         check(sessionManager.find(hash)?.isValid != true) { "Previous metadata task is still being removed" }
-        sessionManager.download(info, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList(), org.libtorrent4j.swig.torrent_flags_t())
+        sessionManager.download(restoredInfo, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList(), org.libtorrent4j.swig.torrent_flags_t())
     }
 
     /**

@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import org.libtorrent4j.*
 import org.libtorrent4j.swig.settings_pack
 import com.masterwok.simpletorrentandroid.*
+import com.masterwok.simpletorrentandroid.extensions.bencode
 import com.masterwok.simpletorrentandroid.contracts.TorrentSessionListener
 import com.masterwok.simpletorrentandroid.models.TorrentSessionStatus
 import kotlinx.coroutines.*
@@ -213,7 +214,7 @@ object TorrentTasks {
         val f = info.files()
         val rows = (0 until f.numFiles()).map { TaskFile(it, f.filePath(it), f.fileSize(it)) }
         val selected = task.selected.filter { it in rows.indices && it !in task.deletedFiles }.toSet().ifEmpty { rows.filter { it.index !in task.deletedFiles }.let { available -> (available.filter { it.video }.maxByOrNull { it.size } ?: available.maxByOrNull { it.size })?.let { setOf(it.index) } ?: emptySet() } }
-        handle.prioritizeFiles(Array(rows.size) { if (it in selected) Priority.NORMAL else Priority.IGNORE })
+        handle.prioritizeFiles(Array(rows.size) { if (it in selected) Priority.DEFAULT else Priority.IGNORE })
     }
     private fun start(task: TorrentTask) {
         task.job = scope.launch {
@@ -227,7 +228,6 @@ object TorrentTasks {
                     options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881")
                     // 16 MiB per active session; queue limits already bound memory usage.
                     // libtorrent 2 uses the OS page cache instead of the removed 1.x cache_size.
-                    options.settingsPack.setInteger(settings_pack.int_types.cache_expiry.swigValue(), 1)
                     options.settingsPack.listenInterfaces("0.0.0.0:0,[::]:0")
                     options.settingsPack.setInteger(settings_pack.int_types.connection_speed.swigValue(), 30)
                     for (flag in listOf(settings_pack.bool_types.enable_dht, settings_pack.bool_types.enable_lsd,
@@ -264,11 +264,10 @@ object TorrentTasks {
                     if (task.cancelled) return@withContext
                     if (bytes != null) {
                         val info = TorrentInfo.bdecode(bytes)
-                        Regex("[?&]tr=([^&]+)").findAll(task.source).forEach {
-                            info.addTracker(java.net.URLDecoder.decode(it.groupValues[1], "UTF-8"), 0)
-                        }
-                        trackers.forEach { info.addTracker(it, 0) }
-                        engine.start(info.bencode())
+                        val sourceTrackers = Regex("[?&]tr=([^&]+)").findAll(task.source).map {
+                            java.net.URLDecoder.decode(it.groupValues[1], "UTF-8")
+                        }.toList()
+                        engine.start(info.bencode(sourceTrackers + trackers))
                     } else {
                         val source = if (task.source.startsWith("magnet:", true)) task.source + trackers.filter { !task.source.contains(java.net.URLEncoder.encode(it, "UTF-8")) }
                             .joinToString("") { "&tr=" + java.net.URLEncoder.encode(it, "UTF-8") } else task.source
@@ -490,7 +489,7 @@ object TorrentTasks {
     private fun applyPriorities(task: TorrentTask) {
         val handle = task.handle ?: return
         if (task.files.isEmpty() || (task.selected.isEmpty() && !task.streaming)) return
-        handle.prioritizeFiles(Array((task.files.maxOfOrNull { it.index } ?: -1) + 1) { if (it !in task.deletedFiles && (it in task.selected || (task.streaming && it == task.playingIndex))) Priority.NORMAL else Priority.IGNORE })
+        handle.prioritizeFiles(Array((task.files.maxOfOrNull { it.index } ?: -1) + 1) { if (it !in task.deletedFiles && (it in task.selected || (task.streaming && it == task.playingIndex))) Priority.DEFAULT else Priority.IGNORE })
         val info = handle.torrentFile() ?: return
         if (!task.streaming) return
         val file = task.files.firstOrNull { it.index == task.playingIndex } ?: return
@@ -651,7 +650,7 @@ object TorrentTasks {
             } ?: return@runCatching null
             val info = TorrentInfo.bdecode(bytes)
             if (!info.infoHash().toString().equals(hash, true)) return@runCatching null
-            trackers.forEach { info.addTracker(it, 0) }; info.bencode()
+            info.bencode(trackers)
         } finally { connection.disconnect() }
     }.getOrNull()
 }
