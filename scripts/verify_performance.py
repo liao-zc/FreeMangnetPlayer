@@ -98,7 +98,7 @@ def main():
             break
         time.sleep(.5)
     peak = max(s.get('payloadRate', 0) for s in samples)
-    assert peak > 64 * 1024, ('Throughput still unusable', peak, samples)
+    assert peak >= 2 * 1024 * 1024, ('Controlled unlimited seed did not reach 2 MiB/s', peak, samples)
     assert all(s.get('downloadLimit') == 0 and s.get('uploadLimit') == 0 for s in samples), samples
     report.append({'check': 'unlimited-app-throughput', 'passed': True,
         'peak_payload_bytes_per_second': peak, 'first_play_seconds': first_seconds,
