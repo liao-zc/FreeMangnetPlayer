@@ -1,6 +1,6 @@
 package com.masterwok.simpletorrentandroid.extensions
 
-import com.frostwire.jlibtorrent.TorrentInfo
+import org.libtorrent4j.TorrentInfo
 
 
 /**

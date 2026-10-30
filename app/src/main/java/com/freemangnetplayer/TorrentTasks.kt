@@ -4,8 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.*
-import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.swig.settings_pack
+import org.libtorrent4j.*
+import org.libtorrent4j.swig.settings_pack
 import com.masterwok.simpletorrentandroid.*
 import com.masterwok.simpletorrentandroid.contracts.TorrentSessionListener
 import com.masterwok.simpletorrentandroid.models.TorrentSessionStatus

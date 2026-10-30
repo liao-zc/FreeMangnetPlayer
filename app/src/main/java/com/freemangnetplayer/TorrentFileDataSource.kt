@@ -5,7 +5,7 @@ import android.os.SystemClock
 import androidx.media3.common.C
 import androidx.media3.datasource.BaseDataSource
 import androidx.media3.datasource.DataSpec
-import com.frostwire.jlibtorrent.TorrentHandle
+import org.libtorrent4j.TorrentHandle
 import java.io.File
 import java.io.IOException
 import java.io.RandomAccessFile
@@ -22,7 +22,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
     private var pieceLength = 0L
     private var lastPrefetched = -1
     private val flushed = mutableSetOf<Int>()
-    private var pieceSnapshot: com.frostwire.jlibtorrent.TorrentStatus? = null
+    private var pieceSnapshot: org.libtorrent4j.TorrentStatus? = null
 
     override fun open(dataSpec: DataSpec): Long {
         transferInitializing(dataSpec)

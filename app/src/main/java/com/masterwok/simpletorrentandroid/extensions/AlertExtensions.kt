@@ -1,7 +1,7 @@
 package com.masterwok.simpletorrentandroid.extensions
 
-import com.frostwire.jlibtorrent.alerts.Alert
-import com.frostwire.jlibtorrent.alerts.TorrentAlert
+import org.libtorrent4j.alerts.Alert
+import org.libtorrent4j.alerts.TorrentAlert
 
 /**
  * Check if the [Alert] is of type [TorrentAlert].

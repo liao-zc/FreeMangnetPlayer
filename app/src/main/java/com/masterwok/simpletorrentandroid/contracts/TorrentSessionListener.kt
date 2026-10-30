@@ -1,6 +1,6 @@
 package com.masterwok.simpletorrentandroid.contracts
 
-import com.frostwire.jlibtorrent.TorrentHandle
+import org.libtorrent4j.TorrentHandle
 import com.masterwok.simpletorrentandroid.models.TorrentSessionStatus
 
 

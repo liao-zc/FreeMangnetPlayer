@@ -1,8 +1,8 @@
 package com.masterwok.simpletorrentandroid.models
 
 import android.net.Uri
-import com.frostwire.jlibtorrent.TorrentHandle
-import com.frostwire.jlibtorrent.TorrentStatus
+import org.libtorrent4j.TorrentHandle
+import org.libtorrent4j.TorrentStatus
 import com.masterwok.simpletorrentandroid.extensions.*
 
 

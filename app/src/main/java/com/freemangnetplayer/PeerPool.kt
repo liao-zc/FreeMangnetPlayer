@@ -1,8 +1,8 @@
 package com.freemangnetplayer
 
 import android.content.Context
-import com.frostwire.jlibtorrent.TcpEndpoint
-import com.frostwire.jlibtorrent.TorrentHandle
+import org.libtorrent4j.TcpEndpoint
+import org.libtorrent4j.TorrentHandle
 import org.json.JSONArray
 import org.json.JSONObject
 

@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.webkit.URLUtil
-import com.frostwire.jlibtorrent.*
-import com.frostwire.jlibtorrent.alerts.*
+import org.libtorrent4j.*
+import org.libtorrent4j.alerts.*
 import com.masterwok.simpletorrentandroid.contracts.TorrentSessionListener
 import com.masterwok.simpletorrentandroid.extensions.*
 import com.masterwok.simpletorrentandroid.models.TorrentSessionBuffer
@@ -374,7 +374,7 @@ open class TorrentSession(
         sessionManager.download(
                 magnetUrl // Native parser decodes parameters; decoding the full URL corrupts trackers.
                 , downloadLocation
-                , com.frostwire.jlibtorrent.swig.torrent_flags_t()
+                , org.libtorrent4j.swig.torrent_flags_t()
         )
     }
 
@@ -462,7 +462,7 @@ open class TorrentSession(
     val isRunning: Boolean get() = sessionManager.isRunning
     fun preferTcp(handle: TorrentHandle) {
         val settings = SettingsPack()
-        settings.setBoolean(com.frostwire.jlibtorrent.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
+        settings.setBoolean(org.libtorrent4j.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), false)
         sessionManager.applySettings(settings)
         // Applying settings alone leaves an existing stalled uTP peer alive.
         handle.pause(); handle.resume()
@@ -471,7 +471,7 @@ open class TorrentSession(
     }
     fun enableOutgoingUtp() {
         val settings = SettingsPack()
-        settings.setBoolean(com.frostwire.jlibtorrent.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), true)
+        settings.setBoolean(org.libtorrent4j.swig.settings_pack.bool_types.enable_outgoing_utp.swigValue(), true)
         sessionManager.applySettings(settings)
     }
     val dhtNodes: Long get() = sessionManager.dhtNodes()
@@ -511,7 +511,7 @@ open class TorrentSession(
         val deadline = android.os.SystemClock.elapsedRealtime() + 3000
         while (sessionManager.find(hash)?.isValid == true && android.os.SystemClock.elapsedRealtime() < deadline) Thread.sleep(20)
         check(sessionManager.find(hash)?.isValid != true) { "Previous metadata task is still being removed" }
-        sessionManager.download(info, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList(), com.frostwire.jlibtorrent.swig.torrent_flags_t())
+        sessionManager.download(info, torrentSessionOptions.downloadLocation, null, null, knownPeers.values.toList(), org.libtorrent4j.swig.torrent_flags_t())
     }
 
     /**

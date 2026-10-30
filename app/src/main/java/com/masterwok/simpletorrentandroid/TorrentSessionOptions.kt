@@ -1,7 +1,7 @@
 package com.masterwok.simpletorrentandroid
 
-import com.frostwire.jlibtorrent.SettingsPack
-import com.frostwire.jlibtorrent.swig.settings_pack
+import org.libtorrent4j.SettingsPack
+import org.libtorrent4j.swig.settings_pack
 import java.io.File
 
 
