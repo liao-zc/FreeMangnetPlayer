@@ -4,8 +4,8 @@ from pathlib import Path
 from capture_usage_screenshots import adb,screenshot,PACKAGE,OUT
 
 targets=json.loads(Path('scripts/public_acceptance_targets.json').read_text(encoding='utf-8'))
+targets.insert(0,dict(category='本轮 MKV 起播回归',hash='172241866C3C439CAB4548115ED1A0250B09FA52',magnet='magnet:?xt=urn:btih:172241866c3c439cab4548115ed1a0250b09fa52&dn=Spider-Man.Brand.New.Day.2026.2160p.iT.WEB-DL.H.265.DV.DDP5.1.Atmos-PandaQT.mkv&so=0'))
 targets.append(dict(category='原指定资源',hash='2362347540B27D8A4142AF2BBE0A071F26A3B7A1'))
-targets.append(dict(category='本轮 MKV 起播回归',hash='172241866C3C439CAB4548115ED1A0250B09FA52',magnet='magnet:?xt=urn:btih:172241866c3c439cab4548115ed1a0250b09fa52&dn=Spider-Man.Brand.New.Day.2026.2160p.iT.WEB-DL.H.265.DV.DDP5.1.Atmos-PandaQT.mkv&so=0'))
 results=[]
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
 for index,target in enumerate(targets,1):
@@ -30,7 +30,8 @@ for index,target in enumerate(targets,1):
         final=samples[-1] if samples else {},samples=samples)
     results.append(row);(OUT/'public-acceptance.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf-8')
     print(target['hash'],row['passed'],row['firstFrameSeconds'],flush=True)
-passed=sum(r['passed'] for r in results[:10]);regression=results[-1]
+regression=next(r for r in results if r['category']=='本轮 MKV 起播回归')
+passed=sum(r['passed'] for r in results if r['category'] in {'电影','动漫','剧集','纪录片'})
 print('User resource acceptance:',passed,'/10',flush=True)
 print('Exact MKV regression:',regression['passed'],'first-frame-seconds=',regression['firstFrameSeconds'],flush=True)
 assert regression['passed'],'The exact reported MKV magnet must render and sustain playback while incomplete'
