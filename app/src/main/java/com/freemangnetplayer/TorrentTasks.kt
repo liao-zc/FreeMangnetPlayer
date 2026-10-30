@@ -307,6 +307,7 @@ object TorrentTasks {
                 while (isActive && !task.cancelled && task.engine?.isRunning == true) {
                     delay(500)
                     val handle = task.handle ?: continue
+                    if(ticks%20==0) withContext(Dispatchers.IO) { synchronized(task.nativeLock) { runCatching { if(task.payloadBytes>0) PeerPool.capture(context,task.id,handle); if(task.payloadRate<1024) PeerPool.reconnect(context,task.id,handle) } } }
                     val snapshot = withContext(Dispatchers.IO) { synchronized(task.nativeLock) {
                         require(handle.isValid) { "资源会话已结束" }
                         val info = handle.torrentFile()

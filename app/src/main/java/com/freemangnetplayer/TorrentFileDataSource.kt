@@ -71,7 +71,7 @@ internal class TorrentFileDataSource(private val handleProvider: () -> TorrentHa
             if (!handle.isValid || Thread.currentThread().isInterrupted) throw IOException("读取已取消")
             val info = handle.torrentFile() ?: throw IOException("元数据不可用")
             if (lastPrefetched != piece) {
-                val window = (8 * 1024 * 1024 / pieceLength).toInt().coerceIn(4, 128)
+                val window = (16 * 1024 * 1024 / pieceLength).toInt().coerceIn(4, 128)
                 val end = minOf(piece + window, ((torrentEnd - 1) / pieceLength).toInt())
                 for (next in piece..end) if (!handle.havePiece(next)) handle.setPieceDeadline(next, (next - piece) * 150)
                 lastPrefetched = piece

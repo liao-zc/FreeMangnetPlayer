@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(searchState, results.size, pageNumber, nextPage) {
                     if (debug && searchTrigger > 0) {
                         val rows = JSONArray()
-                        results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet)) }
+                        results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet).put("bytes",it.bytes).put("sizeText",it.sizeText).put("type",it.type).put("heat",it.heat)) }
                         java.io.File(filesDir, "search-check.json").writeText(JSONObject().put("engine", activeProvider)
                             .put("page", pageNumber).put("next", nextPage).put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
                     }

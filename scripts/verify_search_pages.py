@@ -23,16 +23,18 @@ for page in [1,2,3]:
     st=wait(page,len(expected[str(page)]))
     actual={r['magnet'] for r in st['results']};wanted={r[1].replace('2362347540B27D8A4142AF2BBE0A071F26A3B7A1','2362347540b27d8a4142af2bbe0a071f26a3b7a1') for r in expected[str(page)]}
     assert actual==wanted,(actual-wanted,wanted-actual)
-    require_visible('上一页','下一页','返回');screenshot('pagination-'+str(page)+'.png')
+    require_visible('上一页','下一页','‹ 返回');screenshot('pagination-'+str(page)+'.png')
     checks.append({'check':'source-page-'+str(page)+'-complete','passed':True,'state':st,'expected_count':len(wanted)})
     if page==1:
-        for screen in range(1,5):
-            require_visible(f'结果 {screen} / 4 页', st['results'][(screen-1)*10]['title'])
+        assert all(r.get('bytes',0)>0 for r in st['results']),st
+        require_visible('第 1 / 3 页','跳转网站页')
+        for screen in range(1,3):
+            require_visible(f'结果 {screen} / 2 页 · 39 条', st['results'][(screen-1)*20]['title'])
             screenshot('local-results-'+str(screen)+'.png')
-            checks.append({'check':'local-ten-result-screen-'+str(screen),'passed':True,'source_page':1,'screen':screen,'total_results':len(st['results'])})
-            if screen<4:find_and_tap('后 10 条')
-        for _ in range(3):find_and_tap('前 10 条')
-        require_visible('结果 1 / 4 页')
+            checks.append({'check':'local-twenty-result-screen-'+str(screen),'passed':True,'source_page':1,'screen':screen,'total_results':len(st['results'])})
+            if screen<2:find_and_tap('后 20 条')
+        for _ in range(1):find_and_tap('前 20 条')
+        require_visible('结果 1 / 2 页 · 39 条')
         checks.append({'check':'local-page-back-restores-first-screen','passed':True})
     if page<3:find_and_tap('下一页')
 find_and_tap('上一页');st=wait(2,17);checks.append({'check':'previous-page-restores-all-results','passed':True,'state':st});screenshot('pagination-back.png')
