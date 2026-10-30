@@ -339,3 +339,18 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 [最新十条磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005807792) 仍在执行 Android 逐条检查；独立 native 探测已经结束，十条均无元数据且有效视频字节为 0。native 工作流步骤成功仅表示探测脚本执行完成，不表示资源播放通过。
 
 [缓存定位回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41006619134) 已启动。
+
+### 持续排查：多文件选择与 Peer 数据供给
+
+[选择状态回归 41006619134](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41006619134) 明确在“全选后两个 Episode 均被选中”处失败。代码检查发现 playFile 在准备/重试时覆盖多选，实验分支已保留显式选择；但[修复后的 41006843768](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41006843768) 仍在相同断言失败，当前修复不足以解决界面操作问题，不能标记缓存全选通过。
+
+新增两个直接 Android 回归检查：重复播放准备保持多选，以及无选择时初始化当前文件；同时捕获弹窗点击全选前后的实际截图、超时 UI 和任务状态，继续定位界面点击与页面重建。
+
+- [直接选择回归及完整功能检查](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007551092)
+- [弹窗截图与超时快照检查](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007647713)
+
+磁力诊断增加最多 16 个 Peer 的地址、客户端、拥有资源比例、下载字节、速度和连接标志，以及最多 20 条断连/错误事件，仅写入调试状态。这些字段帮助区分发现地址、完成握手和真正供给视频数据，不把短暂连接数当作播放成功。
+
+[含 Peer 诊断的十条验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41007252723) 正在执行。前一轮 41005807792 也仍在运行，保留其独立结果，未因观察等待而重启或宣布失败。
+
+再次检查对标仓库 zaidielykelee/Magnet_player，当前树仍只有 README.md，无法进行 BT 源码级比较；未将其他客户端探测冒充对标 App 的同设备效果。
