@@ -323,3 +323,19 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 ### BT 仍在验证
 
 现代引擎元数据替换后丢失 Tracker 的原因已定位：TorrentInfo 不保留顶层 Tracker，重新添加任务时必须显式恢复 URL 和 tier。实验分支现已恢复到新句柄，并以新句柄实际 Tracker 集合验证恢复数量。[最新受控回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005592483) 正在执行，尚不能声明解决或发布验收版 APK。十条磁力仍要求全部实际渲染首帧、在文件未下载完成时起播并持续播放。
+
+### 最新运行结果：受控起播通过，缓存后续检查失败
+
+[现代引擎回归 41005802769](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005802769) 已完成。Android 五项存储/字体/任务名额测试通过；受控 Episode-01.mp4 实际起播：总大小 12,590,316 字节，采样时已下载 1,354,314 字节，首帧时间戳非零，视频高度 180，播放进度 913ms，总时长 180 秒，有效传输字节 1,166,686。此采样证明受控文件未下载完成时能起播，不证明连续 20 秒无卡顿或十条公网磁力通过。metadataReplacements 为 0，不能用此样本证明元数据替换路径已恢复。
+
+后续“全选后缓存记录至少两条”检查失败，整套回归仍未通过；已增加选择状态断言以及缓存失败的任务状态、记录和 UI 快照，继续定位。
+
+[受控起播状态](evidence/modern-controlled-playback.json)
+
+![现代引擎受控视频实际画面与画质菜单](screenshots/current/modern-controlled-playing.png)
+
+画面为受控测试视频，不是用户十条电影的验收截图。
+
+[最新十条磁力验收](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41005807792) 仍在执行 Android 逐条检查；独立 native 探测已经结束，十条均无元数据且有效视频字节为 0。native 工作流步骤成功仅表示探测脚本执行完成，不表示资源播放通过。
+
+[缓存定位回归](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41006619134) 已启动。

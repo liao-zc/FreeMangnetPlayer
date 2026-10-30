@@ -1,0 +1,120 @@
+[
+  {
+    "check": "default-original-quality",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 3,
+      "downloaded": 1354314,
+      "total": 12590316,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 2012,
+      "peerMilliseconds": 2012,
+      "verifiedPieceMilliseconds": 2012,
+      "playbackMilliseconds": 3705,
+      "rebufferCount": 1,
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": false
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 1354314,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 11605,
+          "selected": false
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 913,
+      "renderedFrameAt": 1793336634062,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 1520,
+      "playerError": "正在播放：Bundle-1/Episode-01.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 115377,
+      "payloadBytes": 1166686,
+      "rate": 119525,
+      "dhtNodes": 50,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (udp://tracker.theoks.net:6969/announce)[[::]:38389-v1] timed out \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 1354314,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 11605,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 4
+    }
+  },
+  {
+    "check": "quality-control-inside-player-with-no-transcoding-claim",
+    "passed": true
+  }
+]
