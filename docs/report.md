@@ -299,3 +299,14 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 正在执行的回归：[搜索分页](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000403214)、[十条磁力真实播放](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000002632)、[列表与播放功能](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41000014234)。
 
 优化依据：[libtorrent 流式分片调度说明](https://www.libtorrent.org/streaming.html)。该说明要求按播放读取位置设置紧急分片 deadline；单纯顺序下载不能保证首个分片被最快节点处理。
+
+
+### 新版引擎评估进展
+
+独立分支 [improve/modern-bt-engine](https://github.com/liao-zc/FreeMangnetPlayer/tree/improve/modern-bt-engine) 使用 Maven Central 已发布的 libtorrent4j 2.1.0-39，四种 JNI 架构与 Java 版本一致。已适配元数据导出、Tracker 参数及优先级接口；用累计有效接收字节识别下载进展，避免把低于 1KB/s 的下载误判为无进展。
+
+[新版 APK 的十条播放测试](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41001410886) 已通过 assembleDebug，模拟器验收仍在进行。编译通过不代表播放通过，该分支尚未并入 main，也未发布新版本。
+
+本机绑定 WLAN 的十条诊断运行约 597 秒：10 条均未取得元数据，视频有效下载字节均为 0。公开 Ubuntu 最新对照种子取得 1,572,864 字节实际数据，证明当前环境存在可用 BT 传输路径，不能直接据此认定十条目标种子无节点。
+
+搜索分页仍漏抓 2 个详情页（37/39），已增加真实过滤异常与工作线程状态诊断并继续重跑，尚未通过本轮完整分页验收。
