@@ -42,6 +42,19 @@ def control(name):
     (OUT/'preferences-failed-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
     raise AssertionError(name)
 
+def tap_exact(label):
+    for _ in range(12):
+        adb('shell','uiautomator','dump','/sdcard/window.xml')
+        t=ET.fromstring(adb('shell','cat','/sdcard/window.xml'))
+        for n in t.iter('node'):
+            if n.get('text')!=label:continue
+            b=list(map(int,re.findall(r'\d+',n.get('bounds',''))))
+            if len(b)==4 and b[2]>b[0] and b[3]>b[1]:
+                adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
+        adb('shell','input','swipe','540','1900','540','900','400');time.sleep(.5)
+    raise AssertionError('Exact action unavailable: '+label)
+
+adb('shell','wm','size','1080x2400')
 adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/.MainActivity','--es','open-tab',shlex.quote('播放'))
 find_and_tap('设置');require_visible('显示与字体','小','✓ 标准','大','超大','黑体','宋体','楷体')
 screenshot('preferences-01-font-settings.png');record('display-font-module-and-four-presets')
@@ -59,7 +72,7 @@ s=wait(lambda s:s.get('playing') and s.get('duration',0)>0 and s.get('videoHeigh
 control('player_favorite');poll(lambda:bool(entries('favorite-entries')));screenshot('preferences-04-filled-favorite.png');record('favorite-heart-adds-current-video')
 control('player_favorite');poll(lambda:not entries('favorite-entries'));record('favorite-heart-second-tap-removes')
 control('player_favorite')
-find_and_tap('缓存');wait(lambda s:s.get('retainedCache'))
+tap_exact('缓存');wait(lambda s:s.get('retainedCache'))
 control('player_quality');require_visible('原画质');screenshot('preferences-05-supported-quality-menu.png');find_and_tap('原画质')
 time.sleep(6);s=state();assert s['duration']>0 and s['videoHeight']>0
 screenshot('preferences-06-media-cache-information.png');record('actual-duration-resolution-size-and-cache-progress',state=s)
