@@ -62,6 +62,7 @@ class PlayerActivity : ComponentActivity() {
     private var resumeAfterScrub = false
     private var attached = false
     private var superseded = false
+    private var lastHistoryAt=0L
     private var qualityHeight = 0
     companion object { private var activePlayer = java.lang.ref.WeakReference<PlayerActivity>(null) }
     private val notifications = registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
@@ -91,7 +92,7 @@ class PlayerActivity : ComponentActivity() {
         fullscreen = savedInstanceState?.getBoolean("fullscreen") ?: false
         updateSystemBars()
         setContent {
-            MaterialTheme(colorScheme = lightColorScheme(primary = Color(0xFF087F79), background = Color(0xFFF3F8FA))) {
+            AppTheme(colorScheme = lightColorScheme(primary = Color(0xFF087F79), background = Color(0xFFF3F8FA))) {
                 val current = task
                 var favorite by remember { mutableStateOf(LibraryStore.readFavorites(this).any { it.source == source }) }
                 var fileDialog by remember { mutableStateOf(false) }
@@ -149,7 +150,7 @@ class PlayerActivity : ComponentActivity() {
                     Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
-                        OutlinedButton(onClick = { current?.let { t -> t.files.firstOrNull { it.index == t.playingIndex }?.let { LibraryStore.addFavorite(this@PlayerActivity, it.path.substringAfterLast('/'), StoredVideos.fileSource(t, it)) } } ?: LibraryStore.addFavorite(this@PlayerActivity, title, source); favorite = true }, modifier = Modifier.height(52.dp)) { Text(if (favorite) "已收藏" else "收藏") }
+
                     }
                     val compact = LocalConfiguration.current.screenHeightDp < 720
                     val bodyScroll = rememberScrollState()
@@ -245,7 +246,8 @@ class PlayerActivity : ComponentActivity() {
                     if (qualityDialog) AlertDialog(onDismissRequest = { qualityDialog = false }, title = { Text("播放画质") }, text = {
                         Column {
                             Text("默认原画质。720p / 480p 仅选择文件中已有的视频轨道；单画质磁力无法靠缩小画面减少下载量。")
-                            for (height in listOf(0, 720, 480)) TextButton(onClick = { selectQuality(height); qualityDialog = false }) { Text(if (height == 0) "原画质" else "${height}p（需已有低清轨道）") }
+                            val availableHeights=listOf(0,720,480).filter { h -> h==0 || (player as? ExoPlayer)?.currentTracks?.groups?.any { group -> group.type==C.TRACK_TYPE_VIDEO && (0 until group.length).any { group.isTrackSupported(it) && group.getTrackFormat(it).height in 1..h } }==true }
+                            for (height in availableHeights) TextButton(onClick = { selectQuality(height); qualityDialog = false }) { Text(if (height == 0) "原画质" else "${height}p（需已有低清轨道）") }
                         }
                     }, confirmButton = { TextButton(onClick = { qualityDialog = false }) { Text("关闭") } })
                     if (networkDialog) AlertDialog(onDismissRequest = { networkDialog = false }, title = { Text("真实网络诊断") }, text = {
@@ -346,13 +348,26 @@ class PlayerActivity : ComponentActivity() {
         if (next != null) openStored(next.first, next.second)
         else android.widget.Toast.makeText(this, "没有下一个已缓存或下载的视频", android.widget.Toast.LENGTH_SHORT).show()
     }
+    private fun toggleFavorite() {
+        val t=task ?: return;val f=t.files.firstOrNull { it.index==t.playingIndex }
+        val link=f?.let { StoredVideos.fileSource(t,it) } ?: source
+        val exists=LibraryStore.readFavorites(this).any { it.source==link }
+        if(exists) LibraryStore.removeEntries(this,"??",setOf(link)) else LibraryStore.addFavorite(this,f?.path?.substringAfterLast('/') ?: title,link)
+        refreshProgress()
+    }
     private fun selectQuality(height: Int) {
         val media = player as? ExoPlayer
-        if (height == 0) { qualityHeight = 0; media?.let { it.trackSelectionParameters = it.trackSelectionParameters.buildUpon().clearVideoSizeConstraints().setForceHighestSupportedBitrate(true).build() }; return }
-        val available = media?.currentTracks?.groups?.any { group -> group.type == C.TRACK_TYPE_VIDEO && (0 until group.length).any { group.getTrackFormat(it).height in 1..height } } == true
-        if (!available) { android.widget.Toast.makeText(this, "当前文件没有可选低清轨道；请在文件列表选择低码率版本", android.widget.Toast.LENGTH_LONG).show(); return }
-        qualityHeight = height
-        media!!.trackSelectionParameters = media.trackSelectionParameters.buildUpon().setMaxVideoSize(height * 16 / 9, height).setForceHighestSupportedBitrate(false).build()
+        if (height == 0) { qualityHeight = 0; media?.let { it.trackSelectionParameters = it.trackSelectionParameters.buildUpon().clearOverridesOfType(C.TRACK_TYPE_VIDEO).clearVideoSizeConstraints().setForceHighestSupportedBitrate(true).build() }; return }
+        val groups=media?.currentTracks?.groups.orEmpty().filter { it.type==C.TRACK_TYPE_VIDEO }
+        val candidate=groups.flatMap { group -> (0 until group.length).filter { group.isTrackSupported(it) }.map { group to it } }
+            .filter { (group,index) -> val f=group.getTrackFormat(index); f.height in 1..height || (f.height<=0 && f.width in 1..(height*16/9)) }
+            .maxByOrNull { (group,index) -> group.getTrackFormat(index).height }
+        if(candidate==null || media==null) return
+        qualityHeight=height
+        media.trackSelectionParameters=media.trackSelectionParameters.buildUpon().clearOverridesOfType(C.TRACK_TYPE_VIDEO)
+            .setForceHighestSupportedBitrate(false).setMaxVideoSize(height*16/9,height)
+            .setOverrideForType(androidx.media3.common.TrackSelectionOverride(candidate.first.mediaTrackGroup,listOf(candidate.second))).build()
+
     }
     private fun copyFileMagnet(current: TorrentTask, file: TaskFile) {
         val extras = current.source.substringAfter('?', "").split('&').filter {
@@ -424,6 +439,7 @@ class PlayerActivity : ComponentActivity() {
                 findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
                 findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
                 findViewById<View>(R.id.player_next).setOnClickListener { playNextStored() }
+                findViewById<View>(R.id.player_favorite).setOnClickListener { toggleFavorite() }
                 findViewById<View>(R.id.player_quality).setOnClickListener { onQuality() }
                 findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
                     override fun onScrubStart(timeBar: androidx.media3.ui.TimeBar, position: Long) {
@@ -455,8 +471,24 @@ class PlayerActivity : ComponentActivity() {
         else "%02d:%02d".format(seconds / 60, seconds % 60)
     }
     private fun refreshProgress() {
-        val current = player ?: return
-        val view = activeView ?: return
+        val view=activeView ?: return
+        val t=task
+        val f=t?.files?.firstOrNull { it.index==t.playingIndex }
+        val link=if(t!=null && f!=null) StoredVideos.fileSource(t,f) else source
+        val favorite=LibraryStore.readFavorites(this).any { it.source==link }
+        view.findViewById<android.widget.ImageButton>(R.id.player_favorite)?.apply { setImageResource(if(favorite)R.drawable.ic_heart_filled else R.drawable.ic_heart_outline);contentDescription=if(favorite)"????" else "????" }
+        if(f!=null) {
+            val duration=player?.duration?.takeIf{it>0} ?: 0L
+            val height=player?.videoSize?.height ?: 0
+            val percent=(f.done.toDouble()*100/f.size.coerceAtLeast(1)).coerceIn(0.0,100.0)
+            view.findViewById<TextView>(R.id.player_resource_info)?.apply {
+                text="${if(duration>0)historyTime(duration) else "????"} ? ${if(height>0) "${height}P" else "?????"} ? ${bytes(f.size)} ? ${"%.1f".format(percent)}%"
+                typeface=DisplaySettings.typeface(this@PlayerActivity)
+            }
+            view.findViewById<android.widget.ProgressBar>(R.id.player_cache_progress)?.progress=(percent*10).toInt()
+            if(player?.isPlaying==true && System.currentTimeMillis()-lastHistoryAt>5000) {lastHistoryAt=System.currentTimeMillis();LibraryStore.addPlayback(this,f.path.substringAfterLast('/'),link,player?.currentPosition ?: 0,duration)}
+        }
+        val current=player ?: return
         if (scrubbing) return
         val duration = current.duration.takeIf { it > 0 } ?: 0L
         view.findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress)?.let {

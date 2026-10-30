@@ -41,6 +41,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.window.Dialog
@@ -60,7 +61,7 @@ data class SearchProvider(
 
 private data class SearchPage(val label: String, val url: String)
 
-private data class MagnetResult(val title: String, val magnet: String)
+private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "??", val heat: String = "")
 
 val builtInProviders = listOf(
     SearchProvider("clg.im", "https://clg.im/"),
@@ -94,7 +95,7 @@ class MainActivity : ComponentActivity() {
         val requestedEngine = if (debug) intent.getStringExtra("test-engine") else null
         val requestedQuery = if (debug) intent.getStringExtra("test-query") else null
         setContent {
-            MaterialTheme(colorScheme = lightColorScheme(
+            AppTheme(colorScheme = lightColorScheme(
                 primary = teal,
                 secondary = Color(0xFF00A89B),
                 background = canvas,
@@ -123,6 +124,9 @@ class MainActivity : ComponentActivity() {
                 var currentSearchUrl by remember { mutableStateOf("") }
                 val results = remember { mutableStateListOf<MagnetResult>() }
                 var pageNumber by remember { mutableIntStateOf(1) }
+                var sourcePages by remember { mutableIntStateOf(0) }
+                var searchComplete by remember { mutableStateOf(false) }
+                var scannerReady by remember { mutableStateOf(false) }
                 var nextPage by remember { mutableStateOf("") }
                 val pageUrls = remember { mutableStateMapOf<Int, String>() }
                 val pageCache = remember { mutableStateMapOf<Int, List<MagnetResult>>() }
@@ -168,7 +172,9 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(searchTrigger) {
                     if (searchTrigger == 0) return@LaunchedEffect
                     delay(40_000)
-                    if (searchState == "loading") {
+                    if (!searchComplete && searchState !in listOf("idle","empty","error")) {
+                        searchComplete = true
+                        magnetWebView?.evaluateJavascript("window.__fmpStopped=true",null)
                         searchState = "timeout"
                         searchMessage = "40 秒内未提取到磁力链接。可在应用内查看网页，完成验证或检查该网站是否提供磁力下载。"
                     }
@@ -180,9 +186,10 @@ class MainActivity : ComponentActivity() {
                         error = "先输入要搜索的关键词"
                         return
                     }
+                    HistoryStore.record(this@MainActivity,"??",HistoryEntry(q,q,System.currentTimeMillis()))
                     focus.clearFocus()
                     error = ""
-                    pageNumber = 1; nextPage = ""; pageUrls.clear(); pageCache.clear(); pageNext.clear()
+                    sourcePages=0;searchComplete=false;scannerReady=false;pageNumber = 1; nextPage = ""; pageUrls.clear(); pageCache.clear(); pageNext.clear()
                     results.clear()
                     selectedTab = "搜索结果"
                     searchState = "loading"
@@ -290,6 +297,9 @@ class MainActivity : ComponentActivity() {
                         when (selectedTab) {
                             "搜索结果" -> SearchResultsScreen(
                                 page = pageNumber,
+                                totalPages=sourcePages,
+                                onJump={ number -> changePage(number,pageUrls[number].orEmpty()) },
+                                knownPages=pageUrls.keys.toSet(),
                                 nextAvailable = nextPage.isNotBlank(),
                                 onPrevious = { changePage(pageNumber - 1, pageUrls[pageNumber - 1].orEmpty()) },
                                 onNext = { changePage(pageNumber + 1, nextPage) },
@@ -356,7 +366,18 @@ class MainActivity : ComponentActivity() {
                                 WebView(context).apply {
                                     importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                                     magnetWebView = this
-                                    searchBridge = MagnetSearchBridge(onMagnet = { title, link ->
+                                    searchBridge = MagnetSearchBridge(onResource={ row -> runOnUiThread {
+                                        if(generation==searchTrigger && selectedTab=="????" && !searchComplete) {
+                                            val link=normalizeMagnetUri(row.optString("source"))
+                                            val index=results.indexOfFirst { it.magnet==link }
+                                            if(index>=0) { val old=results[index];results[index]=old.copy(bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","??"),heat=row.optString("heat")) }
+                                        }
+                                    } }, onPagination={ row -> runOnUiThread {
+                                        if(generation==searchTrigger && !searchComplete) {
+                                            scannerReady=row.optBoolean("complete");if(row.optInt("totalPages")>0) sourcePages=row.getInt("totalPages")
+                                            row.optJSONArray("pages")?.let { array -> for(i in 0 until array.length()) {val link=array.getJSONObject(i);pageUrls[link.getInt("page")]=link.getString("url") } }
+                                        }
+                                    } }, onMagnet = { title, link ->
                                         runOnUiThread {
                                             if (generation == searchTrigger && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
                                                 results.add(MagnetResult(title.ifBlank { magnetTitle(link) }, link))
@@ -365,11 +386,12 @@ class MainActivity : ComponentActivity() {
                                             }
                                         }
                                     }, onPage = { url, next, pending, failures -> runOnUiThread {
-                                        if (generation == searchTrigger) {
+                                        if (generation == searchTrigger && !searchComplete) {
                                             if (url.startsWith("http")) { pageUrls[pageNumber] = url; currentSearchUrl = url }
                                             nextPage = next
-                                            searchMessage = if (pending > 0) "正在读取 $pending 个详情页面…" else if (failures > 0) "$failures 个详情页面读取失败，可重试本页或查看网页" else "本页已读取完成"
-                                            if (pending == 0 && !searchNeedsFormSubmit && results.isEmpty() && searchState != "error") searchState = "empty"
+                                            searchMessage = if(pending>0) "???" else if(failures>0) "?????" else ""
+                                            if(pending==0 && scannerReady && !searchNeedsFormSubmit) { searchComplete=true;searchState=if(failures>0) "timeout" else if(results.isEmpty()) "empty" else "results" }
+
                                         }
                                     } })
                                     settings.javaScriptEnabled = true
@@ -538,12 +560,14 @@ class MainActivity : ComponentActivity() {
 }
 
 private class MagnetSearchBridge(
+    private val onResource: (JSONObject) -> Unit = {},
+    private val onPagination: (JSONObject) -> Unit = {},
     private val onPage: (String, String, Int, Int) -> Unit = { _, _, _, _ -> },
     private val onMagnet: (String, String) -> Unit
 ) {
     @JavascriptInterface
     fun onPageInfo(json: String) {
-        runCatching { val value = JSONObject(json); onPage(value.optString("url"), value.optString("next"), value.optInt("pending"), value.optInt("failures")) }
+        runCatching { val value = JSONObject(json); onPagination(value); onPage(value.optString("url"), value.optString("next"), value.optInt("pending"), value.optInt("failures")) }
     }
     @JavascriptInterface
     fun onResults(json: String) {
@@ -553,7 +577,7 @@ private class MagnetSearchBridge(
                 val row = rows.optJSONObject(i) ?: continue
                 val link = normalizeMagnetUri(row.optString("source"))
                 if (link != null) {
-                    onMagnet(row.optString("title"), link)
+                    onMagnet(row.optString("title"), link); onResource(row)
                 }
             }
         }
@@ -637,96 +661,66 @@ private fun SearchHome(
 
 @Composable
 private fun SearchResultsScreen(
-    page: Int,
-    nextAvailable: Boolean,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
-    keyword: String,
-    engine: String,
-    state: String,
-    message: String,
-    results: List<MagnetResult>,
-    onBack: () -> Unit,
-    onRetry: () -> Unit,
-    onOpenWeb: () -> Unit,
-    onCancel: () -> Unit,
-    onParse: (MagnetResult) -> Unit,
-    onDownload: (MagnetResult) -> Unit
+    page: Int, totalPages: Int, knownPages: Set<Int>, onJump: (Int) -> Unit,
+    nextAvailable: Boolean, onPrevious: () -> Unit, onNext: () -> Unit,
+    keyword: String, engine: String, state: String, message: String, results: List<MagnetResult>,
+    onBack: () -> Unit, onRetry: () -> Unit, onOpenWeb: () -> Unit, onCancel: () -> Unit,
+    onParse: (MagnetResult) -> Unit, onDownload: (MagnetResult) -> Unit
 ) {
-    var localPage by remember(page, keyword, engine) { mutableIntStateOf(1) }
-    val localPages = ((results.size + 9) / 10).coerceAtLeast(1)
-    val shownPage = localPage.coerceAtMost(localPages)
-    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
-    LaunchedEffect(shownPage, page) { listState.scrollToItem(0) }
-    Column(Modifier.fillMaxSize().background(canvas).padding(horizontal = 16.dp, vertical = 10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            OutlinedButton(onClick = onBack, modifier = Modifier.height(54.dp)) { Text("‹ 返回") }
-            Column(Modifier.weight(1f)) {
-                Text("搜索结果", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text("$engine · $keyword", maxLines = 1, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            }
+    var localPage by remember(page,keyword) { mutableIntStateOf(1) }
+    var jump by remember { mutableStateOf("") };var jumpError by remember { mutableStateOf("") }
+    var localJump by remember(page) { mutableStateOf("") }
+    val localPages=((results.size+19)/20).coerceAtLeast(1);val shown=localPage.coerceAtMost(localPages)
+    val list=androidx.compose.foundation.lazy.rememberLazyListState()
+    LaunchedEffect(shown,page) { list.scrollToItem(0) }
+    Column(Modifier.fillMaxSize().background(canvas).padding(12.dp)) {
+        Row(verticalAlignment=Alignment.CenterVertically) {
+            TextButton(onClick=onBack) { Text("? ??") };Column { Text("????",style=MaterialTheme.typography.titleLarge);Text(keyword,style=MaterialTheme.typography.bodySmall) }
         }
-        Spacer(Modifier.height(12.dp))
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            OutlinedButton(onClick = onPrevious, enabled = page > 1, modifier = Modifier.weight(1f).height(52.dp)) { Text("上一页") }
-            Text("第 $page 页")
-            Button(onClick = onNext, enabled = nextAvailable, modifier = Modifier.weight(1f).height(52.dp)) { Text("下一页") }
+        Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
+            TextButton(onClick=onPrevious,enabled=page>1) { Text("???") }
+            Text(if(totalPages>0) "? $page / $totalPages ?" else "? $page ? ? ??? ${knownPages.maxOrNull() ?: page} ?",style=MaterialTheme.typography.bodySmall)
+            TextButton(onClick=onNext,enabled=nextAvailable) { Text("???") }
         }
-        Text(message, Modifier.padding(vertical = 8.dp), style = MaterialTheme.typography.bodySmall)
-        if (!nextAvailable && state != "loading") Text("当前页面未提供下一页链接；可查看原网页确认是否有更多结果。", style = MaterialTheme.typography.bodySmall)
-        OutlinedButton(onClick = onOpenWeb, modifier = Modifier.fillMaxWidth()) { Text("查看本页原网页 / 验证") }
-        when {
-            results.isNotEmpty() -> {
-                Text("本页 ${results.size} 条磁力链接（不限制结果数量）", Modifier.padding(bottom = 8.dp), style = MaterialTheme.typography.bodyMedium)
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = { localPage = shownPage - 1 }, enabled = shownPage > 1) { Text("前 10 条") }
-                    Text("结果 $shownPage / $localPages 页")
-                    TextButton(onClick = { localPage = shownPage + 1 }, enabled = shownPage < localPages) { Text("后 10 条") }
-                }
-                LazyColumn(Modifier.weight(1f), state = listState, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(results.drop((shownPage - 1) * 10).take(10), key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
-                }
-            }
-            state == "loading" -> Column(
-                Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-                Spacer(Modifier.height(14.dp))
-                Text(message.ifBlank { "正在搜索…" }, style = MaterialTheme.typography.bodyLarge)
-                Spacer(Modifier.height(18.dp))
-                OutlinedButton(onClick = onCancel, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("取消搜索并返回") }
-            }
-            else -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Center) {
-                Card(colors = CardDefaults.cardColors(containerColor = Color.White), shape = RoundedCornerShape(18.dp)) {
-                    Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(if (state == "empty") "没有提取到磁力链接" else "搜索未完成", style = MaterialTheme.typography.titleLarge)
-                        Text(message.ifBlank { "搜索页面没有提供可识别的 magnet 链接。" })
-                        Text("部分站点会拦截自动访问；你也可以从网页复制 magnet 链接，再回首页粘贴解析。", style = MaterialTheme.typography.bodySmall)
-                    }
-                }
-                Spacer(Modifier.height(14.dp))
-                Button(onClick = onRetry, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("重试搜索") }
-                OutlinedButton(onClick = onOpenWeb, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("应用内查看搜索网页 / 验证") }
-                OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth().height(56.dp)) { Text("返回首页") }
-            }
+        Row(verticalAlignment=Alignment.CenterVertically) {
+            OutlinedTextField(jump,{jump=it.filter(Char::isDigit).take(6)},label={Text("?????")},singleLine=true,modifier=Modifier.weight(1f))
+            TextButton(onClick={val n=jump.toIntOrNull();if(n!=null && n in knownPages) {onJump(n);jumpError=""} else jumpError="????????"}) { Text("??") }
         }
+        if(jumpError.isNotEmpty()) Text(jumpError,style=MaterialTheme.typography.bodySmall)
+        if(state=="loading" || message=="???") { LinearProgressIndicator(Modifier.fillMaxWidth());Text("???") }
+        if(state in listOf("error","timeout") || message=="?????") Text("?????",color=MaterialTheme.colorScheme.error)
+        if(results.isNotEmpty()) {
+            Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
+                TextButton(onClick={localPage=shown-1},enabled=shown>1) { Text("? 20 ?") }
+                Text("?? $shown / $localPages ? ? ${results.size} ?",style=MaterialTheme.typography.bodySmall)
+                TextButton(onClick={localPage=shown+1},enabled=shown<localPages) { Text("? 20 ?") }
+            }
+            Row(verticalAlignment=Alignment.CenterVertically) {
+                OutlinedTextField(localJump,{localJump=it.filter(Char::isDigit).take(5)},label={Text("??????1?$localPages?")},singleLine=true,modifier=Modifier.weight(1f))
+                TextButton(onClick={localJump.toIntOrNull()?.takeIf{it in 1..localPages}?.let{localPage=it}}) { Text("?????") }
+            }
+            LazyColumn(Modifier.weight(1f),state=list,verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                items(results.drop((shown-1)*20).take(20),key={it.magnet}) { item -> MagnetResultCard(item,onParse,onDownload) }
+            }
+        } else if(state!="loading") {
+            Text(if(state=="empty") "??????" else "?????",Modifier.padding(16.dp))
+            Button(onClick=onRetry) { Text("????") };OutlinedButton(onClick=onBack) { Text("????") }
+        } else TextButton(onClick=onCancel) { Text("???????") }
     }
 }
 
 @Composable
 private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit, onDownload: (MagnetResult) -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF3F8FA)),
-        shape = RoundedCornerShape(14.dp)
-    ) {
-        Column(Modifier.fillMaxWidth().padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(item.title.ifBlank { magnetTitle(item.magnet) }, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
-            Text(item.magnet, maxLines = 3, style = MaterialTheme.typography.bodySmall, color = Color(0xFF53646D))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                OutlinedButton(onClick = { onParse(item) }, modifier = Modifier.weight(1f).height(52.dp)) { Text("解析 / 播放") }
-                Button(onClick = { onDownload(item) }, modifier = Modifier.weight(1f).height(52.dp)) { Text("下载 / 缓存") }
+    val c=androidx.compose.ui.platform.LocalContext.current
+    val textStyle=MaterialTheme.typography.bodyMedium.copy(fontSize=(14*DisplaySettings.scale(c)).sp,lineHeight=(16.8f*DisplaySettings.scale(c)).sp,color=Color(0xFF333333))
+    Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=Color.White)) {
+        Column(Modifier.fillMaxWidth().padding(horizontal=10.dp,vertical=6.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
+            Text(item.title.ifBlank { "??????" },style=textStyle)
+            Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "???????" }} ? ${item.type} ? ?? ${item.heat.ifBlank { "?????" }}",style=textStyle)
+            Row {
+                TextButton(onClick={onParse(item)}) { Text("??",style=textStyle) }
+                TextButton(onClick={onDownload(item)}) { Text("?? / ??",style=textStyle) }
+                TextButton(onClick={LibraryStore.addFavorite(c,item.title,item.magnet)}) { Text("??",style=textStyle) }
             }
         }
     }

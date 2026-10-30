@@ -158,6 +158,7 @@ object TorrentTasks {
         if (task.cancelled && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
         if (task.paused && task.files.isEmpty() && !task.clearing) { task.paused = false; task.queued = true }
         if (download) {
+            recordHistory(task,"??")
             if (!task.download || task.folder.canonicalPath == File(SettingsStore.root(c, false), "FreeMangnetPlayerTasks/$id").canonicalPath) {
                 task.destination = SettingsStore.taskFolder(c, true, id)
             }
@@ -389,9 +390,13 @@ object TorrentTasks {
             }
         }
     }
+    private fun recordHistory(task: TorrentTask, kind: String) {
+        HistoryStore.record(context,kind,HistoryEntry(task.title,"magnet:?xt=urn:btih:${task.id}",System.currentTimeMillis(),task.status,done=task.done,size=task.total))
+    }
     fun retainCache(task: TorrentTask): Boolean {
         if (!task.retainedCache && !task.download && tasks.values.count { it.retainedCache && !it.download && !it.clearing } >= SettingsStore.maxCaches(context)) return false
         task.retainedCache = true
+        recordHistory(task,"??")
         StoredVideos.sync(context, task)
         if (task.paused || task.cancelled) resume(task)
         persist()
@@ -492,9 +497,10 @@ object TorrentTasks {
         val last = ((offset + file.size - 1) / info.pieceLength()).toInt()
         // Request headers and the MP4 tail early; reads set deadlines near every seek.
         for (piece in first..minOf(first + 3, last)) if (!handle.havePiece(piece)) handle.setPieceDeadline(piece, 0)
-        for (piece in maxOf(first, last - 1)..last) if (!handle.havePiece(piece)) handle.setPieceDeadline(piece, 500)
+        for (piece in maxOf(first, last - 7)..last) if (!handle.havePiece(piece)) handle.setPieceDeadline(piece, 500)
     }
     fun download(task: TorrentTask) {
+        recordHistory(task,"??")
         task.download = true; task.retainedCache = true
         val target = SettingsStore.taskFolder(context, true, task.id)
         task.destination = target

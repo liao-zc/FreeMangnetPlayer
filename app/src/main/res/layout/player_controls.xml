@@ -1,5 +1,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent">
+<ImageButton android:id="@+id/player_favorite" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="top|end" android:background="?android:attr/selectableItemBackgroundBorderless" android:padding="12dp" android:contentDescription="????" android:src="@drawable/ic_heart_outline"/>
+
 <LinearLayout android:id="@+id/exo_bottom_bar" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:orientation="vertical" android:background="#B8000000" android:paddingHorizontal="4dp" android:paddingBottom="4dp">
+<TextView android:id="@+id/player_resource_info" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="11sp" android:maxLines="2" android:padding="4dp"/>
+<ProgressBar android:id="@+id/player_cache_progress" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="4dp" android:max="1000" android:progressTint="#00BFA5"/>
 <LinearLayout android:layout_width="match_parent" android:layout_height="32dp" android:gravity="center_vertical">
 <TextView android:id="@+id/player_position" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="12sp" android:minWidth="40dp" android:gravity="center" android:text="00:00"/>
 <androidx.media3.ui.DefaultTimeBar android:id="@+id/player_progress" android:layout_width="0dp" android:layout_weight="1" android:layout_height="32dp" app:played_color="#29CEC0" app:scrubber_color="#FFFFFF" app:buffered_color="#88FFFFFF"/>

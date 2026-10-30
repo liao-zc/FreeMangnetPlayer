@@ -15,12 +15,24 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 
 class SettingsActivity : ComponentActivity() {
+    private val fontPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) runCatching {
+            val temp=java.io.File(filesDir,"font-import.tmp")
+            contentResolver.openInputStream(uri)!!.use { input -> temp.outputStream().use { output ->
+                val buffer=ByteArray(8192);var total=0;while(true) { val n=input.read(buffer);if(n<0)break;total+=n;require(total<=40*1024*1024) { "??????" };output.write(buffer,0,n) }
+            } }
+            android.graphics.Typeface.createFromFile(temp)
+            require(temp.renameTo(java.io.File(filesDir,"custom-font.ttf")))
+            SettingsStore.prefs(this).edit().putString("font-face","???").apply()
+        }.onFailure { android.widget.Toast.makeText(this,"???????${it.localizedMessage}",android.widget.Toast.LENGTH_LONG).show() }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val prefs = SettingsStore.prefs(this)
         TorrentTasks.initialize(this)
         setContent {
-            MaterialTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF087F79))) {
+            AppTheme(colorScheme = lightColorScheme(primary = androidx.compose.ui.graphics.Color(0xFF087F79))) {
                 var download by remember { mutableStateOf(SettingsStore.root(this, true).absolutePath) }
                 var cache by remember { mutableStateOf(SettingsStore.root(this, false).absolutePath) }
                 var downloads by remember { mutableStateOf(SettingsStore.maxDownloads(this).toString()) }

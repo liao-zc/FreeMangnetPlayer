@@ -9,7 +9,10 @@ data class LibraryEntry(
     val source: String,
     val status: String = "",
     val downloadedBytes: Long = 0,
-    val totalBytes: Long = 0
+    val totalBytes: Long = 0,
+    val time: Long = System.currentTimeMillis(),
+    val position: Long = 0,
+    val duration: Long = 0
 )
 
 object LibraryStore {
@@ -28,7 +31,8 @@ object LibraryStore {
     fun readPlaybacks(context: Context): List<LibraryEntry> = read(context, PLAYBACKS)
 
     @Synchronized
-    fun addPlayback(context: Context, title: String, source: String) {
+    fun addPlayback(context: Context, title: String, source: String, position: Long = 0, duration: Long = 0) {
+        HistoryStore.record(context,"??",HistoryEntry(title,source,System.currentTimeMillis(),position=position,duration=duration))
         val values = read(context, PLAYBACKS).toMutableList()
         values.removeAll { it.source == source }
         values.add(0, LibraryEntry(title.ifBlank { "磁力资源" }, source, "最近播放"))
@@ -68,12 +72,12 @@ object LibraryStore {
     }
 
     @Synchronized
-    fun readCaches(context: Context): List<LibraryEntry> = read(context, "cache-entries").sortedBy { it.title }
+    fun readCaches(context: Context): List<LibraryEntry> = read(context, "cache-entries").sortedByDescending { it.time }
     @Synchronized
     fun saveCache(context: Context, entry: LibraryEntry) {
         if (readCaches(context).any { it == entry }) return
         val rows = readCaches(context).filter { it.source != entry.source }.toMutableList()
-        rows.add(0, entry); write(context, "cache-entries", rows)
+        val previous=readCaches(context).firstOrNull { it.source==entry.source }; rows.add(0, entry.copy(time=previous?.time ?: entry.time)); write(context, "cache-entries", rows)
     }
     @Synchronized
     fun removeEntries(context: Context, kind: String, sources: Set<String>) {
@@ -105,7 +109,7 @@ object LibraryStore {
                 source = item.optString("source"),
                 status = item.optString("status"),
                 downloadedBytes = item.optLong("downloaded"),
-                totalBytes = item.optLong("total")
+                totalBytes = item.optLong("total"), time=item.optLong("time",0), position=item.optLong("position"), duration=item.optLong("duration")
             ).takeIf { it.source.isNotBlank() }
         }
     }.getOrDefault(emptyList())
@@ -118,8 +122,9 @@ object LibraryStore {
                 .put("source", entry.source)
                 .put("status", entry.status)
                 .put("downloaded", entry.downloadedBytes)
-                .put("total", entry.totalBytes))
+                .put("total", entry.totalBytes).put("time",entry.time).put("position",entry.position).put("duration",entry.duration))
         }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(key, array.toString()).apply()
+        if(key==DOWNLOADS || key=="cache-entries") values.forEach { entry -> HistoryStore.update(context,if(key==DOWNLOADS) "??" else "??", HistoryEntry(entry.title,entry.source,entry.time,entry.status,done=entry.downloadedBytes,size=entry.totalBytes)) }
     }
 }
