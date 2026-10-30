@@ -39,7 +39,7 @@
     if(m)try{dn=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){}
     const data=details(node,uri), old=metadata.get(uri);
     const validTitle=resourceName(title);
-    const value={title:resourceName(dn)||validTitle||'待获取文件名',source:uri,...data};
+    const value={title:validTitle||resourceName(dn)||'待获取文件名',source:uri,...data};
     if(old){if(!data.bytes && old.bytes) {value.bytes=old.bytes;value.sizeText=old.sizeText;} if(value.title==='待获取文件名')value.title=old.title;}
     if(old && JSON.stringify(old)===JSON.stringify(value))return;
     emitted.add(uri);metadata.set(uri,value);window.FreeMagnetResults.onResults(JSON.stringify([value]));
