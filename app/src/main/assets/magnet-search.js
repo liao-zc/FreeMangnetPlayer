@@ -60,10 +60,14 @@
     if(window.__fmpStopped)return;parse(document,document.title); if(running){info();return;} running=true;
     const links=[...document.querySelectorAll('a[href]')].filter(a=>{
       try{
-        return /^https?:$/.test(a.protocol)&&a.origin===location.origin&&a.href!==location.href&&!visited.has(a.href)&&
-          !a.closest('.pagination,.pager,.pages,.page-numbers')&&a.rel!=='next'&&a.rel!=='prev'&&
-          !/^(首页|上一页|下一页|上页|下页|返回|登录|注册|next|previous|\d+)$/i.test(clean(a.textContent))&&
-          clean(a.textContent||a.title).length>0;
+        const tests={protocol:/^https?:$/.test(a.protocol),origin:a.origin===location.origin,
+          different:a.href!==location.href,unvisited:!visited.has(a.href),
+          notPager:!a.closest('.pagination,.pager,.pages,.page-numbers'),
+          notNext:a.rel!=='next'&&a.rel!=='prev',
+          name:!/^(首页|上一页|下一页|上页|下页|返回|登录|注册|next|previous|\d+)$/i.test(clean(a.textContent)),
+          text:clean(a.textContent||a.title).length>0};
+        if(a.href.indexOf('detail')>=0)linkErrors.push(JSON.stringify({href:a.href,tests:tests}));
+        return Object.values(tests).every(Boolean);
       }catch(e){linkErrors.push(String(e));return false;}
     });
     const urls=[...new Map(links.map(a=>[a.href,a])).values()]; pending=urls.length; linkErrors.push('detail-candidates='+urls.length); info();
