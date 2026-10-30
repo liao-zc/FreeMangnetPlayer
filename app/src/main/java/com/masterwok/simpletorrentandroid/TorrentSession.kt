@@ -182,6 +182,12 @@ open class TorrentSession(
 
         setInitialTorrentState(torrentHandle)
 
+        knownTrackers.forEach { (url, tier) ->
+            if (torrentHandle.trackers().none { it.url() == url }) {
+                torrentHandle.addTracker(AnnounceEntry(url).apply { tier(tier.toShort()) })
+            }
+        }
+        restoredTrackers = torrentHandle.trackers().count { it.url() in knownTrackers }
         reconnectKnownPeers(torrentHandle)
         listener?.onAddTorrent(
                 torrentHandle
@@ -191,6 +197,8 @@ open class TorrentSession(
         addTorrentAlert
                 .handle()
                 .resume()
+        torrentHandle.forceReannounce()
+        torrentHandle.forceDHTAnnounce()
     }
 
     private fun onPieceFinished(pieceFinishedAlert: PieceFinishedAlert) {
@@ -331,6 +339,7 @@ open class TorrentSession(
                 .inputStream
                 .readBytes()
 
+        rememberTrackers(data)
         sessionManager.download(
                 TorrentInfo.bdecode(data)
                 , downloadLocation
@@ -350,6 +359,7 @@ open class TorrentSession(
         val bytes = context.contentResolver.openInputStream(torrentUri)?.use { it.readBytes() }
                 ?: throw java.io.IOException("Cannot open torrent URI")
 
+        rememberTrackers(bytes)
         sessionManager.download(
                 TorrentInfo.bdecode(bytes)
                 , downloadLocation
@@ -405,6 +415,7 @@ open class TorrentSession(
      */
     fun start(bencode: ByteArray) {
         setInitialStartState()
+        rememberTrackers(bencode)
 
         if (!sessionManager.isRunning) {
             sessionManager.start(sessionParams)
@@ -482,6 +493,14 @@ open class TorrentSession(
 
     @Volatile var metadataReplacements = 0
     @Volatile var restoredTrackers = 0
+    private val knownTrackers = java.util.concurrent.ConcurrentHashMap<String, Int>()
+    private fun rememberTrackers(bytes: ByteArray) {
+        val root = Entry.bdecode(bytes).dictionary()
+        root["announce"]?.string()?.takeIf { it.isNotBlank() }?.let { knownTrackers[it] = 0 }
+        root["announce-list"]?.list()?.forEachIndexed { tier, entry ->
+            entry.list().forEach { tracker -> tracker.string().takeIf { it.isNotBlank() }?.let { knownTrackers[it] = tier } }
+        }
+    }
     private val knownPeers = java.util.concurrent.ConcurrentHashMap<String, TcpEndpoint>()
     fun reconnectKnownPeers(handle: TorrentHandle) {
         knownPeers.values.take(100).forEach { endpoint -> runCatching { handle.swig().connect_peer(endpoint.swig()) } }
@@ -499,12 +518,14 @@ open class TorrentSession(
         // 1.2 bindings cannot set metadata in place. Preserve tracker URLs/tiers
         // and connected endpoints BEFORE replacing the owning handle.
         val oldTrackers = handle.trackers()
+        rememberTrackers(bytes)
+        oldTrackers.forEach { knownTrackers[it.url()] = it.tier() }
         val restoredInfo = TorrentInfo.bdecode(info.bencode(oldTrackers.map { it.url() }))
         handle.peerInfo().forEach { peer -> runCatching {
             val endpoint = peer.ip()
             knownPeers[endpoint] = TcpEndpoint(endpoint.substringBeforeLast(':').removePrefix("[").removeSuffix("]"), endpoint.substringAfterLast(':').toInt())
         } }
-        restoredTrackers = oldTrackers.size
+        restoredTrackers = 0 // Count actual new-handle trackers in onAddTorrent.
         metadataReplacements++
         // Rebuilt metadata handles reconnect via TCP first. A half-open uTP
         // metadata connection must not prevent the fresh handle fetching data.
