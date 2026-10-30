@@ -1,0 +1,4121 @@
+{
+  "check": "unlimited-app-throughput",
+  "passed": true,
+  "peak_payload_bytes_per_second": 6989835,
+  "first_play_seconds": 35.46717419700002,
+  "played_before_complete": true,
+  "first_play_state": {
+    "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+    "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+    "metadata": true,
+    "peers": 1,
+    "downloaded": 18419353,
+    "total": 179628504,
+    "stage": "TRANSFERRING",
+    "metadataMilliseconds": 1057,
+    "peerMilliseconds": 1058,
+    "verifiedPieceMilliseconds": 1058,
+    "playbackMilliseconds": 33549,
+    "rebufferCount": 1,
+    "peerEvents": [
+      "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+      "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+      "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+      "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+    ],
+    "selectionEvents": [
+      "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+    ],
+    "activityInstance": 153405123,
+    "diskBackend": "POSIX",
+    "peerDetails": [
+      {
+        "address": "tcp://10.0.2.2:6881",
+        "client": "libtorrent/2.0.12.0",
+        "progressPpm": 1000000,
+        "downloaded": 18909568,
+        "rate": 1978594,
+        "flags": 1057841,
+        "source": 0
+      },
+      {
+        "address": "tcp://124.235.218.22:1028",
+        "client": "",
+        "progressPpm": 0,
+        "downloaded": 0,
+        "rate": 0,
+        "flags": 170,
+        "source": 2
+      }
+    ],
+    "files": [
+      {
+        "index": 0,
+        "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+        "size": 179628504,
+        "done": 18419353,
+        "selected": true
+      }
+    ],
+    "decoder": "Media3",
+    "playing": true,
+    "position": 908,
+    "renderedFrameAt": 1793339812808,
+    "playRequested": true,
+    "duration": 180000,
+    "buffered": 1960,
+    "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+    "retainedCache": false,
+    "speed": 1,
+    "status": "正在下载 / 缓存，可边下边播",
+    "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+    "paused": false,
+    "payloadRate": 1919531,
+    "payloadBytes": 13291161,
+    "rate": 1978594,
+    "dhtNodes": 102,
+    "seeds": 1,
+    "downloadLimit": 0,
+    "uploadLimit": 0,
+    "outgoingUtp": false,
+    "fullscreen": false,
+    "floating": false,
+    "transportFallbackUsed": true,
+    "metadataReplacements": 0,
+    "restoredTrackers": 0,
+    "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+    "videoHeight": 360,
+    "qualityHeight": 0,
+    "storedQueue": [
+      {
+        "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+        "index": 0,
+        "done": 18419353,
+        "size": 179628504
+      }
+    ],
+    "queued": false,
+    "cancelled": false,
+    "currentFile": 0
+  },
+  "native_baseline": {
+    "seconds": 2.003268324000004,
+    "average_bytes_per_second": 89667720.41866502,
+    "peak_payload_bytes_per_second": 24094884,
+    "sha256": "a3f4011dd3c1d186f4fc25581fabda53796c39e879ae1af1c3d0e33e6cad0105",
+    "samples": [
+      {
+        "seconds": 0.00013030600001684434,
+        "bytes": 0,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 0.2003833090000171,
+        "bytes": 0,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 0.40064832300001285,
+        "bytes": 0,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 0.6009070650000012,
+        "bytes": 9807789,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 0.8012701980000259,
+        "bytes": 29229056,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 1.0015123150000136,
+        "bytes": 51478528,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 1.2017529880000097,
+        "bytes": 75546624,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 1.4026169180000068,
+        "bytes": 104053176,
+        "payload_rate": 0
+      },
+      {
+        "seconds": 1.602891891000013,
+        "bytes": 137506248,
+        "payload_rate": 24094884
+      },
+      {
+        "seconds": 1.8031213990000197,
+        "bytes": 171772583,
+        "payload_rate": 24094884
+      }
+    ]
+  },
+  "samples": [
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 3845594,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": -1,
+      "rebufferCount": 0,
+      "peerEvents": [],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 5136735,
+          "rate": 545287,
+          "flags": 1188915,
+          "source": 0
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 3845594,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": false,
+      "position": 0,
+      "renderedFrameAt": 0,
+      "playRequested": false,
+      "duration": 0,
+      "buffered": 0,
+      "playerError": "",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 526611,
+      "payloadBytes": 3782088,
+      "rate": 545287,
+      "dhtNodes": 0,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": true,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "LISTEN_FAILED - listen_failed - listening on 0.0.0.0:0 (device: ) failed: [enum_route] [TCP] Operation not supported on transport endpoint",
+      "videoHeight": 0,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 3845594,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 18419353,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 1,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 18909568,
+          "rate": 1978594,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 18419353,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 908,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 1960,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 1919531,
+      "payloadBytes": 13291161,
+      "rate": 1978594,
+      "dhtNodes": 102,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 18419353,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 21246704,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 21641957,
+          "rate": 2361859,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 21246704,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": false,
+      "position": 1911,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 1960,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 2292695,
+      "payloadBytes": 16118512,
+      "rate": 2361859,
+      "dhtNodes": 102,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 21246704,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 23617247,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 24231903,
+          "rate": 2361859,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 23617247,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 2322,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 4240,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 2292695,
+      "payloadBytes": 18489055,
+      "rate": 2361859,
+      "dhtNodes": 102,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 23617247,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 30469785,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 31201725,
+          "rate": 2849331,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 30469785,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 3330,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 2766117,
+      "payloadBytes": 25340166,
+      "rate": 2849331,
+      "dhtNodes": 102,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 30469785,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 33858307,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 34725490,
+          "rate": 3668552,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 33858307,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 3854,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 3560807,
+      "payloadBytes": 28730115,
+      "rate": 3668552,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 33858307,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 37238176,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 38321203,
+          "rate": 3668552,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 37238176,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 4369,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 3560807,
+      "payloadBytes": 32109984,
+      "rate": 3668552,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 37238176,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 41049720,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 41653591,
+          "rate": 4405848,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 41049720,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 4875,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 4275716,
+      "payloadBytes": 35921528,
+      "rate": 4405848,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 41049720,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 43567718,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 44311165,
+          "rate": 4405848,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 43567718,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 5382,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 4275716,
+      "payloadBytes": 38439526,
+      "rate": 4405848,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 43567718,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 46321694,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 46893911,
+          "rate": 4668714,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 46321694,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 5903,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 4530548,
+      "payloadBytes": 41161848,
+      "rate": 4668714,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 46321694,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 48595087,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 49784583,
+          "rate": 4668714,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 48595087,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 6431,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 4530548,
+      "payloadBytes": 43466895,
+      "rate": 4668714,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 48595087,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 52206627,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 53350069,
+          "rate": 4837346,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 52206627,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 6936,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 4694168,
+      "payloadBytes": 47078435,
+      "rate": 4837346,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 52206627,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 55598016,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 56840740,
+          "rate": 4837346,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 55598016,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 7445,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 4694168,
+      "payloadBytes": 50469824,
+      "rate": 4837346,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 55598016,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 59212423,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 60297612,
+          "rate": 5308455,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 59212423,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 7949,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 5151153,
+      "payloadBytes": 54084231,
+      "rate": 5308455,
+      "dhtNodes": 103,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (http://tracker.renfei.net:8080/announce)[[::]:42795-v1] Network is unreachable \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 59212423,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 66163551,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 67325700,
+          "rate": 5659963,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 66163551,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 8975,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 5491784,
+      "payloadBytes": 61035359,
+      "rate": 5659963,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 66163551,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 69609621,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 70776090,
+          "rate": 5917882,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 69609621,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 9475,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 5491784,
+      "payloadBytes": 64481429,
+      "rate": 5659963,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 69609621,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 73093092,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 74272508,
+          "rate": 5917882,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 73093092,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 9995,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 5741727,
+      "payloadBytes": 67964900,
+      "rate": 5917882,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 73093092,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 76521895,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 77944476,
+          "rate": 6186552,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 76521895,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 10494,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 5741727,
+      "payloadBytes": 71387943,
+      "rate": 5917882,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 76521895,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 80130542,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 81455294,
+          "rate": 6186552,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 80130542,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 11008,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6002311,
+      "payloadBytes": 74999483,
+      "rate": 6186552,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 80130542,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 83527691,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 85051007,
+          "rate": 6395143,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 83527691,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 11524,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6002311,
+      "payloadBytes": 78396619,
+      "rate": 6186552,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 83527691,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 87150738,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 88662534,
+          "rate": 6395143,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 87150738,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 12026,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6204447,
+      "payloadBytes": 82021106,
+      "rate": 6395143,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 87150738,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 90677383,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 92002122,
+          "rate": 6543445,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 90677383,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 12542,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6204447,
+      "payloadBytes": 85549191,
+      "rate": 6395143,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 90677383,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 94181001,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 96015097,
+          "rate": 6543445,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 94181001,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 13077,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6348172,
+      "payloadBytes": 89051369,
+      "rate": 6543445,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 94181001,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 97814115,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 99462607,
+          "rate": 6718418,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 97814115,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 13593,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6348172,
+      "payloadBytes": 92684483,
+      "rate": 6543445,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 97814115,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 101244358,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 102967665,
+          "rate": 6718418,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 101244358,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 14089,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6517971,
+      "payloadBytes": 96116166,
+      "rate": 6718418,
+      "dhtNodes": 105,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 101244358,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 108225700,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 109767710,
+          "rate": 6743756,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://124.235.218.22:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 108225700,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 15114,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6542440,
+      "payloadBytes": 103097508,
+      "rate": 6743756,
+      "dhtNodes": 105,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 108225700,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 111625716,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 113465572,
+          "rate": 6806267,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 111625716,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 15625,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6542440,
+      "payloadBytes": 106497524,
+      "rate": 6743756,
+      "dhtNodes": 105,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 111625716,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 115325018,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 117385025,
+          "rate": 6806267,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 115325018,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 16131,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6603171,
+      "payloadBytes": 110116251,
+      "rate": 6806267,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 115325018,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 119221444,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 121054113,
+          "rate": 6993414,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 119221444,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 16635,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 18480,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6603171,
+      "payloadBytes": 114093252,
+      "rate": 6806267,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 119221444,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 122907799,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 124455569,
+          "rate": 6993414,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 122907799,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 17151,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 20400,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6784640,
+      "payloadBytes": 117773860,
+      "rate": 6993414,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 122907799,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 126109264,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 127720342,
+          "rate": 6959380,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 126109264,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 17658,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6784640,
+      "payloadBytes": 120981072,
+      "rate": 6993414,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 126109264,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 129663243,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 131385123,
+          "rate": 6959380,
+          "flags": 1057841,
+          "source": 0
+        },
+        {
+          "address": "tcp://52.159.244.180:46133",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://59.15.248.107:1028",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 129663243,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 18159,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6751575,
+      "payloadBytes": 124533611,
+      "rate": 6959380,
+      "dhtNodes": 104,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 129663243,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 133270463,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831546 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831547 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 59.15.248.107:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 134862834,
+          "rate": 7032517,
+          "flags": 1057841,
+          "source": 0
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 133270463,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 18673,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6751575,
+      "payloadBytes": 128142271,
+      "rate": 6959380,
+      "dhtNodes": 106,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 133270463,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 136700706,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831546 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831547 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 59.15.248.107:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 138426893,
+          "rate": 7032517,
+          "flags": 1057841,
+          "source": 0
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 136700706,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 19173,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6822582,
+      "payloadBytes": 131572514,
+      "rate": 7032517,
+      "dhtNodes": 106,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 136700706,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 140375541,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831546 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831547 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 59.15.248.107:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 141990939,
+          "rate": 7064563,
+          "flags": 1057841,
+          "source": 0
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 140375541,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 19677,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6822582,
+      "payloadBytes": 135245909,
+      "rate": 7032517,
+      "dhtNodes": 106,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 140375541,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 147883507,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831546 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831547 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 59.15.248.107:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 149785231,
+          "rate": 7204874,
+          "flags": 1057841,
+          "source": 0
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 147883507,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 20692,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6853469,
+      "payloadBytes": 142755315,
+      "rate": 7064563,
+      "dhtNodes": 106,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 147883507,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 151692171,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831546 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831547 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 59.15.248.107:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 153389571,
+          "rate": 7204874,
+          "flags": 1057841,
+          "source": 0
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 151692171,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 21200,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6989835,
+      "payloadBytes": 146563979,
+      "rate": 7204874,
+      "dhtNodes": 106,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 151692171,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    {
+      "source": "magnet:?xt=urn:btih:67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6&x.pe=10.0.2.2%3A6881",
+      "id": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 155277804,
+      "total": 179628504,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 1057,
+      "peerMilliseconds": 1058,
+      "verifiedPieceMilliseconds": 1058,
+      "playbackMilliseconds": 33549,
+      "rebufferCount": 2,
+      "peerEvents": [
+        "1793339784380 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339800399 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339811325 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339828539 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 124.235.218.22:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831546 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 52.159.244.180:46133 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339831547 PEER_DISCONNECTED - peer_disconnected - 67ec15 peer 59.15.248.107:1028 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339780452 [] -> [0] @ com.freemangnetplayer.TorrentTasks$start$1.invokeSuspend:363 <- kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith:33 <- kotlinx.coroutines.DispatchedTask.run:108 <- android.os.Handler.handleCallback:959"
+      ],
+      "activityInstance": 153405123,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 157149314,
+          "rate": 7294960,
+          "flags": 1057841,
+          "source": 0
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Unlimited-Bunny/Bunny-Performance.mp4",
+          "size": 179628504,
+          "done": 155277804,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 21708,
+      "renderedFrameAt": 1793339812808,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 32640,
+      "playerError": "正在播放：Unlimited-Bunny/Bunny-Performance.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+      "paused": false,
+      "payloadRate": 6989835,
+      "payloadBytes": 150149612,
+      "rate": 7204874,
+      "dhtNodes": 105,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 0,
+      "networkMessage": "TRACKER_ERROR - tracker_error - 67ec15 (udp://tracker.gmi.gd:6969/announce)[[::]:42795-v1] timed out \"\" (2)",
+      "videoHeight": 360,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "67ec154585fe0d82dbcdfc9a152b5d2f3e17a3a6",
+          "index": 0,
+          "done": 155277804,
+          "size": 179628504
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    }
+  ]
+}

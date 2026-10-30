@@ -1,0 +1,1840 @@
+[
+  {
+    "check": "default-original-quality",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 983593,
+      "total": 12590316,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4341,
+      "peerMilliseconds": 1321,
+      "verifiedPieceMilliseconds": 4341,
+      "playbackMilliseconds": 8938,
+      "rebufferCount": 1,
+      "peerEvents": [
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.102.46.202:43775 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 158.23.19.195:43093 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:43617 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:46183 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:45995 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.83.204.178:46375 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 104.215.73.160:45489 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:46647 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.242.196.87:43437 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550472 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:46037 disconnecting (uTP) [bittorrent] [libtorrent]: torrent aborted (reason: 0)",
+        "1793339550563 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339550563 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339551119 PEER_DISCONNECTED - peer_disconnected - da6471 peer 51.81.176.223:35317 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339552834 PEER_DISCONNECTED - peer_disconnected - da6471 peer 127.0.0.1:43775 disconnecting (TCP) [bittorrent] [libtorrent]: connected to ourselves (reason: 0)",
+        "1793339555907 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339555907 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339546525 [] -> [4] @ com.freemangnetplayer.TorrentTasks.obtain:166 <- com.freemangnetplayer.PlayerActivity.onCreate:84 <- android.app.Activity.performCreate:9002 <- android.app.Activity.performCreate:8980"
+      ],
+      "activityInstance": 194729320,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 1097792,
+          "rate": 109179,
+          "flags": 9267,
+          "source": 17
+        },
+        {
+          "address": "tcp://212.104.215.105:58417",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://104.215.73.160:45489",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://158.23.19.195:43093",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://40.124.78.37:46647",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://20.83.204.178:46375",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        },
+        {
+          "address": "tcp://130.131.206.56:41615",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://172.214.45.242:43617",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://4.242.196.87:43437",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        },
+        {
+          "address": "tcp://20.102.46.202:43775",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        },
+        {
+          "address": "tcp://52.161.59.144:45995",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://4.246.86.197:46037",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://20.64.58.65:46183",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": false
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": false
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 983593,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 11605,
+          "selected": false
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 995,
+      "renderedFrameAt": 1793339554604,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 4080,
+      "playerError": "正在播放：Bundle-1/Episode-01.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 105839,
+      "payloadBytes": 1008957,
+      "rate": 109193,
+      "dhtNodes": 42,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (udp://tracker.ilibr.org:6969/announce)[[::]:35469-v1] skipping tracker announce (unreachable) \"\" (1)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 983593,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 11605,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 4
+    }
+  },
+  {
+    "check": "quality-control-inside-player-with-no-transcoding-claim",
+    "passed": true
+  },
+  {
+    "check": "multi-file-selection-before-cache",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 3144932,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4341,
+      "peerMilliseconds": 1321,
+      "verifiedPieceMilliseconds": 4341,
+      "playbackMilliseconds": 8938,
+      "rebufferCount": 1,
+      "peerEvents": [
+        "1793339551119 PEER_DISCONNECTED - peer_disconnected - da6471 peer 51.81.176.223:35317 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339552834 PEER_DISCONNECTED - peer_disconnected - da6471 peer 127.0.0.1:43775 disconnecting (TCP) [bittorrent] [libtorrent]: connected to ourselves (reason: 0)",
+        "1793339555907 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339555907 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339565911 PEER_DISCONNECTED - peer_disconnected - da6471 peer 104.215.73.160:45489 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565911 PEER_DISCONNECTED - peer_disconnected - da6471 peer 158.23.19.195:43093 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565911 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:46647 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.83.204.178:46375 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 130.131.206.56:41615 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:43617 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.242.196.87:43437 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.102.46.202:43775 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:45995 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:46037 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:46183 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565977 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339565989 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339568967 PEER_DISCONNECTED - peer_disconnected - da6471 peer 147.135.7.63:17906 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339569153 PEER_DISCONNECTED - peer_disconnected - da6471 peer 51.81.176.223:35317 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339570060 PEER_DISCONNECTED - peer_disconnected - da6471 peer 212.104.215.105:58417 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339546525 [] -> [4] @ com.freemangnetplayer.TorrentTasks.obtain:166 <- com.freemangnetplayer.PlayerActivity.onCreate:84 <- android.app.Activity.performCreate:9002 <- android.app.Activity.performCreate:8980",
+        "1793339570154 [4] -> [0, 1, 2, 3, 4, 5] @ com.freemangnetplayer.TorrentTasks.select:490 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.invoke$lambda$20$lambda$10$lambda$7$lambda$6:243 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.$r8$lambda$TS-0FBC0KQk95MDECrjvVoBsP4o:0 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7$$ExternalSyntheticLambda2.invoke:0"
+      ],
+      "activityInstance": 194729320,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 3144932,
+          "rate": 127500,
+          "flags": 9267,
+          "source": 17
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 3119568,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 11605,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 17326,
+      "renderedFrameAt": 1793339554604,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 28240,
+      "playerError": "正在播放：Bundle-1/Episode-01.mp4",
+      "retainedCache": false,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 123402,
+      "payloadBytes": 3144932,
+      "rate": 127144,
+      "dhtNodes": 39,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (http://tracker.renfei.net:8080/announce)[[::]:35469-v1] Network is unreachable \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 3119568,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 11605,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 4
+    }
+  },
+  {
+    "check": "explicit-cache-records-files-before-completion",
+    "passed": true,
+    "entries": [
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 11605,
+        "total": 11011765,
+        "time": 1793339576002,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Episode-01.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 3377543,
+        "total": 12590316,
+        "time": 1793339576002,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "缓存中，可继续播放",
+        "downloaded": 13759,
+        "total": 3671275,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 51,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 19116132,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      }
+    ]
+  },
+  {
+    "check": "partial-downloaded-video-auto-enters-queue",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 3402907,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4341,
+      "peerMilliseconds": 1321,
+      "verifiedPieceMilliseconds": 4341,
+      "playbackMilliseconds": 8938,
+      "rebufferCount": 1,
+      "peerEvents": [
+        "1793339551119 PEER_DISCONNECTED - peer_disconnected - da6471 peer 51.81.176.223:35317 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339552834 PEER_DISCONNECTED - peer_disconnected - da6471 peer 127.0.0.1:43775 disconnecting (TCP) [bittorrent] [libtorrent]: connected to ourselves (reason: 0)",
+        "1793339555907 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339555907 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339565911 PEER_DISCONNECTED - peer_disconnected - da6471 peer 104.215.73.160:45489 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565911 PEER_DISCONNECTED - peer_disconnected - da6471 peer 158.23.19.195:43093 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565911 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:46647 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.83.204.178:46375 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 130.131.206.56:41615 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:43617 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.242.196.87:43437 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.102.46.202:43775 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:45995 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:46037 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:46183 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565977 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339565989 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339568967 PEER_DISCONNECTED - peer_disconnected - da6471 peer 147.135.7.63:17906 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339569153 PEER_DISCONNECTED - peer_disconnected - da6471 peer 51.81.176.223:35317 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339570060 PEER_DISCONNECTED - peer_disconnected - da6471 peer 212.104.215.105:58417 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339546525 [] -> [4] @ com.freemangnetplayer.TorrentTasks.obtain:166 <- com.freemangnetplayer.PlayerActivity.onCreate:84 <- android.app.Activity.performCreate:9002 <- android.app.Activity.performCreate:8980",
+        "1793339570154 [4] -> [0, 1, 2, 3, 4, 5] @ com.freemangnetplayer.TorrentTasks.select:490 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.invoke$lambda$20$lambda$10$lambda$7$lambda$6:243 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.$r8$lambda$TS-0FBC0KQk95MDECrjvVoBsP4o:0 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7$$ExternalSyntheticLambda2.invoke:0"
+      ],
+      "activityInstance": 194729320,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 3449676,
+          "rate": 129283,
+          "flags": 9267,
+          "source": 17
+        },
+        {
+          "address": "tcp://40.124.78.37:14381",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://20.64.58.65:26635",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://104.215.73.160:62469",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://158.23.19.195:43038",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://172.214.45.242:13253",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://52.161.59.144:55324",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://4.246.86.197:64517",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 19
+        },
+        {
+          "address": "tcp://4.242.196.87:43437",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        },
+        {
+          "address": "tcp://130.131.206.56:41615",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://20.102.46.202:43775",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        },
+        {
+          "address": "tcp://20.83.204.178:46375",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 3377543,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 11605,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 19411,
+      "renderedFrameAt": 1793339554604,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 28240,
+      "playerError": "已保存为缓存，切换资源后继续保留",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 124592,
+      "payloadBytes": 3402907,
+      "rate": 128370,
+      "dhtNodes": 38,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (http://tracker.renfei.net:8080/announce)[[::]:35469-v1] Network is unreachable \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 3377543,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 11605,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 4
+    }
+  },
+  {
+    "check": "next-control-switches-to-partial-video",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 5417857,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4341,
+      "peerMilliseconds": 1321,
+      "verifiedPieceMilliseconds": 4341,
+      "playbackMilliseconds": 8938,
+      "rebufferCount": 1,
+      "peerEvents": [
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:43617 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565916 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.242.196.87:43437 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.102.46.202:43775 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:45995 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:46037 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565917 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:46183 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339565977 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339565989 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339568967 PEER_DISCONNECTED - peer_disconnected - da6471 peer 147.135.7.63:17906 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339569153 PEER_DISCONNECTED - peer_disconnected - da6471 peer 51.81.176.223:35317 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339570060 PEER_DISCONNECTED - peer_disconnected - da6471 peer 212.104.215.105:58417 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339581443 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339581444 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339591249 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:14381 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591249 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:26635 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591249 PEER_DISCONNECTED - peer_disconnected - da6471 peer 104.215.73.160:62469 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 158.23.19.195:43038 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:13253 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:55324 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:64517 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339546525 [] -> [4] @ com.freemangnetplayer.TorrentTasks.obtain:166 <- com.freemangnetplayer.PlayerActivity.onCreate:84 <- android.app.Activity.performCreate:9002 <- android.app.Activity.performCreate:8980",
+        "1793339570154 [4] -> [0, 1, 2, 3, 4, 5] @ com.freemangnetplayer.TorrentTasks.select:490 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.invoke$lambda$20$lambda$10$lambda$7$lambda$6:243 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.$r8$lambda$TS-0FBC0KQk95MDECrjvVoBsP4o:0 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7$$ExternalSyntheticLambda2.invoke:0"
+      ],
+      "activityInstance": 194729320,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 5417857,
+          "rate": 139459,
+          "flags": 9267,
+          "source": 17
+        },
+        {
+          "address": "tcp://212.104.215.105:58417",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://4.242.196.87:43437",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        },
+        {
+          "address": "tcp://130.131.206.56:41615",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://20.102.46.202:43775",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        },
+        {
+          "address": "tcp://20.83.204.178:46375",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 17
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 4775148,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 628950,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 0,
+      "renderedFrameAt": 1793339591555,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 600,
+      "playerError": "正在播放：Bundle-1/Episode-02.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Cache/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 135290,
+      "payloadBytes": 5417857,
+      "rate": 139460,
+      "dhtNodes": 41,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (udp://tracker.ilibr.org:6969/announce)[[::]:35469-v1] skipping tracker announce (unreachable) \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 4775148,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 628950,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 5
+    }
+  },
+  {
+    "check": "download-library-indexes-individual-files",
+    "passed": true,
+    "entries": [
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 0,
+        "total": 19116132,
+        "time": 1793339596699,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 0,
+        "total": 51,
+        "time": 1793339596699,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "License.txt",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=2&dn=License.txt",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 0,
+        "total": 61,
+        "time": 1793339596699,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 13759,
+        "total": 3671275,
+        "time": 1793339596699,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Episode-01.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 4775148,
+        "total": 12590316,
+        "time": 1793339596699,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "正在下载 / 缓存，可边下边播",
+        "downloaded": 1238498,
+        "total": 11011765,
+        "time": 1793339596700,
+        "position": 0,
+        "duration": 0
+      }
+    ]
+  },
+  {
+    "check": "favorite-file-record",
+    "passed": true,
+    "entries": [
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "已收藏",
+        "downloaded": 0,
+        "total": 0,
+        "time": 1793339598615,
+        "position": 0,
+        "duration": 0
+      }
+    ]
+  },
+  {
+    "check": "cache-entry-discoverable-after-process-restart",
+    "passed": true,
+    "entries": [
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 1334134,
+        "total": 11011765,
+        "time": 1793339576002,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Episode-01.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 4775148,
+        "total": 12590316,
+        "time": 1793339576002,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "缓存中，可继续播放",
+        "downloaded": 13759,
+        "total": 3671275,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 51,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 0,
+        "total": 19116132,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      }
+    ]
+  },
+  {
+    "check": "cached-file-reopens-and-plays",
+    "passed": true,
+    "state": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 6266148,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 4341,
+      "peerMilliseconds": 1321,
+      "verifiedPieceMilliseconds": 4341,
+      "playbackMilliseconds": 8938,
+      "rebufferCount": 1,
+      "peerEvents": [
+        "1793339565989 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339568967 PEER_DISCONNECTED - peer_disconnected - da6471 peer 147.135.7.63:17906 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339569153 PEER_DISCONNECTED - peer_disconnected - da6471 peer 51.81.176.223:35317 disconnecting (uTP) [sock_read] [asio.misc]: End of file (reason: 0)",
+        "1793339570060 PEER_DISCONNECTED - peer_disconnected - da6471 peer 212.104.215.105:58417 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339581443 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339581444 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.42:61994 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339591249 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:14381 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591249 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:26635 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591249 PEER_DISCONNECTED - peer_disconnected - da6471 peer 104.215.73.160:62469 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 158.23.19.195:43038 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:13253 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:55324 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339591250 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:64517 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339592273 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.102.46.202:43775 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339594279 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.242.196.87:43437 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339594279 PEER_DISCONNECTED - peer_disconnected - da6471 peer 130.131.206.56:41615 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339595281 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.83.204.178:46375 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339596639 PEER_DISCONNECTED - peer_disconnected - da6471 peer 112.164.148.104:58417 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339597371 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339598344 PEER_DISCONNECTED - peer_disconnected - da6471 peer 212.104.215.105:58417 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339546525 [] -> [4] @ com.freemangnetplayer.TorrentTasks.obtain:166 <- com.freemangnetplayer.PlayerActivity.onCreate:84 <- android.app.Activity.performCreate:9002 <- android.app.Activity.performCreate:8980",
+        "1793339570154 [4] -> [0, 1, 2, 3, 4, 5] @ com.freemangnetplayer.TorrentTasks.select:490 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.invoke$lambda$20$lambda$10$lambda$7$lambda$6:243 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7.$r8$lambda$TS-0FBC0KQk95MDECrjvVoBsP4o:0 <- com.freemangnetplayer.PlayerActivity$onCreate$5$1$7$$ExternalSyntheticLambda2.invoke:0"
+      ],
+      "activityInstance": 194729320,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 6266148,
+          "rate": 127288,
+          "flags": 9267,
+          "source": 17
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 0,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 13759,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 4775148,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 1477241,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 3424,
+      "renderedFrameAt": 1793339596370,
+      "playRequested": true,
+      "duration": 180000,
+      "buffered": 16400,
+      "playerError": "正在播放：Bundle-1/Episode-02.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Downloads/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 123506,
+      "payloadBytes": 6266148,
+      "rate": 127289,
+      "dhtNodes": 45,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": false,
+      "metadataReplacements": 1,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (udp://tracker.ilibr.org:6969/announce)[[::]:35469-v1] skipping tracker announce (unreachable) \"\" (2)",
+      "videoHeight": 180,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 4775148,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 1477241,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 13759,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 5
+    }
+  },
+  {
+    "check": "existing-lower-resolution-track-selects-real-360p",
+    "passed": true,
+    "before": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 7526173,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 9042,
+      "peerMilliseconds": 9045,
+      "verifiedPieceMilliseconds": 9045,
+      "playbackMilliseconds": 10625,
+      "rebufferCount": 0,
+      "peerEvents": [
+        "1793339642590 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:55324 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339642590 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:14381 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339643652 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.44:58418 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339647594 PEER_DISCONNECTED - peer_disconnected - da6471 peer 190.104.116.204:58418 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339649878 PEER_DISCONNECTED - peer_disconnected - da6471 peer 61.177.172.223:58418 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339656604 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.242.196.87:43437 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339657608 PEER_DISCONNECTED - peer_disconnected - da6471 peer 130.131.206.56:41615 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339657608 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.83.204.178:32787 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339659617 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.102.46.202:58417 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659617 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:26635 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:13253 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:14381 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:64517 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 104.215.73.160:62469 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 190.104.116.204:58418 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 158.23.19.195:43038 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:55324 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339660751 PEER_DISCONNECTED - peer_disconnected - da6471 peer 195.64.150.101:58418 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339662686 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339600418 [] -> [0, 1, 2, 3, 4, 5] @ com.freemangnetplayer.TorrentTasks.initialize:136 <- com.freemangnetplayer.MainActivity.onCreate:91 <- android.app.Activity.performCreate:9002 <- android.app.Activity.performCreate:8980"
+      ],
+      "activityInstance": 252302181,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://172.214.45.242:13253",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://20.83.204.178:32787",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://5.187.135.77:58418",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://125.38.179.53:58418",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://20.64.58.65:26635",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://31.217.176.54:11152",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://20.102.46.202:58418",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://40.124.78.37:14381",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://52.161.59.144:55324",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 1364731,
+          "rate": 102835,
+          "flags": 1057841,
+          "source": 1
+        },
+        {
+          "address": "tcp://104.215.73.160:62469",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://4.246.86.197:64517",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://158.23.19.195:43038",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 1256993,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 51,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 61,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 34027,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 4758764,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 1476277,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 0,
+      "renderedFrameAt": 1793339665633,
+      "playRequested": true,
+      "duration": 30000,
+      "buffered": 440,
+      "playerError": "正在播放：Bundle-1/MultiQuality.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Downloads/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 84902,
+      "payloadBytes": 703933,
+      "rate": 87737,
+      "dhtNodes": 47,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (udp://tracker.dler.org:6969/announce)[0.0.0.0:34895-v1] Operation Canceled \"\" (3)",
+      "videoHeight": 720,
+      "qualityHeight": 0,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 1,
+          "done": 51,
+          "size": 51
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 4758764,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 1476277,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 0,
+          "done": 1256993,
+          "size": 19116132
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 34027,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    },
+    "after": {
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&so=4&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent",
+      "id": "da6471b179130d0a96e80936285e0951fb86c9ab",
+      "metadata": true,
+      "peers": 1,
+      "downloaded": 8108779,
+      "total": 46389600,
+      "stage": "TRANSFERRING",
+      "metadataMilliseconds": 9042,
+      "peerMilliseconds": 9045,
+      "verifiedPieceMilliseconds": 9045,
+      "playbackMilliseconds": 10625,
+      "rebufferCount": 1,
+      "peerEvents": [
+        "1793339642590 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:55324 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339642590 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:14381 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339643652 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.44:58418 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339647594 PEER_DISCONNECTED - peer_disconnected - da6471 peer 190.104.116.204:58418 disconnecting (uTP) [connect] [system]: Connection timed out (reason: 0)",
+        "1793339649878 PEER_DISCONNECTED - peer_disconnected - da6471 peer 61.177.172.223:58418 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339656604 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.242.196.87:43437 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339657608 PEER_DISCONNECTED - peer_disconnected - da6471 peer 130.131.206.56:41615 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339657608 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.83.204.178:32787 disconnecting (TCP) [connect] [libtorrent]: timed out (reason: 0)",
+        "1793339659617 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.102.46.202:58417 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659617 PEER_DISCONNECTED - peer_disconnected - da6471 peer 20.64.58.65:26635 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 172.214.45.242:13253 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 40.124.78.37:14381 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 4.246.86.197:64517 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 10.0.2.2:6881 disconnecting (uTP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 104.215.73.160:62469 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 190.104.116.204:58418 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 158.23.19.195:43038 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339659620 PEER_DISCONNECTED - peer_disconnected - da6471 peer 52.161.59.144:55324 disconnecting (TCP) [bittorrent] [libtorrent]: torrent paused (reason: 0)",
+        "1793339660751 PEER_DISCONNECTED - peer_disconnected - da6471 peer 195.64.150.101:58418 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)",
+        "1793339662686 PEER_DISCONNECTED - peer_disconnected - da6471 peer 67.21.89.45:56385 disconnecting (TCP) [connect] [system]: Connection refused (reason: 0)"
+      ],
+      "selectionEvents": [
+        "1793339600418 [] -> [0, 1, 2, 3, 4, 5] @ com.freemangnetplayer.TorrentTasks.initialize:136 <- com.freemangnetplayer.MainActivity.onCreate:91 <- android.app.Activity.performCreate:9002 <- android.app.Activity.performCreate:8980"
+      ],
+      "activityInstance": 252302181,
+      "diskBackend": "POSIX",
+      "peerDetails": [
+        {
+          "address": "tcp://172.214.45.242:13253",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://190.104.116.204:58418",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 0
+        },
+        {
+          "address": "tcp://20.83.204.178:32787",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 1
+        },
+        {
+          "address": "tcp://5.187.135.77:58418",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://125.38.179.53:58418",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://20.64.58.65:26635",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://31.217.176.54:11152",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 2
+        },
+        {
+          "address": "tcp://20.102.46.202:58418",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://40.124.78.37:14381",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://52.161.59.144:55324",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://10.0.2.2:6881",
+          "client": "libtorrent/2.0.12.0",
+          "progressPpm": 1000000,
+          "downloaded": 1890508,
+          "rate": 116456,
+          "flags": 1057841,
+          "source": 1
+        },
+        {
+          "address": "tcp://104.215.73.160:62469",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://4.246.86.197:64517",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        },
+        {
+          "address": "tcp://158.23.19.195:43038",
+          "client": "",
+          "progressPpm": 0,
+          "downloaded": 0,
+          "rate": 0,
+          "flags": 170,
+          "source": 3
+        }
+      ],
+      "files": [
+        {
+          "index": 0,
+          "path": "Bundle-1/MultiQuality.mp4",
+          "size": 19116132,
+          "done": 1839599,
+          "selected": true
+        },
+        {
+          "index": 1,
+          "path": "Bundle-1/Broken.mp4",
+          "size": 51,
+          "done": 51,
+          "selected": true
+        },
+        {
+          "index": 2,
+          "path": "Bundle-1/License.txt",
+          "size": 61,
+          "done": 61,
+          "selected": true
+        },
+        {
+          "index": 3,
+          "path": "Bundle-1/RealMedia.rm",
+          "size": 3671275,
+          "done": 34027,
+          "selected": true
+        },
+        {
+          "index": 4,
+          "path": "Bundle-1/Episode-01.mp4",
+          "size": 12590316,
+          "done": 4758764,
+          "selected": true
+        },
+        {
+          "index": 5,
+          "path": "Bundle-1/Episode-02.mp4",
+          "size": 11011765,
+          "done": 1476277,
+          "selected": true
+        }
+      ],
+      "decoder": "Media3",
+      "playing": true,
+      "position": 824,
+      "renderedFrameAt": 1793339665633,
+      "playRequested": true,
+      "duration": 30000,
+      "buffered": 1960,
+      "playerError": "正在播放：Bundle-1/MultiQuality.mp4",
+      "retainedCache": true,
+      "speed": 1,
+      "status": "正在下载 / 缓存，可边下边播",
+      "folder": "/storage/emulated/0/Android/data/com.freemangnetplayer/files/Movies/Downloads/FreeMangnetPlayerTasks/da6471b179130d0a96e80936285e0951fb86c9ab",
+      "paused": false,
+      "payloadRate": 112906,
+      "payloadBytes": 1286539,
+      "rate": 116456,
+      "dhtNodes": 44,
+      "seeds": 1,
+      "downloadLimit": 0,
+      "uploadLimit": 0,
+      "outgoingUtp": false,
+      "fullscreen": false,
+      "floating": false,
+      "transportFallbackUsed": true,
+      "metadataReplacements": 0,
+      "restoredTrackers": 26,
+      "networkMessage": "TRACKER_ERROR - tracker_error - da6471 (udp://tracker.tryhackx.org:6969/announce)[[::]:43569-v1] timed out \"\" (3)",
+      "videoHeight": 360,
+      "qualityHeight": 480,
+      "storedQueue": [
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 1,
+          "done": 51,
+          "size": 51
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 4,
+          "done": 4758764,
+          "size": 12590316
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 5,
+          "done": 1476277,
+          "size": 11011765
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 0,
+          "done": 1839599,
+          "size": 19116132
+        },
+        {
+          "task": "da6471b179130d0a96e80936285e0951fb86c9ab",
+          "index": 3,
+          "done": 34027,
+          "size": 3671275
+        }
+      ],
+      "queued": false,
+      "cancelled": false,
+      "currentFile": 0
+    }
+  },
+  {
+    "check": "original-quality-restores-highest-track",
+    "passed": true
+  },
+  {
+    "check": "favorite-delete-keeps-cache-files",
+    "passed": true
+  },
+  {
+    "check": "batch-history-delete-keeps-cache",
+    "passed": true
+  },
+  {
+    "check": "single-cached-file-delete-preserves-other-files",
+    "passed": true,
+    "deleted": {
+      "title": "Episode-01.mp4",
+      "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=4&dn=Episode-01.mp4",
+      "status": "缓存中，可继续播放",
+      "downloaded": 4758764,
+      "total": 12590316,
+      "time": 1793339576002,
+      "position": 0,
+      "duration": 0
+    },
+    "remaining": [
+      {
+        "title": "Episode-02.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=5&dn=Episode-02.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 1476277,
+        "total": 11011765,
+        "time": 1793339576002,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "RealMedia.rm",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=3&dn=RealMedia.rm",
+        "status": "缓存中，可继续播放",
+        "downloaded": 34027,
+        "total": 3671275,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "Broken.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=1&dn=Broken.mp4",
+        "status": "缓存完成",
+        "downloaded": 51,
+        "total": 51,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      },
+      {
+        "title": "MultiQuality.mp4",
+        "source": "magnet:?xt=urn:btih:da6471b179130d0a96e80936285e0951fb86c9ab&tr=http%3A%2F%2F10.0.2.2%3A8888%2Fannounce&xs=http%3A%2F%2F10.0.2.2%3A8888%2Fmetadata.torrent&so=0&dn=MultiQuality.mp4",
+        "status": "缓存中，可继续播放",
+        "downloaded": 2302913,
+        "total": 19116132,
+        "time": 1793339576001,
+        "position": 0,
+        "duration": 0
+      }
+    ]
+  },
+  {
+    "check": "batch-cache-file-delete",
+    "passed": true
+  },
+  {
+    "check": "batch-download-file-deletion",
+    "passed": true
+  }
+]
