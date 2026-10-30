@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import java.io.File
 
 object DisplaySettings {
+    private val faces=android.util.LruCache<String,Typeface>(4)
     fun scale(c: Context) = SettingsStore.prefs(c).getFloat("font-scale", 1f).coerceIn(.75f, 1.75f)
     fun face(c: Context) = SettingsStore.prefs(c).getString("font-face", "黑体") ?: "黑体"
     private fun file(c: Context, face: String): File? {
@@ -21,7 +22,11 @@ object DisplaySettings {
         return File(c.filesDir, asset).also { if (!it.exists()) c.assets.open("fonts/$asset").use { input -> it.outputStream().use { out -> input.copyTo(out) } } }
     }
     fun family(c: Context, face: String): FontFamily = runCatching { file(c, face)?.let { FontFamily(Font(it)) } ?: FontFamily.SansSerif }.getOrDefault(FontFamily.SansSerif)
-    fun typeface(c: Context): Typeface = runCatching { file(c, face(c))?.let(Typeface::createFromFile) ?: Typeface.DEFAULT }.getOrDefault(Typeface.DEFAULT)
+    fun typeface(c: Context): Typeface = runCatching {
+        val f=file(c,face(c)) ?: return@runCatching Typeface.DEFAULT
+        val key=f.absolutePath+":"+f.lastModified()
+        faces.get(key) ?: Typeface.createFromFile(f).also { faces.put(key,it) }
+    }.getOrDefault(Typeface.DEFAULT)
 }
 
 @Composable
