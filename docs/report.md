@@ -609,22 +609,22 @@ This section records the current code changes. It is not a claim that the Androi
 
 | Requirement | Code state | Verification |
 |---|---|---|
-| Automatic update check preference; latest public GitHub Release check at app start; one prompt per process; manual check in Settings | Implemented against the GitHub Releases API | Not built or device-tested in this environment |
+| Automatic update check preference; latest public GitHub Release check at app start; one prompt per process; manual check in Settings | Implemented against the GitHub Releases API | Android APK CI build passed; not device-tested |
 | Download and install an update while preserving the current screen during download | DownloadManager downloads in background; installer launches after completion | Android installer confirmation is mandatory for ordinary apps; not device-tested |
 | Relaunch after package replacement | Package-replaced receiver attempts to launch the app | OS background-launch behavior is device/version dependent; not device-tested |
 | Preserve settings and app-private data | Existing package ID retained; app data is not cleared by the updater | Requires same signing key and an in-place Android install; not tested |
-| Import IPTV playlist from a device file | Picker copies an M3U file into private storage and stores its local URI | Not built or device-tested |
-| Full-screen magnet controls | Removed the separate cache progress strip; cache percentage remains in resource text beside the timed seek bar | Source inspection only |
+| Import IPTV playlist from a device file | Picker copies an M3U file into private storage and stores its local URI | Android APK CI build passed; not device-tested |
+| Full-screen magnet controls | Removed the separate cache progress strip; cache percentage remains in resource text beside the timed seek bar | Android APK CI build passed; behavior not device-tested |
 | Seek-directed cache and fill the remaining file afterward | Playback seek reprioritizes the torrent piece range; tail completion switches to a pass that fills earlier missing pieces | Not built or network-tested |
 | Audio and subtitle track selection | Media3 track chooser and automatic same-directory SRT/VTT subtitle configuration added | LibVLC fallback track chooser is not implemented; not built or device-tested |
-| Download reuses cached torrent data | Existing libtorrent storage migration path retained | Source inspection only; no fresh test |
-| PiP for magnet and live playback | Existing activity declarations and controls retained | Source inspection only |
-| One-line channel/file labels; remove home settings entry | Home settings entry removed; player title set to one line | Source inspection only |
+| Download reuses cached torrent data | Existing libtorrent storage migration path retained | Android APK CI build passed; behavior not device-tested; no fresh test |
+| PiP for magnet and live playback | Existing activity declarations and controls retained | Android APK CI build passed; behavior not device-tested |
+| One-line channel/file labels; remove home settings entry | Home settings entry removed; player title set to one line | Android APK CI build passed; behavior not device-tested |
 | All market formats | Not promised: codec/profile/hardware support varies by Android device; Media3 plus LibVLC covers common formats | Unsupported codecs remain possible |
 | Choose arbitrary cache/download directories using Android folder picker | Not implemented: libtorrent currently writes through filesystem paths, while arbitrary SAF document providers expose URI streams | Open limitation |
 
 ### Build and remote status
 
-- No local Java, Gradle, or Android Debug Bridge executable is available in this Windows session, so no new APK was built and no emulator/phone test was run.
-- `git fetch` to GitHub timed out. The remote branch could not be refreshed or pushed during this pass. The local branch was already ahead of its cached remote-tracking ref by 17 commits before the changes in this section; it must be reconciled with the live remote before publication.
+- This Windows session has no local Java, Gradle, or Android Debug Bridge executable. GitHub Actions Android APK build **passed** on run [41106664965](https://github.com/liao-zc/OmniPlayer/actions/runs/41106664965), after correcting a missing FileProvider XML resource and removing a reference to the intentionally removed cache progress view. The workflow artifact is available from that run; no release was published. No emulator/phone test was run.
+- The update was synchronized through the GitHub API because Git fetch timed out. Local project file contents were checked against remote tree `ee7bb94828de5c2099260ce270bd31c4bdd35370`; repository metadata in the local `.git` directory still has an older commit pointer.
 - The previous exact-magnet run remains **0/10 first-frame starts** before the later cache-flush event-order fix; post-fix playback was not verified. This work does not change that result or claim otherwise.

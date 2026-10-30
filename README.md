@@ -5,7 +5,7 @@ OmniPlayer is an Android media app for IPTV live channels and magnet-link search
 ## Current development state
 
 - Current release: **v0.2.7**.
-- The working tree contains unreleased v0.2.8 playback/search fixes and the v0.2.9 update and player improvements. These changes have not yet passed an Android build or device test; they are not release APKs.
+- The unreleased v0.2.9 updater and player changes pass the GitHub Actions Android APK build (run 41106664965). No device playback or update-install test has been completed, so these changes are not a published release.
 - Android package ID remains `com.freemangnetplayer` so signed upgrades can retain the existing app's private settings and data.
 - Supported playback depends on container/codec support in Android Media3, device decoders, or LibVLC. No Android player can guarantee every codec and profile on every device.
 
