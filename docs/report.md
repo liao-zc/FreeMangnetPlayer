@@ -431,3 +431,13 @@ Peer 地址修复的 Android 实际回归已通过：[41009900336](https://githu
 [性能首帧及吞吐数据](evidence/posix-performance-verification.json)。该受控高速种子不代表用户十条资源拥有相同做种能力或速度。
 
 POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Android 运行仍在执行，独立 native 测试无元数据/下载数据结果继续保留。
+
+### POSIX 后端十条磁力真实验收：0/10 起播
+
+[完整运行 41010386326](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010386326) 已结束。Android 正式测试 APK 使用 POSIX 后端逐条检查十条用户磁力。**0/10 取得视频数据，0/10 实际渲染首帧**；7 条通过 HTTPS 元数据补充显示文件名，3 条未取得元数据；所有下载字节、播放位置和首帧记录均为 0。分别采样到 Peer 的资源，没有形成可下载的已校验分片。
+
+同一工作流里的独立 libtorrent 2.0.12 native 探测十条也均未取得元数据、有效数据为 0。native 探测客户端不同，说明该次运行的公开发现链同样没有足够证据证明这些磁力在外网提供资源。此结果不能证明别处一定没有做种，也不能计入“通过”。
+
+[逐条 POSIX 元数据、Peer、字节、首帧及吞吐采样](evidence/posix-public-acceptance.json)。由于十条均未显示视频帧，不伪造或放入影视截图。
+
+因此，目前已证明：受控有做种素材可实际边下边播、POSIX 后端可让 Android 15 缓存跨重启恢复；尚未证明：这十个指定磁力能连上供片 Peer。新的地址解析和 Tracker 调度尚需依据非零供片节点继续验证。
