@@ -255,7 +255,11 @@ object TorrentTasks {
                     val options = TorrentSessionOptions(downloadLocation = task.folder, onlyDownloadLargestFile = false,
                         shouldStream = false, streamBufferSize = 4, enableLogging = false, dhtNodeMinimum = 0,
                         downloadRateLimit = 0, uploadRateLimit = 0, connectionsLimit = 300)
-                    options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(), "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881")
+                    // Keep several independently operated bootstrap routers. A short
+                    // override here used to discard libtorrent's broader defaults.
+                    options.settingsPack.setString(settings_pack.string_types.dht_bootstrap_nodes.swigValue(),
+                        "router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881," +
+                            "dht.libtorrent.org:25401,dht.aelitis.com:6881,router.bitcomet.com:6881,router.silotis.us:6881")
                     // 16 MiB per active session; queue limits already bound memory usage.
                     // libtorrent 2 uses the OS page cache instead of the removed 1.x cache_size.
                     options.settingsPack.listenInterfaces("0.0.0.0:0,[::]:0")
