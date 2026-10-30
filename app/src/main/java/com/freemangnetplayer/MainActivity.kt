@@ -127,6 +127,7 @@ class MainActivity : ComponentActivity() {
                 var sourcePages by remember { mutableIntStateOf(0) }
                 var searchComplete by remember { mutableStateOf(false) }
                 var scannerReady by remember { mutableStateOf(false) }
+                var completionTicket by remember { mutableIntStateOf(0) }
                 var nextPage by remember { mutableStateOf("") }
                 val pageUrls = remember { mutableStateMapOf<Int, String>() }
                 val pageCache = remember { mutableStateMapOf<Int, List<MagnetResult>>() }
@@ -393,7 +394,12 @@ class MainActivity : ComponentActivity() {
                                             if (url.startsWith("http")) { pageUrls[pageNumber] = url; currentSearchUrl = url }
                                             nextPage = next
                                             searchMessage = if(pending>0) "搜索中" else if(failures>0) "搜索未完成" else ""
-                                            if(pending==0 && scannerReady && !searchNeedsFormSubmit) { searchComplete=true;searchState=if(failures>0) "timeout" else if(results.isEmpty()) "empty" else "results" }
+                                            val ticket=++completionTicket
+                                            if(pending==0 && scannerReady && !searchNeedsFormSubmit) android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                                                if(ticket==completionTicket && generation==searchTrigger && !searchComplete) {
+                                                    searchComplete=true;searchState=if(failures>0) "timeout" else if(results.isEmpty()) "empty" else "results"
+                                                }
+                                            },1000)
 
                                         }
                                     } })
