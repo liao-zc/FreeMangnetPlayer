@@ -56,7 +56,11 @@ def poll(fn,timeout=30):
     while time.monotonic()<end:
         if fn():return
         time.sleep(.5)
-    raise AssertionError('Persistence/cleanup condition failed')
+    failure={'state':state(),'cacheEntries':caches(),'downloadEntries':entries('download-entries')}
+    (OUT/'library-failure.json').write_text(json.dumps(failure,ensure_ascii=False,indent=2),encoding='utf-8')
+    (OUT/'library-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
+    screenshot('library-failure.png')
+    raise AssertionError(failure)
 
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk');adb('shell','pm','clear',PACKAGE)
 adb('shell','wm','size','1080x2400');adb('shell','pm','grant',PACKAGE,'android.permission.POST_NOTIFICATIONS')
@@ -69,6 +73,8 @@ assert played['qualityHeight']==0;record('default-original-quality',state=played
 control('player_quality');require_visible('原画质');screenshot('library-01-quality-options.png');find_and_tap('原画质')
 record('quality-control-inside-player-with-no-transcoding-claim')
 control('player_files');find_and_tap('全选');find_and_tap('完成')
+selection=wait(lambda s:len([f for f in s.get('files',[]) if f.get('selected') and f['path'].endswith(('Episode-01.mp4','Episode-02.mp4'))])==2,timeout=15)
+record('multi-file-selection-before-cache',state=selection)
 find_and_tap('缓存');poll(lambda:len(caches())>=2);screenshot('library-02-retained-files.png')
 record('explicit-cache-records-files-before-completion',entries=caches())
 partial=wait(lambda s:any(f['path'].endswith('Episode-02.mp4') and 0<f['done']<f['size'] for f in s.get('files',[])))
