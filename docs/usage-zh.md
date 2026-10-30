@@ -30,7 +30,6 @@
 
 ![v0.2.6 从设置分类进入的直播源配置](screenshots/current-ui/08-live-source-settings.png)
 
-![v0.2.6 从直播页齿轮打开的同一直播源配置](screenshots/current-ui/10-live-module-settings.png)
 
 
 ## 设置
