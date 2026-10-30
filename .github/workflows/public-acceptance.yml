@@ -1,6 +1,12 @@
 name: Public playback acceptance for ten user resources
 on:
   workflow_dispatch:
+    inputs:
+      target_only:
+        description: 'Only cold-start the reported Spider-Man MKV magnet'
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: read
 jobs:
@@ -30,7 +36,9 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
       - uses: reactivecircus/android-emulator-runner@v2
-        env: {FMP_FAST_UI: '1'}
+        env:
+          FMP_FAST_UI: '1'
+          OMNI_TARGET_ONLY: ${{ inputs.target_only && '1' || '0' }}
         with:
           api-level: 35
           target: default

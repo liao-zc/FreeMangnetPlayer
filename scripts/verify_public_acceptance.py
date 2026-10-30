@@ -1,11 +1,13 @@
 """Actual APK first-frame acceptance for the user's ten public magnets."""
-import json,shlex,time
+import json,os,shlex,time
 from pathlib import Path
 from capture_usage_screenshots import adb,screenshot,PACKAGE,OUT
 
 targets=json.loads(Path('scripts/public_acceptance_targets.json').read_text(encoding='utf-8'))
 targets.insert(0,dict(category='本轮 MKV 起播回归',hash='172241866C3C439CAB4548115ED1A0250B09FA52',magnet='magnet:?xt=urn:btih:172241866c3c439cab4548115ed1a0250b09fa52&dn=Spider-Man.Brand.New.Day.2026.2160p.iT.WEB-DL.H.265.DV.DDP5.1.Atmos-PandaQT.mkv&so=0'))
 targets.append(dict(category='原指定资源',hash='2362347540B27D8A4142AF2BBE0A071F26A3B7A1'))
+if os.environ.get('OMNI_TARGET_ONLY') == '1':
+    targets = targets[:1]
 results=[]
 adb('install','-r','app/build/outputs/apk/debug/app-debug.apk')
 for index,target in enumerate(targets,1):
@@ -35,4 +37,5 @@ passed=sum(r['passed'] for r in results if r['category'] in {'电影','动漫','
 print('User resource acceptance:',passed,'/10',flush=True)
 print('Exact MKV regression:',regression['passed'],'first-frame-seconds=',regression['firstFrameSeconds'],flush=True)
 assert regression['passed'],'The exact reported MKV magnet must render and sustain playback while incomplete'
-assert passed==10,'All ten previous user resources must render video while incomplete and sustain playback; inspect peer and payload evidence'
+if os.environ.get('OMNI_TARGET_ONLY') != '1':
+    assert passed==10,'All ten previous user resources must render video while incomplete and sustain playback; inspect peer and payload evidence'
