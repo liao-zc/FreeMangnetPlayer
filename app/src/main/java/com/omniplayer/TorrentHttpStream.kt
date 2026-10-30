@@ -25,11 +25,12 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
     @Volatile private var response = ""
     @Volatile private var bytesSent = 0L
     @Volatile private var lastError = ""
+    @Volatile private var lastDataSource: TorrentFileDataSource? = null
     private val resourcePath = "/$token/video.${MediaFormats.extension(target.path).ifBlank { "bin" }}"
     val uri: Uri = Uri.parse("http://127.0.0.1:${server.localPort}$resourcePath")
     fun debugInfo() = JSONObject().put("httpRequests", requests).put("httpLastRequest", lastRequest)
         .put("httpLastRange", lastRange).put("httpResponse", response).put("httpBytesSent", bytesSent)
-        .put("httpLastError", lastError)
+        .put("httpLastError", lastError).put("dataSource", lastDataSource?.debugInfo() ?: JSONObject())
     init {
         Thread({
             while (!closed) runCatching {
@@ -76,6 +77,7 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
             output.write(headers.toByteArray()); output.flush()
             if (request[0] == "HEAD") return
             source = TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }, task.nativeLock)
+            lastDataSource = source
             clients[socket] = source
             source.open(DataSpec.Builder().setUri(Uri.fromFile(java.io.File(task.folder, target.path))).setPosition(start).setLength(length).build())
             val buffer = ByteArray(32 * 1024)
