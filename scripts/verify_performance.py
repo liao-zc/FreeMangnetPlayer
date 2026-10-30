@@ -126,6 +126,7 @@ def main():
     from capture_usage_screenshots import visible_text
     if 'Got it' in visible_text():
         find_and_tap('Got it')
+    if 'Show player controls' in visible_text(): _original_tap('Show player controls')
     require_visible('退出全屏', '悬浮播放', '切换视频')
     time.sleep(2)
     screenshot('perf-06-fullscreen-film.png')
