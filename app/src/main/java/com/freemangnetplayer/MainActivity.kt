@@ -289,7 +289,10 @@ class MainActivity : ComponentActivity() {
                         if (magnetSection) TopAppBar(
                             title = { Text(if (selectedTab == "搜索结果") "搜索结果" else "磁力播放") },
                             navigationIcon = { IconButton(onClick = { selectedTab = "门户" }) { Icon(Icons.Default.ArrowBack, "返回主页") } },
-                            actions = { TextButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "magnet")) }) { Text("设置") } }
+                            actions = { TextButton(
+                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "magnet")) },
+                                modifier = Modifier.semantics { contentDescription = "磁播模块设置" }
+                            ) { Text("设置") } }
                         )
                     },
                     bottomBar = {

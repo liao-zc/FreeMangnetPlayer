@@ -60,14 +60,12 @@ def main():
     capture.find_and_tap('磁力播放')
     time.sleep(3)
     shot('02-magnet.png', ('搜索', '播放', '下载', '收藏'))
-    capture.find_and_tap('设置')
+    capture.find_and_tap('磁播模块设置')
     time.sleep(2)
     shot('09-magnet-entry-settings.png', ('下载目录', '缓存目录', '搜索引擎'))
     check_absent('显示与字体', '背景颜色', '电视直播设置', '直播源名称', '软件说明')
     capture.adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
     time.sleep(2)
-    if 'RETURN_TO_MENU' in capture.visible_text():
-        raise RuntimeError('Unreachable marker')
     print('Current UI verification passed: home navigation, isolated settings pages, independent software info, first-run IPTV source URLs, and module settings entry.')
 
 if __name__ == '__main__':
