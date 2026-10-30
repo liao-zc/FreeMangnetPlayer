@@ -2,6 +2,7 @@
   if (window.__fmpScan) { window.__fmpScan(); return; }
   const visited = new Set(), emitted = new Set(), failed = new Set();
   const clean = x => (x || '').replace(/\s+/g, ' ').trim();
+  const resourceName=x=>{const t=clean(x);return /magnet:\?|^https?:|^link_blocked$|^(?:(?:磁力|magnet)(?:下载|链接)?|下载|复制|播放|查看详[情细]|详情|详细|查看|更多|点击查看|点击下载)$/i.test(t)?'':t;};
   const decode = x => { const e = document.createElement('textarea'); e.innerHTML = x; return e.value; };
   let running = false, pending = 0; const metadata = new Map();
   function nextUrl() {
@@ -23,7 +24,8 @@
   function details(node, uri) {
     const chunks=[];if(node){const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);let part;while((part=walker.nextNode()))if(!part.parentElement.closest('script,style,noscript'))chunks.push(part.textContent);}
     const text=clean(chunks.join(' ')).replace(/magnet:\?[^\s<>]+/ig,'').replace(/https?:\/\/[^\s<>]+/ig,'');
-    const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=/(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|TiB|GB|MB|KB|TB|B|\u5b57\u8282)(?![a-z0-9])/i.exec(text);
+    const occurrences=node?(node.innerHTML.match(/magnet:\?/ig)||[]).length:0;
+    const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=occurrences>1?null:/(?<![a-z0-9])(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|TiB|GB|MB|KB|TB|B|\u5b57\u8282)(?![a-z0-9])/i.exec(text);
     let bytes=m?+m[1]:0, sizeText='';
     if(sizeMatch){const unit=sizeMatch[2].toUpperCase();const power=unit.startsWith('T')?4:unit.startsWith('G')?3:unit.startsWith('M')?2:unit.startsWith('K')?1:0;
       sizeText=sizeMatch[1].replace(',','.')+sizeMatch[2];if(!bytes)bytes=Math.round(parseFloat(sizeMatch[1].replace(',','.'))*Math.pow(unit.includes('I')?1024:1000,power));}
@@ -36,8 +38,8 @@
     let dn=''; const m=/(?:[?&])dn=([^&]+)/i.exec(uri);
     if(m)try{dn=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){}
     const data=details(node,uri), old=metadata.get(uri);
-    const label=clean(title), validTitle=/magnet:\?|^https?:|^link_blocked$/i.test(label)?'':label;
-    const value={title:validTitle||dn||'待获取文件名',source:uri,...data};
+    const validTitle=resourceName(title);
+    const value={title:resourceName(dn)||validTitle||'待获取文件名',source:uri,...data};
     if(old){if(!data.bytes && old.bytes) {value.bytes=old.bytes;value.sizeText=old.sizeText;} if(value.title==='待获取文件名')value.title=old.title;}
     if(old && JSON.stringify(old)===JSON.stringify(value))return;
     emitted.add(uri);metadata.set(uri,value);window.FreeMagnetResults.onResults(JSON.stringify([value]));
@@ -47,13 +49,12 @@
       const uri=a.getAttribute('data-magnet')||a.getAttribute('href')||a.value||'';
       const row=a.closest('article,.result,.search-item,.item,li,tr,.card,.panel');
       const heading=row && row.querySelector('h1,h2,h3,h4,.title,.name,.item-title,.result-title,.search-title');
-      const usable=x=>{const t=clean(x);return /magnet:\?|^https?:|^link_blocked$|^(?:(?:磁力|magnet)(?:下载|链接)?|下载|复制|播放)$/i.test(t)?'':t;};
-      const name=[heading && heading.textContent,a.textContent,a.title,fallback,doc!==document?doc.title:''].map(usable).find(Boolean)||'';
+      const name=[heading && heading.textContent,a.textContent,a.title,fallback,doc!==document?doc.title:''].map(resourceName).find(Boolean)||'';
       emit(uri,name,row || (doc!==document?doc.body:null));
     });
     const pattern=/magnet:\?[^"'<>\s]+/ig; let m;
     const html=doc.documentElement?doc.documentElement.outerHTML:'';
-    while((m=pattern.exec(html))) {if(!emitted.has(decode(m[0])))emit(m[0],fallback,doc!==document?doc.body:null);}
+    while((m=pattern.exec(html))) {if(!emitted.has(decode(m[0])))emit(m[0],fallback,null);}
   }
   window.__fmpScan=function(){
     if(window.__fmpStopped)return;parse(document,document.title); if(running){info();return;} running=true;
@@ -70,7 +71,7 @@
       while(urls.length){
         const a=urls.shift();visited.add(a.href);const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
         try{const response=await fetch(a.href,{credentials:'include',signal:controller.signal});if(!response.ok)throw Error(response.status);
-          if(!window.__fmpStopped)parse(new DOMParser().parseFromString(await response.text(),'text/html'),a.title||a.textContent);failed.delete(a.href);
+          if(!window.__fmpStopped)parse(new DOMParser().parseFromString(await response.text(),'text/html'),[a.title,a.textContent,a.closest('article,.result,.item,li,.card')?.querySelector('h1,h2,h3,h4,.title,.entry-title')?.textContent].map(resourceName).find(Boolean)||'');failed.delete(a.href);
         }catch(_){failed.add(a.href);}finally{clearTimeout(timer);pending--;info();}
       }
     }
