@@ -59,8 +59,7 @@
     if(window.__fmpStopped)return;parse(document,document.title); if(running){info();return;} running=true;
     const links=[...document.querySelectorAll('a[href]')].filter(a=>{
       try{
-        const u=new URL(a.href,location.href);
-        return /^https?:$/.test(u.protocol)&&u.origin===location.origin&&u.href!==location.href&&!visited.has(u.href)&&
+        return /^https?:$/.test(a.protocol)&&a.origin===location.origin&&a.href!==location.href&&!visited.has(a.href)&&
           !a.closest('.pagination,.pager,.pages,.page-numbers')&&a.rel!=='next'&&a.rel!=='prev'&&
           !/^(首页|上一页|下一页|上页|下页|返回|登录|注册|next|previous|\d+)$/i.test(clean(a.textContent))&&
           clean(a.textContent||a.title).length>0;
