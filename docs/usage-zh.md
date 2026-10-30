@@ -91,3 +91,11 @@
 播放器画质菜单只列出文件实际具有并能识别的轨道。单轨视频只有原画；降低显示分辨率不能降低原文件下载量，本版未实现实时转码。
 
 ![实际画质轨道](screenshots/current/preferences-preferences-05-supported-quality-menu.png)
+
+## 资源时间与任务数量
+
+搜索结果的资源时间来自网站资源行或详情页；“来源未提供”表示网站没有给出日期。
+
+![资源时间与分页](screenshots/current/preferences-local-results-1.png)
+
+设置页“最大同时下载数量（不含缓存）”默认 5。缓存和播放任务使用独立的“最大缓存任务数量”，不会占下载名额。
