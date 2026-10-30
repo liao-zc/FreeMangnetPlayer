@@ -494,7 +494,9 @@ object TorrentTasks {
     fun playFile(task: TorrentTask, index: Int) {
         if (index in task.deletedFiles) return
         if (task.playingIndex != index) task.handle?.clearPieceDeadlines()
-        if (!task.download && !task.retainedCache) task.selected = setOf(index)
+        // Decoder preparation or retry must not erase an explicit multi-file selection.
+        // Temporary file switches set their own selection in switchStreamFile.
+        if (!task.download && !task.retainedCache && task.selected.isEmpty()) task.selected = setOf(index)
         task.streaming = true; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
         applyPriorities(task)
         if (task.selectionPaused) { task.selectionPaused = false; resume(task) }
