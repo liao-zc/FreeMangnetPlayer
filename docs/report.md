@@ -405,3 +405,5 @@ Android 设备测试另校验字体真实加载、字号持久化、各类历史
 - [不限速受控视频性能验证](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41010526508)
 
 性能验证要求实际首帧、视频尺寸和播放进度，而不只检查 playing 标志。受控速度不代表十条公网资源一定达到相同速度；十条仍分别执行未下载完成时首帧和持续播放检查。以上新运行未结束，未发布新版 APK。
+
+Peer 地址修复的 Android 实际回归已通过：[41009900336](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41009900336) 的十项测试均无失败，包括带协议 IPv4、IPv6 和非法地址检查。其后续完整界面流程仍失败；该运行未包含 POSIX 后端，不能宣称整套回归通过。
