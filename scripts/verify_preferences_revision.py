@@ -28,20 +28,24 @@ def wait(fn,timeout=150):
         if fn(s):return s
         time.sleep(.5)
     raise AssertionError(state())
+def actionable(node):
+    if node is None or node.get('visible-to-user') != 'true': return False
+    b=list(map(int,re.findall(r'\d+',node.get('bounds',''))))
+    return len(b)==4 and b[2]>b[0] and b[3]>b[1]
 def control(name):
     for _ in range(15):
         adb('shell','uiautomator','dump','/sdcard/window.xml');t=ET.fromstring(adb('shell','cat','/sdcard/window.xml'))
-        node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name)),None)
-        if node is None:node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface')),None)
+        node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
+        if node is not None:
+            b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
+        node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
         if node is not None:
             b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
-            if node.get('resource-id','').endswith('/'+name):time.sleep(.5);return
         time.sleep(.3)
     screenshot('preferences-failed-'+name+'.png')
     (OUT/'preferences-failed-ui.xml').write_text(adb('shell','cat','/sdcard/window.xml'),encoding='utf-8')
     (OUT/'preferences-failed-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
     raise AssertionError(name)
-
 def tap_exact(label):
     for _ in range(12):
         adb('shell','uiautomator','dump','/sdcard/window.xml')

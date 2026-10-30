@@ -26,14 +26,18 @@ def tree():
     adb('shell','uiautomator','dump','/sdcard/window.xml');return ET.fromstring(adb('shell','cat','/sdcard/window.xml'))
 def tap(n):
     b=list(map(int,re.findall(r'\d+',n.get('bounds',''))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
+def actionable(node):
+    if node is None or node.get('visible-to-user') != 'true': return False
+    b=list(map(int,re.findall(r'\d+',node.get('bounds',''))))
+    return len(b)==4 and b[2]>b[0] and b[3]>b[1]
 def control(name):
     for _ in range(15):
-        t=tree();n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name)),None)
+        t=tree();n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
         if n is not None:tap(n);time.sleep(.4);return
-        n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface')),None)
-        if n is not None:tap(n)
+        surface=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
+        if surface is not None:tap(surface)
         time.sleep(.3)
-    raise AssertionError('Missing built-in control '+name)
+    raise AssertionError('Missing visible built-in control '+name)
 def open_cache(title):
     root=tree();parents={child:parent for parent in root.iter() for child in parent}
     node=next(n for n in root.iter('node') if n.get('text')==title)
