@@ -204,7 +204,10 @@ def main():
     find_and_tap('解析资源')
     time.sleep(20)
     plain = state()
-    require_visible('返回搜索', '网络诊断')
+    require_visible('返回搜索')
+    find_and_tap('网络诊断')
+    require_visible('真实网络诊断', '有效载荷速度')
+    find_and_tap('关闭')
     screenshot('perf-10-plain-hash-discovery.png')
     assert plain.get('id') == fixture['id'] and plain.get('downloadLimit') == 0, plain
     report.append({'check': 'plain-hash-input-and-responsive-discovery', 'passed': True,
