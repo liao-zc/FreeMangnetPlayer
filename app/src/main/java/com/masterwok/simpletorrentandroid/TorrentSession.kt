@@ -184,7 +184,7 @@ open class TorrentSession(
 
         knownTrackers.forEach { (url, tier) ->
             if (torrentHandle.trackers().none { it.url() == url }) {
-                torrentHandle.addTracker(AnnounceEntry(url).apply { tier(tier.toShort()) })
+                torrentHandle.addTracker(AnnounceEntry(url).apply { this.tier(tier.toShort()) })
             }
         }
         restoredTrackers = torrentHandle.trackers().count { it.url() in knownTrackers }
