@@ -357,6 +357,16 @@ class PlayerActivity : ComponentActivity() {
         if (media is ExoPlayer) media.trackSelectionParameters = media.trackSelectionParameters.buildUpon().setForceHighestSupportedBitrate(true).build()
         qualityHeight = 0
         media.seekTo(savedPosition); media.prepare(); media.setPlaybackSpeed(speed); media.playWhenReady = autoPlay
+        if (!realMedia && MediaFormats.shouldRetryWithSoftware(file.path)) {
+            window.decorView.postDelayed({
+                if (!isDestroyed && player === media && task.renderedFrameAt == 0L) {
+                    savedPosition = media.currentPosition
+                    releasePlayer()
+                    playerMessage = "设备解码器尚未渲染画面，正在切换兼容解码器…"
+                    startPlayback(task, file, forceSoftware = true)
+                }
+            }, 8_000)
+        }
     }
     private fun openStored(target: TorrentTask, file: TaskFile) {
         val current = task ?: return
