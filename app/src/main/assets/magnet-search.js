@@ -46,7 +46,9 @@
       sizeText=sizeMatch[1].replace(',','.')+sizeMatch[2];if(!bytes)bytes=Math.round(parseFloat(sizeMatch[1].replace(',','.'))*Math.pow(unit.includes('I')?1024:1000,power));}
     const category=/纪录片/.test(text)?'纪录片':/动漫|动画/.test(text)?'动漫':/剧集|电视剧|连续剧/.test(text)?'剧集':/电影/.test(text)?'电影':'视频';
     const score=/(?:评分|热度|score)\s*[:：]?\s*(\d+(?:\.\d+)?)/i.exec(text);
-    return {bytes:bytes,sizeText:sizeText,type:category,heat:score?score[1]:'',publishedAt:resourceTime(node,occurrences)};
+    const formatSource=clean((node&&node.textContent||'')+' '+uri+' '+(node&&node.querySelector('h1,h2,h3,h4,.title,.name')?.textContent||''));
+    const formatMatch=/\.((?:mp4|m4v|mkv|webm|avi|mov|ts|m2ts|mpeg|mpg|vob|flv|wmv|rmvb?|ogv|3gp|h264|h265|hevc|zip|rar|7z|tar|gz|bz2|xz|iso|pdf|srt|ass|ssa|vtt|mp3|flac|wav|aac|m4a|docx?|xlsx?|pptx?))\b/i.exec(formatSource);
+    return {bytes:bytes,sizeText:sizeText,type:category,heat:score?score[1]:'',publishedAt:resourceTime(node,occurrences),format:formatMatch?'.'+formatMatch[1].toUpperCase():''};
   }
   function emit(uri, title, node) {
     uri=decode(uri).trim(); if (!/^magnet:\?/i.test(uri)) return;
@@ -55,7 +57,7 @@
     const data=details(node,uri), old=metadata.get(uri);
     const validTitle=resourceName(title);
     const value={title:validTitle||resourceName(dn)||'待获取文件名',source:uri,...data};
-    if(old){if(!data.bytes && old.bytes) {value.bytes=old.bytes;value.sizeText=old.sizeText;} if(value.title==='待获取文件名')value.title=old.title;if(!value.publishedAt)value.publishedAt=old.publishedAt;}
+    if(old){if(!data.bytes && old.bytes) {value.bytes=old.bytes;value.sizeText=old.sizeText;} if(value.title==='待获取文件名')value.title=old.title;if(!value.publishedAt)value.publishedAt=old.publishedAt;if(!value.format)value.format=old.format;}
     if(old && JSON.stringify(old)===JSON.stringify(value))return;
     emitted.add(uri);metadata.set(uri,value);window.FreeMagnetResults.onResults(JSON.stringify([value]));
   }

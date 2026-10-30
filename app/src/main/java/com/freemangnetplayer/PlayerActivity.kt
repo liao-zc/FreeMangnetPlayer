@@ -154,7 +154,7 @@ class PlayerActivity : ComponentActivity() {
                         if (player == null && !floating) Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                             if (requested) CircularProgressIndicator(color = Color.White)
                             else TextButton(onClick = { requestPlayback(true) }) { Text("重试播放", color = Color.White) }
-                            Text(playerMessage.ifBlank { "正在等待播放分片…" }, color = Color.White)
+                            Text(current.unplayableReason.ifBlank { playerMessage.ifBlank { "正在等待播放分片…" } }, color = if (current.unplayableReason.isNotBlank()) Color(0xFFFF8A80) else Color.White)
                         }
                     }
                 } else {
@@ -184,6 +184,7 @@ class PlayerActivity : ComponentActivity() {
                         Card(Modifier.fillMaxWidth()) {
                             Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                 Text(if (current.files.isEmpty()) "正在解析磁力资源" else "资源解析完成", style = MaterialTheme.typography.titleMedium)
+                                if (current.unplayableReason.isNotBlank()) Text(current.unplayableReason, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleSmall)
                                 Text(current.status)
                                 if (current.files.isEmpty() && !current.paused && !current.cancelled) LinearProgressIndicator(Modifier.fillMaxWidth())
                                 else LinearProgressIndicator(progress = { if (current.total == 0L) 0f else (current.done.toFloat() / current.total).coerceIn(0f, 1f) }, modifier = Modifier.fillMaxWidth())

@@ -531,15 +531,33 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 |---|---|---|
 | 1 | README 与 GitHub 仓库统一命名 OmniPlayer | GitHub 仓库已重命名为 [`liao-zc/OmniPlayer`](https://github.com/liao-zc/OmniPlayer)，本地 origin 已切换到新仓库地址。Android applicationId 仍为 `com.freemangnetplayer`，保留原安装升级与本机数据身份。README 已更新仓库链接、产品名及 v0.2.5 下载链接。服务端改名已由 GitHub API 查询确认；推送和 release 尚待本轮 CI。|
 | 2 | 确认上轮报告和截图是否过时、重新点检 | 确认 v0.2.4 报告所列大部分截图来自早期需求回归，并非 v0.2.4 本轮新采集，不能视为本轮 UI 截图。历史报告明确保留为历史记录；本轮新增 `current-ui` 模拟器流程，待 Actions 实际运行后再补入真实截图和运行链接。未运行前不宣称 UI 已通过。|
-| 3 | 首页底部移除磁力播放入口 | 首页模式不再绘制独立磁播底栏项；首页磁播功能卡片仍可进入模块。磁播模块内搜索、播放、下载、收藏导航保留。源码检查通过，模拟器点击验收待 `current-ui`。|
-| 4 | 磁播和直播各自设置只显示本类配置，并与外部设置同步 | 统一设置入口仍列直播、磁播、通用、软件说明分类。磁播模块顶部“设置”现在直接打开磁播配置；直播页面齿轮及统一设置“直播设置”仍进入同一个 `IptvStore` 源编辑器。配置读写仍使用各自本地 SharedPreferences。源码检查通过；本轮跨入口保存后复读由 `current-ui` 待验。|
-| 5 | 更改默认 IPTV 源，保留 IPTV Org 备用源 | `IptvStore.DEFAULT_URL` 已改为 `https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u`，IPTV Org 地址保留为备用。首次升级迁移加入两条内置源并选中 IPTV_ALL，原有自定义源保留。代码已修改；新装/升级模拟器配置检查待运行。|
-| 6 | 版本信息从通用设置移入软件说明 | 通用设置只保留字体和背景；设置菜单增加独立“软件说明”，显示 OmniPlayer、版本号和更新时间。源码检查通过；模拟器页面内容检查待 `current-ui`。|
+| 3 | 首页底部移除磁力播放入口 | 首页模式不再绘制独立磁播底栏项；首页磁播功能卡片仍可进入模块。磁播模块内搜索、播放、下载、收藏导航保留。源码和 Android 15 模拟器界面验收均通过；首页新截图见 [01-home.png](screenshots/current-ui/01-home.png)。|
+| 4 | 磁播和直播各自设置只显示本类配置，并与外部设置同步 | 统一设置入口仍列直播、磁播、通用、软件说明分类。磁播模块顶部“设置”现在直接打开磁播配置；直播页面齿轮及统一设置“直播设置”仍进入同一个 `IptvStore` 源编辑器。配置读写仍使用各自本地 SharedPreferences。Android 15 模拟器通过：从统一设置中选择并保存 BT 搜索引擎后，从磁播页齿轮再次打开，默认引擎仍显示为刚才保存的值。入口截图：[04-magnet-settings.png](screenshots/current-ui/04-magnet-settings.png)、[09-magnet-entry-settings.png](screenshots/current-ui/09-magnet-entry-settings.png)。|
+| 5 | 更改默认 IPTV 源，保留 IPTV Org 备用源 | `IptvStore.DEFAULT_URL` 已改为 `https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u`，IPTV Org 地址保留为备用。首次升级迁移加入两条内置源并选中 IPTV_ALL，原有自定义源保留。Android 15 模拟器清除数据后首次启动，直播源编辑页显示 IPTV_ALL 指定地址和 IPTV Org 备用地址，自动化断言通过。升级迁移保留用户自定义源的行为由源码路径核对，未用已有用户偏好快照做设备升级实测。截图：[08-live-source-settings.png](screenshots/current-ui/08-live-source-settings.png)。|
+| 6 | 版本信息从通用设置移入软件说明 | 通用设置只保留字体和背景；设置菜单增加独立“软件说明”，显示 OmniPlayer、版本号和更新时间。Android 15 模拟器页面检查通过：通用设置包含字体和背景，没有版本/更新时间；软件说明单页显示名称、版本、更新时间。截图：[05-general-settings.png](screenshots/current-ui/05-general-settings.png)、[06-about.png](screenshots/current-ui/06-about.png)。|
 
 ### 截图与证据说明
 
-旧版指南曾直接引用 `performance-*`、`preferences-*` 等文件。它们确实是此前版本的截图，不是本次工作采集；不得据此判定本轮界面。当前模拟器尚未执行，所以本表里涉及 UI、跨入口同步、首次默认源呈现的内容均为“待模拟器验收”，不冒充已通过。成功运行后会把本轮截图放进 `docs/screenshots/current-ui/` 并在指南及本节直接链接。
+旧版指南曾直接引用 `performance-*`、`preferences-*` 等文件。它们确实是此前版本的截图，不是本次工作采集；不得据此判定本轮界面。本轮 Android 15 Pixel 2 模拟器流程 [41038878876](https://github.com/liao-zc/OmniPlayer/actions/runs/41038878876) 最终通过，采集了 10 张本轮截图并直接嵌入指南和下表。第一次运行 [41038129580](https://github.com/liao-zc/OmniPlayer/actions/runs/41038129580) 因通用“设置”文本选择器点到了另一个入口而失败；给磁播模块顶部按钮增加唯一无障碍标识后重跑通过。
 
 v0.2.4 及更早版本的公网 BT 十条仍为 0/10 起播等历史结果，详见本报告既有专项记录；本轮设置/UI 改动不修改这些结果，也未重测 BT 网络链路。
 
 版本目标推进至 **v0.2.5**（versionCode 23）。本地 Windows 环境没有 Java/Android 设备，本地 Gradle 和设备实播无法运行；等待 GitHub Actions Android 构建、Markdown 检查和模拟器验收。APK 下载地址在构建 Release 成功前尚不可用。
+## OmniPlayer v0.2.6 搜索源、返回导航与无数据提示点检（2026-10-30）
+
+本轮针对用户最新提出的 4 项要求及既有“每次逐项点检、报告刷新、同步 GitHub、清理临时产物”要求进行更新。当前源码检查结果如下；Android 编译、模拟器 UI、Instrumentation 测试需等 GitHub Actions 实际运行后再将状态改为通过。
+
+| # | 要求 | 实现与当前验证状态 |
+|---|---|---|
+| 1 | 本地项目文件夹改名 OmniPlayer | 待本轮验证/推送结束后，在父目录将工作区目录改为 `OmniPlayer`；尚未执行。|
+| 2 | 无法播放资源持续提示，并在下载/缓存/收藏中保留提示 | BT 任务仅在已取元数据、所选视频无校验数据/无 payload、Peer 与连接均为 0 且持续 3 分钟后标记“暂无可用资源节点”；警告写入任务与本地列表记录，列表项突出显示。下载/缓存列表展示数量排除此类条目，调度名额也忽略已告警任务。新增显式“重新尝试”按钮，提示不会自行消失。已补策略及持久化 Android 测试；设备测试待 Actions。|
+| 3 | 六个搜索源可编辑、删除，默认 BDFlix，最多 10 个，保留配置 | 增加独立搜索引擎管理页面；旧六个内置源和旧版单个自定义源在首次迁移时合并保留。支持改名称/主页/搜索模板、删源、选默认、增至 10 个，并限制至少保留一个；Manifest 已注册页面。新增 Android Store 测试，模拟器验证待运行。|
+| 4 | 从搜索结果逐级返回 | 搜索结果页顶部返回及系统返回均回到关键词搜索页；设置页的搜索引擎管理返回磁播设置，磁播设置再回上一页。源码路径已核对；模拟器操作待运行。|
+| 5 | 结果时间及文件格式 | 保留搜索站点提供的资源上架时间，并明确 magnet 本身不包含发布时间；格式先从文件名/`dn` 提取，解析元数据后以最大视频文件扩展名更新，非视频扩展名标明压缩包、文档、音频/字幕等，下载入口不按格式过滤。大小仅在搜索源或种子元数据真实提供后展示，不伪造“精准”未知值。自动化内容断言待运行。|
+| 6 | 每轮报告、清理中间文件、Markdown 在 GitHub 可读 | 本报告增补本轮点检表；临时 UI 工作目录在提交前清理。UTF-8、相对链接、GitHub Markdown 渲染及截图有效性检查待运行。|
+
+### 当前边界
+
+本轮没有声称解决无做种者/无 Peer 的客观网络问题。3 分钟无节点只会触发明确的当前不可播放提示，并从下载/缓存名额中排除；它不能令没有在线资源节点的磁力凭空产生数据。用户可手动重新尝试以重新进行 Peer 发现。指定公网磁力资源的实际起播能力需要可达 Peer，本轮 UI 与逻辑改动不构成十条资源播放通过的证据。
+
+v0.2.6 版本目标为 versionCode 24。GitHub Actions 尚未执行前，不将构建、模拟器测试或 APK 发布记为通过。新版本截图将在 Android 15 模拟器流程成功后采集并替换使用说明中的旧截图。

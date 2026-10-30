@@ -11,13 +11,13 @@ object StoredVideos {
         for(kind in listOf("下载","缓存")) HistoryStore.update(context,kind,HistoryEntry(task.title,"magnet:?xt=urn:btih:${task.id}",0,task.status,done=task.done,size=task.total))
         if (!task.retainedCache || task.clearing || task.stopping) return
         if (task.files.isEmpty()) {
-            LibraryStore.saveCache(context, LibraryEntry(task.title, task.source, "缓存任务，打开后恢复文件列表"))
+            LibraryStore.saveCache(context, LibraryEntry(task.title, task.source, task.unplayableReason.ifBlank { "缓存任务，打开后恢复文件列表" }, unplayableReason = task.unplayableReason))
             return
         }
         LibraryStore.removeCachePlaceholder(context, task.source)
         for (file in task.files.filter { it.video && it.index in task.selected && it.index !in task.deletedFiles }) {
             LibraryStore.saveCache(context, LibraryEntry(file.path.substringAfterLast('/'), fileSource(task, file),
-                if (file.done >= file.size) "缓存完成" else "缓存中，可继续播放", file.done, file.size))
+                task.unplayableReason.ifBlank { if (file.done >= file.size) "缓存完成" else "缓存中，可继续播放" }, file.done, file.size, unplayableReason = task.unplayableReason))
         }
     }
 

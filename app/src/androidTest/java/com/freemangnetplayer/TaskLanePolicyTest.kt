@@ -6,6 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import androidx.test.platform.app.InstrumentationRegistry
 
 @RunWith(AndroidJUnit4::class)
 class TaskLanePolicyTest {
@@ -26,5 +27,47 @@ class TaskLanePolicyTest {
         values[0].paused = true; values[1].complete = true; values[2].cancelled = true
         assertEquals(2, TaskLanePolicy.activeCount(values, true))
         values.forEach { it.job?.cancel() }
+    }
+
+    @Test fun confirmedNoDataWarningPersistsAndDoesNotConsumeDownloadOrCacheSlots() {
+        assertEquals(false, TaskLanePolicy.shouldWarnUnplayable(false, true, false, 0, 0, 600_000))
+        assertEquals(false, TaskLanePolicy.shouldWarnUnplayable(true, true, true, 0, 0, 600_000))
+        assertEquals(false, TaskLanePolicy.shouldWarnUnplayable(true, true, false, 1, 0, 600_000))
+        assertEquals(false, TaskLanePolicy.shouldWarnUnplayable(true, true, false, 0, 1, 600_000))
+        assertEquals(false, TaskLanePolicy.shouldWarnUnplayable(true, true, false, 0, 0, TaskLanePolicy.NO_DATA_WARNING_AFTER_MS - 1))
+        assertEquals(true, TaskLanePolicy.shouldWarnUnplayable(true, true, false, 0, 0, TaskLanePolicy.NO_DATA_WARNING_AFTER_MS))
+
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val id = "abcdef0123456789abcdef0123456789abcdef01"
+        val source = "magnet:?xt=urn:btih:$id"
+        val failed = TorrentTask(id, source, "No seed", File(context.cacheDir, id), true).apply {
+            files = listOf(TaskFile(0, "episode.mkv", 1024))
+            selected = setOf(0)
+            job = Job()
+        }
+        val reason = "⚠ 无法播放：没有收到有效视频数据"
+        TorrentTasks.tasks[id] = failed
+        try {
+            LibraryStore.addFavorite(context, "No seed", source)
+            LibraryStore.addPlayback(context, "No seed", source)
+            LibraryStore.updateDownload(context, "No seed", source, reason)
+            LibraryStore.saveCache(context, LibraryEntry("No seed", source, reason, unplayableReason = reason))
+            LibraryStore.markUnplayable(context, failed, reason)
+
+            assertEquals(reason, LibraryStore.readFavorites(context).first { it.source == source }.unplayableReason)
+            assertEquals(reason, LibraryStore.readPlaybacks(context).first { it.source == source }.unplayableReason)
+            assertEquals(reason, LibraryStore.readDownloads(context).first { it.source.contains(id) }.unplayableReason)
+            assertEquals(reason, LibraryStore.readCaches(context).first { it.source == source }.unplayableReason)
+            assertEquals(0, TaskLanePolicy.activeCount(listOf(failed), true))
+            failed.download = false; failed.retainedCache = true; failed.paused = false
+            assertEquals(0, TaskLanePolicy.activeCount(listOf(failed), false))
+        } finally {
+            failed.job?.cancel()
+            TorrentTasks.tasks.remove(id)
+            LibraryStore.removeEntries(context, "收藏", setOf(source))
+            LibraryStore.removeEntries(context, "播放", setOf(source))
+            LibraryStore.removeEntries(context, "下载", setOf(source, StoredVideos.fileSource(failed, failed.files.first())))
+            LibraryStore.removeEntries(context, "缓存", setOf(source))
+        }
     }
 }

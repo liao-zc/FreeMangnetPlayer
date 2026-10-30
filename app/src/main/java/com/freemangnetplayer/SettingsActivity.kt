@@ -19,6 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 class SettingsActivity : ComponentActivity() {
     private val fontPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
@@ -45,11 +48,21 @@ class SettingsActivity : ComponentActivity() {
                 var cache by remember { mutableStateOf(SettingsStore.root(this, false).absolutePath) }
                 var downloads by remember { mutableStateOf(SettingsStore.maxDownloads(this).toString()) }
                 var caches by remember { mutableStateOf(SettingsStore.maxCaches(this).toString()) }
+                var providers by remember { mutableStateOf(SearchEngineStore.load(this)) }
                 var customName by remember { mutableStateOf(prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索") }
                 var customUrl by remember { mutableStateOf(prefs.getString("custom-url", "") ?: "") }
                 var engine by remember { mutableStateOf(prefs.getString("search-name", "clg.im") ?: "clg.im") }
                 var message by remember { mutableStateOf("") }
                 var menu by remember { mutableStateOf(false) }
+                val lifecycleOwner = LocalLifecycleOwner.current
+                DisposableEffect(lifecycleOwner) {
+                    val observer = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_RESUME) {
+                        providers = SearchEngineStore.load(this@SettingsActivity)
+                        engine = prefs.getString("search-name", SearchEngineStore.defaultName()) ?: SearchEngineStore.defaultName()
+                    } }
+                    lifecycleOwner.lifecycle.addObserver(observer)
+                    onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+                }
                 val pkg = packageManager.getPackageInfo(packageName, 0)
                 @Suppress("DEPRECATION") val legacyVersion = pkg.versionCode
                 val version = if (Build.VERSION.SDK_INT >= 28) pkg.longVersionCode.toString() else legacyVersion.toString()
@@ -91,28 +104,24 @@ class SettingsActivity : ComponentActivity() {
                             Text("最大任务数", style = MaterialTheme.typography.titleMedium)
                             OutlinedTextField(downloads, { downloads = it }, label = { Text("最大同时下载数量（1–8，不含缓存）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                             OutlinedTextField(caches, { caches = it }, label = { Text("最大缓存任务数量（1–100，单独计算）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-                            Text("搜索引擎", style = MaterialTheme.typography.titleMedium)
+                            Text("默认搜索引擎", style = MaterialTheme.typography.titleMedium)
                             Box {
                                 OutlinedButton(onClick = { menu = true }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("默认搜索引擎：$engine") }
                                 DropdownMenu(menu, { menu = false }) {
-                                    builtInProviders.forEach { provider -> DropdownMenuItem(text = { Text(provider.name) }, onClick = { engine = provider.name; menu = false }) }
-                                    DropdownMenuItem(text = { Text("自定义：$customName") }, onClick = { engine = customName; menu = false })
+                                    providers.forEach { provider -> DropdownMenuItem(text = { Text(provider.name) }, onClick = { engine = provider.name; menu = false }) }
                                 }
                             }
-                            OutlinedTextField(customName, { customName = it }, label = { Text("自定义引擎名称") }, modifier = Modifier.fillMaxWidth())
-                            OutlinedTextField(customUrl, { customUrl = it }, label = { Text("自定义地址，%s 为关键词") }, modifier = Modifier.fillMaxWidth())
+                            OutlinedButton(onClick = { startActivity(Intent(this@SettingsActivity, SearchEngineSettingsActivity::class.java)) }, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text("编辑 / 删除搜索引擎（${providers.size}/10）") }
                             Button(onClick = {
                                 runCatching {
                                     val d = SettingsStore.validateRoot(download)
                                     val c = SettingsStore.validateRoot(cache)
                                     val md = downloads.toInt(); val mc = caches.toInt()
                                     require(md in 1..8 && mc in 1..100) { "任务数量超出允许范围" }
-                                    val provider = builtInProviders.firstOrNull { it.name == engine }
-                                    require(provider != null || customUrl.startsWith("https://") || customUrl.startsWith("http://")) { "自定义地址需以 http:// 或 https:// 开头" }
+                                    val provider = providers.firstOrNull { it.name == engine } ?: error("请选择有效的搜索引擎")
                                     prefs.edit().putString("download-path", d.absolutePath).putString("cache-path", c.absolutePath)
                                         .putInt("max-downloads", md).putInt("max-caches", mc)
-                                        .putString("custom-name", customName).putString("custom-url", customUrl)
-                                        .putString("search-name", provider?.name ?: customName).putString("search-url", provider?.homepage ?: customUrl).apply()
+                                        .putString("search-name", provider.name).putString("search-url", provider.homepage).apply()
                                     TorrentTasks.schedule()
                                     message = "磁播设置已保存"
                                 }.onFailure { message = "保存失败：${it.localizedMessage}" }

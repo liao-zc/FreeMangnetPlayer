@@ -18,7 +18,8 @@ internal fun ManagedLibrary(title: String, entries: List<LibraryEntry>, kind: St
     var deleteData by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf("") }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineSmall)
+        val availableCount = if (kind == "缓存" || kind == "下载") entries.count { it.unplayableReason.isBlank() } else entries.size
+        Text("$title（$availableCount）", style = MaterialTheme.typography.headlineSmall)
         Row {
             TextButton(onClick = { selected = entries.map { it.source }.toSet() }) { Text("全选") }
             TextButton(onClick = { selected = emptySet() }) { Text("取消选择") }
@@ -43,9 +44,16 @@ internal fun ManagedLibrary(title: String, entries: List<LibraryEntry>, kind: St
                         Checkbox(entry.source in selected, { checked -> selected = if (checked) selected + entry.source else selected - entry.source })
                         Text(entry.title, Modifier.weight(1f))
                     }
-                    Text(entry.status)
+                    if (entry.unplayableReason.isNotBlank()) Text(entry.unplayableReason, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.titleSmall)
+                    Text(entry.status, color = if (entry.unplayableReason.isNotBlank()) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant)
                     if (entry.totalBytes > 0) Text("${entry.downloadedBytes / 1024} KB / ${entry.totalBytes / 1024} KB")
                     Row {
+                        if (entry.unplayableReason.isNotBlank()) TextButton(onClick = {
+                            val id = Regex("(?i)btih:([a-f0-9]{40})").find(entry.source)?.groupValues?.get(1)?.lowercase()
+                            val task = id?.let { TorrentTasks.tasks[it] }
+                            if (task != null) TorrentTasks.retryUnplayable(context, task)
+                            onRefresh()
+                        }) { Text("重新尝试") }
                         TextButton(onClick = { onOpen(entry) }) { Text("播放 / 打开") }
                         TextButton(onClick = { selected = setOf(entry.source); deleteData = kind == "缓存" || kind == "下载"; confirm = true }) { Text("删除") }
                     }

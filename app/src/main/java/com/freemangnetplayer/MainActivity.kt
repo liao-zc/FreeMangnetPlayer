@@ -63,7 +63,7 @@ data class SearchProvider(
 )
 
 
-private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "视频", val heat: String = "", val publishedAt: String = "")
+private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "视频", val heat: String = "", val publishedAt: String = "", val format: String = "")
 
 val builtInProviders = listOf(
     SearchProvider("clg.im", "https://clg.im/"),
@@ -116,6 +116,7 @@ class MainActivity : ComponentActivity() {
                 val canvas = DisplaySettings.background(this@MainActivity)
                 var keyword by remember { mutableStateOf(requestedQuery.orEmpty()) }
                 var magnet by remember { mutableStateOf("") }
+                var searchProviders by remember { mutableStateOf(SearchEngineStore.load(this@MainActivity)) }
                 var selectedTab by remember { mutableStateOf(intent.getStringExtra("open-tab") ?: if (inbound != null || !requestedQuery.isNullOrBlank()) "搜索" else "门户") }
                 SideEffect { navigateHome = { selectedTab = "门户" } }
                 var showEngineMenu by remember { mutableStateOf(false) }
@@ -123,11 +124,11 @@ class MainActivity : ComponentActivity() {
                 var customName by remember { mutableStateOf(prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索") }
                 var customUrl by remember { mutableStateOf(prefs.getString("custom-url", "") ?: "") }
                 val storedSearchName = requestedEngine ?: prefs.getString("search-name", null)
-                val storedProvider = builtInProviders.firstOrNull { it.name == storedSearchName }
+                val storedProvider = searchProviders.firstOrNull { it.name == storedSearchName }
                 val storedCustomIsValid = storedSearchName == customName && customUrl.startsWith("https://") ||
                     storedSearchName == customName && customUrl.startsWith("http://")
-                var selectedName by remember { mutableStateOf(storedProvider?.name ?: if (storedCustomIsValid) customName else builtInProviders[0].name) }
-                var selectedUrl by remember { mutableStateOf(storedProvider?.homepage ?: if (storedCustomIsValid) customUrl else builtInProviders[0].homepage) }
+                var selectedName by remember { mutableStateOf(storedProvider?.name ?: if (storedCustomIsValid) customName else SearchEngineStore.defaultName()) }
+                var selectedUrl by remember { mutableStateOf(storedProvider?.homepage ?: if (storedCustomIsValid) customUrl else searchProviders.firstOrNull { it.name == SearchEngineStore.defaultName() }?.homepage.orEmpty()) }
                 var error by remember { mutableStateOf("") }
                 var searchState by remember { mutableStateOf("idle") }
                 var searchMessage by remember { mutableStateOf("") }
@@ -156,7 +157,8 @@ class MainActivity : ComponentActivity() {
                     selectedTab = "搜索"
                 }
                 BackHandler(enabled = selectedTab == "门户") { finish() }
-                BackHandler(enabled = selectedTab in setOf("搜索", "播放", "下载", "收藏", "缓存", "历史")) { selectedTab = "门户" }
+                BackHandler(enabled = selectedTab == "历史") { selectedTab = "播放" }
+                BackHandler(enabled = selectedTab in setOf("搜索", "播放", "下载", "收藏", "缓存")) { selectedTab = "门户" }
 
                 fun reloadLibrary() {
                     TorrentTasks.tasks.values.forEach { StoredVideos.sync(this@MainActivity, it) }
@@ -171,10 +173,15 @@ class MainActivity : ComponentActivity() {
 
                 fun syncSearchResultSizes() {
                     results.forEachIndexed { index, result ->
-                        if (result.bytes > 0L) return@forEachIndexed
                         val hash = Regex("(?i)xt=urn:btih:([0-9a-f]{40})").find(result.magnet)?.groupValues?.get(1)?.lowercase() ?: return@forEachIndexed
                         val total = TorrentTasks.tasks[hash]?.files?.sumOf { it.size } ?: 0L
-                        if (total > 0L) results[index] = result.copy(bytes = total, sizeText = formatLibraryBytes(total))
+                        val files = TorrentTasks.tasks[hash]?.files.orEmpty()
+                        val largest = files.filter { it.video }.maxByOrNull { it.size } ?: files.maxByOrNull { it.size }
+                        if (total > 0L || largest != null) results[index] = result.copy(
+                            bytes = total.takeIf { it > 0L } ?: result.bytes,
+                            sizeText = if (total > 0L) formatLibraryBytes(total) else result.sizeText,
+                            format = largest?.let { detectResourceFormat(it.path, result.magnet) }?.takeIf { it.isNotBlank() } ?: result.format
+                        )
                     }
                 }
 
@@ -183,8 +190,9 @@ class MainActivity : ComponentActivity() {
                         if (event == Lifecycle.Event.ON_RESUME) {
                             reloadLibrary()
                             if (requestedEngine == null) {
-                            selectedName = prefs.getString("search-name", "clg.im") ?: "clg.im"
-                            selectedUrl = prefs.getString("search-url", "https://clg.im/") ?: "https://clg.im/"
+                            searchProviders = SearchEngineStore.load(this@MainActivity)
+                            selectedName = prefs.getString("search-name", SearchEngineStore.defaultName()) ?: SearchEngineStore.defaultName()
+                            selectedUrl = searchProviders.firstOrNull { it.name == selectedName }?.homepage ?: prefs.getString("search-url", "") ?: ""
                             }
                             customName = prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索"
                             customUrl = prefs.getString("custom-url", "") ?: ""
@@ -223,7 +231,7 @@ class MainActivity : ComponentActivity() {
                     searchMessage = "搜索中"
                     activeQuery = q
                     activeProvider = selectedName
-                    val provider = builtInProviders.firstOrNull { it.name == selectedName }
+                    val provider = searchProviders.firstOrNull { it.name == selectedName }
                     val template = provider?.queryUrl ?: selectedUrl.takeIf { it.contains("%s") }
                     currentSearchUrl = template?.replace("%s", URLEncoder.encode(q, "UTF-8")) ?: selectedUrl
                     searchNeedsFormSubmit = template == null
@@ -249,7 +257,7 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(searchState, results.toList(), pageNumber, nextPage, sourcePages, searchComplete) {
                     if (debug && searchTrigger > 0) {
                         val rows = JSONArray()
-                        results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet).put("bytes",it.bytes).put("sizeText",it.sizeText).put("type",it.type).put("heat",it.heat).put("publishedAt",it.publishedAt)) }
+                        results.forEach { rows.put(JSONObject().put("title", it.title).put("magnet", it.magnet).put("bytes",it.bytes).put("sizeText",it.sizeText).put("type",it.type).put("heat",it.heat).put("publishedAt",it.publishedAt).put("format",it.format)) }
                         java.io.File(filesDir, "search-check.json").writeText(JSONObject().put("engine", activeProvider)
                             .put("page", pageNumber).put("totalPages",sourcePages).put("complete",searchComplete).put("next", nextPage).put("query", activeQuery).put("state", searchState).put("message", searchMessage).put("results", rows).toString())
                     }
@@ -271,11 +279,18 @@ class MainActivity : ComponentActivity() {
                                 val url = customUrl.trim()
                                 if (url.startsWith("https://") || url.startsWith("http://")) {
                                     val name = customName.trim().ifBlank { "自定义搜索" }
-                                    prefs.edit().putString("custom-name", name).putString("custom-url", url)
-                                        .putString("search-name", name).putString("search-url", url).apply()
-                                    selectedName = name
-                                    selectedUrl = url
-                                    showCustomDialog = false
+                                    val existing = searchProviders.indexOfFirst { it.name == name }
+                                    val endpoint = url.substringBefore("%s").trimEnd('?', '&', '=')
+                                    val row = SearchProvider(name, endpoint.ifBlank { url }, url.takeIf { it.contains("%s") })
+                                    val changed = searchProviders.toMutableList()
+                                    if (existing >= 0) changed[existing] = row else if (changed.size < 10) changed.add(row) else error = "最多支持 10 个搜索引擎，请先编辑或删除一个"
+                                    if (error.isBlank()) runCatching {
+                                        SearchEngineStore.save(this@MainActivity, changed, name)
+                                        searchProviders = changed
+                                        selectedName = name
+                                        selectedUrl = row.homepage
+                                        showCustomDialog = false
+                                    }.onFailure { error = "无法保存搜索引擎：${it.localizedMessage}" }
                                 } else error = "地址需要以 http:// 或 https:// 开头"
                             }) { Text("保存并使用") }
                         },
@@ -288,7 +303,7 @@ class MainActivity : ComponentActivity() {
                     topBar = {
                         if (magnetSection) TopAppBar(
                             title = { Text(if (selectedTab == "搜索结果") "搜索结果" else "磁力播放") },
-                            navigationIcon = { IconButton(onClick = { selectedTab = "门户" }) { Icon(Icons.Default.ArrowBack, "返回主页") } },
+                            navigationIcon = { IconButton(onClick = { if (selectedTab == "搜索结果") selectedTab = "搜索" else selectedTab = "门户" }) { Icon(Icons.Default.ArrowBack, if (selectedTab == "搜索结果") "返回搜索" else "返回主页") } },
                             actions = { TextButton(
                                 onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "magnet")) },
                                 modifier = Modifier.semantics { contentDescription = "磁播模块设置" }
@@ -369,7 +384,7 @@ class MainActivity : ComponentActivity() {
                             )
                             "历史" -> HistoryScreen(onBack={ selectedTab="播放" }, onOpen={ kind,entry -> if(kind=="搜索") {keyword=entry.title;beginSearch()} else openTorrent(MagnetResult(entry.title,entry.source),"play") })
                             "播放" -> Column {
-                                Row { TextButton(onClick={selectedTab="历史"}) { Text("历史记录") }; TextButton(onClick = { selectedTab = "缓存"; reloadLibrary() }) { Text("缓存视频 (${caches.size})") } }
+                                Row { TextButton(onClick={selectedTab="历史"}) { Text("历史记录") }; TextButton(onClick = { selectedTab = "缓存"; reloadLibrary() }) { Text("缓存视频 (${caches.count { it.unplayableReason.isBlank() }})") } }
                                 ManagedLibrary("播放列表", playbacks, "播放", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             }
                             "缓存" -> ManagedLibrary("缓存视频", caches, "缓存", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
@@ -382,7 +397,7 @@ class MainActivity : ComponentActivity() {
                                 selectedName = selectedName,
                                 showEngineMenu = showEngineMenu,
                                 onEngineMenu = { showEngineMenu = it },
-                                builtIns = builtInProviders,
+                                builtIns = searchProviders,
                                 onSelectEngine = { provider ->
                                     selectedName = provider.name
                                     selectedUrl = provider.homepage
@@ -415,7 +430,7 @@ class MainActivity : ComponentActivity() {
                                         if(generation==searchTrigger && selectedTab=="搜索结果" && !searchComplete) {
                                             val link=normalizeMagnetUri(row.optString("source"))
                                             val index=results.indexOfFirst { it.magnet==link }
-                                            if(index>=0) { val old=results[index];val foundBytes=row.optLong("bytes");val foundSize=row.optString("sizeText");results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=foundBytes.takeIf { it>0L } ?: old.bytes,sizeText=foundSize.takeIf { it.isNotBlank() } ?: old.sizeText,type=row.optString("type","视频"),heat=row.optString("heat").ifBlank { old.heat },publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt }) }
+                                            if(index>=0) { val old=results[index];val foundBytes=row.optLong("bytes");val foundSize=row.optString("sizeText");results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=foundBytes.takeIf { it>0L } ?: old.bytes,sizeText=foundSize.takeIf { it.isNotBlank() } ?: old.sizeText,type=row.optString("type","视频"),heat=row.optString("heat").ifBlank { old.heat },publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt },format=row.optString("format").ifBlank { old.format }) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(debug) java.io.File(filesDir,"search-scan.json").writeText(row.toString())
@@ -426,7 +441,8 @@ class MainActivity : ComponentActivity() {
                                      } }, onMagnet = { title, link ->
                                         runOnUiThread {
                                             if (generation == searchTrigger && !searchComplete && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
-                                                results.add(MagnetResult(title.ifBlank { magnetTitle(link) }, link))
+                                                val name = title.ifBlank { magnetTitle(link) }
+                                                results.add(MagnetResult(name, link, format = detectResourceFormat(name, link)))
                                                 searchState = "results"
                                                 searchMessage = ""
                                             }
@@ -490,7 +506,7 @@ class MainActivity : ComponentActivity() {
                                                 if (value == "true" && generation == searchTrigger) searchMessage = "网站要求确认访问，正在等待验证返回…"
                                             }
                                             // Wrapper sites host the actual search page in an iframe.
-                                            if (activeProvider == builtInProviders[1].name) view?.evaluateJavascript("JSON.stringify(Array.from(document.querySelectorAll('iframe[src]')).map(x=>x.src).find(x=>/^https?:/.test(x))||'')") { value ->
+                                            if (searchProviders.firstOrNull { it.name == activeProvider }?.homepage?.contains("mg.dobt.cc", true) == true) view?.evaluateJavascript("JSON.stringify(Array.from(document.querySelectorAll('iframe[src]')).map(x=>x.src).find(x=>/^https?:/.test(x))||'')") { value ->
                                                 val frame = runCatching { JSONArray("[$value]").optString(0) }.getOrDefault("")
                                                 if (generation == searchTrigger && frame.isNotBlank() && frame != url) {
                                                     firstPageLoad = true
@@ -750,7 +766,7 @@ private fun SearchResultsScreen(
             }
         } else if(state!="loading") {
             Text(if(state=="empty") "没有搜索结果" else "搜索未完成",Modifier.padding(16.dp))
-            Button(onClick=onRetry) { Text("重试搜索") };OutlinedButton(onClick=onBack) { Text("返回首页") }
+            Button(onClick=onRetry) { Text("重试搜索") };OutlinedButton(onClick=onBack) { Text("返回搜索") }
         } else TextButton(onClick=onCancel) { Text("取消搜索并返回") }
     }
     if(jumpDialog.isNotEmpty()) {
@@ -775,9 +791,9 @@ private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit
     val textStyle=MaterialTheme.typography.bodyMedium.copy(fontSize=(14*DisplaySettings.scale(c)).sp,lineHeight=(16.8f*DisplaySettings.scale(c)).sp,color=Color(0xFF333333))
     Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=Color.White)) {
         Column(Modifier.fillMaxWidth().padding(horizontal=10.dp,vertical=6.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
-            Text(item.title.ifBlank { "待获取文件名" },style=textStyle)
+            Text("${item.title.ifBlank { "待获取文件名" }} · ${item.format.ifBlank { detectResourceFormat(item.title, item.magnet).ifBlank { "格式待解析" } }}",style=textStyle)
             Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "搜索源未提供大小；解析后读取" }} · ${item.type} · 热度 ${item.heat.ifBlank { "未提供评分" }}",style=textStyle)
-            Text("资源时间："+item.publishedAt.ifBlank { "来源未提供" },style=textStyle)
+            Text("资源上架时间："+item.publishedAt.ifBlank { "来源未提供；magnet 地址不含创建时间" },style=textStyle)
             Row {
                 TextButton(onClick={onParse(item)}) { Text("播放",style=textStyle) }
                 TextButton(onClick={onDownload(item)}) { Text("下载 / 缓存",style=textStyle) }
@@ -791,6 +807,22 @@ private fun magnetTitle(magnet: String): String = runCatching {
     val dn = Regex("(?:[?&])dn=([^&]+)", RegexOption.IGNORE_CASE).find(magnet)?.groupValues?.get(1)
     if (dn.isNullOrBlank()) "磁力资源" else java.net.URLDecoder.decode(dn, "UTF-8")
 }.getOrDefault("磁力资源")
+
+private fun detectResourceFormat(name: String, magnet: String): String {
+    val dn = runCatching { Regex("(?:[?&])dn=([^&]+)", RegexOption.IGNORE_CASE).find(magnet)?.groupValues?.get(1)?.let { java.net.URLDecoder.decode(it, "UTF-8") }.orEmpty() }.getOrDefault("")
+    val source = "$name $dn"
+    val extensions = (MediaFormats.extensions + setOf("zip", "rar", "7z", "tar", "gz", "bz2", "xz", "iso", "pdf", "srt", "ass", "ssa", "vtt", "mp3", "flac", "wav", "aac", "m4a", "doc", "docx", "xls", "xlsx", "ppt", "pptx"))
+        .sortedByDescending { it.length }.joinToString("|") { Regex.escape(it) }
+    val extension = Regex("(?i)\\.($extensions)(?=$|[^A-Za-z0-9])").find(source)?.groupValues?.get(1)?.lowercase() ?: return ""
+    return when {
+        extension in MediaFormats.extensions -> ".$extension".uppercase()
+        extension in setOf("zip", "rar", "7z", "tar", "gz", "bz2", "xz", "iso") -> ".$extension".uppercase() + "（压缩包/镜像）"
+        extension in setOf("srt", "ass", "ssa", "vtt") -> ".$extension".uppercase() + "（字幕）"
+        extension in setOf("mp3", "flac", "wav", "aac", "m4a") -> ".$extension".uppercase() + "（音频）"
+        extension == "pdf" || extension in setOf("doc", "docx", "xls", "xlsx", "ppt", "pptx") -> ".$extension".uppercase() + "（文档）"
+        else -> ".$extension".uppercase() + "（可下载）"
+    }
+}
 
 /** Accept a pasted URL, HTML entity or encoded URL; canonicalize base32 BTIH. */
 internal fun normalizeMagnetUri(raw: String): String? = runCatching {
