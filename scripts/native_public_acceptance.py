@@ -5,10 +5,11 @@ import libtorrent as lt
 targets=json.loads(Path('scripts/public_acceptance_targets.json').read_text(encoding='utf-8'))
 session=lt.session({'listen_interfaces':'0.0.0.0:0','download_rate_limit':0,'upload_rate_limit':0,'enable_dht':True,
     'dht_bootstrap_nodes':'router.bittorrent.com:6881,dht.transmissionbt.com:6881,router.utorrent.com:6881'})
+trackers=['udp://tracker.opentrackr.org:1337/announce','https://tracker.tamersunion.org:443/announce','udp://open.stealth.si:80/announce','udp://tracker.torrent.eu.org:451/announce','udp://exodus.desync.com:6969/announce','udp://open.demonii.com:1337/announce','https://tracker.gbitt.info/announce','http://tracker.opentrackr.org:1337/announce']
 handles=[];rows=[]
 for target in targets:
     params=lt.parse_magnet_uri('magnet:?xt=urn:btih:'+target['hash']);params.save_path=str(Path('native-public-data',target['hash']).resolve())
-    handles.append(session.add_torrent(params));rows.append(dict(target,samples=[]))
+    params.trackers=trackers;handles.append(session.add_torrent(params));rows.append(dict(target,trackers=trackers,nativeVersion=lt.version,samples=[]))
 start=time.monotonic()
 while time.monotonic()-start<180:
     for row,handle in zip(rows,handles):
