@@ -24,9 +24,15 @@ internal object TrackerDirectory {
                 connection.connectTimeout = 6000; connection.readTimeout = 6000
                 check(connection.responseCode == 200)
                 val text = connection.inputStream.use { input ->
-                    val bytes = input.readNBytes(65537)
-                    check(bytes.size <= 65536)
-                    bytes.toString(Charsets.UTF_8)
+                    val output = java.io.ByteArrayOutputStream()
+                    val buffer = ByteArray(4096)
+                    while (true) {
+                        val count = input.read(buffer)
+                        if (count < 0) break
+                        check(output.size() + count <= 65536)
+                        output.write(buffer, 0, count)
+                    }
+                    output.toString("UTF-8")
                 }
                 val values = parse(text)
                 check(values.isNotEmpty())
