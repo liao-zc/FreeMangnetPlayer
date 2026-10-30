@@ -50,9 +50,8 @@ def paste(value):
     tree = ET.fromstring(adb('shell', 'cat', '/sdcard/window.xml'))
     focused = [n for n in tree.iter('node') if n.get('class') == 'android.widget.EditText' and n.get('focused') == 'true']
     assert focused, 'No focused magnet field'
-    count = len(focused[0].get('text', '')) + 5
-    adb('shell', 'input', 'keyevent', 'KEYCODE_MOVE_END')
-    adb('shell', 'input', 'keyevent', *(['KEYCODE_DEL'] * count))
+    adb('shell', 'input', 'keycombination', '113', '29')  # Ctrl+A selects the entire multiline field.
+    adb('shell', 'input', 'keyevent', 'KEYCODE_DEL')
     adb('shell', 'input', 'text', shlex.quote(value))
     adb('shell', 'input', 'keyevent', 'KEYCODE_BACK')
     screenshot('perf-02-pasted-magnet.png')
