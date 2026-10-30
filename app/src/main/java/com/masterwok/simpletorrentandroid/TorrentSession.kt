@@ -362,10 +362,8 @@ open class TorrentSession(
     ) = synchronized(dhtLock) {
         shouldDownloadMagnetOnResume = false
 
-        // We must wait for DHT to start
-        if (!isDhtReady()) {
-            dhtLock.wait()
-        }
+        // Trackers and supplied peers must start even if UDP/DHT is unavailable.
+        // Native DHT announces later when routing nodes become available.
 
         // Session was paused while waiting on DHT, defer until resume
         if (sessionManager.isPaused) {
