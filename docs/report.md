@@ -605,7 +605,7 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 
 ## v0.2.9 update/player work (2026-10-31)
 
-This section records the current code changes. It is not a claim that the Android build or device acceptance passed.
+This section records the current code changes. The Android APK build passed on GitHub Actions run 41107548311; device-level feature acceptance remains incomplete.
 
 | Requirement | Code state | Verification |
 |---|---|---|
@@ -615,13 +615,13 @@ This section records the current code changes. It is not a claim that the Androi
 | Preserve settings and app-private data | Existing package ID retained; app data is not cleared by the updater | Requires same signing key and an in-place Android install; not tested |
 | Import IPTV playlist from a device file | Picker copies an M3U file into private storage and stores its local URI | Android APK CI build passed; not device-tested |
 | Full-screen magnet controls | Removed the separate cache progress strip; cache percentage remains in resource text beside the timed seek bar | Android APK CI build passed; behavior not device-tested |
-| Seek-directed cache and fill the remaining file afterward | Playback seek reprioritizes the torrent piece range; tail completion switches to a pass that fills earlier missing pieces | Not built or network-tested |
-| Audio and subtitle track selection | Media3 track chooser and automatic same-directory SRT/VTT subtitle configuration added | LibVLC fallback track chooser is not implemented; not built or device-tested |
+| Seek-directed cache and fill the remaining file afterward | Playback seek reprioritizes the torrent piece range; tail completion switches to a pass that fills earlier missing pieces | Android APK build passed; network/device behavior not tested |
+| Audio and subtitle track selection | Media3 track chooser and automatic same-directory SRT/VTT subtitle configuration added | LibVLC fallback track chooser is not implemented; Android APK build passed, not device-tested |
 | Download reuses cached torrent data | Existing libtorrent storage migration path retained | Android APK CI build passed; behavior not device-tested; no fresh test |
 | PiP for magnet and live playback | Existing activity declarations and controls retained | Android APK CI build passed; behavior not device-tested |
 | One-line channel/file labels; remove home settings entry | Home settings entry removed; player title set to one line | Android APK CI build passed; behavior not device-tested |
 | All market formats | Not promised: codec/profile/hardware support varies by Android device; Media3 plus LibVLC covers common formats | Unsupported codecs remain possible |
-| Choose cache/download directories with Android folder picker | Implemented for local shared-storage directories; selected external-storage document IDs resolve to filesystem paths for libtorrent | Android 11+ requires granting all-files access in system Settings; non-external-storage providers are rejected |
+| Choose cache/download directories with Android folder picker | Implemented for local shared-storage directories; selected external-storage document IDs resolve to filesystem paths for libtorrent | Android APK build passed. Android 11+ requires granting all-files access in system Settings; non-external-storage providers are rejected. Device permission flow not tested |
 
 ### Build and remote status
 
