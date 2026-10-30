@@ -3,6 +3,9 @@ package com.omniplayer
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.net.Uri
+import android.os.Environment
+import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
@@ -28,6 +31,12 @@ import kotlinx.coroutines.withContext
 
 class SettingsActivity : ComponentActivity() {
     private var attemptedPendingUpdate = false
+    private var directorySelected: ((String) -> Unit)? = null
+    private val directoryPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree()) { uri ->
+        val folder = uri?.let { DirectoryPicker.resolve(this, it) }
+        if (folder != null) directorySelected?.invoke(folder.absolutePath)
+        else if (uri != null) android.widget.Toast.makeText(this, "请选择设备共享存储中的本地文件夹", android.widget.Toast.LENGTH_LONG).show()
+    }
     private val fontPicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) runCatching {
             val temp=java.io.File(filesDir,"font-import.tmp")
@@ -38,6 +47,19 @@ class SettingsActivity : ComponentActivity() {
             require(temp.renameTo(java.io.File(filesDir,"custom-font.ttf")))
             SettingsStore.prefs(this).edit().putString("font-face","自定义").apply()
         }.onFailure { android.widget.Toast.makeText(this,"字体导入失败：${it.localizedMessage}",android.widget.Toast.LENGTH_LONG).show() }
+    }
+
+    private fun chooseStorageDirectory(onSelected: (String) -> Unit) {
+        directorySelected = onSelected
+        if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
+            android.widget.Toast.makeText(this, "为让 BT 引擎写入所选目录，请在系统页面允许 OmniPlayer 管理文件；返回后再点一次选择目录。", android.widget.Toast.LENGTH_LONG).show()
+            val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, Uri.parse("package:$packageName"))
+            runCatching { startActivity(intent) }.onFailure {
+                startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+            }
+            return
+        }
+        directoryPicker.launch(null)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +84,7 @@ class SettingsActivity : ComponentActivity() {
                 var customUrl by remember { mutableStateOf(prefs.getString("custom-url", "") ?: "") }
                 var engine by remember { mutableStateOf(prefs.getString("search-name", "clg.im") ?: "clg.im") }
                 var message by remember { mutableStateOf("") }
+                var directoryMessage by remember { mutableStateOf("") }
                 var menu by remember { mutableStateOf(false) }
                 val lifecycleOwner = LocalLifecycleOwner.current
                 DisposableEffect(lifecycleOwner) {
@@ -143,7 +166,10 @@ class SettingsActivity : ComponentActivity() {
                         "magnet" -> Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("存储位置", style = MaterialTheme.typography.titleMedium)
                             OutlinedTextField(download, { download = it }, label = { Text("下载目录（绝对路径）") }, singleLine = true, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "下载目录输入框" })
+                            OutlinedButton(onClick = { chooseStorageDirectory { download = it; directoryMessage = "已选择下载目录" } }, modifier = Modifier.fillMaxWidth()) { Text("选择下载目录…") }
                             OutlinedTextField(cache, { cache = it }, label = { Text("缓存目录（绝对路径）") }, singleLine = true, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "缓存目录输入框" })
+                            OutlinedButton(onClick = { chooseStorageDirectory { cache = it; directoryMessage = "已选择缓存目录" } }, modifier = Modifier.fillMaxWidth()) { Text("选择缓存目录…") }
+                            Text(directoryMessage, style = MaterialTheme.typography.bodySmall)
                             Text("可填写应用有权写入的真实路径。修改目录用于新任务，旧任务保留原地址。", style = MaterialTheme.typography.bodySmall)
                             getExternalFilesDirs(null).filterNotNull().forEach { base ->
                                 OutlinedButton(onClick = { download = "${base.absolutePath}/MyDownloads"; cache = "${base.absolutePath}/MyCache" }, modifier = Modifier.fillMaxWidth()) { Text("使用 ${base.absolutePath}") }

@@ -621,7 +621,7 @@ This section records the current code changes. It is not a claim that the Androi
 | PiP for magnet and live playback | Existing activity declarations and controls retained | Android APK CI build passed; behavior not device-tested |
 | One-line channel/file labels; remove home settings entry | Home settings entry removed; player title set to one line | Android APK CI build passed; behavior not device-tested |
 | All market formats | Not promised: codec/profile/hardware support varies by Android device; Media3 plus LibVLC covers common formats | Unsupported codecs remain possible |
-| Choose arbitrary cache/download directories using Android folder picker | Not implemented: libtorrent currently writes through filesystem paths, while arbitrary SAF document providers expose URI streams | Open limitation |
+| Choose cache/download directories with Android folder picker | Implemented for local shared-storage directories; selected external-storage document IDs resolve to filesystem paths for libtorrent | Android 11+ requires granting all-files access in system Settings; non-external-storage providers are rejected |
 
 ### Build and remote status
 

@@ -16,7 +16,7 @@ The app can check the latest public GitHub Release at startup when automatic che
 ## IPTV
 
 Default playlist: `https://testingcf.jsdelivr.net/gh/liao-zc/iptv-live@main/IPTV_ALL.m3u`.
-Additional M3U/M3U8 sources can be configured by URL or imported from a device file. Imported playlists are copied into app-private storage. Channel playback and PiP depend on the stream and device.
+Additional M3U/M3U8 sources can be configured by URL or imported from a device file. Imported playlists are copied into app-private storage. Magnet download/cache directories can be selected with the Android folder picker. Android 11 and later may ask the user to grant all-files access so the native BT engine can write to that path. Channel playback and PiP depend on the stream and device.
 
 ## Verification
 
