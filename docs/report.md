@@ -567,7 +567,7 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 
 | # | 检查项 | 当前结果 |
 |---|---|---|
-| 1 | 本地工作区目录改名为 OmniPlayer | 当前打开的 `C:\Users\gnsfb\Downloads\FreeMagnetPlayer` 被 Windows 进程占用，直接重命名会失败。本轮会尝试创建同级 `OmniPlayer` 工作目录；如果原目录仍被占用，旧路径无法从当前会话物理移除。|
+| 1 | 本地工作区目录改名为 OmniPlayer | 已在 `C:\Users\gnsfb\Downloads\OmniPlayer` 创建与 GitHub 同一提交的本地工作区。原目录 `C:\Users\gnsfb\Downloads\FreeMagnetPlayer` 仍被当前 Windows 进程占用，不能在此会话删除/改名；新目录可直接打开继续开发，旧目录目前仍保留。|
 | 2 | 无节点资源的明显、持久提示及计数排除 | v0.2.6 Instrumentation 已验证：满足无 Peer/无有效数据 3 分钟条件后提示写入任务与收藏、播放、下载、缓存记录；明确重试前不自动清除；无法播放项不占下载/缓存任务数。此次改动未重测 BT 网络可用性。|
 | 3 | 六个搜索源可编辑/删除、BDFlix 默认、最多 10 个并保留旧配置 | v0.2.6 Android Store/模拟器检查通过；搜索源配置保持本地迁移数据。此次未改变搜索引擎逻辑。|
 | 4 | 搜索结果逐级返回 | v0.2.6 Android 15 模拟器分别检查工具栏返回和系统返回，均返回保留关键词的搜索页；详情/设置流程逐级返回。此次未改变导航逻辑。|
