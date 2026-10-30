@@ -247,7 +247,7 @@ class PlayerActivity : ComponentActivity() {
                         Column {
                             Text("默认原画质。720p / 480p 仅选择文件中已有的视频轨道；单画质磁力无法靠缩小画面减少下载量。")
                             val availableHeights=listOf(0,720,480).filter { h -> h==0 || (player as? ExoPlayer)?.currentTracks?.groups?.any { group -> group.type==C.TRACK_TYPE_VIDEO && (0 until group.length).any { group.isTrackSupported(it) && group.getTrackFormat(it).height in 1..h } }==true }
-                            for (height in availableHeights) TextButton(onClick = { selectQuality(height); qualityDialog = false }) { Text(if (height == 0) "原画质" else "${height}p（需已有低清轨道）") }
+                            for (height in availableHeights) TextButton(onClick = { selectQuality(height); qualityDialog = false }) { Text(if (height == 0) "原画质" else "${height}p") }
                         }
                     }, confirmButton = { TextButton(onClick = { qualityDialog = false }) { Text("关闭") } })
                     if (networkDialog) AlertDialog(onDismissRequest = { networkDialog = false }, title = { Text("真实网络诊断") }, text = {
@@ -352,7 +352,7 @@ class PlayerActivity : ComponentActivity() {
         val t=task ?: return;val f=t.files.firstOrNull { it.index==t.playingIndex }
         val link=f?.let { StoredVideos.fileSource(t,it) } ?: source
         val exists=LibraryStore.readFavorites(this).any { it.source==link }
-        if(exists) LibraryStore.removeEntries(this,"??",setOf(link)) else LibraryStore.addFavorite(this,f?.path?.substringAfterLast('/') ?: title,link)
+        if(exists) LibraryStore.removeEntries(this,"收藏",setOf(link)) else LibraryStore.addFavorite(this,f?.path?.substringAfterLast('/') ?: title,link)
         refreshProgress()
     }
     private fun selectQuality(height: Int) {
@@ -476,13 +476,13 @@ class PlayerActivity : ComponentActivity() {
         val f=t?.files?.firstOrNull { it.index==t.playingIndex }
         val link=if(t!=null && f!=null) StoredVideos.fileSource(t,f) else source
         val favorite=LibraryStore.readFavorites(this).any { it.source==link }
-        view.findViewById<android.widget.ImageButton>(R.id.player_favorite)?.apply { setImageResource(if(favorite)R.drawable.ic_heart_filled else R.drawable.ic_heart_outline);contentDescription=if(favorite)"????" else "????" }
+        view.findViewById<android.widget.ImageButton>(R.id.player_favorite)?.apply { setImageResource(if(favorite)R.drawable.ic_heart_filled else R.drawable.ic_heart_outline);contentDescription=if(favorite)"取消收藏" else "收藏视频" }
         if(f!=null) {
             val duration=player?.duration?.takeIf{it>0} ?: 0L
             val height=player?.videoSize?.height ?: 0
             val percent=(f.done.toDouble()*100/f.size.coerceAtLeast(1)).coerceIn(0.0,100.0)
             view.findViewById<TextView>(R.id.player_resource_info)?.apply {
-                text="${if(duration>0)historyTime(duration) else "????"} ? ${if(height>0) "${height}P" else "?????"} ? ${bytes(f.size)} ? ${"%.1f".format(percent)}%"
+                text="${if(duration>0)historyTime(duration) else "读取时长"} · ${if(height>0) "${height}P" else "读取分辨率"} · ${bytes(f.size)} · ${"%.1f".format(percent)}%"
                 typeface=DisplaySettings.typeface(this@PlayerActivity)
             }
             view.findViewById<android.widget.ProgressBar>(R.id.player_cache_progress)?.progress=(percent*10).toInt()

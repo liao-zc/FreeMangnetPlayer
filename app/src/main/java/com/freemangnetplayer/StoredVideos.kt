@@ -8,7 +8,7 @@ object StoredVideos {
             "&so=${file.index}&dn=${java.net.URLEncoder.encode(file.path.substringAfterLast('/'), "UTF-8") }"
 
     fun sync(context: Context, task: TorrentTask) {
-        for(kind in listOf("??","??")) HistoryStore.update(context,kind,HistoryEntry(task.title,"magnet:?xt=urn:btih:${task.id}",0,task.status,done=task.done,size=task.total))
+        for(kind in listOf("下载","缓存")) HistoryStore.update(context,kind,HistoryEntry(task.title,"magnet:?xt=urn:btih:${task.id}",0,task.status,done=task.done,size=task.total))
         if (!task.retainedCache || task.clearing || task.stopping) return
         if (task.files.isEmpty()) {
             LibraryStore.saveCache(context, LibraryEntry(task.title, task.source, "缓存任务，打开后恢复文件列表"))

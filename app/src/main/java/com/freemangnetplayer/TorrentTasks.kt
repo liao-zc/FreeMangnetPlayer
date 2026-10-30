@@ -158,7 +158,7 @@ object TorrentTasks {
         if (task.cancelled && !task.clearing) { task.cancelled = false; task.paused = false; task.queued = true; task.files = emptyList() }
         if (task.paused && task.files.isEmpty() && !task.clearing) { task.paused = false; task.queued = true }
         if (download) {
-            recordHistory(task,"??")
+            recordHistory(task,"下载")
             if (!task.download || task.folder.canonicalPath == File(SettingsStore.root(c, false), "FreeMangnetPlayerTasks/$id").canonicalPath) {
                 task.destination = SettingsStore.taskFolder(c, true, id)
             }
@@ -396,7 +396,7 @@ object TorrentTasks {
     fun retainCache(task: TorrentTask): Boolean {
         if (!task.retainedCache && !task.download && tasks.values.count { it.retainedCache && !it.download && !it.clearing } >= SettingsStore.maxCaches(context)) return false
         task.retainedCache = true
-        recordHistory(task,"??")
+        recordHistory(task,"缓存")
         StoredVideos.sync(context, task)
         if (task.paused || task.cancelled) resume(task)
         persist()
@@ -500,7 +500,7 @@ object TorrentTasks {
         for (piece in maxOf(first, last - 7)..last) if (!handle.havePiece(piece)) handle.setPieceDeadline(piece, 500)
     }
     fun download(task: TorrentTask) {
-        recordHistory(task,"??")
+        recordHistory(task,"下载")
         task.download = true; task.retainedCache = true
         val target = SettingsStore.taskFolder(context, true, task.id)
         task.destination = target

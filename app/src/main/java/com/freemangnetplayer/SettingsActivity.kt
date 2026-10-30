@@ -19,12 +19,12 @@ class SettingsActivity : ComponentActivity() {
         if (uri != null) runCatching {
             val temp=java.io.File(filesDir,"font-import.tmp")
             contentResolver.openInputStream(uri)!!.use { input -> temp.outputStream().use { output ->
-                val buffer=ByteArray(8192);var total=0;while(true) { val n=input.read(buffer);if(n<0)break;total+=n;require(total<=40*1024*1024) { "??????" };output.write(buffer,0,n) }
+                val buffer=ByteArray(8192);var total=0;while(true) { val n=input.read(buffer);if(n<0)break;total+=n;require(total<=40*1024*1024) { "字体文件过大" };output.write(buffer,0,n) }
             } }
             android.graphics.Typeface.createFromFile(temp)
             require(temp.renameTo(java.io.File(filesDir,"custom-font.ttf")))
-            SettingsStore.prefs(this).edit().putString("font-face","???").apply()
-        }.onFailure { android.widget.Toast.makeText(this,"???????${it.localizedMessage}",android.widget.Toast.LENGTH_LONG).show() }
+            SettingsStore.prefs(this).edit().putString("font-face","自定义").apply()
+        }.onFailure { android.widget.Toast.makeText(this,"字体导入失败：${it.localizedMessage}",android.widget.Toast.LENGTH_LONG).show() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +60,7 @@ class SettingsActivity : ComponentActivity() {
                         Text("个性化设置", style = MaterialTheme.typography.titleLarge)
                     }
                     Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FontSettings { fontPicker.launch(arrayOf("font/*", "application/octet-stream", "application/x-font-ttf", "application/x-font-opentype")) }
                         Text("存储位置", style = MaterialTheme.typography.titleMedium)
                         OutlinedTextField(download, { download = it }, label = { Text("下载目录（绝对路径）") }, singleLine = true, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "下载目录输入框" })
                         OutlinedTextField(cache, { cache = it }, label = { Text("缓存目录（绝对路径）") }, singleLine = true, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "缓存目录输入框" })

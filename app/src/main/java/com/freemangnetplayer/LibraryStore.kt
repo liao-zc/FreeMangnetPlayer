@@ -32,10 +32,10 @@ object LibraryStore {
 
     @Synchronized
     fun addPlayback(context: Context, title: String, source: String, position: Long = 0, duration: Long = 0) {
-        HistoryStore.record(context,"??",HistoryEntry(title,source,System.currentTimeMillis(),position=position,duration=duration))
+        HistoryStore.record(context,"播放",HistoryEntry(title,source,System.currentTimeMillis(),position=position,duration=duration))
         val values = read(context, PLAYBACKS).toMutableList()
         values.removeAll { it.source == source }
-        values.add(0, LibraryEntry(title.ifBlank { "磁力资源" }, source, "最近播放"))
+        values.add(0, LibraryEntry(title.ifBlank { "磁力资源" }, source, "最近播放",position=position,duration=duration))
         write(context, PLAYBACKS, values.take(100))
     }
 
@@ -125,6 +125,6 @@ object LibraryStore {
                 .put("total", entry.totalBytes).put("time",entry.time).put("position",entry.position).put("duration",entry.duration))
         }
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(key, array.toString()).apply()
-        if(key==DOWNLOADS || key=="cache-entries") values.forEach { entry -> HistoryStore.update(context,if(key==DOWNLOADS) "??" else "??", HistoryEntry(entry.title,entry.source,entry.time,entry.status,done=entry.downloadedBytes,size=entry.totalBytes)) }
+        if(key==DOWNLOADS || key=="cache-entries") values.forEach { entry -> HistoryStore.update(context,if(key==DOWNLOADS) "下载" else "缓存", HistoryEntry(entry.title,entry.source,entry.time,entry.status,done=entry.downloadedBytes,size=entry.totalBytes)) }
     }
 }

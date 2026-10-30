@@ -17,17 +17,17 @@
   }
   function info() {
     const pages=[...document.querySelectorAll('.pagination a[href],.pager a[href],.pages a[href],a.page-numbers[href]')].map(a=>({page:parseInt(clean(a.textContent),10),url:a.href})).filter(p=>p.page>0);
-    const text=clean(document.body.textContent);const totalMatch=/(?:?|total)\s*(\d+)\s*(?:?|pages)/i.exec(text);
+    const text=clean(document.body.textContent);const totalMatch=/(?:共|total)\s*(\d+)\s*(?:页|pages)/i.exec(text);
     window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,complete:document.readyState==="complete"}));
   }
   function details(node, uri) {
     const text=clean(node && node.textContent);
-    const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=/(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|GB|MB|KB|TB|B|??)/i.exec(text);
+    const m=/(?:[?&])xl=(\d+)/i.exec(uri), sizeMatch=/(\d+(?:[.,]\d+)?)\s*(GiB|MiB|KiB|GB|MB|KB|TB|B|字节)/i.exec(text);
     let bytes=m?+m[1]:0, sizeText='';
     if(sizeMatch){const unit=sizeMatch[2].toUpperCase();const power=unit.startsWith('T')?4:unit.startsWith('G')?3:unit.startsWith('M')?2:unit.startsWith('K')?1:0;
       sizeText=sizeMatch[1].replace(',','.')+sizeMatch[2];if(!bytes)bytes=Math.round(parseFloat(sizeMatch[1].replace(',','.'))*Math.pow(unit.includes('I')?1024:1000,power));}
-    const category=/???/.test(text)?'???':/??|??/.test(text)?'??':/??|???|???/.test(text)?'??':/??/.test(text)?'??':'??';
-    const score=/(?:??|??|score)\s*[:?]?\s*(\d+(?:\.\d+)?)/i.exec(text);
+    const category=/纪录片/.test(text)?'纪录片':/动漫|动画/.test(text)?'动漫':/剧集|电视剧|连续剧/.test(text)?'剧集':/电影/.test(text)?'电影':'视频';
+    const score=/(?:评分|热度|score)\s*[:：]?\s*(\d+(?:\.\d+)?)/i.exec(text);
     return {bytes:bytes,sizeText:sizeText,type:category,heat:score?score[1]:''};
   }
   function emit(uri, title, node) {
@@ -35,8 +35,8 @@
     let dn=''; const m=/(?:[?&])dn=([^&]+)/i.exec(uri);
     if(m)try{dn=decodeURIComponent(m[1].replace(/\+/g,' '));}catch(_){}
     const data=details(node,uri), old=metadata.get(uri);
-    const value={title:clean(title)||dn||'??????',source:uri,...data};
-    if(old){if(!data.bytes && old.bytes) {value.bytes=old.bytes;value.sizeText=old.sizeText;} if(value.title==='??????')value.title=old.title;}
+    const value={title:clean(title)||dn||'待获取文件名',source:uri,...data};
+    if(old){if(!data.bytes && old.bytes) {value.bytes=old.bytes;value.sizeText=old.sizeText;} if(value.title==='待获取文件名')value.title=old.title;}
     if(old && JSON.stringify(old)===JSON.stringify(value))return;
     emitted.add(uri);metadata.set(uri,value);window.FreeMagnetResults.onResults(JSON.stringify([value]));
   }
@@ -46,7 +46,7 @@
       const row=a.closest('article,.result,.search-item,.item,li,tr,.card,.panel');
       const heading=row && row.querySelector('h1,h2,h3,h4,.title');
       const label=clean(a.title||a.textContent);
-      const name=heading?heading.textContent:/^(??|??|??|??|magnet)(??)?$/i.test(label)?fallback:label||fallback;
+      const name=heading?heading.textContent:/^(磁力|下载|复制|播放|magnet)(链接)?$/i.test(label)?fallback:label||fallback;
       emit(uri,name,row || (doc!==document?doc.body:null));
     });
     const pattern=/magnet:\?[^"'<>\s]+/ig; let m;

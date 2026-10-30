@@ -24,7 +24,7 @@ internal fun ManagedLibrary(title: String, entries: List<LibraryEntry>, kind: St
             TextButton(onClick = { selected = emptySet() }) { Text("取消选择") }
             TextButton(onClick = { deleteData = kind == "缓存" || kind == "下载"; confirm = true }, enabled = selected.isNotEmpty()) { Text("删除所选 (${selected.size})") }
         }
-        if(kind=="??") TextButton(onClick={
+        if(kind=="收藏") TextButton(onClick={
             var added=0
             entries.filter { it.source in selected }.forEach { entry -> runCatching {
                 val t=TorrentTasks.obtain(context,entry.source,entry.title,true)
@@ -32,8 +32,8 @@ internal fun ManagedLibrary(title: String, entries: List<LibraryEntry>, kind: St
                 if(index!=null && t.files.isNotEmpty()) TorrentTasks.select(t,t.selected+index)
                 TorrentTasks.download(t);added++
             }.onFailure { error=it.localizedMessage.orEmpty() } }
-            if(added>0) { error="??? $added ??????????????";onRefresh() }
-        },enabled=selected.isNotEmpty()) { Text("???? (${selected.size})") }
+            if(added>0) { error="已添加 $added 个下载任务，请在下载列表查看";onRefresh() }
+        },enabled=selected.isNotEmpty()) { Text("下载所选 (${selected.size})") }
         if (entries.isEmpty()) Text("这里暂无记录")
         if (error.isNotBlank()) Text(error, color = MaterialTheme.colorScheme.error)
         LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {

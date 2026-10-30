@@ -61,7 +61,7 @@ data class SearchProvider(
 
 private data class SearchPage(val label: String, val url: String)
 
-private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "??", val heat: String = "")
+private data class MagnetResult(val title: String, val magnet: String, val bytes: Long = 0, val sizeText: String = "", val type: String = "视频", val heat: String = "")
 
 val builtInProviders = listOf(
     SearchProvider("clg.im", "https://clg.im/"),
@@ -176,7 +176,7 @@ class MainActivity : ComponentActivity() {
                         searchComplete = true
                         magnetWebView?.evaluateJavascript("window.__fmpStopped=true",null)
                         searchState = "timeout"
-                        searchMessage = "40 秒内未提取到磁力链接。可在应用内查看网页，完成验证或检查该网站是否提供磁力下载。"
+                        searchMessage = "搜索未完成"
                     }
                 }
 
@@ -186,14 +186,14 @@ class MainActivity : ComponentActivity() {
                         error = "先输入要搜索的关键词"
                         return
                     }
-                    HistoryStore.record(this@MainActivity,"??",HistoryEntry(q,q,System.currentTimeMillis()))
+                    HistoryStore.record(this@MainActivity,"搜索",HistoryEntry(q,q,System.currentTimeMillis()))
                     focus.clearFocus()
                     error = ""
                     sourcePages=0;searchComplete=false;scannerReady=false;pageNumber = 1; nextPage = ""; pageUrls.clear(); pageCache.clear(); pageNext.clear()
                     results.clear()
                     selectedTab = "搜索结果"
                     searchState = "loading"
-                    searchMessage = "正在连接 $selectedName…"
+                    searchMessage = "搜索中"
                     activeQuery = q
                     activeProvider = selectedName
                     val provider = builtInProviders.firstOrNull { it.name == selectedName }
@@ -214,7 +214,7 @@ class MainActivity : ComponentActivity() {
                     currentSearchUrl = url; searchPageUrl = url
                     firstPageLoad = false; searchNeedsFormSubmit = false
                     searchState = if (results.isEmpty()) "loading" else "results"
-                    searchMessage = "正在读取第 $number 页…"
+                    searchComplete=false;scannerReady=false;searchMessage = "搜索中"
                     searchTrigger++
                 }
 
@@ -323,8 +323,9 @@ class MainActivity : ComponentActivity() {
                                 onParse = { openTorrent(it, "parse") },
                                 onDownload = { openTorrent(it, "download") }
                             )
+                            "历史" -> HistoryScreen(onBack={ selectedTab="播放" }, onOpen={ kind,entry -> if(kind=="搜索") {keyword=entry.title;beginSearch()} else openTorrent(MagnetResult(entry.title,entry.source),"play") })
                             "播放" -> Column {
-                                Row { TextButton(onClick = { selectedTab = "缓存"; reloadLibrary() }) { Text("缓存视频 (${caches.size})") } }
+                                Row { TextButton(onClick={selectedTab="历史"}) { Text("历史记录") }; TextButton(onClick = { selectedTab = "缓存"; reloadLibrary() }) { Text("缓存视频 (${caches.size})") } }
                                 ManagedLibrary("播放列表", playbacks, "播放", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             }
                             "缓存" -> ManagedLibrary("缓存视频", caches, "缓存", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
@@ -367,17 +368,17 @@ class MainActivity : ComponentActivity() {
                                     importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                                     magnetWebView = this
                                     searchBridge = MagnetSearchBridge(onResource={ row -> runOnUiThread {
-                                        if(generation==searchTrigger && selectedTab=="????" && !searchComplete) {
+                                        if(generation==searchTrigger && selectedTab=="搜索结果" && !searchComplete) {
                                             val link=normalizeMagnetUri(row.optString("source"))
                                             val index=results.indexOfFirst { it.magnet==link }
-                                            if(index>=0) { val old=results[index];results[index]=old.copy(bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","??"),heat=row.optString("heat")) }
+                                            if(index>=0) { val old=results[index];results[index]=old.copy(bytes=row.optLong("bytes"),sizeText=row.optString("sizeText"),type=row.optString("type","视频"),heat=row.optString("heat")) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(generation==searchTrigger && !searchComplete) {
                                             scannerReady=row.optBoolean("complete");if(row.optInt("totalPages")>0) sourcePages=row.getInt("totalPages")
                                             row.optJSONArray("pages")?.let { array -> for(i in 0 until array.length()) {val link=array.getJSONObject(i);pageUrls[link.getInt("page")]=link.getString("url") } }
                                         }
-                                    } }, onMagnet = { title, link ->
+                                     } }, onMagnet = { title, link ->
                                         runOnUiThread {
                                             if (generation == searchTrigger && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
                                                 results.add(MagnetResult(title.ifBlank { magnetTitle(link) }, link))
@@ -389,7 +390,7 @@ class MainActivity : ComponentActivity() {
                                         if (generation == searchTrigger && !searchComplete) {
                                             if (url.startsWith("http")) { pageUrls[pageNumber] = url; currentSearchUrl = url }
                                             nextPage = next
-                                            searchMessage = if(pending>0) "???" else if(failures>0) "?????" else ""
+                                            searchMessage = if(pending>0) "搜索中" else if(failures>0) "搜索未完成" else ""
                                             if(pending==0 && scannerReady && !searchNeedsFormSubmit) { searchComplete=true;searchState=if(failures>0) "timeout" else if(results.isEmpty()) "empty" else "results" }
 
                                         }
@@ -456,7 +457,7 @@ class MainActivity : ComponentActivity() {
                                                     }
                                                 }
                                             } else if (searchState == "loading") {
-                                                searchMessage = "网页已加载，正在读取搜索结果和详情中的磁力链接…"
+                                                searchMessage = "搜索中"
                                             }
                                         }
 
@@ -465,14 +466,14 @@ class MainActivity : ComponentActivity() {
                                             if (request?.isForMainFrame == true) {
                                                 runOnUiThread {
                                                     searchState = "error"
-                                                    searchMessage = "搜索网站连接失败。检查网络，或更换搜索引擎后重试。"
+                                                    searchComplete=true;searchMessage = "搜索未完成"
                                                 }
                                             }
                                         }
                                         override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, response: android.webkit.WebResourceResponse?) {
                                             if (request?.isForMainFrame == true && generation == searchTrigger) {
                                                 searchState = "error"
-                                                searchMessage = "网站返回 HTTP ${response?.statusCode}，并非没有资源。可查看网页或更换引擎。"
+                                                searchComplete=true;searchMessage = "搜索未完成"
                                             }
                                         }
                                     }
@@ -675,37 +676,37 @@ private fun SearchResultsScreen(
     LaunchedEffect(shown,page) { list.scrollToItem(0) }
     Column(Modifier.fillMaxSize().background(canvas).padding(12.dp)) {
         Row(verticalAlignment=Alignment.CenterVertically) {
-            TextButton(onClick=onBack) { Text("? ??") };Column { Text("????",style=MaterialTheme.typography.titleLarge);Text(keyword,style=MaterialTheme.typography.bodySmall) }
+            TextButton(onClick=onBack) { Text("‹ 返回") };Column { Text("搜索结果",style=MaterialTheme.typography.titleLarge);Text(keyword,style=MaterialTheme.typography.bodySmall) }
         }
         Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
-            TextButton(onClick=onPrevious,enabled=page>1) { Text("???") }
-            Text(if(totalPages>0) "? $page / $totalPages ?" else "? $page ? ? ??? ${knownPages.maxOrNull() ?: page} ?",style=MaterialTheme.typography.bodySmall)
-            TextButton(onClick=onNext,enabled=nextAvailable) { Text("???") }
+            TextButton(onClick=onPrevious,enabled=page>1) { Text("上一页") }
+            Text(if(totalPages>0) "第 $page / $totalPages 页" else "第 $page 页 · 已发现 ${knownPages.maxOrNull() ?: page} 页",style=MaterialTheme.typography.bodySmall)
+            TextButton(onClick=onNext,enabled=nextAvailable) { Text("下一页") }
         }
         Row(verticalAlignment=Alignment.CenterVertically) {
-            OutlinedTextField(jump,{jump=it.filter(Char::isDigit).take(6)},label={Text("?????")},singleLine=true,modifier=Modifier.weight(1f))
-            TextButton(onClick={val n=jump.toIntOrNull();if(n!=null && n in knownPages) {onJump(n);jumpError=""} else jumpError="????????"}) { Text("??") }
+            OutlinedTextField(jump,{jump=it.filter(Char::isDigit).take(6)},label={Text("跳转网站页")},singleLine=true,modifier=Modifier.weight(1f))
+            TextButton(onClick={val n=jump.toIntOrNull();if(n!=null && n in knownPages) {onJump(n);jumpError=""} else jumpError="尚未取得该页地址"}) { Text("跳转") }
         }
         if(jumpError.isNotEmpty()) Text(jumpError,style=MaterialTheme.typography.bodySmall)
-        if(state=="loading" || message=="???") { LinearProgressIndicator(Modifier.fillMaxWidth());Text("???") }
-        if(state in listOf("error","timeout") || message=="?????") Text("?????",color=MaterialTheme.colorScheme.error)
+        if(state=="loading" || message=="搜索中") { LinearProgressIndicator(Modifier.fillMaxWidth());Text("搜索中") }
+        if(state in listOf("error","timeout") || message=="搜索未完成") Text("搜索未完成",color=MaterialTheme.colorScheme.error)
         if(results.isNotEmpty()) {
             Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,horizontalArrangement=Arrangement.SpaceBetween) {
                 TextButton(onClick={localPage=shown-1},enabled=shown>1) { Text("? 20 ?") }
-                Text("?? $shown / $localPages ? ? ${results.size} ?",style=MaterialTheme.typography.bodySmall)
+                Text("结果 $shown / $localPages 页 · ${results.size} 条",style=MaterialTheme.typography.bodySmall)
                 TextButton(onClick={localPage=shown+1},enabled=shown<localPages) { Text("? 20 ?") }
             }
             Row(verticalAlignment=Alignment.CenterVertically) {
-                OutlinedTextField(localJump,{localJump=it.filter(Char::isDigit).take(5)},label={Text("??????1?$localPages?")},singleLine=true,modifier=Modifier.weight(1f))
-                TextButton(onClick={localJump.toIntOrNull()?.takeIf{it in 1..localPages}?.let{localPage=it}}) { Text("?????") }
+                OutlinedTextField(localJump,{localJump=it.filter(Char::isDigit).take(5)},label={Text("跳转结果页（1–$localPages）")},singleLine=true,modifier=Modifier.weight(1f))
+                TextButton(onClick={localJump.toIntOrNull()?.takeIf{it in 1..localPages}?.let{localPage=it}}) { Text("跳转结果页") }
             }
             LazyColumn(Modifier.weight(1f),state=list,verticalArrangement=Arrangement.spacedBy(4.dp)) {
                 items(results.drop((shown-1)*20).take(20),key={it.magnet}) { item -> MagnetResultCard(item,onParse,onDownload) }
             }
         } else if(state!="loading") {
-            Text(if(state=="empty") "??????" else "?????",Modifier.padding(16.dp))
-            Button(onClick=onRetry) { Text("????") };OutlinedButton(onClick=onBack) { Text("????") }
-        } else TextButton(onClick=onCancel) { Text("???????") }
+            Text(if(state=="empty") "没有搜索结果" else "搜索未完成",Modifier.padding(16.dp))
+            Button(onClick=onRetry) { Text("重试搜索") };OutlinedButton(onClick=onBack) { Text("返回首页") }
+        } else TextButton(onClick=onCancel) { Text("取消搜索并返回") }
     }
 }
 
@@ -715,12 +716,12 @@ private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit
     val textStyle=MaterialTheme.typography.bodyMedium.copy(fontSize=(14*DisplaySettings.scale(c)).sp,lineHeight=(16.8f*DisplaySettings.scale(c)).sp,color=Color(0xFF333333))
     Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=Color.White)) {
         Column(Modifier.fillMaxWidth().padding(horizontal=10.dp,vertical=6.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
-            Text(item.title.ifBlank { "??????" },style=textStyle)
-            Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "???????" }} ? ${item.type} ? ?? ${item.heat.ifBlank { "?????" }}",style=textStyle)
+            Text(item.title.ifBlank { "待获取文件名" },style=textStyle)
+            Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "等待元数据大小" }} · ${item.type} · 热度 ${item.heat.ifBlank { "未提供评分" }}",style=textStyle)
             Row {
-                TextButton(onClick={onParse(item)}) { Text("??",style=textStyle) }
-                TextButton(onClick={onDownload(item)}) { Text("?? / ??",style=textStyle) }
-                TextButton(onClick={LibraryStore.addFavorite(c,item.title,item.magnet)}) { Text("??",style=textStyle) }
+                TextButton(onClick={onParse(item)}) { Text("播放",style=textStyle) }
+                TextButton(onClick={onDownload(item)}) { Text("下载 / 缓存",style=textStyle) }
+                TextButton(onClick={LibraryStore.addFavorite(c,item.title,item.magnet)}) { Text("收藏",style=textStyle) }
             }
         }
     }

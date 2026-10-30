@@ -1,5 +1,5 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent">
-<ImageButton android:id="@+id/player_favorite" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="top|end" android:background="?android:attr/selectableItemBackgroundBorderless" android:padding="12dp" android:contentDescription="????" android:src="@drawable/ic_heart_outline"/>
+<ImageButton android:id="@+id/player_favorite" android:layout_width="48dp" android:layout_height="48dp" android:layout_gravity="top|end" android:background="?android:attr/selectableItemBackgroundBorderless" android:padding="12dp" android:contentDescription="收藏视频" android:src="@drawable/ic_heart_outline"/>
 
 <LinearLayout android:id="@+id/exo_bottom_bar" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_gravity="bottom" android:orientation="vertical" android:background="#B8000000" android:paddingHorizontal="4dp" android:paddingBottom="4dp">
 <TextView android:id="@+id/player_resource_info" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#FFFFFF" android:textSize="11sp" android:maxLines="2" android:padding="4dp"/>
