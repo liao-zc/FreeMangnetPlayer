@@ -684,8 +684,8 @@ private fun SearchResultsScreen(
             TextButton(onClick=onPrevious,enabled=page>1) { Text("上一页") }
             Text(if(totalPages>0) "第 $page / $totalPages 页" else "第 $page 页 · 已发现 ${knownPages.maxOrNull() ?: page} 页",style=MaterialTheme.typography.bodySmall)
             TextButton(onClick=onNext,enabled=nextAvailable) { Text("下一页") }
+            TextButton(onClick={jumpDialog="网站"},modifier=Modifier.semantics { contentDescription="跳转网站页" }) { Text("跳页") }
         }
-        TextButton(onClick={jumpDialog="网站"}) { Text("跳转网站页",style=MaterialTheme.typography.bodySmall) }
         if(state=="loading" || message=="搜索中") { LinearProgressIndicator(Modifier.fillMaxWidth());Text("搜索中") }
         if(state in listOf("error","timeout") || message=="搜索未完成") Text("搜索未完成",color=MaterialTheme.colorScheme.error)
         if(results.isNotEmpty()) {
@@ -694,7 +694,6 @@ private fun SearchResultsScreen(
                 Text("结果 $shown / $localPages 页 · ${results.size} 条",style=MaterialTheme.typography.bodySmall)
                 TextButton(onClick={localPage=shown+1},enabled=shown<localPages) { Text("? 20 ?") }
             }
-            TextButton(onClick={jumpDialog="结果"}) { Text("跳转结果页",style=MaterialTheme.typography.bodySmall) }
             LazyColumn(Modifier.weight(1f),state=list,verticalArrangement=Arrangement.spacedBy(4.dp)) {
                 items(results.drop((shown-1)*20).take(20),key={it.magnet}) { item -> MagnetResultCard(item,onParse,onDownload) }
             }
@@ -706,7 +705,7 @@ private fun SearchResultsScreen(
     if(jumpDialog.isNotEmpty()) {
         val requester=remember { androidx.compose.ui.focus.FocusRequester() }
         val keyboard=androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
-        LaunchedEffect(jumpDialog) { requester.requestFocus();keyboard?.show() }
+        LaunchedEffect(jumpDialog) { delay(100);requester.requestFocus();keyboard?.show() }
         AlertDialog(onDismissRequest={jumpDialog=""},title={Text(if(jumpDialog=="网站") "跳转网站页" else "跳转结果页")},text={Column {
             OutlinedTextField(if(jumpDialog=="网站")jump else localJump,{value -> if(jumpDialog=="网站")jump=value.filter(Char::isDigit).take(6) else localJump=value.filter(Char::isDigit).take(6)},
                 label={Text(if(jumpDialog=="网站") "输入网站页码" else "跳转结果页（1–$localPages）")},singleLine=true,modifier=Modifier.focusRequester(requester),keyboardOptions=KeyboardOptions(keyboardType=androidx.compose.ui.text.input.KeyboardType.Number))
