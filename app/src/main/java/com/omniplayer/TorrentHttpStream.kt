@@ -10,6 +10,7 @@ import java.net.Socket
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
+import org.json.JSONObject
 
 /** Loopback byte ranges read only through the existing verified-piece data source. */
 internal class TorrentHttpStream(private val task: TorrentTask, private val target: TaskFile) : AutoCloseable {
@@ -18,8 +19,17 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
     private val workers = Executors.newFixedThreadPool(4)
     private val clients = ConcurrentHashMap<Socket, TorrentFileDataSource>()
     @Volatile private var closed = false
+    @Volatile private var requests = 0
+    @Volatile private var lastRequest = ""
+    @Volatile private var lastRange = ""
+    @Volatile private var response = ""
+    @Volatile private var bytesSent = 0L
+    @Volatile private var lastError = ""
     private val resourcePath = "/$token/video.${MediaFormats.extension(target.path).ifBlank { "bin" }}"
     val uri: Uri = Uri.parse("http://127.0.0.1:${server.localPort}$resourcePath")
+    fun debugInfo() = JSONObject().put("httpRequests", requests).put("httpLastRequest", lastRequest)
+        .put("httpLastRange", lastRange).put("httpResponse", response).put("httpBytesSent", bytesSent)
+        .put("httpLastError", lastError)
     init {
         Thread({
             while (!closed) runCatching {
@@ -34,7 +44,12 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
             socket.soTimeout = 15000
             val reader = BufferedReader(InputStreamReader(socket.getInputStream(), Charsets.ISO_8859_1))
             val request = reader.readLine()?.split(' ') ?: return
-            if (request.size < 2 || request[1].substringBefore('?') != resourcePath) return
+            requests++
+            lastRequest = request.joinToString(" ")
+            if (request.size < 2 || request[1].substringBefore('?') != resourcePath) {
+                lastError = "Unexpected request path"
+                return
+            }
             var range: String? = null
             var headerCount = 0
             while (headerCount++ < 64) {
@@ -42,6 +57,7 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
                 if (line.startsWith("Range:", true)) range = line.substringAfter(':').trim()
                 if (line.isEmpty()) break
             }
+            lastRange = range.orEmpty()
             val size = target.size
             val values = range?.removePrefix("bytes=")?.substringBefore(',')?.split('-', limit = 2)
             val start = if (values?.getOrNull(0)?.isEmpty() == true) (size - (values.getOrNull(1)?.toLongOrNull() ?: size)).coerceAtLeast(0)
@@ -54,6 +70,7 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
             }
             val length = end - start + 1
             val status = if (range == null) "200 OK" else "206 Partial Content"
+            response = status
             val headers = "HTTP/1.1 $status\r\nContent-Type: application/octet-stream\r\nAccept-Ranges: bytes\r\nContent-Length: $length\r\n" +
                 (if (range != null) "Content-Range: bytes $start-$end/$size\r\n" else "") + "Connection: close\r\n\r\n"
             output.write(headers.toByteArray()); output.flush()
@@ -66,9 +83,11 @@ internal class TorrentHttpStream(private val task: TorrentTask, private val targ
                 val count = source.read(buffer, 0, buffer.size)
                 if (count < 0) break
                 output.write(buffer, 0, count)
+                bytesSent += count
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
             // Decoder close/seek and task cancellation close the range connection.
+            lastError = "${e.javaClass.simpleName}: ${e.message.orEmpty()}"
         } finally {
             clients.remove(socket); runCatching { source?.close() }; runCatching { socket.close() }
         }

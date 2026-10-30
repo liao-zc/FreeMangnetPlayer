@@ -10,6 +10,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import org.videolan.libvlc.LibVLC
 import org.videolan.libvlc.Media
 import org.videolan.libvlc.MediaPlayer
+import org.json.JSONObject
 
 /** Media3 control-compatible software decoder for RealMedia containers. */
 internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskFile) : SimpleBasePlayer(Looper.getMainLooper()) {
@@ -29,6 +30,8 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     private var output: Any? = null
     private var pendingSeek: Long? = null
     private var playingEventAt = 0L
+    @Volatile private var lastEvent = "created"
+    @Volatile private var lastAction = ""
     private val refresh = object : Runnable {
         override fun run() { if (!released) {
             if (ready && wanted && playingEventAt > 0 && android.os.SystemClock.elapsedRealtime() - playingEventAt > 10000 &&
@@ -38,11 +41,17 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
             invalidateState(); main.postDelayed(this, 250)
         } }
     }
+    fun debugInfo() = stream.debugInfo().put("vlcLastEvent", lastEvent).put("vlcLastAction", lastAction)
+        .put("vlcIsPlaying", decoder.isPlaying).put("vlcVideoTracks", decoder.videoTracksCount)
+        .put("vlcAudioTracks", decoder.audioTracksCount).put("vlcLengthMs", decoder.length)
+
     init {
         val media = Media(library, stream.uri)
         media.setHWDecoderEnabled(false, false)
         decoder.media = media; media.release()
-        decoder.setEventListener { event -> main.post {
+        decoder.setEventListener { event ->
+            lastEvent = event.type.toString()
+            main.post {
             if (!released) {
                 when (event.type) {
                     MediaPlayer.Event.Playing -> { playingEventAt = android.os.SystemClock.elapsedRealtime(); ready = true; ended = false; decoder.setRate(speed); pendingSeek?.let { decoder.setTime(it); pendingSeek = null } }
@@ -55,7 +64,8 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
                 }
                 invalidateState()
             }
-        } }
+            }
+        }
         main.post(refresh)
     }
     override fun getState(): State {
@@ -78,6 +88,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     }
     override fun handleSetPlayWhenReady(playWhenReady: Boolean): ListenableFuture<*> {
         wanted = playWhenReady
+        lastAction = if (wanted) "play" else "pause"
         if (wanted) decoder.play() else decoder.pause()
         return Futures.immediateVoidFuture()
     }

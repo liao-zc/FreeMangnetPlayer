@@ -589,7 +589,7 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 
 | # | 要求 | 实现与校验 |
 |---|---|---|
-| 1 | 指定 Spider-Man MKV 已收到约 7.4 MB，但播放器无画面/信息 | MKV 优先使用设备硬件解码；8 秒没有首帧则切换 LibVLC 兼容解码。Android 15 构建与 Instrumentation 通过。用用户给出的完整磁力 `172241866c3c439cab4548115ed1a0250b09fa52` 做冷启动并要求未完成下载前出首帧、持续播放的 GitHub 验收仍在执行：[运行 41079866177](https://github.com/liao-zc/OmniPlayer/actions/runs/41079866177)。当前没有将解码器路由测试当成该资源已能播放的证据。 |
+| 1 | 指定 Spider-Man MKV 已收到约 7.4 MB，但播放器无画面/信息 | MKV 优先使用设备硬件解码；8 秒没有首帧则切换 LibVLC 兼容解码。Android 15 APK 构建通过。用户给出的完整 magnet 冷启动 120 秒实际失败：[运行 41082074816](https://github.com/liao-zc/OmniPlayer/actions/runs/41082074816)。播放器连到 2 个 peer/seed 并接收 54,792,716 字节（约 0.33% 的 16.53 GB 视频，峰值 533,646 B/s），但 LibVLC 回退后 `playing=false`、时长未知、视频高度 0、首帧时间为 0。不是节点缺失，也没有声称可播。真实 App 截图显示播放器仍为黑屏：[冷启动画面](screenshots/current/v0.2.8-spiderman-no-frame.png)；[逐项数据](evidence/v0.2.8-spiderman-playback.json)。现增加 loopback HTTP Range/VLC 事件计数，待以新 APK 定位和复测。 |
 | 2 | 搜索资源日期精确到日 | 搜索源明确提供的绝对/相对发布日期统一显示 `YYYY-MM-DD`。磁力 URI 和 info-hash 不含做种创建时间；没有来源日期时显示“来源未提供”，不拿当前搜索时间冒充做种日。 |
 | 3 | 搜索翻页控件可用且简洁 | 去掉“前/后 20 页”，只保留一行页码、上一页/下一页图标；按钮使用搜索站点已发现的页面地址，无地址时禁用。Android 15 模拟器验证第 1 页 39 条、第 2 页 17 条、第 3 页 0 条；上一页、跳到已发现页、空结果返回搜索页均通过。记录：[运行 41080171319](https://github.com/liao-zc/OmniPlayer/actions/runs/41080171319)，[逐项数据](evidence/v0.2.8-pagination-verification.json)。 |
 | 4 | 搜索排序按钮 | 单个排序图标内含匹配度、时间、热度三个规则。受控搜索页上三种规则均可选，截图确认搜索结果页只有一个“搜索结果”标题和一个返回箭头：[实际模拟器排序菜单截图](screenshots/current/v0.2.8-search-sort-menu.png)。 |
@@ -601,6 +601,6 @@ v0.2.6 使用 versionCode 24。Android 编译、Android 15 界面、Instrumentat
 
 Android `assembleDebug` / `assembleDebugAndroidTest` 与 `connectedDebugAndroidTest` 均通过（[运行 41079573687](https://github.com/liao-zc/OmniPlayer/actions/runs/41079573687)）。同一工作流后续的通用偏好页 UI 脚本在定位 `player_favorite` 自动化控件时失败；它没有推翻 Gradle 测试或独立分页回归，但该偏好 UI 脚本不能报告为通过。分页和排序使用独立模拟器回归，结果通过。
 
-指定 Spider-Man 磁力的公网冷启动结果以及用户先前提交的十条磁力首帧/持续播放结果，必须以运行 41079866177 完成后生成的 APK 运行数据判定。独立 libtorrent 探测成功构建并运行，但本次采样的十条旧验收链接中 9 条未取得元数据，1 条取得元数据但 Peer 为 1、有效负载字节为 0；这只能证明本次探测没有获得可下载分片，不能代替 App 播放验收，也不能证明资源永久无种。没有可播放画面时，报告不会插入伪造的影视截图。
+单磁力运行 41082074816 已结束，结论为未起播。更早的长串运行 41079866177 使用旧提交且已取消，不把它计为验收结果。本轮同 workflow 的独立 libtorrent 探测完成：用户原先十条磁力里 9 条没有元数据，1 条虽有元数据但有效下载字节为 0；这不代表 Spider-Man 目标，因为该资源的 Android App 实测确有 peer 与 payload。当前诊断代码尚未构建，下一轮需要用新 App 同一资源复测；本报告不把黑屏截图伪装成视频画面。
 
 ![搜索排序菜单的 Android 15 模拟器截图](screenshots/current/v0.2.8-search-sort-menu.png)

@@ -1,5 +1,5 @@
 """Actual APK first-frame acceptance for the user's ten public magnets."""
-import json,os,shlex,time
+import json,os,shlex,subprocess,time
 from pathlib import Path
 from capture_usage_screenshots import adb,screenshot,PACKAGE,OUT
 
@@ -31,6 +31,9 @@ for index,target in enumerate(targets,1):
         peakPayloadBytesPerSecond=max((s.get('payloadRate',0) for s in samples),default=0),
         final=samples[-1] if samples else {},samples=samples)
     results.append(row);(OUT/'public-acceptance.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf-8')
+    if os.environ.get('OMNI_TARGET_ONLY') == '1':
+        with (OUT/'public-01-logcat.txt').open('w',encoding='utf-8') as log:
+            subprocess.run(['adb','logcat','-d','-t','4000'],stdout=log,stderr=subprocess.STDOUT,check=True,text=True)
     print(target['hash'],row['passed'],row['firstFrameSeconds'],flush=True)
 regression=next(r for r in results if r['category']=='本轮 MKV 起播回归')
 passed=sum(r['passed'] for r in results if r['category'] in {'电影','动漫','剧集','纪录片'})
