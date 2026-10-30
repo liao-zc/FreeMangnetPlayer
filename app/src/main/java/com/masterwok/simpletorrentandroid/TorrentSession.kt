@@ -103,6 +103,7 @@ open class TorrentSession(
                     AlertType.TORRENT_ERROR -> torrentSession.get()?.onTorrentError(alert as TorrentErrorAlert)
                     AlertType.CACHE_FLUSHED -> torrentSession.get()?.let { it.cacheFlushGeneration++ }
                     AlertType.TRACKER_ERROR, AlertType.LISTEN_FAILED -> torrentSession.get()?.networkMessage = alert.toString()
+                    AlertType.PEER_ERROR, AlertType.PEER_DISCONNECTED -> torrentSession.get()?.recordPeerEvent(alert.toString())
                     AlertType.ADD_TORRENT -> torrentSession.get()?.onAddTorrent(alert as AddTorrentAlert)
                     AlertType.BLOCK_UPLOADED -> torrentSession.get()?.onBlockUploaded(alert as BlockUploadedAlert)
                     else -> if (torrentSession.get()?.torrentSessionOptions?.enableLogging == true) Log.d(Tag, "Unhandled alert: $alert")
@@ -489,6 +490,12 @@ open class TorrentSession(
     val actualDownloadLimit: Int get() = sessionManager.downloadRateLimit()
     val actualUploadLimit: Int get() = sessionManager.uploadRateLimit()
     @Volatile var networkMessage: String = ""
+    private val peerEvents = java.util.ArrayDeque<String>()
+    @Synchronized private fun recordPeerEvent(message: String) {
+        if (peerEvents.size >= 20) peerEvents.removeFirst()
+        peerEvents.addLast("${System.currentTimeMillis()} $message")
+    }
+    @Synchronized fun recentPeerEvents(): List<String> = peerEvents.toList()
     @Volatile var cacheFlushGeneration: Long = 0
 
     @Volatile var metadataReplacements = 0

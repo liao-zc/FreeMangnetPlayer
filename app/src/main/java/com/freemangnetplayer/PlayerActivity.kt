@@ -112,6 +112,14 @@ class PlayerActivity : ComponentActivity() {
                                     } else playerMessage = "该链接没有可识别的视频文件，可选择文件下载"
                                 }
                                 if (attached && applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE != 0) { runCatching {
+                                    val peerRows = JSONArray()
+                                    runCatching {
+                                        current.handle?.takeIf { it.isValid }?.peerInfo()?.take(16)?.forEach { peer ->
+                                            peerRows.put(JSONObject().put("address", peer.ip()).put("client", peer.client())
+                                                .put("progressPpm", peer.progressPpm()).put("downloaded", peer.totalDownload())
+                                                .put("rate", peer.downSpeed()).put("flags", peer.flags()).put("source", peer.source().toInt()))
+                                        }
+                                    }
                                     val rows = JSONArray()
                                     current.files.forEach { rows.put(JSONObject().put("index", it.index).put("path", it.path).put("size", it.size).put("done", it.done).put("selected", it.index in current.selected)) }
                                     File(filesDir, "torrent-check.json").writeText(JSONObject().put("source", current.source).put("id", current.id)
@@ -120,7 +128,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("peerMilliseconds", if (current.peerAt > 0) current.peerAt - current.startedAt else -1)
                                         .put("verifiedPieceMilliseconds", if (current.verifiedPieceAt > 0) current.verifiedPieceAt - current.startedAt else -1)
                                         .put("playbackMilliseconds", if (current.playbackAt > 0) current.playbackAt - current.startedAt else -1).put("rebufferCount", current.rebufferCount)
-                                        .put("files", rows).put("decoder", if (player is VlcTorrentPlayer) "LibVLC" else "Media3").put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
+                                        .put("peerEvents", JSONArray(current.engine?.recentPeerEvents() ?: emptyList<String>())).put("peerDetails", peerRows).put("files", rows).put("decoder", if (player is VlcTorrentPlayer) "LibVLC" else "Media3").put("playing", player?.isPlaying == true).put("position", player?.currentPosition ?: 0)
                                         .put("renderedFrameAt", current.renderedFrameAt).put("playRequested", requested).put("duration", player?.duration ?: 0).put("buffered", player?.bufferedPosition ?: 0).put("playerError", playerMessage).put("retainedCache", current.retainedCache).put("speed", speed).put("status", current.status).put("folder", current.folder.absolutePath).put("paused", current.paused)
                                         .put("payloadRate", current.payloadRate).put("payloadBytes", current.payloadBytes)
                                         .put("rate", current.rate).put("dhtNodes", current.dhtNodes).put("seeds", current.seeds)
