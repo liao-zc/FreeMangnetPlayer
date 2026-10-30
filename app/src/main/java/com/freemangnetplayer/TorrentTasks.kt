@@ -23,7 +23,21 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     var folder by mutableStateOf(folder)
     var download by mutableStateOf(download)
     var files by mutableStateOf<List<TaskFile>>(emptyList())
-    var selected by mutableStateOf<Set<Int>>(emptySet())
+    private var selectedState by mutableStateOf<Set<Int>>(emptySet())
+    private val selectionChanges = java.util.ArrayDeque<String>()
+    var selected: Set<Int>
+        get() = selectedState
+        set(value) {
+            synchronized(selectionChanges) {
+                if (value != selectedState) {
+                    if (selectionChanges.size >= 20) selectionChanges.removeFirst()
+                    val caller = Throwable().stackTrace.drop(1).take(4).joinToString(" <- ") { "${it.className}.${it.methodName}:${it.lineNumber}" }
+                    selectionChanges.addLast("${System.currentTimeMillis()} $selectedState -> $value @ $caller")
+                }
+                selectedState = value
+            }
+        }
+    fun recentSelectionChanges(): List<String> = synchronized(selectionChanges) { selectionChanges.toList() }
     var deletedFiles by mutableStateOf<Set<Int>>(emptySet())
     var playingIndex by mutableIntStateOf(-1)
     var status by mutableStateOf("等待任务调度…")
