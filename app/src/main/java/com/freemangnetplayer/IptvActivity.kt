@@ -134,7 +134,7 @@ class IptvActivity : ComponentActivity() {
                     channelCatalog.filter { (group == "全部" || it.group == group) && (query.isBlank() || it.name.contains(query, true)) }
                 }
 
-                Scaffold(containerColor = Color(0xFFF3F8FA), topBar = {
+                Scaffold(containerColor = DisplaySettings.background(context), topBar = {
                     TopAppBar(
                         title = { Column { Text("OmniPlayer · 电视直播", fontWeight = FontWeight.Bold); Text("${if (favoritesOnly) savedFavorites.size else channels.size} 个频道", style = MaterialTheme.typography.labelSmall) } },
                         navigationIcon = { IconButton(onClick = { finish() }) { Icon(Icons.Default.ArrowBack, "返回") } },
@@ -254,7 +254,7 @@ class IptvSettingsActivity : ComponentActivity() {
             AppTheme(colorScheme = lightColorScheme(primary = iptvTeal)) {
                 var entries by remember { mutableStateOf(IptvStore.sources(this).toMutableList()) }
                 var message by remember { mutableStateOf("") }
-                Column(Modifier.fillMaxSize().safeDrawingPadding().padding(16.dp)) {
+                Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(16.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { finish() }) { Icon(Icons.Default.ArrowBack, "返回") }
                         Text("电视直播设置", style = MaterialTheme.typography.titleLarge)
@@ -392,7 +392,7 @@ class IptvPlayerActivity : ComponentActivity() {
                     onDispose { exo.removeListener(listener); exo.removeAnalyticsListener(analyticsListener); exo.release(); if (player === exo) player = null }
                 }
                 LaunchedEffect(fullScreen) { applyFullScreen(fullScreen) }
-                Box(Modifier.fillMaxSize().background(Color.Black).pointerInput(fullScreen) {
+                Box(Modifier.fillMaxSize().background(if (fullScreen) Color.Black else DisplaySettings.background(this@IptvPlayerActivity)).pointerInput(fullScreen) {
                     detectTapGestures(onTap = { if (fullScreen) fullScreenControls = !fullScreenControls })
                 }) {
                     AndroidView(factory = { context ->
@@ -400,7 +400,7 @@ class IptvPlayerActivity : ComponentActivity() {
                             useController = false
                             setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                         }
-                    }, update = { it.player = player }, modifier = Modifier.fillMaxSize())
+                    }, update = { it.player = player }, modifier = if (fullScreen) Modifier.fillMaxSize() else Modifier.padding(top = 90.dp).fillMaxWidth().height(240.dp).align(Alignment.TopCenter))
                     if (playbackError.isNotBlank()) Surface(Modifier.align(Alignment.Center).padding(28.dp), color = Color(0xEE202124), shape = RoundedCornerShape(16.dp)) {
                         Column(Modifier.padding(18.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("此频道暂时无法播放", color = Color.White, style = MaterialTheme.typography.titleMedium)

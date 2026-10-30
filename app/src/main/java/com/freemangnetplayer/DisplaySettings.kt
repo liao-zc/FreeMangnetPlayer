@@ -13,9 +13,19 @@ import androidx.compose.ui.Modifier
 import java.io.File
 
 object DisplaySettings {
+    val backgroundChoices = linkedMapOf(
+        "雾蓝" to 0xFFF3F8FA,
+        "暖白" to 0xFFFAF7F0,
+        "浅绿" to 0xFFF1F7F2,
+        "浅灰" to 0xFFF2F3F5,
+        "淡紫" to 0xFFF5F1F8
+    )
     private val faces=android.util.LruCache<String,Typeface>(4)
     fun scale(c: Context) = SettingsStore.prefs(c).getFloat("font-scale", 1f).coerceIn(.75f, 1.75f)
     fun face(c: Context) = SettingsStore.prefs(c).getString("font-face", "黑体") ?: "黑体"
+    fun background(c: Context) = androidx.compose.ui.graphics.Color(
+        backgroundChoices[SettingsStore.prefs(c).getString("background-preset", "雾蓝")] ?: backgroundChoices.getValue("雾蓝")
+    )
     private fun file(c: Context, face: String): File? {
         if (face == "自定义") return File(c.filesDir, "custom-font.ttf").takeIf { it.exists() }
         val asset = when (face) { "楷体" -> "Kai.ttf"; "宋体" -> "Song.ttf"; else -> return null }
@@ -35,7 +45,7 @@ internal fun AppTheme(colorScheme: ColorScheme = lightColorScheme(primary = andr
     var revision by remember { mutableIntStateOf(0) }
     DisposableEffect(c) {
         val prefs = SettingsStore.prefs(c)
-        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key -> if (key == "font-scale" || key == "font-face") revision++ }
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key -> if (key == "font-scale" || key == "font-face" || key == "background-preset") revision++ }
         prefs.registerOnSharedPreferenceChangeListener(listener)
         onDispose { prefs.unregisterOnSharedPreferenceChangeListener(listener) }
     }
@@ -49,7 +59,22 @@ internal fun AppTheme(colorScheme: ColorScheme = lightColorScheme(primary = andr
             bodyLarge=t.bodyLarge.adjust(),bodyMedium=t.bodyMedium.adjust(),bodySmall=t.bodySmall.adjust(),
             labelLarge=t.labelLarge.adjust(),labelMedium=t.labelMedium.adjust(),labelSmall=t.labelSmall.adjust())
     }
-    MaterialTheme(colorScheme=colorScheme, typography=typography, content=content)
+    MaterialTheme(colorScheme=colorScheme.copy(background=DisplaySettings.background(c)), typography=typography, content=content)
+}
+
+@Composable
+internal fun BackgroundSettings() {
+    val c=LocalContext.current
+    val prefs=SettingsStore.prefs(c)
+    var selected by remember { mutableStateOf(prefs.getString("background-preset", "雾蓝") ?: "雾蓝") }
+    Text("软件背景颜色", style=MaterialTheme.typography.titleMedium)
+    Row(Modifier.fillMaxWidth(), horizontalArrangement=Arrangement.spacedBy(4.dp)) {
+        DisplaySettings.backgroundChoices.forEach { (name, value) ->
+            FilterChip(selected=selected==name, onClick={selected=name;prefs.edit().putString("background-preset",name).apply()}, label={Text(name)}, leadingIcon={
+                androidx.compose.foundation.Canvas(Modifier.size(16.dp)) { drawCircle(androidx.compose.ui.graphics.Color(value)) }
+            })
+        }
+    }
 }
 
 @Composable

@@ -506,3 +506,20 @@ POSIX 功能报告及原图已在此更新；十条公网链接的新 POSIX Andr
 ### 历史验收保留及本轮边界
 
 此前 IPTV 9 项点检和 BT/搜索/字体/播放等历史结果仍保留于本报告；指定十条公网磁力仍记录为 0/10 起播，不因本轮直播 UI 改动而更改。本轮 Android 真机 IPTV 播放、PiP 系统行为、网络速度显示和触摸/遥控交互均未完成设备实测。GitHub Actions 已通过：Android `assembleDebug`、通用/ARM64/ARMv7 APK 打包与 Release 发布成功（[构建记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41031735784)）；UTF-8/Markdown 文档可读性检查通过（[检查记录](https://github.com/liao-zc/FreeMangnetPlayer/actions/runs/41031735965)）。v0.2.3 APK 下载：[ARM64](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-arm64-v8a.apk) · [ARMv7](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3-armeabi-v7a.apk) · [通用版](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.2.3/OmniPlayer-v0.2.3.apk)。设备实播仍待验。
+## OmniPlayer v0.2.4 设置与导航调整点检（2026-10-30）
+
+### 本轮要求逐项点检
+
+| # | 要求 | 实现与验证边界 |
+|---|---|---|
+| 1 | 首页底部不放磁播专属播放/下载/收藏 | 首页底栏现为首页、磁播入口、设置；进入磁播模块后才显示播放、下载、收藏及搜索导航。源码检查通过。|
+| 2 | 磁播页面可返回主页 | 磁播模块顶栏新增返回主页箭头；资源解析页增加“返回主页”，通过 CLEAR_TOP/SINGLE_TOP 导航到现有主页。源码检查通过。|
+| 3 | 增加软件背景颜色设置 | 通用设置提供雾蓝、暖白、浅绿、浅灰、淡紫五种颜色。存储在本地偏好设置。源码检查通过，运行时全屏/各子页表现待设备点检。|
+| 4 | 设置分成直播、磁播、通用三类 | 设置首页提供三个独立子类；直播设置进入直播源编辑，磁播设置管理存储路径/引擎/任务上限，通用设置管理字体和背景。源码检查通过。|
+| 5 | 字体/背景等通用项影响直播和磁播 | AppTheme 监听背景偏好并更新 Material 背景色；直播列表、磁播主页/搜索结果/解析页使用通用设置。源码检查通过。|
+| 6 | 清除下载/缓存不放设置页 | 删除设置页的一键清除操作；磁播缓存/下载/收藏/播放列表沿用列表选择及删除操作。源码检查通过。|
+| 7 | 显示软件版本与更新时间 | 通用设置显示 package versionName/versionCode，并显示当前版本最近更新日期 2026-10-30。源码检查通过。|
+| 8 | 改进复制磁力入口 | 保留用户此前要求的目标文件磁力复制功能；移除列表文字按钮，改成每个文件旁边的复制图标，文件选择弹窗也提供单项复制图标。源码检查通过。|
+| 9 | 电视与磁播默认视频画面尺寸/位置一致 | 两个播放器的非全屏视频区域均设为屏幕内容区顶部、宽度充满、高度 240dp；全屏仍按各播放器全屏操作生效。源码检查通过，设备视觉对照待验。|
+
+此前各轮直播、BT、搜索、字体和历史需求点检均保留；十条指定公网磁力此前 0/10 起播的结果仍有效，不受本轮设置/导航改动影响。当前环境没有 Android 设备，本轮 UI 交互、颜色跨屏即时生效、播放器画面实际对齐及清理文件回归尚未进行真机验收。构建及文档检查结果待 v0.2.4 GitHub Actions 完成后补记。

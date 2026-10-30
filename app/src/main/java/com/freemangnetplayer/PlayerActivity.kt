@@ -1,6 +1,7 @@
 package com.freemangnetplayer
 
 import android.app.PictureInPictureParams
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -27,6 +28,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -156,9 +160,12 @@ class PlayerActivity : ComponentActivity() {
                 } else {
                 Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Button(onClick = { finish() }, modifier = Modifier.height(52.dp)) { Text("返回搜索") }
-
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = { finish() }, modifier = Modifier.weight(1f).height(52.dp)) { Text("返回搜索") }
+                        Button(onClick = {
+                            startActivity(Intent(this@PlayerActivity, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra("open-tab", "门户"))
+                            finish()
+                        }, modifier = Modifier.weight(1f).height(52.dp)) { Text("返回主页") }
                     }
                     val compact = LocalConfiguration.current.screenHeightDp < 720
                     val bodyScroll = rememberScrollState()
@@ -198,7 +205,7 @@ class PlayerActivity : ComponentActivity() {
                                             Text(file.path, maxLines = 1, style = MaterialTheme.typography.bodySmall)
                                             Text("${bytes(file.done)} / ${bytes(file.size)}", style = MaterialTheme.typography.labelSmall)
                                         }
-                                        TextButton(onClick = { copyFileMagnet(current, file) }) { Text("复制磁力") }
+                                        IconButton(onClick = { copyFileMagnet(current, file) }) { Icon(Icons.Default.ContentCopy, "复制此文件磁力链接") }
                                         if (file.video) TextButton(onClick = { switchVideo(current, file.index) }) { Text("播放此文件") }
                                     }
                                 }
@@ -247,8 +254,11 @@ class PlayerActivity : ComponentActivity() {
                                             Checkbox(file.index in current.selected, { checked -> TorrentTasks.select(current, if (checked) current.selected + file.index else current.selected - file.index) })
                                             Text(file.path, Modifier.weight(1f))
                                         }
-                                        TextButton(onClick = { copyFileMagnet(current, file) }) { Text("复制磁力：${file.path.substringAfterLast('/')}") }
-                                        if (file.video) TextButton(onClick = { switchVideo(current, file.index); fileDialog = false }) { Text("切换播放：${file.path.substringAfterLast('/')}") }
+                                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                            Text(file.path.substringAfterLast('/'), Modifier.weight(1f), maxLines = 1)
+                                            IconButton(onClick = { copyFileMagnet(current, file) }) { Icon(Icons.Default.ContentCopy, "复制此文件磁力链接") }
+                                            if (file.video) IconButton(onClick = { switchVideo(current, file.index); fileDialog = false }) { Icon(Icons.Default.PlayArrow, "切换播放") }
+                                        }
                                     } }
                                 }
                             }

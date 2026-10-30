@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Download
@@ -74,9 +75,9 @@ val builtInProviders = listOf(
 
 private val ink = Color(0xFF14202B)
 private val teal = Color(0xFF087F79)
-private val canvas = Color(0xFFF3F8FA)
 private const val PREFS_NAME = "player-settings"
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     private var magnetWebView: WebView? = null
     private var activeQuery = ""
@@ -85,6 +86,13 @@ class MainActivity : ComponentActivity() {
     private var firstPageLoad = true
     private var searchBridge: MagnetSearchBridge? = null
     private var searchNeedsFormSubmit = false
+    private var navigateHome: (() -> Unit)? = null
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        navigateHome?.invoke()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,17 +103,20 @@ class MainActivity : ComponentActivity() {
         val requestedEngine = if (debug) intent.getStringExtra("test-engine") else null
         val requestedQuery = if (debug) intent.getStringExtra("test-query") else null
         setContent {
+            val initialCanvas = DisplaySettings.background(this@MainActivity)
             AppTheme(colorScheme = lightColorScheme(
                 primary = teal,
                 secondary = Color(0xFF00A89B),
-                background = canvas,
+                background = initialCanvas,
                 surface = Color.White,
                 onBackground = ink,
                 onSurface = ink
             )) {
+                val canvas = DisplaySettings.background(this@MainActivity)
                 var keyword by remember { mutableStateOf(requestedQuery.orEmpty()) }
                 var magnet by remember { mutableStateOf("") }
                 var selectedTab by remember { mutableStateOf(intent.getStringExtra("open-tab") ?: if (inbound != null || !requestedQuery.isNullOrBlank()) "搜索" else "门户") }
+                SideEffect { navigateHome = { selectedTab = "门户" } }
                 var showEngineMenu by remember { mutableStateOf(false) }
                 var showCustomDialog by remember { mutableStateOf(false) }
                 var customName by remember { mutableStateOf(prefs.getString("custom-name", "自定义搜索") ?: "自定义搜索") }
@@ -138,6 +149,7 @@ class MainActivity : ComponentActivity() {
                 val playbacks = remember { mutableStateListOf<LibraryEntry>() }
                 val focus = LocalFocusManager.current
                 val lifecycleOwner = LocalLifecycleOwner.current
+                val magnetSection = selectedTab != "门户"
 
                 BackHandler(enabled = selectedTab == "搜索结果") {
                     selectedTab = "搜索"
@@ -272,6 +284,13 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(
                     containerColor = canvas,
+                    topBar = {
+                        if (magnetSection) TopAppBar(
+                            title = { Text(if (selectedTab == "搜索结果") "搜索结果" else "磁力播放") },
+                            navigationIcon = { IconButton(onClick = { selectedTab = "门户" }) { Icon(Icons.Default.ArrowBack, "返回主页") } },
+                            actions = { TextButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }) { Text("设置") } }
+                        )
+                    },
                     bottomBar = {
                         NavigationBar(containerColor = Color.White) {
                             NavigationBarItem(
@@ -280,24 +299,14 @@ class MainActivity : ComponentActivity() {
                                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
                                 label = { Text("首页") }
                             )
-                            NavigationBarItem(
-                                selected = selectedTab == "播放",
-                                onClick = { selectedTab = "播放"; reloadLibrary() },
-                                icon = { Icon(Icons.Default.PlayArrow, contentDescription = null) },
-                                label = { Text("播放") }
-                            )
-                            NavigationBarItem(
-                                selected = selectedTab == "下载",
-                                onClick = { selectedTab = "下载"; reloadLibrary() },
-                                icon = { Icon(Icons.Default.Download, contentDescription = null) },
-                                label = { Text("下载") }
-                            )
-                            NavigationBarItem(
-                                selected = selectedTab == "收藏",
-                                onClick = { selectedTab = "收藏"; reloadLibrary() },
-                                icon = { Icon(Icons.Default.Bookmarks, contentDescription = null) },
-                                label = { Text("收藏") }
-                            )
+                            if (magnetSection) {
+                                NavigationBarItem(selected = selectedTab == "搜索" || selectedTab == "搜索结果", onClick = { selectedTab = "搜索" }, icon = { Icon(Icons.Default.Search, null) }, label = { Text("搜索") })
+                                NavigationBarItem(selected = selectedTab == "播放" || selectedTab == "缓存", onClick = { selectedTab = "播放"; reloadLibrary() }, icon = { Icon(Icons.Default.PlayArrow, null) }, label = { Text("播放") })
+                                NavigationBarItem(selected = selectedTab == "下载", onClick = { selectedTab = "下载"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("下载") })
+                                NavigationBarItem(selected = selectedTab == "收藏", onClick = { selectedTab = "收藏"; reloadLibrary() }, icon = { Icon(Icons.Default.Bookmarks, null) }, label = { Text("收藏") })
+                            } else {
+                                NavigationBarItem(selected = false, onClick = { selectedTab = "搜索" }, icon = { Icon(Icons.Default.Search, null) }, label = { Text("磁力播放") })
+                            }
                             NavigationBarItem(
                                 selected = false,
                                 onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) },
@@ -327,7 +336,6 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                                 OutlinedButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) { Icon(Icons.Default.Settings, null); Spacer(Modifier.width(8.dp)); Text("统一设置") }
-                                Text("磁力播放的原有列表入口仍在下方导航栏。", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                             }
                             "搜索结果" -> SearchResultsScreen(
                                 page = pageNumber,
@@ -708,6 +716,7 @@ private fun SearchResultsScreen(
     onBack: () -> Unit, onRetry: () -> Unit, onOpenWeb: () -> Unit, onCancel: () -> Unit,
     onParse: (MagnetResult) -> Unit, onDownload: (MagnetResult) -> Unit
 ) {
+    val context = LocalContext.current
     var localPage by remember(page,keyword) { mutableIntStateOf(1) }
     var jump by remember { mutableStateOf("") };var jumpError by remember { mutableStateOf("") }
     var localJump by remember(page) { mutableStateOf("") }
@@ -715,7 +724,7 @@ private fun SearchResultsScreen(
     val localPages=((results.size+19)/20).coerceAtLeast(1);val shown=localPage.coerceAtMost(localPages)
     val list=androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(shown,page) { list.scrollToItem(0) }
-    Column(Modifier.fillMaxSize().background(canvas).padding(12.dp)) {
+    Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(12.dp)) {
         Row(verticalAlignment=Alignment.CenterVertically) {
             TextButton(onClick=onBack) { Text("‹ 返回") };Column { Text("搜索结果",style=MaterialTheme.typography.titleLarge);Text(keyword,style=MaterialTheme.typography.bodySmall) }
         }
