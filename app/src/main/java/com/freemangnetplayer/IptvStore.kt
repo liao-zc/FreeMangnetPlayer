@@ -3,6 +3,7 @@ package com.freemangnetplayer
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.MessageDigest
 
 data class IptvSource(val name: String, val url: String)
 data class IptvChannel(
@@ -10,12 +11,18 @@ data class IptvChannel(
     val url: String,
     val group: String,
     val logo: String,
-    val id: String
+    val id: String,
+    val legacyId: String = ""
 )
+
+object IptvSession {
+    @Volatile var channels: List<IptvChannel> = emptyList()
+}
 
 object IptvStore {
     const val DEFAULT_URL = "https://iptv-org.github.io/iptv/index.m3u"
     private const val PREFS = "iptv-player"
+    private const val FAVORITE_ROWS = "favorite-channels"
 
     fun sources(context: Context): List<IptvSource> {
         val rows = runCatching { JSONArray(context.getSharedPreferences(PREFS, 0).getString("sources", "[]")) }.getOrDefault(JSONArray())
@@ -29,16 +36,49 @@ object IptvStore {
         context.getSharedPreferences(PREFS, 0).edit().putString("sources", rows.toString()).apply()
     }
 
+    fun selectedSource(context: Context): String? = context.getSharedPreferences(PREFS, 0).getString("selected-source", null)
+    fun selectSource(context: Context, name: String) { context.getSharedPreferences(PREFS, 0).edit().putString("selected-source", name).apply() }
+
+    fun favoriteChannels(context: Context): List<IptvChannel> = runCatching {
+        val rows = JSONArray(context.getSharedPreferences(PREFS, 0).getString(FAVORITE_ROWS, "[]"))
+        buildList { for (i in 0 until rows.length()) rows.optJSONObject(i)?.let { row ->
+            val url = row.optString("url")
+            if (url.startsWith("http://") || url.startsWith("https://")) add(IptvChannel(row.optString("name"), url, row.optString("group", "其他"), row.optString("logo"), row.optString("id"), row.optString("legacyId")))
+        } }
+    }.getOrDefault(emptyList())
+
     fun favorites(context: Context): Set<String> = runCatching {
         val a = JSONArray(context.getSharedPreferences(PREFS, 0).getString("favorites", "[]"))
-        (0 until a.length()).mapNotNull { a.optString(it).takeIf(String::isNotBlank) }.toSet()
+        ((0 until a.length()).mapNotNull { a.optString(it).takeIf(String::isNotBlank) } + favoriteChannels(context).map { it.id }).toSet()
     }.getOrDefault(emptySet())
+
+    fun migrateKnownFavorites(context: Context, channels: List<IptvChannel>) {
+        val prefs = context.getSharedPreferences(PREFS, 0)
+        val existing = favoriteChannels(context).toMutableList()
+        val storedIds = JSONArray(prefs.getString("favorites", "[]"))
+        val oldIds = (0 until storedIds.length()).mapNotNull { storedIds.optString(it).takeIf(String::isNotBlank) }.toMutableSet()
+        oldIds.removeAll(existing.map { it.id }.toSet())
+        val found = channels.filter { it.legacyId.isNotBlank() && it.legacyId in oldIds && existing.none { saved -> saved.id == it.id } }
+        if (found.isNotEmpty()) {
+            existing.addAll(found); oldIds.removeAll(found.map { it.legacyId }.toSet())
+            val rows = JSONArray(); existing.forEach { rows.put(it.toJson()) }
+            val ids = JSONArray(); (oldIds + existing.map { it.id }).distinct().forEach(ids::put)
+            prefs.edit().putString(FAVORITE_ROWS, rows.toString()).putString("favorites", ids.toString()).apply()
+        }
+    }
 
     fun setFavorite(context: Context, channel: IptvChannel, favorite: Boolean) {
         val prefs = context.getSharedPreferences(PREFS, 0)
-        val values = favorites(context).toMutableSet()
-        if (favorite) values.add(channel.id) else values.remove(channel.id)
-        prefs.edit().putString("favorites", JSONArray(values.toList()).toString()).apply()
+        val channels = favoriteChannels(context).toMutableList()
+        channels.removeAll { it.id == channel.id }
+        if (favorite) channels.add(channel)
+        val storedIds = JSONArray(prefs.getString("favorites", "[]"))
+        val oldIds = (0 until storedIds.length()).mapNotNull { storedIds.optString(it).takeIf(String::isNotBlank) }.toMutableSet()
+        oldIds.removeAll(favoriteChannels(context).map { it.id }.toSet())
+        oldIds.remove(channel.legacyId)
+        val rows = JSONArray(); channels.forEach { rows.put(it.toJson()) }
+        val ids = JSONArray(); (oldIds + channels.map { it.id }).distinct().forEach(ids::put)
+        prefs.edit().putString(FAVORITE_ROWS, rows.toString()).putString("favorites", ids.toString()).apply()
     }
 
     fun parseM3u(text: String, sourceName: String): List<IptvChannel> {
@@ -55,8 +95,9 @@ object IptvStore {
                 id = attr(line, "tvg-id")
             } else if (!line.startsWith('#') && (line.startsWith("http://", true) || line.startsWith("https://", true))) {
                 val channelName = title.ifBlank { line.substringAfterLast('/').substringBefore('?').ifBlank { "未命名频道" } }
-                val key = id.ifBlank { "$sourceName|$channelName|$line" }
-                out.add(IptvChannel(channelName, line, group, logo, key))
+                val digest = MessageDigest.getInstance("SHA-256").digest("${id.ifBlank { channelName }}\u0000$line".toByteArray(Charsets.UTF_8))
+                val key = digest.take(12).joinToString("") { "%02x".format(it) }
+                out.add(IptvChannel(channelName, line, group, logo, key, id))
                 title = ""; group = "其他"; logo = ""; id = ""
             }
         }
@@ -67,4 +108,6 @@ object IptvStore {
         val regex = Regex("(?:^|\\s)${Regex.escape(key)}=\\\"([^\\\"]*)\\\"", RegexOption.IGNORE_CASE)
         return regex.find(line)?.groupValues?.getOrNull(1).orEmpty()
     }
+
+    private fun IptvChannel.toJson() = JSONObject().put("id", id).put("legacyId", legacyId).put("name", name).put("url", url).put("group", group).put("logo", logo)
 }

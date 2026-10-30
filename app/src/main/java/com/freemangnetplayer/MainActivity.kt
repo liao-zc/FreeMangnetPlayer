@@ -312,18 +312,18 @@ class MainActivity : ComponentActivity() {
                             "门户" -> Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                                 Spacer(Modifier.height(22.dp))
                                 Text("OmniPlayer", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold, color = teal)
-                                Text("电视直播与磁力播放", style = MaterialTheme.typography.titleMedium, color = ink)
+                                Text("万能播放器", style = MaterialTheme.typography.titleMedium, color = ink)
                                 Spacer(Modifier.height(12.dp))
                                 Card(Modifier.fillMaxWidth().height(148.dp).clickable { startActivity(Intent(this@MainActivity, IptvActivity::class.java)) }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
                                     Row(Modifier.fillMaxSize().padding(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                                         Text("📺", fontSize = 38.sp)
-                                        Column { Text("电视直播", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("浏览分类频道、收藏并播放 IPTV", style = MaterialTheme.typography.bodyMedium) }
+                                        Column { Text("电视直播", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("分类浏览 · 搜台 · 收藏播放", style = MaterialTheme.typography.bodyMedium) }
                                     }
                                 }
                                 Card(Modifier.fillMaxWidth().height(148.dp).clickable { selectedTab = "搜索" }, colors = CardDefaults.cardColors(containerColor = Color.White)) {
                                     Row(Modifier.fillMaxSize().padding(22.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
                                         Text("🧲", fontSize = 38.sp)
-                                        Column { Text("磁力播放", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("进入原有磁力搜索、解析、播放与下载", style = MaterialTheme.typography.bodyMedium) }
+                                        Column { Text("磁力播放", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold); Text("搜索 · 解析 · 下载 · 播放", style = MaterialTheme.typography.bodyMedium) }
                                     }
                                 }
                                 OutlinedButton(onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) { Icon(Icons.Default.Settings, null); Spacer(Modifier.width(8.dp)); Text("统一设置") }
