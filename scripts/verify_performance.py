@@ -43,6 +43,16 @@ def clear_app():
     adb('shell', 'am', 'start', '-W', '-n', f'{PACKAGE}/.MainActivity')
     time.sleep(2)
 
+def close_diagnostic():
+    adb('shell','input','keyevent','KEYCODE_BACK')
+    time.sleep(.5)
+    visible = __import__('capture_usage_screenshots').visible_text()
+    if '真实网络诊断' in visible:
+        adb('shell','input','keyevent','KEYCODE_BACK')
+        time.sleep(.5)
+    visible = __import__('capture_usage_screenshots').visible_text()
+    assert '真实网络诊断' not in visible, 'Network diagnostics dialog remained open: '+visible
+
 def paste(value):
     # Actual focus + input events; no Activity source extra or .torrent injection.
     find_and_tap('磁力链接输入框')
@@ -106,7 +116,7 @@ def main():
     find_and_tap('网络诊断')
     require_visible('真实网络诊断', '0 为不限速', '有效载荷速度', 'TCP / uTP')
     screenshot('perf-05-native-diagnostics.png')
-    find_and_tap('关闭')
+    close_diagnostic()
     report.append({'check': 'real-native-limits-and-network-diagnostics', 'passed': True})
 
     # Use real seek controls to show the movie rather than its opening title.
@@ -207,7 +217,7 @@ def main():
     require_visible('返回搜索')
     find_and_tap('网络诊断')
     require_visible('真实网络诊断', '有效载荷速度')
-    find_and_tap('关闭')
+    close_diagnostic()
     screenshot('perf-10-plain-hash-discovery.png')
     assert plain.get('id') == fixture['id'] and plain.get('downloadLimit') == 0, plain
     report.append({'check': 'plain-hash-input-and-responsive-discovery', 'passed': True,
