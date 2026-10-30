@@ -13,7 +13,11 @@ def wait(fn,timeout=120):
         s=state()
         if fn(s):return s
         time.sleep(.3)
-    raise AssertionError(state())
+    failure=state()
+    (OUT/'library-wait-failure.json').write_text(json.dumps(failure,ensure_ascii=False,indent=2),encoding='utf-8')
+    (OUT/'library-wait-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
+    screenshot('library-wait-failure.png')
+    raise AssertionError(failure)
 def record(name,**data):
     checks.append({'check':name,'passed':True,**data});(OUT/'library-verification.json').write_text(json.dumps(checks,ensure_ascii=False,indent=2),encoding='utf-8')
 def tree():
@@ -72,7 +76,7 @@ played=wait(lambda s:s.get('playing') and s.get('position',0)>800)
 assert played['qualityHeight']==0;record('default-original-quality',state=played)
 control('player_quality');require_visible('原画质');screenshot('library-01-quality-options.png');find_and_tap('原画质')
 record('quality-control-inside-player-with-no-transcoding-claim')
-control('player_files');find_and_tap('全选');find_and_tap('完成')
+control('player_files');screenshot('library-selection-before.png');find_and_tap('全选');screenshot('library-selection-after.png');find_and_tap('完成')
 selection=wait(lambda s:len([f for f in s.get('files',[]) if f.get('selected') and f['path'].endswith(('Episode-01.mp4','Episode-02.mp4'))])==2,timeout=15)
 record('multi-file-selection-before-cache',state=selection)
 find_and_tap('缓存');poll(lambda:len(caches())>=2);screenshot('library-02-retained-files.png')
