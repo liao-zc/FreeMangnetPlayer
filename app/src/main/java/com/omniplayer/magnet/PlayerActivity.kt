@@ -72,6 +72,7 @@ class PlayerActivity : ComponentActivity() {
     private var retryAfter = 0L
     private var task: TorrentTask? = null
     private var activeView: PlayerView? = null
+    private var activeOverlay: View? = null
     private var scrubbing = false
     private var resumeAfterScrub = false
     private var attached = false
@@ -176,7 +177,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
                                         .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("transportFallbackUsed", current.transportFallbackUsed).put("metadataReplacements", current.engine?.metadataReplacements ?: 0).put("restoredTrackers", current.engine?.restoredTrackers ?: 0).put("networkMessage", current.networkMessage)
                                         .put("streaming", current.streaming).put("sequentialStartupActive", current.sequentialStartupActive).put("streamRangeStart", current.streamRangeStart).put("streamRangeEnd", current.streamRangeEnd).put("startupPieces", startupPieces).put("cacheFlushGeneration", current.engine?.cacheFlushGeneration ?: -1L)
-                                        .put("controllerEnabled", activeView?.useController ?: false).put("controllerFullyVisible", activeView?.isControllerFullyVisible ?: false).put("controllerRootVisibility", activeView?.findViewById<View>(R.id.exo_controller)?.visibility ?: -1).put("qualityViewVisibility", activeView?.findViewById<View>(R.id.player_quality)?.visibility ?: -1).put("playerClass", player?.javaClass?.simpleName.orEmpty()).put("playerDebug", (player as? VlcTorrentPlayer)?.debugInfo() ?: JSONObject())
+                                        .put("controllerEnabled", activeOverlay?.visibility == View.VISIBLE).put("controllerFullyVisible", activeOverlay?.isShown == true).put("controllerRootVisibility", activeOverlay?.visibility ?: -1).put("qualityViewVisibility", activeOverlay?.findViewById<View>(R.id.player_quality)?.visibility ?: -1).put("playerClass", player?.javaClass?.simpleName.orEmpty()).put("playerDebug", (player as? VlcTorrentPlayer)?.debugInfo() ?: JSONObject())
                                         .put("videoHeight", player?.videoSize?.height ?: 0).put("qualityHeight", qualityHeight).put("storedQueue", JSONArray().also { a -> StoredVideos.queue(current).forEach { row -> a.put(JSONObject().put("task", row.first.id).put("index", row.second.index).put("done", row.second.done).put("size", row.second.size)) } }).put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
@@ -531,37 +532,44 @@ class PlayerActivity : ComponentActivity() {
         old.stop()
         old.release()
     }
-    private fun showEmbeddedControls(view: PlayerView) {
+    private fun showEmbeddedControls() {
         if (floating) return
-        view.useController = true
-        view.showController()
-        view.findViewById<View>(R.id.exo_controller)?.visibility = View.VISIBLE
+        activeOverlay?.visibility = View.VISIBLE
     }
     @Composable
     private fun VideoSurface(modifier: Modifier, onQuality: () -> Unit = {}, onFiles: () -> Unit) {
         AndroidView(factory = { context ->
-            (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
+            android.widget.FrameLayout(context).apply {
+                val surface = android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, this, false) as PlayerView
+                addView(surface, android.widget.FrameLayout.LayoutParams(-1, -1))
+                val overlay = android.view.LayoutInflater.from(context).inflate(R.layout.player_overlay_controls, this, false)
+                addView(overlay, android.widget.FrameLayout.LayoutParams(-1, -1))
+                activeView = surface
+                activeOverlay = overlay
+                surface.apply {
                 importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
                 setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                 setShutterBackgroundColor(android.graphics.Color.BLACK)
-                controllerShowTimeoutMs = 60000
-                setOnClickListener { showEmbeddedControls(this) }
-                setShowRewindButton(true); setShowFastForwardButton(true)
-                findViewById<View>(R.id.player_fullscreen).setOnClickListener { changeFullscreen(!fullscreen) }
-                findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }
-                findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
-                findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
-                findViewById<View>(R.id.player_next).setOnClickListener { playNextStored() }
-                findViewById<View>(R.id.player_favorite).setOnClickListener { toggleFavorite() }
-                findViewById<View>(R.id.player_quality).setOnClickListener { onQuality() }
-                findViewById<View>(R.id.player_tracks).setOnClickListener { showTrackMenu() }
-                findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
+                useController = false
+                setOnClickListener { overlay.visibility = if (overlay.visibility == View.VISIBLE) View.GONE else View.VISIBLE }
+                if (player is VlcTorrentPlayer) findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
+                player?.let { this.player = it }
+                }
+                overlay.findViewById<View>(R.id.player_fullscreen).setOnClickListener { changeFullscreen(!fullscreen) }
+                overlay.findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }
+                overlay.findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
+                overlay.findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
+                overlay.findViewById<View>(R.id.player_next).setOnClickListener { playNextStored() }
+                overlay.findViewById<View>(R.id.player_favorite).setOnClickListener { toggleFavorite() }
+                overlay.findViewById<View>(R.id.player_quality).setOnClickListener { onQuality() }
+                overlay.findViewById<View>(R.id.player_tracks).setOnClickListener { showTrackMenu() }
+                overlay.findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
                     override fun onScrubStart(timeBar: androidx.media3.ui.TimeBar, position: Long) {
                         scrubbing = true; resumeAfterScrub = this@PlayerActivity.player?.playWhenReady == true
                         this@PlayerActivity.player?.pause()
                     }
                     override fun onScrubMove(timeBar: androidx.media3.ui.TimeBar, position: Long) {
-                        findViewById<TextView>(R.id.player_position).text = formatTime(position)
+                        overlay.findViewById<TextView>(R.id.player_position).text = formatTime(position)
                     }
                     override fun onScrubStop(timeBar: androidx.media3.ui.TimeBar, position: Long, canceled: Boolean) {
                         if (!canceled) {
@@ -572,21 +580,21 @@ class PlayerActivity : ComponentActivity() {
                         if (resumeAfterScrub) this@PlayerActivity.player?.play()
                     }
                 })
-                activeView = this
             }
         }, update = { view ->
-            val playerChanged = view.player !== player
-            val shouldUseController = !floating
-            if (view.useController != shouldUseController) view.useController = shouldUseController
+            val surface = view.findViewById<PlayerView>(R.id.video_surface)
+            val overlay = view.findViewById<View>(R.id.player_controls_overlay)
+            val playerChanged = surface.player !== player
+            if (surface.useController) surface.useController = false
             if (playerChanged) {
-                view.player = player
-                if (player != null && !floating) showEmbeddedControls(view)
+                surface.player = player
+                if (player != null && !floating) showEmbeddedControls()
             }
-            if (player != null && !floating && !view.isControllerFullyVisible) showEmbeddedControls(view)
-            if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
-            view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
-            view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
-        }, onRelease = { view -> if (activeView === view) activeView = null; view.player = null }, modifier = modifier.background(Color.Black))
+            if (player != null && !floating) overlay.visibility = View.VISIBLE
+            if (player is VlcTorrentPlayer) surface.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
+            overlay.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
+            overlay.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
+        }, onRelease = { view -> if (activeView === view.findViewById<PlayerView>(R.id.video_surface)) activeView = null; activeOverlay = null; view.findViewById<PlayerView>(R.id.video_surface).player = null }, modifier = modifier.background(Color.Black))
     }
     private fun formatTime(value: Long): String {
         val seconds = (value.coerceAtLeast(0) / 1000)
@@ -656,7 +664,7 @@ class PlayerActivity : ComponentActivity() {
             }.show()
     }
     private fun refreshProgress() {
-        val view=activeView ?: return
+        val view=activeOverlay ?: return
         val t=task
         val f=t?.files?.firstOrNull { it.index==t.playingIndex }
         val link=if(t!=null && f!=null) StoredVideos.fileSource(t,f) else t?.source.orEmpty()
