@@ -17,6 +17,7 @@ data class HistoryEntry(val title: String, val source: String, val time: Long,
 
 object HistoryStore {
     val kinds = listOf("搜索", "播放", "下载", "缓存")
+    val sections = listOf("搜索", "播放", "任务")
     private fun key(kind: String) = "history-$kind"
     @Synchronized fun read(c: Context, kind: String): List<HistoryEntry> = runCatching {
         val a=JSONArray(SettingsStore.prefs(c).getString(key(kind),"[]"))
@@ -43,21 +44,21 @@ object HistoryStore {
 
 @Composable internal fun HistoryScreen(onBack: () -> Unit, onOpen: (String, HistoryEntry) -> Unit) {
     val c=LocalContext.current;var kind by remember { mutableStateOf("搜索") };var revision by remember { mutableIntStateOf(0) };var clear by remember { mutableStateOf(false) };var all by remember { mutableStateOf(false) }
-    val rows=remember(kind,revision) { HistoryStore.read(c,kind) }
+    val rows=remember(kind,revision) { when(kind) { "任务" -> (HistoryStore.read(c,"下载").map { "下载" to it } + HistoryStore.read(c,"缓存").map { "缓存" to it }).sortedByDescending { it.second.time }; else -> HistoryStore.read(c,kind).map { kind to it } } }
     Column(Modifier.fillMaxSize().padding(16.dp)) {
         Row { TextButton(onClick=onBack) { Text("‹ 返回") };Text("历史记录",style=MaterialTheme.typography.headlineSmall) }
-        Row { HistoryStore.kinds.forEach { type -> TextButton(onClick={kind=type;revision++}) { Text(if(kind==type) "✓ $type" else type) } } }
+        Row { HistoryStore.sections.forEach { type -> TextButton(onClick={kind=type;revision++}) { Text(if(kind==type) "✓ $type" else type) } } }
         Row { TextButton(onClick={ all=false;clear=true }) { Text("清空${kind}记录") };TextButton(onClick={all=true;clear=true}) { Text("清空全部记录") } }
         if(rows.isEmpty()) Text("暂无${kind}记录")
-        LazyColumn(verticalArrangement=Arrangement.spacedBy(8.dp)) { items(rows,key={it.source}) { entry -> Card {
+        LazyColumn(verticalArrangement=Arrangement.spacedBy(8.dp)) { items(rows,key={it.first+":"+it.second.source}) { (recordKind,entry) -> Card {
             Column(Modifier.fillMaxWidth().padding(12.dp)) {
                 Text(entry.title);Text(java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss",java.util.Locale.CHINA).format(java.util.Date(entry.time)),style=MaterialTheme.typography.bodySmall)
-                if(kind=="播放") Text("进度 ${historyTime(entry.position)} / ${historyTime(entry.duration)}")
-                if(kind=="缓存" || kind=="下载") Text("${entry.status} · ${if(entry.size>0) (entry.done*100/entry.size).coerceIn(0,100).toString()+"%" else "等待元数据"}")
-                Row { TextButton(onClick={onOpen(kind,entry)}) { Text(if(kind=="搜索") "再次搜索" else "打开") };TextButton(onClick={HistoryStore.remove(c,kind,entry.source);revision++}) { Text("删除记录") } }
+                if(recordKind=="播放") Text("进度 ${historyTime(entry.position)} / ${historyTime(entry.duration)}")
+                if(recordKind=="缓存" || recordKind=="下载") Text("${recordKind} · ${entry.status} · ${if(entry.size>0) (entry.done*100/entry.size).coerceIn(0,100).toString()+"%" else "等待元数据"}")
+                Row { TextButton(onClick={onOpen(recordKind,entry)}) { Text(if(recordKind=="搜索") "再次搜索" else "打开") };TextButton(onClick={ val cm=c.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager; cm.setPrimaryClip(android.content.ClipData.newPlainText("${recordKind}记录",entry.source)); android.widget.Toast.makeText(c,"已复制",android.widget.Toast.LENGTH_SHORT).show() }) { Text("复制") };TextButton(onClick={HistoryStore.remove(c,recordKind,entry.source);revision++}) { Text("删除记录") } }
             }
         } } }
     }
-    if(clear) AlertDialog(onDismissRequest={clear=false},title={Text(if(all) "清空全部历史？" else "清空${kind}历史？")},text={Text("仅删除行为记录，保留下载、缓存文件和收藏。")},confirmButton={TextButton(onClick={HistoryStore.clear(c,if(all)null else kind);revision++;clear=false}) { Text("确认清空") }},dismissButton={TextButton(onClick={clear=false}) { Text("取消") }})
+    if(clear) AlertDialog(onDismissRequest={clear=false},title={Text(if(all) "清空全部历史？" else "清空${kind}历史？")},text={Text("仅删除行为记录，保留下载、缓存文件和收藏。")},confirmButton={TextButton(onClick={if(all) HistoryStore.clear(c,null) else if(kind=="任务") { HistoryStore.clear(c,"下载"); HistoryStore.clear(c,"缓存") } else HistoryStore.clear(c,kind);revision++;clear=false}) { Text("确认清空") }},dismissButton={TextButton(onClick={clear=false}) { Text("取消") }})
 }
 internal fun historyTime(value: Long): String = "%02d:%02d:%02d".format(value.coerceAtLeast(0)/3600000,value.coerceAtLeast(0)/60000%60,value.coerceAtLeast(0)/1000%60)

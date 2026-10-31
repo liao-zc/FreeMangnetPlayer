@@ -134,6 +134,7 @@ class MainActivity : ComponentActivity() {
                 var magnet by remember { mutableStateOf("") }
                 var searchProviders by remember { mutableStateOf(SearchEngineStore.load(this@MainActivity)) }
                 var selectedTab by remember { mutableStateOf(intent.getStringExtra("open-tab") ?: if (inbound != null || !requestedQuery.isNullOrBlank()) "搜索" else "门户") }
+                var selectedTaskCache by remember { mutableStateOf(false) }
                 SideEffect { navigateHome = { selectedTab = "门户" } }
                 var showEngineMenu by remember { mutableStateOf(false) }
                 var showCustomDialog by remember { mutableStateOf(false) }
@@ -174,7 +175,7 @@ class MainActivity : ComponentActivity() {
                 }
                 BackHandler(enabled = selectedTab == "门户") { finish() }
                 BackHandler(enabled = selectedTab == "历史") { selectedTab = "播放" }
-                BackHandler(enabled = selectedTab in setOf("搜索", "播放", "下载", "收藏", "缓存")) { selectedTab = "门户" }
+                BackHandler(enabled = selectedTab in setOf("搜索", "播放", "下载", "收藏", "缓存", "任务")) { selectedTab = "门户" }
 
                 fun reloadLibrary() {
                     TorrentTasks.tasks.values.forEach { StoredVideos.sync(this@MainActivity, it) }
@@ -341,9 +342,8 @@ class MainActivity : ComponentActivity() {
                                 label = { Text("设置") }
                             )
                             if (magnetSection) {
-                                NavigationBarItem(selected = selectedTab == "搜索" || selectedTab == "搜索结果", onClick = { selectedTab = "搜索" }, icon = { Icon(Icons.Default.Search, null) }, label = { Text("搜索") })
                                 NavigationBarItem(selected = selectedTab == "播放" || selectedTab == "缓存", onClick = { selectedTab = "播放"; reloadLibrary() }, icon = { Icon(Icons.Default.PlayArrow, null) }, label = { Text("播放") })
-                                NavigationBarItem(selected = selectedTab == "下载", onClick = { selectedTab = "下载"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("下载") })
+                                NavigationBarItem(selected = selectedTab in setOf("任务", "下载", "缓存"), onClick = { selectedTab = "任务"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("任务") })
                                 NavigationBarItem(selected = selectedTab == "收藏", onClick = { selectedTab = "收藏"; reloadLibrary() }, icon = { Icon(Icons.Default.Bookmarks, null) }, label = { Text("收藏") })
                             }
 
@@ -400,11 +400,20 @@ class MainActivity : ComponentActivity() {
                             )
                             "历史" -> HistoryScreen(onBack={ selectedTab="播放" }, onOpen={ kind,entry -> if(kind=="搜索") {keyword=entry.title;beginSearch()} else openTorrent(MagnetResult(entry.title,entry.source),"play") })
                             "播放" -> Column {
-                                Row { TextButton(onClick={selectedTab="历史"}) { Text("历史记录") }; TextButton(onClick = { selectedTab = "缓存"; reloadLibrary() }) { Text("缓存视频 (${caches.count { it.unplayableReason.isBlank() }})") } }
+                                Row { TextButton(onClick={selectedTab="历史"}) { Text("历史记录") }; TextButton(onClick = { selectedTaskCache = true; selectedTab = "任务"; reloadLibrary() }) { Text("缓存视频 (${caches.count { it.unplayableReason.isBlank() }})") } }
                                 ManagedLibrary("播放列表", playbacks, "播放", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             }
-                            "缓存" -> ManagedLibrary("缓存视频", caches, "缓存", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
-                            "下载" -> ManagedLibrary("下载任务", downloads, "下载", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                            "缓存" -> { selectedTaskCache = true; selectedTab = "任务" }
+                            "任务" -> Column {
+                                val taskTab = if (selectedTaskCache) "缓存" else "下载"
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    FilterChip(selected = taskTab == "下载", onClick = { selectedTaskCache = false }, label = { Text("下载 (${downloads.size})") })
+                                    FilterChip(selected = taskTab == "缓存", onClick = { selectedTaskCache = true }, label = { Text("缓存 (${caches.size})") })
+                                }
+                                if (taskTab == "下载") ManagedLibrary("下载任务", downloads, "下载", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                                else ManagedLibrary("缓存视频", caches, "缓存", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                            }
+                            "下载" -> { selectedTab = "任务" }
                             "收藏" -> ManagedLibrary("我的收藏", favorites, "收藏", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             else -> SearchHome(
                                 keyword = keyword,
@@ -421,6 +430,8 @@ class MainActivity : ComponentActivity() {
                                     showEngineMenu = false
                                 },
                                 onCustomEngine = { showEngineMenu = false; showCustomDialog = true },
+                                recentSearches = HistoryStore.read(this@MainActivity, "搜索").map { it.title },
+                                onChooseSearchHistory = { keyword = it; beginSearch() },
                                 magnet = magnet,
                                 onMagnetChange = { magnet = it; error = "" },
                                 onParseMagnet = {

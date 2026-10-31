@@ -18,7 +18,7 @@ jobs:
         run: |
           python3 scripts/architecture-smoke-check.py
           python3 scripts/check_repository.py
-          python3 -m py_compile scripts/architecture-smoke-check.py scripts/check_repository.py scripts/verify_apk_abi.py scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/summarize_ci_results.py
+          python3 -m py_compile scripts/architecture-smoke-check.py scripts/check_repository.py scripts/verify_apk_abi.py scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/verify_recent_requirements.py scripts/summarize_ci_results.py
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
       - uses: android-actions/setup-android@v3

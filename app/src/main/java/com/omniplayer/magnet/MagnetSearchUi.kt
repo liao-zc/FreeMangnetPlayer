@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Sort
@@ -95,6 +96,8 @@ internal fun SearchHome(
     builtIns: List<SearchProvider>,
     onSelectEngine: (SearchProvider) -> Unit,
     onCustomEngine: () -> Unit,
+    recentSearches: List<String>,
+    onChooseSearchHistory: (String) -> Unit,
     magnet: String,
     onMagnetChange: (String) -> Unit,
     onParseMagnet: () -> Unit,
@@ -117,11 +120,15 @@ internal fun SearchHome(
                 shape = RoundedCornerShape(18.dp),
                 colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.White, focusedContainerColor = Color.White)
             )
-            Button(onClick = onSearch, modifier = Modifier.height(58.dp).semantics { contentDescription = "执行关键词搜索" }, contentPadding = PaddingValues(horizontal = 16.dp)) {
-                Icon(Icons.Default.Search, contentDescription = null)
-                Spacer(Modifier.width(5.dp))
-                Text("搜索", style = MaterialTheme.typography.titleMedium)
+            var historyMenu by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { historyMenu = true }, modifier = Modifier.size(48.dp).semantics { contentDescription = "搜索历史" }) { Icon(Icons.Default.History, "搜索历史", tint = Color.White) }
+                DropdownMenu(expanded = historyMenu, onDismissRequest = { historyMenu = false }) {
+                    if (recentSearches.isEmpty()) DropdownMenuItem(text = { Text("暂无搜索记录") }, onClick = { historyMenu = false }, enabled = false)
+                    recentSearches.take(50).forEach { query -> DropdownMenuItem(text = { Text(query, maxLines = 1, overflow = TextOverflow.Ellipsis) }, onClick = { historyMenu = false; onChooseSearchHistory(query) }) }
+                }
             }
+            IconButton(onClick = onSearch, modifier = Modifier.size(48.dp).semantics { contentDescription = "执行关键词搜索" }) { Icon(Icons.Default.Search, "搜索", tint = Color.White) }
             Box {
                 IconButton(onClick = { onEngineMenu(true) }, modifier = Modifier.size(54.dp)) {
                     Icon(Icons.Default.MoreVert, contentDescription = "选择搜索引擎", tint = Color.White, modifier = Modifier.size(30.dp))
@@ -174,33 +181,31 @@ internal fun SearchResultsScreen(
     var jumpPage by remember { mutableStateOf("") }
     var jumpError by remember { mutableStateOf("") }
     val list = androidx.compose.foundation.lazy.rememberLazyListState()
-    var localPage by remember(keyword, engine, page) { mutableIntStateOf(1) }
     val sortedResults = remember(results.toList(), sortMode) {
         when (sortMode) {
             "时间" -> results.sortedWith(compareByDescending<MagnetResult> { parsePublishedDate(it.publishedAt) }.thenByDescending { it.title.length })
             "热度" -> results.sortedWith(compareByDescending<MagnetResult> { parseHeat(it.heat) }.thenBy { it.title })
+            "大小" -> results.sortedWith(compareByDescending<MagnetResult> { it.bytes }.thenBy { it.title })
             else -> results.sortedByDescending { item -> keyword.lowercase().split(' ').count { word -> word.isNotBlank() && item.title.lowercase().contains(word) } }
         }
     }
-    val localPageCount = ((sortedResults.size + 9) / 10).coerceAtLeast(1)
-    LaunchedEffect(localPageCount) { if (localPage > localPageCount) localPage = localPageCount }
-    val visibleResults = sortedResults.drop((localPage - 1) * 10).take(10)
-    val canGoPrevious = localPage > 1 || page > 1
-    val canGoNext = localPage < localPageCount || nextAvailable
-    LaunchedEffect(page, keyword, localPage) { list.scrollToItem(0) }
+    val visibleResults = sortedResults.distinctBy { magnetIdentity(it.magnet) }
+    val canGoPrevious = page > 1
+    val canGoNext = nextAvailable && (totalPages <= 0 || page < totalPages)
+    LaunchedEffect(page, keyword) { list.scrollToItem(0) }
     Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { if (localPage > 1) localPage-- else onPrevious() }, enabled = canGoPrevious, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }
-            Text("结果第 $localPage / $localPageCount 页${if (totalPages > 0) " · 源站 $page / $totalPages" else " · 源站 $page 页"}", style = MaterialTheme.typography.bodySmall,
-                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转结果页；当前第 $localPage 页，共 $localPageCount 页" })
+            IconButton(onClick = onPrevious, enabled = canGoPrevious, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }
+            Text(if (totalPages > 0) "第 $page / $totalPages 页" else "第 $page 页", style = MaterialTheme.typography.bodySmall,
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转结果页；当前第 $page 页，共 $totalPages 页" })
             Box {
                 IconButton(onClick = { sortMenu = true }, modifier = Modifier.semantics { contentDescription = "排序：$sortMode" }) { Icon(Icons.Default.Sort, "排序") }
                 DropdownMenu(expanded = sortMenu, onDismissRequest = { sortMenu = false }) {
-                    listOf("匹配度", "时间", "热度").forEach { option -> DropdownMenuItem(
+                    listOf("匹配度", "时间", "热度", "大小").forEach { option -> DropdownMenuItem(
                         text = { Text(if (sortMode == option) "✓ $option" else option) }, onClick = { sortMode = option; sortMenu = false }) }
                 }
             }
-            IconButton(onClick = { if (localPage < localPageCount) localPage++ else if (nextAvailable) { localPage++; onNext() } }, enabled = canGoNext, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
+            IconButton(onClick = onNext, enabled = canGoNext, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
         }
         if (state == "loading" || message == "搜索中") LinearProgressIndicator(Modifier.fillMaxWidth())
         if (state in listOf("error", "timeout") || message == "搜索未完成") Text("搜索未完成", color = MaterialTheme.colorScheme.error)
@@ -222,7 +227,6 @@ internal fun SearchResultsScreen(
                 OutlinedTextField(jumpPage, { jumpPage = it.filter(Char::isDigit).take(6) }, label = { Text("输入页码") }, singleLine = true,
                     modifier = Modifier.focusRequester(requester), keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
                 if (jumpError.isNotBlank()) Text(jumpError, color = MaterialTheme.colorScheme.error)
-                Text("已加载结果页：1–$localPageCount", style = MaterialTheme.typography.bodySmall)
                 Text("源站页：", style = MaterialTheme.typography.bodySmall)
                 Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     knownPages.sorted().forEach { sourcePage -> TextButton(onClick = { onJump(sourcePage); jumpDialog = false }, modifier = Modifier.semantics { contentDescription = "源站第 $sourcePage 页" }) { Text("$sourcePage") } }
@@ -230,8 +234,8 @@ internal fun SearchResultsScreen(
             } },
             confirmButton = { TextButton(onClick = {
                 val target = jumpPage.toIntOrNull()
-                if (target != null && target in 1..localPageCount) { localPage = target; jumpDialog = false }
-                else jumpError = "请输入已加载的结果页，或点击下方的源站页码"
+                if (target != null && target in knownPages) { onJump(target); jumpDialog = false }
+                else jumpError = "请输入已发现的源站页码，或点击下方页码"
             }) { Text("跳转") } },
             dismissButton = { TextButton(onClick = { jumpDialog = false }) { Text("取消") } })
     }
@@ -251,6 +255,7 @@ private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit
         Column(Modifier.fillMaxWidth().padding(horizontal=10.dp,vertical=6.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
             Text("${item.title.ifBlank { "待获取文件名" }} · ${item.format.ifBlank { detectResourceFormat(item.title, item.magnet).ifBlank { "格式待解析" } }}",style=textStyle)
             Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "大小 —" }} · ${item.format.ifBlank { detectResourceFormat(item.title, item.magnet).ifBlank { "格式 —" } }} · ${item.publishedAt.ifBlank { "时间 —" }}",style=textStyle)
+            Text(item.magnet, style=textStyle, maxLines=2, overflow=TextOverflow.Ellipsis, modifier=Modifier.semantics { contentDescription = "磁力链接：${item.magnet}" })
             Row {
                 TextButton(onClick={onParse(item)}) { Text("播放",style=textStyle) }
                 TextButton(onClick={onDownload(item)}) { Text("下载 / 缓存",style=textStyle) }

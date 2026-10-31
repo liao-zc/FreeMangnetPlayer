@@ -142,7 +142,7 @@ class IptvActivity : ComponentActivity() {
 
                 Scaffold(containerColor = DisplaySettings.background(context), topBar = {
                     TopAppBar(
-                        title = { Column { Text(if (showHistory) "电视观看历史" else "OmniPlayer · 电视直播", fontWeight = FontWeight.Bold); Text("${channelCatalog.size} 个频道", style = MaterialTheme.typography.labelSmall) } },
+                        title = { Text("电视直播", fontWeight = FontWeight.Bold) },
                         navigationIcon = { IconButton(onClick = { finish() }) { Icon(Icons.Default.ArrowBack, "返回") } },
                         actions = {
                             IconButton(onClick = { showHistory = !showHistory; managingHistory = false; selectedHistoryIds = emptySet(); group = "全部" }) { Icon(Icons.Default.History, if (showHistory) "返回频道列表" else "观看历史") }
@@ -208,7 +208,7 @@ class IptvActivity : ComponentActivity() {
                                     } else if (favoritesOnly && managingFavorites) {
                                         selectedFavoriteIds = if (channel.id in selectedFavoriteIds) selectedFavoriteIds - channel.id else selectedFavoriteIds + channel.id
                                     } else {
-                                        IptvSession.channels = channelCatalog
+                                        IptvSession.channels = channels
                                         startActivity(Intent(this@IptvActivity, IptvPlayerActivity::class.java).putExtra("channel-name", channel.name).putExtra("channel-url", channel.url).putExtra("channel-id", channel.id).putExtra("channel-logo", channel.logo).putExtra("group", channel.group))
                                     }
                                 }, shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {

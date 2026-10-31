@@ -200,7 +200,6 @@ class PlayerActivity : ComponentActivity() {
                                 Text(file.path.substringAfterLast('/'), color = Color.White, maxLines = 1)
                                 LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
                                 CacheCoverageTrack(cacheRanges, file.size, Modifier.fillMaxWidth())
-                                Text(CacheCoverage.describe(cacheRanges, file.size, cacheDuration), color = Color(0xFFBFEDE4), style = MaterialTheme.typography.labelSmall)
                                 Text("${bytes(file.done)} / ${bytes(file.size)} · ${current?.peers ?: 0} 个节点 · ${bytes(current?.payloadRate?.toLong() ?: 0L)}/秒", color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
                                 Text("时长与分辨率将在首个完整分片可读后显示", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                             }
@@ -237,7 +236,6 @@ class PlayerActivity : ComponentActivity() {
                                     Text(file.path.substringAfterLast('/'), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
                                     LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
                                     CacheCoverageTrack(cacheRanges, file.size, Modifier.fillMaxWidth())
-                                    Text(CacheCoverage.describe(cacheRanges, file.size, cacheDuration), style = MaterialTheme.typography.labelSmall, color = Color(0xFF087F79), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                                     Text("${bytes(file.done)} / ${bytes(file.size)}（${"%.1f".format(fraction * 100)}%） · ${current.peers} 个节点 · ${bytes(current.payloadRate.toLong())}/秒 · ${player?.duration?.takeIf { it > 0 }?.let(::formatTime) ?: "等待时长"} · ${player?.videoSize?.height?.takeIf { it > 0 }?.let { "${it}P" } ?: "等待分辨率"}", style = MaterialTheme.typography.labelSmall, color = Color(0xFF444444))
                                 }
                             }
@@ -451,6 +449,14 @@ class PlayerActivity : ComponentActivity() {
         if (next != null) openStored(next.first, next.second)
         else android.widget.Toast.makeText(this, "没有下一个已缓存或下载的视频", android.widget.Toast.LENGTH_SHORT).show()
     }
+    private fun playPreviousStored() {
+        val current = task ?: return
+        val queue = StoredVideos.queue(current)
+        val index = queue.indexOfFirst { it.first === current && it.second.index == current.playingIndex }
+        val previous = queue.getOrNull(index - 1)
+        if (previous != null) openStored(previous.first, previous.second)
+        else android.widget.Toast.makeText(this, "没有上一个已缓存或下载的视频", android.widget.Toast.LENGTH_SHORT).show()
+    }
     private fun toggleFavorite() {
         val t=task ?: return;val f=t.files.firstOrNull { it.index==t.playingIndex }
         val link=f?.let { StoredVideos.fileSource(t,it) } ?: t.source
@@ -493,6 +499,7 @@ class PlayerActivity : ComponentActivity() {
             else if (normalOrientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
             else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
         updateSystemBars()
+        window.decorView.post { refreshProgress() }
     }
     private fun updateSystemBars() {
         val controller = WindowCompat.getInsetsController(window, window.decorView)
@@ -560,6 +567,7 @@ class PlayerActivity : ComponentActivity() {
                 overlay.findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
                 overlay.findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
                 overlay.findViewById<View>(R.id.player_next).setOnClickListener { playNextStored() }
+                overlay.findViewById<View>(R.id.player_previous).setOnClickListener { playPreviousStored() }
                 overlay.findViewById<View>(R.id.player_favorite).setOnClickListener { toggleFavorite() }
                 overlay.findViewById<View>(R.id.player_quality).setOnClickListener { onQuality() }
                 overlay.findViewById<View>(R.id.player_tracks).setOnClickListener { showTrackMenu() }
@@ -681,12 +689,11 @@ class PlayerActivity : ComponentActivity() {
                 typeface=DisplaySettings.typeface(this@PlayerActivity)
             }
             val ranges = TorrentTasks.verifiedRanges(t, f)
-            val rangeDescription = CacheCoverage.describe(ranges, f.size, duration)
-            view.findViewById<TextView>(R.id.player_cache_ranges)?.text = rangeDescription
-            view.findViewById<CacheCoverageView>(R.id.player_cache_coverage)?.submit(ranges, f.size, rangeDescription)
+            view.findViewById<TextView>(R.id.player_cache_ranges)?.visibility = View.GONE
+            view.findViewById<CacheCoverageView>(R.id.player_cache_coverage)?.submit(ranges, f.size, "已缓存区间")
             if(player?.isPlaying==true && System.currentTimeMillis()-lastHistoryAt>5000) {lastHistoryAt=System.currentTimeMillis();LibraryStore.addPlayback(this,f.path.substringAfterLast('/'),link,player?.currentPosition ?: 0,duration)}
         }
-        for((id,size) in listOf(R.id.player_position to 12f,R.id.player_duration to 12f,R.id.player_speed to 13f,R.id.player_quality to 11f,R.id.player_resource_info to 11f,R.id.player_cache_ranges to 10f)) view.findViewById<TextView>(id)?.apply { typeface=DisplaySettings.typeface(this@PlayerActivity);setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP,size*DisplaySettings.scale(this@PlayerActivity)) }
+        for((id,size) in listOf(R.id.player_position to 12f,R.id.player_duration to 12f,R.id.player_speed to 13f,R.id.player_quality to 11f,R.id.player_resource_info to 11f)) view.findViewById<TextView>(id)?.apply { typeface=DisplaySettings.typeface(this@PlayerActivity);setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP,size*DisplaySettings.scale(this@PlayerActivity)) }
         val current=player ?: return
         if (scrubbing) return
         val duration = current.duration.takeIf { it > 0 } ?: 0L

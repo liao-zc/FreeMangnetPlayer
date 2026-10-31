@@ -6,6 +6,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - **电视直播**：添加多个 M3U/M3U8 地址或导入本地播放列表，按分组查看频道，收藏、观看历史、全屏和画中画。
 - **磁力播放**：在应用内搜索或粘贴 magnet，查看文件列表，播放、缓存、下载并管理收藏/历史。
+- **搜索和任务管理**：搜索结果按源站翻页并去重显示磁力链接；下载与缓存集中在任务页，搜索/播放/任务历史分开管理。
 - **通用设置**：字体、背景、存储访问与软件更新入口。
 
 ## 架构和验收文档
@@ -21,9 +22,9 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前开发版本：`v0.3.9`（versionCode `37`）。v0.3.8 已通过全量 CI 并正式发布；本轮报告与需求清单校准后再次执行 CI 并发布 v0.3.9。
+- 当前开发版本：`v0.3.10`（versionCode `38`）。本版本待全量 CI 通过后发布。
 - v0.3.8 已按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；旧通用包包含四种 ABI 的 libtorrent 和 LibVLC 原生库，因此体积较大，ABI 拆包减少了单包内的无关原生库。
-- [v0.3.8 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.8)，SHA-256 清单和大小见 Release 附件。CI 通用 APK 下载到 [`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)。
+- [v0.3.9 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.9)，SHA-256 清单和大小见 Release 附件。CI 通用 APK 下载到 [`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)。
 - 模块：`:app`、`:ui-inspector`
 - 核心技术：Kotlin、Jetpack Compose、Media3、LibVLC、libtorrent4j
 

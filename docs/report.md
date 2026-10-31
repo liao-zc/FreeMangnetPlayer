@@ -156,3 +156,8 @@ GitHub Actions [run 41199169525](https://github.com/liao-zc/OmniPlayer/actions/r
 GitHub Release [v0.3.8](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.8) 已发布四种 ABI APK 与 SHA-256 清单。ARM64 APK 大小为 114,734,853 bytes，SHA-256 为 `def1f210684aa535f15f758315171ae77799c9978165ed4d0f009a806999b276`。本报告不把用户给出的公网磁力记为通过；SAF 文件选择器跨厂商返回行为、真实更新服务器下载、真实 IPTV 源外观仍需设备或服务端验证。
 
 本地 ARM64 Release APK 的下载在本次会话内未完成，原因是 GitHub 资产下载速率很低；不得将已有旧版本地 APK 当作 v0.3.8。需求清单中的公网 magnet 验收仍按用户排除的十条资源处理。
+## 2026-10-31 搜索、任务、播放器和直播交互更新
+
+本轮实现了新增的12项需求：底部导航移除重复搜索并把下载/缓存合并为“任务”；搜索框旁新增搜索历史菜单，搜索动作只显示图标；历史页按搜索、播放、任务三类显示和管理，支持复制、单项删除与分类/全部清空；搜索结果去重并显示 magnet，结果数不再经客户端10条分页，页码跟随搜索源，增加大小排序；播放器增加上一个已缓存/下载文件快捷键，移除缓存区间文字，将缓存区间色带叠入时间进度条；从直播收藏播放时仍使用完整频道列表切换。
+
+验证状态：新需求已逐条登记在 `docs/requirements-checklist.md` N 节，并纳入 UI 回归脚本。待本轮 Gradle/Android instrumentation 与 GitHub Actions 完成后再填最终通过/失败证据。自动化受控搜索 fixture 验证源站页码、无本地10条分页、磁力去重、大小排序；它不代替真实公网搜索源或物理设备播放验证。
