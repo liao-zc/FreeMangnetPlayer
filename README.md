@@ -12,9 +12,9 @@ Playback depends on codec support and on the torrent having reachable peers. The
 
 ## Current development
 
-The `improve/modern-bt-engine` branch contains the latest settings, search paging/deduplication, and IPTV control changes. This work is not part of a new published APK yet. Its full checklist, historical requirement summary, and known test limits are in [docs/report.md](docs/report.md).
+The `improve/modern-bt-engine` branch has passed Android APK compilation and the current UI walkthrough on an Android API 35 emulator. The latest settings, search paging/deduplication, and IPTV control changes are not part of a newly published APK. Its full checklist, historical requirement summary, screenshots, and known test limits are in [docs/report.md](docs/report.md).
 
-Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest magnet supplied for playback names an `.srt` subtitle file, which cannot itself produce a video frame.
+Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest magnet supplied for playback declares an `.srt` file with `so=1`; inspect the torrent file list before treating that selected file as a video.
 
 ## Build and download
 
