@@ -9,4 +9,5 @@ internal object MediaFormats {
     fun extension(path: String) = path.substringAfterLast('.', "").lowercase(java.util.Locale.ROOT)
     fun isVideo(path: String) = extension(path) in extensions
     fun useSoftware(path: String) = extension(path) in softwareContainers
+    fun shouldRetryWithSoftware(path: String) = extension(path) == "mkv" && !useSoftware(path)
 }

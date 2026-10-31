@@ -380,7 +380,7 @@ class PlayerActivity : ComponentActivity() {
                 window.decorView.post {
                     if (player === media && !isDestroyed) {
                         savedPosition = media.currentPosition
-                        if (media !is VlcTorrentPlayer && error.errorCode in 3000..4999) {
+                        if (media !is VlcTorrentPlayer && error.errorCode in 3000..4999 && MediaFormats.shouldRetryWithSoftware(file.path)) {
                             releasePlayer()
                             playerMessage = "正在尝试兼容解码：${file.path}"
                             startPlayback(task, file, forceSoftware = true)
