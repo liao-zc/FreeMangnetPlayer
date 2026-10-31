@@ -1,12 +1,21 @@
-# FreeMangnetPlayer
+# OmniPlayer
 
-安卓磁力播放器，当前版本 **v0.1.16**。本地使用模式。
+OmniPlayer is an Android IPTV and magnet media player. The latest published APK is [v0.3.0](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.0). Existing installations keep the Android application ID `com.freemangnetplayer` for in-place upgrades and app-data retention.
 
-- [ARM64 下载](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-arm64-v8a.apk)
-- [十五项点检与实际截图](docs/report.md)
-- [操作说明](docs/usage-zh.md)
-- [离线图文报告](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-report.html)
-- [源码包](https://github.com/liao-zc/FreeMangnetPlayer/releases/download/v0.1.16/FreeMangnetPlayer-v0.1.16-source.zip)
-- [第三方许可证](THIRD_PARTY_NOTICES.md)
+## Published app
 
-新增显示与字体、四类历史、20 条分页及跳页、媒体缓存信息、爱心收藏与收藏多选下载。受控不限速测试峰值 8.89MB/s；公网十条起播 0/10，未达到 90% 要求。公网速度、缺失资源元数据及网站总页数不作虚假保证，见报告。
+- IPTV channels, configurable playlists, favorites, history, fullscreen, and picture-in-picture.
+- Magnet search, torrent metadata/file selection, playback, caching, downloads, and a Media3/LibVLC player.
+- General appearance and update controls in Settings.
+
+Playback depends on codec support and on the torrent having reachable peers. The latest public-resource acceptance report recorded **0/10 first frames**; local controlled-seed tests passed 16 format fixtures. Public magnet playback is still an open issue.
+
+## Current development
+
+The `improve/modern-bt-engine` branch contains the latest settings, search paging/deduplication, and IPTV control changes. This work is not part of a new published APK yet. Its full checklist, historical requirement summary, and known test limits are in [docs/report.md](docs/report.md).
+
+Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest magnet supplied for playback names an `.srt` subtitle file, which cannot itself produce a video frame.
+
+## Build and download
+
+Use Android Studio with JDK 17, or build with Gradle. Download the current published APK from [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases).
