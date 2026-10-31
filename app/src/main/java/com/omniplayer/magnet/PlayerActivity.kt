@@ -173,7 +173,7 @@ class PlayerActivity : ComponentActivity() {
                                         .put("downloadLimit", current.downloadLimit).put("uploadLimit", current.uploadLimit)
                                         .put("outgoingUtp", current.outgoingUtp).put("fullscreen", fullscreen).put("floating", floating).put("transportFallbackUsed", current.transportFallbackUsed).put("metadataReplacements", current.engine?.metadataReplacements ?: 0).put("restoredTrackers", current.engine?.restoredTrackers ?: 0).put("networkMessage", current.networkMessage)
                                         .put("streaming", current.streaming).put("sequentialStartupActive", current.sequentialStartupActive).put("streamRangeStart", current.streamRangeStart).put("streamRangeEnd", current.streamRangeEnd).put("startupPieces", startupPieces).put("cacheFlushGeneration", current.engine?.cacheFlushGeneration ?: -1L)
-                                        .put("controllerEnabled", activeView?.useController ?: false).put("controllerRootVisibility", activeView?.findViewById<View>(R.id.exo_controller)?.visibility ?: -1).put("qualityViewVisibility", activeView?.findViewById<View>(R.id.player_quality)?.visibility ?: -1).put("playerClass", player?.javaClass?.simpleName.orEmpty()).put("playerDebug", (player as? VlcTorrentPlayer)?.debugInfo() ?: JSONObject())
+                                        .put("controllerEnabled", activeView?.useController ?: false).put("controllerFullyVisible", activeView?.isControllerFullyVisible ?: false).put("controllerRootVisibility", activeView?.findViewById<View>(R.id.exo_controller)?.visibility ?: -1).put("qualityViewVisibility", activeView?.findViewById<View>(R.id.player_quality)?.visibility ?: -1).put("playerClass", player?.javaClass?.simpleName.orEmpty()).put("playerDebug", (player as? VlcTorrentPlayer)?.debugInfo() ?: JSONObject())
                                         .put("videoHeight", player?.videoSize?.height ?: 0).put("qualityHeight", qualityHeight).put("storedQueue", JSONArray().also { a -> StoredVideos.queue(current).forEach { row -> a.put(JSONObject().put("task", row.first.id).put("index", row.second.index).put("done", row.second.done).put("size", row.second.size)) } }).put("queued", current.queued).put("cancelled", current.cancelled).put("currentFile", current.playingIndex).toString())
                                     val tasks = JSONArray()
                                     TorrentTasks.tasks.values.forEach { tasks.put(JSONObject().put("id", it.id).put("done", it.done).put("total", it.total).put("paused", it.paused).put("queued", it.queued).put("cancelled", it.cancelled).put("folder", it.folder.absolutePath)) }
@@ -538,6 +538,7 @@ class PlayerActivity : ComponentActivity() {
     private fun VideoSurface(modifier: Modifier, onQuality: () -> Unit = {}, onFiles: () -> Unit) {
         AndroidView(factory = { context ->
             (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
                 setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                 setShutterBackgroundColor(android.graphics.Color.BLACK)
                 controllerShowTimeoutMs = 60000
@@ -578,6 +579,7 @@ class PlayerActivity : ComponentActivity() {
                 view.player = player
                 if (player != null && !floating) showEmbeddedControls(view)
             }
+            if (player != null && !floating && !view.isControllerFullyVisible) showEmbeddedControls(view)
             if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
             view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
             view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"

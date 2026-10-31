@@ -2,7 +2,7 @@
 
 更新日期：2026-10-31
 
-## v0.3.3 本轮改动
+## v0.3.4 本轮改动
 
 本轮新增并在 `docs/requirements-checklist.md` M 节逐项登记了用户提出的 13 项需求。代码已实现缓存片段范围显示、播放器 seek 回调、播放任务调度优先、观看位置/时长保存、系统目录与 M3U 文件选择取消、频道选择器缩放、更新下载进度，以及 ABI 拆分发布流程。新增 instrumentation 覆盖分片区间计算、播放位置按文件恢复、播放优先级策略。以下项目在本轮 GitHub Actions 完成前不提前记为通过。
 
@@ -14,11 +14,11 @@
 | Android 构建、instrumentation、模拟器 UI 与分页回归 | 待本轮 Actions | 需成功执行 `scripts/run_full_ci.ps1 -PublishRelease`。 |
 | 缓存片段条 | 逻辑测试待 CI | 基于 libtorrent 的已校验 piece 显示分段；时间位置为按字节比例估算，VBR 时间轴精度有限。 |
 | 指定 Spider-Man magnet | 本轮未联网下载或播放 | 该公网 torrent 是否存活、能否起播取决于做种与节点。本轮使用受控素材验证代码，不能报告公网播放通过。 |
-| 本地与远端 APK | 待 v0.3.3 发布 | 发布工作流生成四种 ABI APK，并检查包内 JNI ABI 集合、保存文件大小和 SHA-256。 |
+| 本地与远端 APK | 待 v0.3.4 发布 | 发布工作流生成四种 ABI APK，并检查包内 JNI ABI 集合、保存文件大小和 SHA-256。 |
 
 ### APK 体积说明
 
-之前的通用 APK 同时装入 arm64-v8a、armeabi-v7a、x86、x86_64 的 libtorrent 原生库，且 LibVLC 也包含多个 ABI，因此单个 APK 会包含多个设备用不到的 native payload。v0.3.3 发布流程按 ABI 分别构建，并检查每个 APK 的 `lib/` 目录只包含目标 ABI；实际体积以 Release 的 `APK-SIZES.txt` 为准。应用 ID 与签名配置保持不变，设计上支持覆盖安装并保留本地偏好和任务数据；本轮仍需 CI 确认包签名和 ABI 检查后才能作最终结论。
+之前的通用 APK 同时装入 arm64-v8a、armeabi-v7a、x86、x86_64 的 libtorrent 原生库，且 LibVLC 也包含多个 ABI，因此单个 APK 会包含多个设备用不到的 native payload。v0.3.4 发布流程按 ABI 分别构建，并检查每个 APK 的 `lib/` 目录只包含目标 ABI；实际体积以 Release 的 `APK-SIZES.txt` 为准。应用 ID 与签名配置保持不变，设计上支持覆盖安装并保留本地偏好和任务数据；本轮仍需 CI 确认包签名和 ABI 检查后才能作最终结论。
 
 本轮已把磁力播放、IPTV 直播、通用能力和全局设置按职责拆分，并按历史需求建立了逐项功能清单。完整架构见 [架构说明](architecture.md)，逐项结果与证据边界见 [全量功能点检清单](requirements-checklist.md)。
 
