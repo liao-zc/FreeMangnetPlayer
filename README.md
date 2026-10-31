@@ -14,6 +14,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 - [完整历史需求清单和逐项点检报告](docs/requirements-checklist.md)
 - [本轮重构报告](docs/report.md)
 - [当前主界面截图](docs/screenshots/current-ui/01-home.png)
+- [本轮 CI 实际验证截图](docs/screenshots/current-ci/library-stored-queue.png)
 - [界面使用说明](docs/usage-zh.md)
 
 ## 构建信息
@@ -39,4 +40,4 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 .\scripts\run_full_ci.ps1
 ```
 
-脚本会重试推送当前分支，启动 `library.yml` 全量 Android/媒体库/偏好/搜索分页回归，等待完成并下载 APK 和逐项 CI 报告到 `artifacts/ci/<run-id>/`。失败测试的截图和状态文件会一并保留。
+脚本会无限退避重试推送当前分支，启动 `library.yml` 全量 Android/媒体库/偏好/搜索分页回归并等待完成；最新 APK 提取至 `dist/OmniPlayer-debug.apk`，逐项 CI 报告保存至 `artifacts/ci/<run-id>/`。失败测试的截图和状态文件保留在 Actions artifact 中。

@@ -55,3 +55,35 @@
 - Actions run [41170874885](https://github.com/liao-zc/OmniPlayer/actions/runs/41170874885) 发现提交对象中的 README 被 SafeNet 过滤加密，失败在仓库编码检查。
 - 已从 `.gitattributes` 删除错误 `fmp-plaintext` 清理过滤规则，并通过 GitHub Contents API 发布 README、报告和完整需求表单的 UTF-8 明文版本；本地 Fetch 后 `HEAD` 与远端 ref 一致，提交 `6d3457049f247248f38527ead1f9cbdf836a3bd1`。
 - 下一次 `scripts/run_full_ci.ps1` 将重新验证仓库所有文本对象；只有其编码检查与后续 Android/模拟器套件完成后，才把 Markdown 和 APK 构建记为通过。
+
+## 2026-10-31 后续回归与交付
+
+本次修正了媒体库回归脚本在多文件缓存后重新打开播放器时的步骤：它现在通过单个磁力 `VIEW` Intent 重开，并确认 `PlayerActivity` 位于前台且播放位置有效，再检查未完成视频的队列切换。此修复是测试稳定性修正；应用播放实现本身未因这次回归错误而变更。
+
+| 检查 | 结果 |
+|---|---|
+| 架构边界、文本/UTF-8 检查、Python 脚本语法 | 通过：Actions [41176052615](https://github.com/liao-zc/OmniPlayer/actions/runs/41176052615) |
+| APK 与 Android instrumentation 构建 | 通过：同一 Actions run |
+| API 35 instrumentation 与受控媒体库回归 | 通过：真实启动 APK；播放器 Intent 重开、缓存跨重启恢复、多文件队列和下一条播放等 19 项均通过 |
+| 字体/播放历史/收藏回归 | 通过：同一模拟器 run，11 项检查通过 |
+| 搜索源分页、上一页/跳页与排序 | 通过：受控 fixture，6 项检查通过；每页 10 条、来源分页按本次模拟器验证 |
+| CI 汇总报告 | 36 项通过，0 项失败；完整报告见 `artifacts/ci/41176052615/OmniPlayer-CI-Report.md` |
+| 最新 APK | 从此 run 的 Actions artifact 提取至 `dist/OmniPlayer-debug.apk`；SHA-256：`B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557` |
+
+本次按用户要求排除了那 10 条指定公网磁力的专项验收，报告没有把它们写成通过。当前 CI 使用本地受控做种素材；公网种子可用性、首帧速度、真实频道播放/画中画、所有电视设备适配和搜索源逐站结果对照仍未由本次模拟器 run 验证。无源站大小/发布日期字段时，客户端也不能生成“精准”元数据；对应未通过项保持未通过，详见需求表。
+
+`scripts/run_full_ci.ps1` 现在默认无限退避重试 GitHub 推送，成功后执行 `.github/workflows/library.yml`；它从 Actions artifact 按 ZIP 条目提取 APK 与 CI Markdown 报告，避免为取得 APK 下载整包截图数据。`scripts/download_ci_artifact.ps1` 是该提取脚本。完整截图仍保留在 Actions run artifact，当前点检用的截图也存于 `docs/screenshots/current-ci/`。
+
+### 当前 run 的模拟器截图
+
+![缓存文件队列](screenshots/current-ci/library-stored-queue.png)
+
+![从已缓存队列切换到部分下载的视频](screenshots/current-ci/library-partial-next-video.png)
+
+![应用重启后仍可找到缓存视频](screenshots/current-ci/library-cache-restored.png)
+
+![显示与字体设置](screenshots/current-ci/font-settings.png)
+
+![搜索结果分页](screenshots/current-ci/search-pagination.png)
+
+![搜索结果排序选项](screenshots/current-ci/search-sort-options.png)

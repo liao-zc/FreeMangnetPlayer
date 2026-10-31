@@ -201,3 +201,28 @@
 | 单个 UI 套件失败后继续执行偏好和分页测试并生成逐项报告 | 代码已加入，待运行 | `scripts/run_ui_regressions.sh` 记录每个套件退出码，`scripts/summarize_ci_results.py` 汇总每项检查。 |
 
 | README 与 Markdown 在 GitHub 可读，仓库文本检查无加密对象 | 修复已发布，待新 CI | 移除 `.gitattributes` 错误文本过滤，通过 GitHub API 写入 UTF-8 明文 README/报告/需求表单；新一轮 Actions 仓库编码检查尚未运行。 |
+
+## L. 2026-10-31 当前续检（用户排除 10 条指定公网磁力）
+
+当前证据来自 Actions [41176052615](https://github.com/liao-zc/OmniPlayer/actions/runs/41176052615)，提交 `8f39f7301b84b257023932ee92183588b6be6722`。本轮按用户指示不运行、不判定那 10 条公网 magnet 专项验收。
+
+| 功能/检查 | 本轮状态 | 实测证据与边界 |
+|---|---|---|
+| 架构包边界、仓库文本可读性、CI Python 文件语法 | 通过 | `architecture-smoke-check.py`、`check_repository.py`、`py_compile` 在 Actions 成功。 |
+| OmniPlayer APK 与 instrumentation APK 构建 | 通过 | Actions `41176052615` 的 Build APK and Android instrumentation APK 成功。 |
+| API 35 Android instrumentation | 通过 | 模拟器执行 `connectedDebugAndroidTest` 成功。 |
+| 多文件选中、缓存入库、未完成文件进入下一条队列 | 通过（受控素材） | 媒体库 UI 回归通过；截图见 `screenshots/current-ci/library-stored-queue.png`、`library-partial-next-video.png`。 |
+| 磁力 Intent 重开播放器、播放页查看已缓存/下载视频队列 | 通过（回归修复） | 新增 `player-reopened-through-magnet-intent` 检查；确认 PlayerActivity 前台且播放位置有效后再点文件队列。 |
+| 缓存跨进程重启可见并能重新打开播放 | 通过（受控素材） | `cache-entry-discoverable-after-process-restart` 与 `cached-file-reopens-and-plays` 通过；截图见 `library-cache-restored.png`。 |
+| 默认原画与切换真实低分辨率轨道 | 通过（多轨素材） | `default-original-quality`、`existing-lower-resolution-track-selects-real-360p`、`original-quality-restores-highest-track` 通过；不代表客户端可转码生成低码率副本。 |
+| 收藏、播放记录、缓存及下载条目单删/多删 | 通过（受控素材） | 媒体库套件 19 项全过，覆盖收藏、历史、文件保留和删除。 |
+| 字体预设/字体应用、历史记录及收藏入口 | 通过（模拟器） | 偏好 UI 套件通过；当前截图见 `screenshots/current-ci/font-settings.png`。 |
+| 搜索每页 10 条、来源翻页/跳页、排序和返回搜索上下文 | 通过（受控 fixture） | 搜索分页套件通过；截图见 `screenshots/current-ci/search-pagination.png`、`search-sort-options.png`。不证明所有公网搜索源都返回相同页数。 |
+| 当前 CI 汇总计数 | 通过 | `OmniPlayer-CI-Report.md` 记录 36 项通过、0 项失败；媒体库 19 项、偏好/历史 11 项、搜索分页 6 项。 |
+| 用户指定 10 条公网 magnet 专项 | 本轮排除 | 遵照当前指示，不测试、不把此前失败改标通过。 |
+| 搜索源精准大小/发布日期及结果与原网站偏差 | 未通过/来源能力限制 | 本轮验证受控分页/匹配逻辑，不构成对六个公网站点实时等量抓取的保证；源站未公开的数据不能由客户端精准推造。 |
+| 无 Peer 资源稳定保留并永久提示 | 本轮未覆盖 | 本轮受控素材有可用 Peer，不能据此声称 no-peer 行为已通过；原未通过状态保留。 |
+| IPTV 真实源端到端解析/播放、PiP、全屏、真机/电视遥控器 | 本轮未覆盖 | 当前 API 35 手机模拟器 run 未连接真实直播源，也未覆盖电视遥控器或多厂商播放器行为。 |
+| 自动升级覆盖安装后保留设置/缓存 | 本轮未覆盖 | 本轮没有实际触发系统安装器覆盖升级；原部分状态保留。 |
+| 当前工作区旧文件清理 | 进行中 | 已产出本轮 APK；后续精确清理旧 `dist` 包和过期 CI 中间文件。已有 `.tmp-*` 删除曾遭执行环境拒绝，本轮不绕过。 |
+| 本地最新 APK | 已从当前 run 提取 | `dist/OmniPlayer-debug.apk`，307,441,494 bytes；ZIP 结构含 `AndroidManifest.xml` 和 `classes.dex`，SHA-256 `B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557`。 |
