@@ -1,20 +1,21 @@
 # OmniPlayer
 
-OmniPlayer is an Android app for IPTV live channels and magnet-link search, playback, downloads, and caching. The current published release is [v0.3.0](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.0). The Android package ID remains `com.freemangnetplayer` to support in-place upgrades and preserve app data.
+OmniPlayer is an Android IPTV and magnet media player. The latest published APK is [v0.3.0](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.0). Existing installations keep the Android application ID `com.freemangnetplayer` for in-place upgrades and app-data retention.
 
-## Features
+## Published app
 
-- IPTV: configurable M3U/M3U8 sources by URL or imported file, channel groups, favorites, viewing history, fullscreen, and picture-in-picture.
-- Magnet: configurable search engines, in-app results, BTIH de-duplication, result paging, metadata/file selection, download/cache tasks, and playback.
-- Player: Media3 plus LibVLC fallback, seeking, speed, quality selection where available, audio/subtitle selection, fullscreen, and picture-in-picture.
-- Settings: one home entry for live TV, magnet, general appearance, update checks, and software information. Magnet and live-TV settings remain separate.
+- IPTV channels, configurable playlists, favorites, history, fullscreen, and picture-in-picture.
+- Magnet search, torrent metadata/file selection, playback, caching, downloads, and a Media3/LibVLC player.
+- General appearance and update controls in Settings.
 
-## Limits and current verification
+Playback depends on codec support and on the torrent having reachable peers. The latest public-resource acceptance report recorded **0/10 first frames**; local controlled-seed tests passed 16 format fixtures. Public magnet playback is still an open issue.
 
-A magnet metadata list does not prove that a torrent has peers or playable bytes. The previous public-resource acceptance run rendered **0/10 first frames**; a controlled local seed passed playback and checksum checks for 16 formats. Public playback therefore remains an unresolved, resource-dependent limitation. See the [current functional checklist and audit](docs/report.md).
+## Current development
 
-Search results show source-provided size, format, and publication date when available. A source that does not expose a field is shown as `—`; the app does not invent metadata. The magnet supplied in the latest request declares an `.srt` subtitle as its selected file, which is not itself a video stream.
+The `improve/modern-bt-engine` branch contains the latest settings, search paging/deduplication, and IPTV control changes. This work is not part of a new published APK yet. Its full checklist, historical requirement summary, and known test limits are in [docs/report.md](docs/report.md).
 
-## Build
+Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest magnet supplied for playback names an `.srt` subtitle file, which cannot itself produce a video frame.
 
-Open the project in Android Studio with JDK 17, or run `gradle assembleDebug`. Current release metadata and APK downloads are listed on the [GitHub Releases page](https://github.com/liao-zc/OmniPlayer/releases).
+## Build and download
+
+Use Android Studio with JDK 17, or build with Gradle. Download the current published APK from [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases).
