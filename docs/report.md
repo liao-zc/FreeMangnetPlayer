@@ -36,9 +36,9 @@
 |---|---|
 | 最新架构拆分代码构建与 API 35 instrumentation | 通过：Actions [41162813195](https://github.com/liao-zc/OmniPlayer/actions/runs/41162813195) |
 | GitHub Markdown 渲染 | 通过：Actions [41165205364](https://github.com/liao-zc/OmniPlayer/actions/runs/41165205364) |
-| 当前分支全量媒体库/设置/搜索分页回归 | 三轮未通过：`41164610686`、`41165205509`、`41165851825`。受控视频能起播，但控制层仍未进入视图树；已补齐根 ID `exo_controller`，增加 surface 点击显示及状态诊断。第四轮 Actions `41166377619` 待验证。 |
+| 当前分支全量媒体库/设置/搜索分页回归 | 四轮未通过：`41164610686`、`41165205509`、`41165851825`、`41166377619`。视频持续播放但控制层仍隐藏；诊断显示 `useController=true`、画质子控件存在、控制根节点 `GONE`。现已在点击处理和播放器首次绑定时显式设为 `VISIBLE`，第五轮 Actions `41166934395` 待验证。 |
 | 当前分支截图采集 | 通过：Actions [41164612904](https://github.com/liao-zc/OmniPlayer/actions/runs/41164612904)，14 张手机模拟器截图已更新到 `docs/screenshots/current-ui/`。该截图任务与最新播放器控制条顺序调整只差一行，不影响截图中的设置和直播页面。 |
-| 最新播放器控制条回归 | 进行中：Actions [41166377619](https://github.com/liao-zc/OmniPlayer/actions/runs/41166377619)，验证自定义 Media3 控制容器根 ID 与触屏显示修复。前三轮未定位控制层，后续偏好/分页检查未执行。 |
+| 最新播放器控制条回归 | 进行中：Actions [41166934395](https://github.com/liao-zc/OmniPlayer/actions/runs/41166934395)，验证强制显示 Media3 控制容器修复。此前四轮未通过控制层检查，后续偏好/分页检查未执行。 |
 | 公网磁力快速起播 | 未通过：历史受控/公网证据仍显示启动慢，无法证明十条用户磁力达到 90% 成功或 2 MB/s。 |
 
 `41163294809` 已通过编译和 instrumentation 单元/组件测试，但后续综合脚本在播放器画质控件检查处停止，因此后续偏好与搜索分页阶段未执行。修复后的完整结果应以新的 CI run 为准。本地项目文件夹仍名为 `FreeMagnetPlayer`，安装包 ID `com.freemangnetplayer` 为兼容旧安装而保留；界面和仓库名称为 OmniPlayer。
