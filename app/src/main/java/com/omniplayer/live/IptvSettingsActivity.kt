@@ -113,7 +113,7 @@ class IptvSettingsActivity : ComponentActivity() {
                         confirmButton = { TextButton(onClick = {
                             showPlaylistPickerPrompt = false
                             playlistPicker.launch(arrayOf("application/x-mpegURL", "audio/x-mpegurl", "text/plain", "application/octet-stream"))
-                        }) { Text("继续选择") },
+                        }) { Text("继续选择") } },
                         dismissButton = { TextButton(onClick = { showPlaylistPickerPrompt = false }) { Text("取消并返回") } }
                     )
                     Button(onClick = {
