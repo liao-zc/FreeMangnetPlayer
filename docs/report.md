@@ -119,7 +119,7 @@
 ## 2026-10-31 全量 CI 与交付更新
 
 - 最新成功 CI：[41179560907](https://github.com/liao-zc/OmniPlayer/actions/runs/41179560907)，提交 3f7df41151644ac6d127d025cd1532f92521a5a7；36 项通过、0 项失败。报告见 [CI 报告与 APK artifact](https://github.com/liao-zc/OmniPlayer/actions/runs/41179560907)。
-- 本地 APK：[OmniPlayer-debug.apk](../dist/OmniPlayer-debug.apk)，307,441,494 bytes，SHA-256 B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557。它取自 CI run 41176052615；当前成功 run 和该 run 的 app/ 树逐文件相同，因此 APK 对应当前应用源码。
+- 本地 APK：`dist/OmniPlayer-debug.apk` (历史 CI 本地文件；当前公开下载请使用本报告中的 GitHub Release 链接)，307,441,494 bytes，SHA-256 B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557。它取自 CI run 41176052615；当前成功 run 和该 run 的 app/ 树逐文件相同，因此 APK 对应当前应用源码。
 - 无 Peer 行为：策略级 instrumentation 通过，真实 3 分钟 BT/UI 端到端未验证。
 - 用户提供的十条公网磁力验收按要求排除；未写成通过。
 
