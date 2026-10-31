@@ -5,7 +5,7 @@ OmniPlayer is an Android media app for IPTV live channels and magnet-link search
 ## Current development state
 
 - Current release: **v0.2.7**.
-- The unreleased v0.2.9 updater, player, and directory-picker changes pass the GitHub Actions Android APK build (run 41107548311). No device playback or update-install test has been completed, so these changes are not a published release.
+- The current development version is **v0.3.0**. LibVLC-backed playback now exposes embedded audio and subtitle track selection alongside the Media3 chooser. This change is pending Android CI and device verification; it is not a published release.
 - Android package ID remains `com.freemangnetplayer` so signed upgrades can retain the existing app's private settings and data.
 - Supported playback depends on container/codec support in Android Media3, device decoders, or LibVLC. No Android player can guarantee every codec and profile on every device.
 
@@ -20,8 +20,8 @@ Additional M3U/M3U8 sources can be configured by URL or imported from a device f
 
 ## Verification
 
-The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The latest update/player changes are marked as implementation-only until CI and device verification are available. Do not treat the historic v0.2.7 APK as containing these unreleased changes.
+The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The v0.3.0 changes remain implementation-only until CI and device verification are available. Do not treat the historic v0.2.7 APK as containing these unreleased changes.
 
 ## Download
 
-See [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases) for published APKs. The current development changes have no new APK download yet.
+See [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases) for published APKs. A v0.3.0 APK will be linked here only after the build succeeds and the release is created.

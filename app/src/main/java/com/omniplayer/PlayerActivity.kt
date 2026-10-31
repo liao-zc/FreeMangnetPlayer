@@ -553,6 +553,14 @@ class PlayerActivity : ComponentActivity() {
         else "%02d:%02d".format(seconds / 60, seconds % 60)
     }
     private fun showTrackMenu() {
+        val vlc = player as? VlcTorrentPlayer
+        if (vlc != null) {
+            android.app.AlertDialog.Builder(this).setTitle("音轨与字幕")
+                .setItems(arrayOf("选择音轨", "选择字幕")) { _, which ->
+                    showVlcTrackPicker(vlc, subtitle = which == 1)
+                }.show()
+            return
+        }
         val exo = player as? ExoPlayer
         if (exo == null) {
             android.widget.Toast.makeText(this, "当前播放内核暂不支持轨道选择", android.widget.Toast.LENGTH_SHORT).show()
@@ -561,6 +569,26 @@ class PlayerActivity : ComponentActivity() {
         android.app.AlertDialog.Builder(this).setTitle("音轨与字幕")
             .setItems(arrayOf("选择音轨", "选择字幕")) { _, which ->
                 showTrackPicker(exo, if (which == 0) C.TRACK_TYPE_AUDIO else C.TRACK_TYPE_TEXT)
+            }.show()
+    }
+    private fun showVlcTrackPicker(vlc: VlcTorrentPlayer, subtitle: Boolean) {
+        val tracks = if (subtitle) vlc.subtitleTrackChoices() else vlc.audioTrackChoices()
+        if (tracks.isEmpty()) {
+            android.widget.Toast.makeText(this, if (subtitle) "此视频没有可选的内嵌字幕轨道" else "此视频没有可选的音轨", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+        val labels = buildList {
+            add(if (subtitle) "关闭字幕" else "自动选择")
+            tracks.forEach { track -> add("${if (track.selected) "✓ " else ""}${track.label}") }
+        }
+        android.app.AlertDialog.Builder(this)
+            .setTitle(if (subtitle) "字幕轨道" else "音轨")
+            .setItems(labels.toTypedArray()) { _, index ->
+                if (subtitle) {
+                    if (index == 0) vlc.selectSubtitleTrack(-1)
+                    else vlc.selectSubtitleTrack(tracks[index - 1].id)
+                } else if (index == 0) vlc.selectAudioTrack(-1)
+                else vlc.selectAudioTrack(tracks[index - 1].id)
             }.show()
     }
     private fun showTrackPicker(exo: ExoPlayer, type: Int) {

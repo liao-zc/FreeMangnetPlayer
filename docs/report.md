@@ -628,3 +628,12 @@ This section records the current code changes. The Android APK build passed on G
 - This Windows session has no local Java, Gradle, or Android Debug Bridge executable. GitHub Actions Android APK build **passed** on run [41107548311](https://github.com/liao-zc/OmniPlayer/actions/runs/41107548311). Earlier builds exposed a missing FileProvider XML resource and a stale cache progress view reference; both were fixed before this successful build. The workflow artifact is attached to the run; no release was published. No emulator/phone test was run.
 - The update was synchronized through the GitHub API because Git fetch timed out. A raw Git blob check found the local project files byte-for-byte equal to the remote tree after synchronization. Local `.git` branch metadata still points to an older commit.
 - The previous exact-magnet run remains **0/10 first-frame starts** before the later cache-flush event-order fix; post-fix playback was not verified. This work does not change that result or claim otherwise.
+## v0.3.0 continuation: LibVLC track selection (2026-10-31)
+
+| Item | Implementation and verification |
+|---|---|
+| Audio/subtitle selection on Media3 | Existing chooser remains, including the automatic same-folder SRT/VTT subtitle import. |
+| Audio/subtitle selection on LibVLC fallback | The shared track menu now queries LibVLC's embedded audio and subtitle track descriptions, shows available choices, marks the active track, and lets the user switch tracks or disable subtitles. Empty track lists produce a clear message. |
+| Validation | Source-level change only so far. This Windows workspace has no local Java/Android toolchain; Android CI build and runtime verification are pending. External sidecar subtitle loading on the LibVLC-only fallback and actual track switching have not been verified. |
+| Overall playback acceptance | The ten user-provided public magnets remain 0/10 first-frame starts in the last measured public run. No claim of P2P playback acceptance or a 2 MB/s public minimum is made. |
+| Version/package | Development target advanced to v0.3.0 (versionCode 28); the Android application ID remains unchanged to preserve upgrade compatibility. No release should be treated as published until CI succeeds and a tag release is created. |

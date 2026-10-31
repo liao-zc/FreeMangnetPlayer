@@ -17,6 +17,7 @@ import org.json.JSONObject
 
 /** Media3 control-compatible software decoder for RealMedia containers. */
 internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskFile) : SimpleBasePlayer(Looper.getMainLooper()) {
+    internal data class TrackChoice(val id: Int, val label: String, val selected: Boolean)
     private val torrentTask = task
     private val stream = TorrentHttpStream(task, file)
     private val library = LibVLC(context.applicationContext, arrayListOf("--network-caching=300", "--file-caching=300", "--no-video-title-show"))
@@ -50,6 +51,18 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         .put("vlcIsPlaying", decoder.isPlaying).put("vlcVideoTracks", decoder.videoTracksCount)
         .put("vlcAudioTracks", decoder.audioTracksCount).put("vlcLengthMs", decoder.length)
         .put("videoOutputClass", output?.javaClass?.name.orEmpty()).put("vlcViewsAttached", decoder.vlcVout.areViewsAttached())
+
+    /** Expose LibVLC's actual elementary stream tracks to the shared player UI. */
+    fun audioTrackChoices(): List<TrackChoice> = decoder.audioTracks.orEmpty().map { track ->
+        TrackChoice(track.id, track.name?.takeIf(String::isNotBlank) ?: "音轨 ${track.id}", track.id == decoder.audioTrack)
+    }
+
+    fun subtitleTrackChoices(): List<TrackChoice> = decoder.spuTracks.orEmpty().map { track ->
+        TrackChoice(track.id, track.name?.takeIf(String::isNotBlank) ?: "字幕 ${track.id}", track.id == decoder.spuTrack)
+    }
+
+    fun selectAudioTrack(id: Int) { decoder.setAudioTrack(id) }
+    fun selectSubtitleTrack(id: Int) { decoder.setSpuTrack(id) }
 
     init {
         val media = Media(library, stream.uri)
