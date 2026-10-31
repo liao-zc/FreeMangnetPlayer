@@ -12,7 +12,7 @@ Playback depends on codec support and on the torrent having reachable peers. The
 
 ## Current development
 
-The `improve/modern-bt-engine` branch has passed Android APK compilation and the current UI walkthrough on an Android API 35 emulator. The latest settings, search paging/deduplication, and IPTV control changes are not part of a newly published APK. Its full checklist, historical requirement summary, screenshots, and known test limits are in [docs/report.md](docs/report.md).
+The `improve/modern-bt-engine` branch has passed Android APK compilation, the current UI walkthrough, and a controlled Android search pagination test (37/17/0 results across three source pages; no more than 10 per local page). See [run 41158145082](https://github.com/liao-zc/OmniPlayer/actions/runs/41158145082). The latest settings, search paging/deduplication, and IPTV control changes are not part of a newly published APK. Its full checklist, historical requirement summary, screenshots, and known test limits are in [docs/report.md](docs/report.md).
 
 Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest magnet supplied for playback declares an `.srt` file with `so=1`; inspect the torrent file list before treating that selected file as a video.
 
