@@ -38,6 +38,8 @@ def tap_action(label,timeout=15):
                 if target.get('clickable')=='true' and actionable(target):
                     tap(target);time.sleep(.5);return
                 target=parents.get(target)
+        # Scroll lower player actions into view before declaring them missing.
+        adb('shell','input','swipe','540','2050','540','850','300')
         time.sleep(.25)
     raise AssertionError('Missing enabled action button with exact label '+label)
 def actionable(node):

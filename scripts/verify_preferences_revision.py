@@ -71,7 +71,7 @@ def tap_exact(label):
     raise AssertionError('Exact enabled action unavailable: '+label)
 adb('shell','wm','size','1080x2400')
 adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote('门户'))
-find_and_tap('统一设置');find_and_tap('通用设置');require_visible('显示与字体','小','✓ 标准','大','超大','黑体','宋体','楷体')
+find_and_tap('设置');find_and_tap('通用设置');require_visible('显示与字体','小','✓ 标准','大','超大','黑体','宋体','楷体')
 screenshot('preferences-01-font-settings.png');record('display-font-module-and-four-presets')
 find_and_tap('大');find_and_tap('宋体');screenshot('preferences-02-song-large.png')
 assert next(n for n in prefs() if n.get('name')=='font-face').get('value',next(n for n in prefs() if n.get('name')=='font-face').text)=='宋体'
