@@ -4,8 +4,8 @@ OmniPlayer is an Android media app for IPTV live channels and magnet-link search
 
 ## Current development state
 
-- Current release: **v0.2.7**.
-- The current development version is **v0.3.0**. LibVLC-backed playback now exposes embedded audio and subtitle track selection alongside the Media3 chooser. This change is pending Android CI and device verification; it is not a published release.
+- Current release: **v0.3.0** ([GitHub Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.0)).
+- The **v0.3.0** release includes LibVLC embedded audio/subtitle selection and same-folder SRT/VTT/ASS/SSA subtitle streams. Android APK CI passed (run [41149346604](https://github.com/liao-zc/OmniPlayer/actions/runs/41149346604)); device-level track switching and public magnet playback remain unverified.
 - Android package ID remains `com.freemangnetplayer` so signed upgrades can retain the existing app's private settings and data.
 - Supported playback depends on container/codec support in Android Media3, device decoders, or LibVLC. No Android player can guarantee every codec and profile on every device.
 
@@ -20,8 +20,8 @@ Additional M3U/M3U8 sources can be configured by URL or imported from a device f
 
 ## Verification
 
-The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The v0.3.0 changes remain implementation-only until CI and device verification are available. Do not treat the historic v0.2.7 APK as containing these unreleased changes.
+The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The v0.3.0 APK is published. The ten public magnet acceptance test is still running; the previous native probe found 0 payload bytes across all ten resources. Do not interpret a successful APK build as proof of P2P playback.
 
 ## Download
 
-See [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases) for published APKs. A v0.3.0 APK will be linked here only after the build succeeds and the release is created.
+- [Universal APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0.apk)\n- [ARM64 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-arm64-v8a.apk)\n- [ARMv7 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-armeabi-v7a.apk)\n- [OmniPlayer source archive](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-source.zip)
