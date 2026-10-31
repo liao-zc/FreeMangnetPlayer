@@ -458,7 +458,7 @@ class MainActivity : ComponentActivity() {
                                     searchBridge = MagnetSearchBridge(onResource={ row -> runOnUiThread {
                                         if(generation==searchTrigger && selectedTab=="搜索结果" && !searchComplete) {
                                             val link=normalizeMagnetUri(row.optString("source"))
-                                            val identity=magnetIdentity(link)
+                                            val identity=magnetIdentity(link.orEmpty())
                                             val index=results.indexOfFirst { magnetIdentity(it.magnet)==identity }
                                             if(index>=0) { val old=results[index];val foundBytes=row.optLong("bytes");val foundSize=row.optString("sizeText");results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=foundBytes.takeIf { it>0L } ?: old.bytes,sizeText=foundSize.takeIf { it.isNotBlank() } ?: old.sizeText,type=row.optString("type","视频"),heat=row.optString("heat").ifBlank { old.heat },publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt },format=row.optString("format").ifBlank { old.format }) }
                                         }
