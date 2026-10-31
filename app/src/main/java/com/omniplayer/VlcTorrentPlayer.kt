@@ -20,6 +20,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     internal data class TrackChoice(val id: Int, val label: String, val selected: Boolean)
     private val torrentTask = task
     private val stream = TorrentHttpStream(task, file)
+    private val subtitleStreams = mutableListOf<TorrentHttpStream>()
     private val library = LibVLC(context.applicationContext, arrayListOf("--network-caching=300", "--file-caching=300", "--no-video-title-show"))
     private val decoder = MediaPlayer(library)
     private val main = Handler(Looper.getMainLooper())
@@ -70,6 +71,17 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         // to decode in software on many Android TV/phone CPUs. Prefer MediaCodec
         // and let LibVLC fall back itself when the device lacks a compatible one.
         media.setHWDecoderEnabled(true, false)
+        val directory = file.path.substringBeforeLast('/', "")
+        task.files.filter { candidate ->
+            candidate.path.substringBeforeLast('/', "") == directory &&
+                candidate.path.substringAfterLast('.', "").lowercase() in setOf("srt", "vtt", "ass", "ssa")
+        }.forEachIndexed { index, subtitle ->
+            val subtitleStream = TorrentHttpStream(task, subtitle)
+            val added = runCatching {
+                media.addSlave(Media.Slave.Type.Subtitle, subtitleStream.uri.toString(), index == 0)
+            }.getOrDefault(false)
+            if (added) subtitleStreams += subtitleStream else subtitleStream.close()
+        }
         decoder.media = media; media.release()
         decoder.setEventListener { event ->
             lastEvent = event.type.toString()
@@ -167,7 +179,8 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     }
     override fun handleRelease(): ListenableFuture<*> {
         released = true; wanted = false; main.removeCallbacks(refresh)
-        stream.close(); decoder.setEventListener(null); decoder.vlcVout.detachViews(); ownedOutputSurface?.release(); ownedOutputSurface = null; decoder.stop(); decoder.release(); library.release()
+        decoder.setEventListener(null); decoder.vlcVout.detachViews(); ownedOutputSurface?.release(); ownedOutputSurface = null; decoder.stop(); decoder.release()
+        stream.close(); subtitleStreams.forEach { it.close() }; subtitleStreams.clear(); library.release()
         return Futures.immediateVoidFuture()
     }
 }
