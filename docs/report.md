@@ -191,3 +191,6 @@ CI run [41204663746](https://github.com/liao-zc/OmniPlayer/actions/runs/41204663
 GitHub Actions [run 41208267640](https://github.com/liao-zc/OmniPlayer/actions/runs/41208267640) 成功：更新流程静态回归、仓库与架构检查、APK/instrumentation 构建、API 35 模拟器测试全部通过。模拟器报告记录 49 项检查全部通过，其中 `verify_update_flow.py` 专项检查通过；见 [CI 报告 artifact](https://github.com/liao-zc/OmniPlayer/actions/runs/41208267640)。GitHub Release [OmniPlayer v0.3.11](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.11) 已发布 arm64-v8a、armeabi-v7a、x86、x86_64 APK 与 SHA-256 清单，Release notes 已写明续传、暂停/继续和安装确认变更。本地 ARM64 APK：[dist/OmniPlayer-0.3.11-arm64-v8a.apk](../dist/OmniPlayer-0.3.11-arm64-v8a.apk)，114,751,755 bytes，SHA-256 `3a776011c771cc73e8c2804bcb0ebe05afc536cfdffacd2aca56e059a955efaa`。
 
 CI 验证覆盖编译、instrumentation 和静态更新流程检查；未在模拟器中对真实更新服务器进行限速/断网续传实传，也未实际安装自身更新包验证系统安装器交互。系统要求用户确认安装；这些未做的设备级动作没有标为通过。Android 更新 UI 只显示版本名，不显示 versionCode 或版本来源。
+### 本地旧产物清理状态
+
+本轮尝试清理 `dist/` 中旧版本 APK 和历史临时产物，但执行环境的自动审核拦截了删除命令，因此这些旧文件仍保留；没有把清理标为完成。当前 v0.3.11 ARM64 APK 已单独校验并保留在 `dist/OmniPlayer-0.3.11-arm64-v8a.apk`。
