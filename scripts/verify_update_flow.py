@@ -15,6 +15,7 @@ checks = {
     "partial retained on pause/failure": 'update-state", "paused"' in updater and 'update-state", "failed"' in service and "part.delete()" in service,
     "pause and resume controls": 'Text("暂停更新")' in settings and 'Text("继续更新")' in settings,
     "install confirmation path": 'pending-update-apk' in updater and 'installerIntent' in updater and '点击打开系统安装确认' in service,
+    "unknown-source permission handoff": 'ACTION_MANAGE_UNKNOWN_APP_SOURCES' in updater and 'PendingUpdateInstaller.resume(this)' in settings,
     "completed package reused": 'pending-update-apk' in updater and 'if (apk.isFile && apk.length() > 0L' in updater,
     "update notes shown": 'release.notes' in settings and 'update.notes' in main,
     "no version code/source text in update info": 'versionCode $version' not in settings and '版本号来自' not in settings and 'updateStatus = "正在检查 GitHub' not in settings,

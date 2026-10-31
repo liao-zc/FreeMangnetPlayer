@@ -84,6 +84,7 @@ object AppUpdater {
     fun install(context: Context, apk: File) {
         SettingsStore.prefs(context).edit().putString("pending-update-apk", apk.absolutePath).putString("update-state", "ready").apply()
         if (Build.VERSION.SDK_INT >= 26 && !context.packageManager.canRequestPackageInstalls()) {
+            PendingUpdateInstaller.notePermissionPrompted()
             val permission = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}"))
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             runCatching { context.startActivity(permission) }
@@ -95,14 +96,23 @@ object UpdatePromptGate { @Volatile var promptedThisProcess = false }
 
 object PendingUpdateInstaller {
     @Volatile private var attemptedThisProcess = false
-    fun resetForAppLaunch() { attemptedThisProcess = false }
+    @Volatile private var permissionPromptedThisProcess = false
+    fun resetForAppLaunch() { attemptedThisProcess = false; permissionPromptedThisProcess = false }
+    fun notePermissionPrompted() { permissionPromptedThisProcess = true }
     fun resume(activity: Activity) {
         if (attemptedThisProcess) return
         val prefs = SettingsStore.prefs(activity)
         val apk = prefs.getString("pending-update-apk", null)?.let(::File)?.takeIf { it.isFile && it.length() > 0L }
             ?: prefs.getString("update-apk-path", null)?.let(::File)?.takeIf { it.isFile && it.length() > 0L && prefs.getString("update-state", "") == "ready" }
             ?: return
-        if (Build.VERSION.SDK_INT >= 26 && !activity.packageManager.canRequestPackageInstalls()) return
+        if (Build.VERSION.SDK_INT >= 26 && !activity.packageManager.canRequestPackageInstalls()) {
+            if (!permissionPromptedThisProcess) {
+                permissionPromptedThisProcess = true
+                val permission = Intent(android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${activity.packageName}"))
+                runCatching { activity.startActivity(permission) }
+            }
+            return
+        }
         attemptedThisProcess = true
         runCatching { activity.startActivity(AppUpdater.installerIntent(activity, apk)) }
     }

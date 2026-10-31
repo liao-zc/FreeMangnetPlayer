@@ -6,7 +6,6 @@ manifest = (root / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8
 source = root / "app/src/main/java/com/omniplayer"
 checks = {
     ".magnet.DownloadService": "magnet/DownloadService.kt",
-    ".core.UpdateDownloadReceiver": "core/UpdateReceivers.kt",
     ".core.PackageReplacedReceiver": "core/UpdateReceivers.kt",
     ".settings.SettingsActivity": "settings/SettingsActivity.kt",
     ".magnet.SearchEngineSettingsActivity": "magnet/SearchEngineSettings.kt",

@@ -261,11 +261,7 @@ class SettingsActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (attemptedPendingUpdate || Build.VERSION.SDK_INT < 26 || !packageManager.canRequestPackageInstalls()) return
-        val path = SettingsStore.prefs(this).getString("pending-update-apk", null) ?: return
-        val apk = java.io.File(path).takeIf { it.isFile } ?: return
-        attemptedPendingUpdate = true
-        runCatching { startActivity(AppUpdater.installerIntent(this, apk)) }
+        PendingUpdateInstaller.resume(this)
     }
 }
 
