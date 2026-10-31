@@ -541,7 +541,9 @@ class PlayerActivity : ComponentActivity() {
                 activeView = this
             }
         }, update = { view ->
+            val playerChanged = view.player !== player
             view.player = player
+            if (playerChanged && player != null && !floating) view.showController()
             if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
             view.useController = !floating
             view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
