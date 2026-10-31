@@ -18,7 +18,8 @@ jobs:
         run: |
           python3 scripts/architecture-smoke-check.py
           python3 scripts/check_repository.py
-          python3 -m py_compile scripts/architecture-smoke-check.py scripts/check_repository.py scripts/verify_apk_abi.py scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/verify_recent_requirements.py scripts/summarize_ci_results.py
+          python3 -m py_compile scripts/architecture-smoke-check.py scripts/check_repository.py scripts/verify_apk_abi.py scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/verify_recent_requirements.py scripts/verify_update_flow.py scripts/summarize_ci_results.py
+          python3 scripts/verify_update_flow.py
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
       - uses: android-actions/setup-android@v3
@@ -97,7 +98,7 @@ jobs:
             sha256sum "release-assets/$APK" >> release-assets/SHA256SUMS
             stat -c '%n %s bytes' "release-assets/$APK" >> release-assets/APK-SIZES.txt
           done
-          gh release create "$TAG" release-assets/OmniPlayer-*.apk release-assets/SHA256SUMS release-assets/APK-SIZES.txt --repo "${GITHUB_REPOSITORY}" --target "$GITHUB_SHA" --title "OmniPlayer $TAG" --notes "API 35 全量 CI 与模拟器回归通过后发布。按设备 ABI 拆分安装包以减少单包体积：arm64-v8a、armeabi-v7a、x86、x86_64。每个 APK 共用签名和数据目录，覆盖安装保留本地数据。SHA-256 校验值见 SHA256SUMS，包体见 APK-SIZES.txt。"
+          gh release create "$TAG" release-assets/OmniPlayer-*.apk release-assets/SHA256SUMS release-assets/APK-SIZES.txt --repo "${GITHUB_REPOSITORY}" --target "$GITHUB_SHA" --title "OmniPlayer $TAG" --notes "OmniPlayer $TAG：更新包支持断点续传和暂停/继续；下载完成后提供系统安装确认，取消或稍后安装时保留安装包；应用设置与缓存继续保留。"
           for APK in release-assets/OmniPlayer-*.apk; do echo "Published https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/$(basename "$APK")" >> "$GITHUB_STEP_SUMMARY"; done
           echo "Published split APKs to ${TAG}; native payload was limited to each target ABI." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
@@ -111,3 +112,4 @@ jobs:
             scripts/run_ui_regressions.sh
             scripts/run_android_regressions.sh
             scripts/summarize_ci_results.py
+            scripts/verify_update_flow.py

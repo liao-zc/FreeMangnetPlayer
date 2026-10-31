@@ -3,7 +3,7 @@ set +e
 mkdir -p manual-shots
 failed=0
 : > manual-shots/ui-regression-status.tsv
-for test_script in scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/verify_recent_requirements.py; do
+for test_script in scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/verify_recent_requirements.py scripts/verify_update_flow.py; do
   printf 'START %s\n' "$test_script"
   /usr/bin/python3 "$test_script"
   result=$?

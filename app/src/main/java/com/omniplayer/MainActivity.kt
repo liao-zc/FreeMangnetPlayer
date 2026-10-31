@@ -96,6 +96,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) PendingUpdateInstaller.resetForAppLaunch()
+        val updateState = SettingsStore.prefs(this).getString("update-state", "")
+        if (updateState == "queued" || updateState == "downloading") AppUpdater.resume(this)
         TorrentTasks.initialize(this)
         val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()?.let(::normalizeMagnetUri)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -619,7 +622,7 @@ class MainActivity : ComponentActivity() {
                     AlertDialog(
                         onDismissRequest = { availableUpdate = null },
                         title = { Text("发现 OmniPlayer 新版本 ${update.version}") },
-                        text = { Text("更新包下载后会打开 Android 系统安装确认页。安装需要系统确认；完成后会尝试重新打开应用。应用设置和私有缓存会保留。") },
+                        text = { Text(buildString { append("更新包下载后会打开系统安装确认页；应用设置和缓存会保留。"); if (update.notes.isNotBlank()) { append("\n\n更新说明：\n"); append(update.notes.take(1800)) } }) },
                         confirmButton = { TextButton(onClick = {
                             updateScope.launch(Dispatchers.IO) { runCatching { AppUpdater.enqueue(this@MainActivity, update) } }
                             availableUpdate = null

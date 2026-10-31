@@ -92,6 +92,7 @@ class SettingsActivity : ComponentActivity() {
                 var showDirectoryPickerPrompt by remember { mutableStateOf(false) }
                 var updateDownloadPercent by remember { mutableStateOf<Int?>(null) }
                 var updateDownloadDetail by remember { mutableStateOf("") }
+                var deferInstallPrompt by remember { mutableStateOf(false) }
                 var menu by remember { mutableStateOf(false) }
                 val lifecycleOwner = LocalLifecycleOwner.current
                 DisposableEffect(lifecycleOwner) {
@@ -103,42 +104,24 @@ class SettingsActivity : ComponentActivity() {
                     onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                 }
                 LaunchedEffect(Unit) {
-                    val manager = getSystemService(android.app.DownloadManager::class.java)
                     while (true) {
-                        val id = prefs.getLong("update-download-id", -1L)
-                        if (id >= 0L) {
-                            val cursor = manager.query(android.app.DownloadManager.Query().setFilterById(id))
-                            cursor?.use { row ->
-                                if (row.moveToFirst()) {
-                                    val status = row.getInt(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_STATUS))
-                                    val downloaded = row.getLong(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)).coerceAtLeast(0)
-                                    val total = row.getLong(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
-                                    updateDownloadPercent = when {
-                                        status == android.app.DownloadManager.STATUS_SUCCESSFUL -> 100
-                                        total > 0 -> (downloaded * 100 / total).toInt().coerceIn(0, 99)
-                                        status == android.app.DownloadManager.STATUS_RUNNING || status == android.app.DownloadManager.STATUS_PENDING -> null
-                                        else -> null
-                                    }
-                                    updateDownloadDetail = when (status) {
-                                        android.app.DownloadManager.STATUS_SUCCESSFUL -> "下载完成，正在等待系统安装确认。"
-                                        android.app.DownloadManager.STATUS_RUNNING -> "正在下载更新：${bytesForUpdate(downloaded)} / ${if (total > 0) bytesForUpdate(total) else "计算大小中"}"
-                                        android.app.DownloadManager.STATUS_PENDING -> "更新已排队，等待开始下载。"
-                                        android.app.DownloadManager.STATUS_PAUSED -> "更新下载暂停，系统恢复后会继续。"
-                                        android.app.DownloadManager.STATUS_FAILED -> "更新下载失败（${row.getInt(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_REASON))}），可重新检查并下载。"
-                                        else -> ""
-                                    }
-                                }
-                            }
-                        } else {
-                            updateDownloadPercent = null
-                            updateDownloadDetail = ""
+                        val state = prefs.getString("update-state", "") ?: ""
+                        val downloaded = prefs.getLong("update-bytes", 0L)
+                        val total = prefs.getLong("update-total", 0L)
+                        updateDownloadPercent = when { state == "ready" -> 100; total > 0 -> (downloaded * 100 / total).toInt().coerceIn(0, 99); else -> null }
+                        updateDownloadDetail = when (state) {
+                            "downloading" -> "正在下载更新：${bytesForUpdate(downloaded)} / ${if (total > 0) bytesForUpdate(total) else "计算大小中"}"
+                            "queued" -> "更新已排队，准备继续下载。"
+                            "paused" -> "更新已暂停，已下载内容会保留。"
+                            "failed" -> "下载中断，已保留已下载内容，可继续更新。"
+                            "ready" -> "下载完成，正在等待系统安装确认。"
+                            else -> ""
                         }
                         kotlinx.coroutines.delay(750)
                     }
                 }
+                LaunchedEffect(updateDownloadDetail) { if (updateDownloadDetail != "下载完成，正在等待系统安装确认。") deferInstallPrompt = false }
                 val pkg = packageManager.getPackageInfo(packageName, 0)
-                @Suppress("DEPRECATION") val legacyVersion = pkg.versionCode
-                val version = if (Build.VERSION.SDK_INT >= 28) pkg.longVersionCode.toString() else legacyVersion.toString()
 
                 Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -174,13 +157,13 @@ class SettingsActivity : ComponentActivity() {
                             }
                             OutlinedButton(enabled = !checkingUpdate, onClick = {
                                 checkingUpdate = true
-                                updateStatus = "正在检查 GitHub Releases…"
+                                updateStatus = "正在检查更新…"
                                 updateScope.launch {
                                     val result = runCatching { withContext(Dispatchers.IO) { AppUpdater.latest(this@SettingsActivity) } }
                                     checkingUpdate = false
                                     result.onSuccess { release ->
                                         updateRelease = release
-                                        updateStatus = if (release == null) "已是最新版本，或远端尚无正式 APK。" else "发现版本 ${release.version}。"
+                                        updateStatus = if (release == null) "已是最新版本，或暂无可用更新。" else "发现版本 ${release.version}。"
                                     }.onFailure { updateStatus = "检查失败：${it.localizedMessage}" }
                                 }
                             }, modifier = Modifier.fillMaxWidth().height(50.dp)) { Text(if (checkingUpdate) "检查中…" else "立即检查更新") }
@@ -191,11 +174,20 @@ class SettingsActivity : ComponentActivity() {
                                 if (progress == null) LinearProgressIndicator(Modifier.fillMaxWidth())
                                 else LinearProgressIndicator(progress = { progress / 100f }, modifier = Modifier.fillMaxWidth())
                                 if (progress != null) Text("${progress}%", style = MaterialTheme.typography.labelSmall)
+                                val updateState = prefs.getString("update-state", "") ?: ""
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    if (updateState == "downloading" || updateState == "queued")
+                                        OutlinedButton(onClick = { AppUpdater.pause(this@SettingsActivity) }) { Text("暂停更新") }
+                                    if (updateState == "paused" || updateState == "failed")
+                                        Button(onClick = { AppUpdater.resume(this@SettingsActivity) }) { Text("继续更新") }
+                                    if (updateState == "ready")
+                                        Button(onClick = { prefs.getString("pending-update-apk", null)?.let { AppUpdater.install(this@SettingsActivity, java.io.File(it)) } }) { Text("立即安装") }
+                                }
                             }
                             updateRelease?.let { release -> AlertDialog(
                                 onDismissRequest = { updateRelease = null },
                                 title = { Text("更新到 ${release.version}？") },
-                                text = { Text("更新包下载完成后将由 Android 系统安装。系统要求用户确认；应用私有设置与缓存会保留。") },
+                                text = { Text(buildString { append("更新包下载后会打开系统安装确认；原有设置与缓存会保留。"); if (release.notes.isNotBlank()) { append("\n\n更新说明：\n"); append(release.notes.take(1800)) } }) },
                                 confirmButton = { TextButton(onClick = {
                                     updateScope.launch(Dispatchers.IO) {
                                         runCatching { AppUpdater.enqueue(this@SettingsActivity, release) }
@@ -206,8 +198,14 @@ class SettingsActivity : ComponentActivity() {
                                 }) { Text("下载并更新") } },
                                 dismissButton = { TextButton(onClick = { updateRelease = null }) { Text("取消") } }
                             ) }
-                            Text("版本：${pkg.versionName}（versionCode $version）")
-                            Text("当前安装版本号来自应用包，更新版本号来自 GitHub Release。")
+                            if (updateDownloadDetail == "下载完成，正在等待系统安装确认。" && !deferInstallPrompt) AlertDialog(
+                                onDismissRequest = { deferInstallPrompt = true },
+                                title = { Text("下载完成") },
+                                text = { Text("更新安装包已准备好。现在打开系统安装确认吗？") },
+                                confirmButton = { TextButton(onClick = { prefs.getString("pending-update-apk", null)?.let { AppUpdater.install(this@SettingsActivity, java.io.File(it)) } }) { Text("立即安装") } },
+                                dismissButton = { TextButton(onClick = { deferInstallPrompt = true }) { Text("稍后") } }
+                            )
+                            Text("版本：${pkg.versionName}")
                             Text("电视直播与磁力播放工具", style = MaterialTheme.typography.bodyMedium)
                         }
                         "magnet" -> Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -267,7 +265,6 @@ class SettingsActivity : ComponentActivity() {
         val path = SettingsStore.prefs(this).getString("pending-update-apk", null) ?: return
         val apk = java.io.File(path).takeIf { it.isFile } ?: return
         attemptedPendingUpdate = true
-        SettingsStore.prefs(this).edit().remove("pending-update-apk").apply()
         runCatching { startActivity(AppUpdater.installerIntent(this, apk)) }
     }
 }

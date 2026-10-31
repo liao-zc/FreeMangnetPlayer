@@ -10,9 +10,7 @@
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <application android:theme="@style/AppTheme" android:label="OmniPlayer" android:icon="@drawable/ic_launcher_legacy" android:roundIcon="@drawable/ic_launcher_legacy" android:banner="@drawable/tv_banner" android:usesCleartextTraffic="true" android:supportsRtl="true">
         <service android:name=".magnet.DownloadService" android:exported="false" android:foregroundServiceType="dataSync" android:stopWithTask="false" />
-        <receiver android:name=".core.UpdateDownloadReceiver" android:exported="false">
-            <intent-filter><action android:name="android.intent.action.DOWNLOAD_COMPLETE" /></intent-filter>
-        </receiver>
+        <service android:name=".core.UpdateTransferService" android:exported="false" android:foregroundServiceType="dataSync" />
         <receiver android:name=".core.PackageReplacedReceiver" android:exported="true">
             <intent-filter><action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
         </receiver>
