@@ -47,6 +47,7 @@ def control(name):
             else: adb('shell','input','tap','540','450')
             tapped=True
         time.sleep(.25)
+    (OUT/'library-control-failure-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
     (OUT/'library-control-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
     screenshot('library-control-failure.png')
     raise AssertionError('Missing visible built-in control '+name)
