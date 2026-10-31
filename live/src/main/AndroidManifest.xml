@@ -1,0 +1,7 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <activity android:name="com.omniplayer.live.IptvActivity" android:exported="false" />
+        <activity android:name="com.omniplayer.live.IptvSettingsActivity" android:exported="false" />
+        <activity android:name="com.omniplayer.live.IptvPlayerActivity" android:exported="false" android:supportsPictureInPicture="true" android:resizeableActivity="true" android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout" />
+    </application>
+</manifest>

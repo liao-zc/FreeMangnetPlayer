@@ -22,12 +22,17 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前开发版本：`v0.3.12`；本轮全量 CI 完成后再更新正式发布状态。
+- 当前开发版本：`v0.3.12`；当前发布状态以 [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases) 为准。
 - v0.3.11 已按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；更新器支持 HTTP Range 断点续传、暂停/继续和系统安装确认。旧通用包包含所有 ABI 的原生库，因此体积较大，ABI 拆包减少了单包内的无关原生库。
 - [v0.3.11 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.11)，SHA-256 清单和大小见 Release 附件。本地 ARM64 APK 位于 `dist/OmniPlayer-0.3.11-arm64-v8a.apk`；也可直接下载 [ARM64 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.11/OmniPlayer-0.3.11-arm64-v8a.apk)。
-- 模块：`:app`、`:ui-inspector`
+- Gradle 模块：`:app`（应用组合壳）、`:core`（共享能力）、`:magnet`（磁力播放）、`:live`（电视直播）、`:ui-inspector`（独立 UI 回归应用）。`:magnet` 与 `:live` 均为 Android library module，只依赖 `:core`，互不依赖。
 - 核心技术：Kotlin、Jetpack Compose、Media3、LibVLC、libtorrent4j
 
+## 模块扩展方式
+
+应用壳 `:app` 组合各功能；`:core` 管理跨功能可复用的偏好、媒体信息、更新和导航能力。磁力业务按搜索、BT 引擎、播放器、内容库和设置组织在 `:magnet`；直播按播放列表解析、频道、播放器和设置组织在 `:live`。未来网站视频和音乐可以分别加入新的 Android library modules，由应用壳组合，并按稳定接口复用 `:core`，不需要改动其他 feature 的内部实现。
+
+独立 UI 检查应用 `:ui-inspector` 只由 CI 构建，用于验证实际安装的播放器界面。
 ## 重要说明
 
 磁力文件列表出现并不代表已连接 Peer 或已经取得可播放视频分片。不同种子的首帧等待和速度可能差异很大；本项目不保证公网种子均可播放、不保证固定下载速度，也不声称支持所有编码组合。完整实测证据与未通过项请看全量点检报告。

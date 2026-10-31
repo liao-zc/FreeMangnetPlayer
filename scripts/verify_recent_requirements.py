@@ -6,18 +6,18 @@ def read(path):
     return (ROOT / path).read_text(encoding="utf-8")
 
 main = read("app/src/main/java/com/omniplayer/MainActivity.kt")
-search = read("app/src/main/java/com/omniplayer/magnet/MagnetSearchUi.kt")
-history = read("app/src/main/java/com/omniplayer/magnet/HistoryStore.kt")
-player = read("app/src/main/java/com/omniplayer/magnet/PlayerActivity.kt")
-live = read("app/src/main/java/com/omniplayer/live/IptvActivity.kt")
-layouts = [read(f"app/src/main/res/layout/{name}") for name in ("player_controls.xml", "player_overlay_controls.xml")]
+search = read("magnet/src/main/java/com/omniplayer/magnet/search/MagnetSearchUi.kt")
+history = read("magnet/src/main/java/com/omniplayer/magnet/library/HistoryStore.kt")
+player = read("magnet/src/main/java/com/omniplayer/magnet/player/PlayerActivity.kt")
+live = read("live/src/main/java/com/omniplayer/live/channels/IptvActivity.kt")
+layouts = [read(f"magnet/src/main/res/layout/{name}") for name in ("player_controls.xml", "player_overlay_controls.xml")]
 
 checks = {
     "magnet bottom tabs are exactly playback, tasks, favorites, history": all(token in main for token in ('label = { Text("播放") }', 'label = { Text("任务") }', 'label = { Text("收藏") }', 'label = { Text("历史") }')) and 'label = { Text("首页") }' not in main and 'label = { Text("设置") }' not in main and main.index('label = { Text("播放") }') < main.index('label = { Text("任务") }') < main.index('label = { Text("收藏") }') < main.index('label = { Text("历史") }'),
     "history is reachable from the bottom tab and not embedded in playback screen": 'NavigationBarItem(selected = selectedTab == "历史"' in main and 'TextButton(onClick={selectedTab="历史"})' not in main,
     "search actions are ordered search, history, settings menu": search.index('IconButton(onClick = onSearch') < search.index('IconButton(onClick = { historyMenu = true') < search.index('IconButton(onClick = { onEngineMenu(true)'),
     "magnet settings labels use black": 'Text("设置", color = Color.Black)' in main and 'Icon(Icons.Default.Settings, "设置", tint = Color.Black)' in player,
-    "verified complete cached media uses local file playback": 'val verifiedLocalFile = file.size > 0 && file.done >= file.size' in player and 'if (verifiedLocalFile) DefaultDataSource.Factory(this)' in player and 'readVerifiedLocalFile' in read("app/src/main/java/com/omniplayer/magnet/VlcTorrentPlayer.kt"),
+    "verified complete cached media uses local file playback": 'CachePlaybackPolicy.useVerifiedLocalFile(file.size, file.done, localFile.isFile, localFile.length())' in player and 'if (verifiedLocalFile) DefaultDataSource.Factory(this)' in player and 'readVerifiedLocalFile' in read("magnet/src/main/java/com/omniplayer/magnet/player/VlcTorrentPlayer.kt"),
     "bottom navigation omits duplicate search entry": 'label = { Text("搜索") })' not in main and 'selectedTab == "搜索" || selectedTab == "搜索结果"' not in main,
     "download and cache share one task page": '"任务" -> Column' in main and 'FilterChip(selected = taskTab ==' in main and '缓存 (${caches.size})' in main,
     "search history icon and recent query picker": 'Icons.Default.History' in search and 'recentSearches.take(50)' in search,

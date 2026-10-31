@@ -200,3 +200,25 @@ CI 验证覆盖编译、instrumentation 和静态更新流程检查；未在模�
 - 搜索栏操作图标顺序调整为搜索、搜索历史、引擎设置；磁力顶栏设置文字和播放器设置图标显式使用黑色。
 - 完整已校验的缓存/下载文件改为 Media3 和 LibVLC 直接从本地文件读取，避免再次通过 BT 网络读取完整文件。未完成缓存仍通过 BT verified-piece 数据源等待校验块；文件预分配长度本身不被视为缓存完成。
 - 代码级验收已纳入 `scripts/verify_recent_requirements.py`。GitHub Actions 模拟器/受控种子回归尚未运行；未运行前不得将本轮标为通过或创建 Release。
+## 2026-10-31 两阶段 Release 计划与模块重构
+
+### 第一阶段：导航与缓存读取修复
+
+- 目标版本：v0.3.12，versionCode 40。
+- 更新点：底部导航改为“播放 / 任务 / 收藏 / 历史”；搜索动作改为搜索、历史、引擎设置；完整且已校验的缓存文件从本地直读，部分缓存仍读取通过校验的 BT 分片；设置字样改为黑色。
+- 测试证据：GitHub Actions run `41214499167` 编译通过，但模拟器偏好设置用例在主页寻找不存在的“设置”按钮时失败，因此未发布。已修正点检路径，重跑结果记录在下方。
+
+### 第二阶段：Gradle 模块重构
+
+- `:core` 管理跨功能共享设置、显示/字体、存储路径、更新、媒体信息和导航。
+- `:magnet` 为 Android library module，按 search、engine、player、library、settings 归档。
+- `:live` 为 Android library module，按 source、channels、player、settings 归档。
+- `:app` 作为组合根依赖 `:core`、`:magnet`、`:live`；两个 feature 只依赖 `:core` 且互不依赖。未来 web-video、music 可作为独立 feature 由应用壳组合。
+- `:ui-inspector` 是独立回归应用，不是 `:app` 依赖。
+- 模块化目标版本：v0.4.0，versionCode 41；全量 CI 通过后正式发布。
+
+### Release 与本地点检
+
+第一阶段模拟器失败的直接原因是偏好 UI 脚本沿用旧主页设置入口。产品主页当前只显示直播/磁力卡片，磁力页顶栏提供设置入口。脚本已调整为先进入磁力播放，再进入设置和通用设置。不得把该次失败当作产品功能回归通过；新 run 的最终状态、截图、APK、Release URL 和 SHA-256 应在本节补记。
+
+第二阶段的 Gradle 编译、模块 Manifest 合并、仪器测试、API 35 模拟器和完整历史需求点检应全部通过后再发布；未通过项和公网上游限制需如实记录。

@@ -3,8 +3,8 @@
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-updater = (ROOT / "app/src/main/java/com/omniplayer/core/AppUpdater.kt").read_text(encoding="utf-8")
-service = (ROOT / "app/src/main/java/com/omniplayer/core/UpdateTransferService.kt").read_text(encoding="utf-8")
+updater = (ROOT / "core/src/main/java/com/omniplayer/core/update/AppUpdater.kt").read_text(encoding="utf-8")
+service = (ROOT / "core/src/main/java/com/omniplayer/core/update/UpdateTransferService.kt").read_text(encoding="utf-8")
 settings = (ROOT / "app/src/main/java/com/omniplayer/settings/SettingsActivity.kt").read_text(encoding="utf-8")
 main = (ROOT / "app/src/main/java/com/omniplayer/MainActivity.kt").read_text(encoding="utf-8")
 manifest = (ROOT / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")

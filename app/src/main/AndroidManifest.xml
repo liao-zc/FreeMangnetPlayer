@@ -9,20 +9,10 @@
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <application android:theme="@style/AppTheme" android:label="OmniPlayer" android:icon="@drawable/ic_launcher_legacy" android:roundIcon="@drawable/ic_launcher_legacy" android:banner="@drawable/tv_banner" android:usesCleartextTraffic="true" android:supportsRtl="true">
-        <service android:name=".magnet.DownloadService" android:exported="false" android:foregroundServiceType="dataSync" android:stopWithTask="false" />
-        <service android:name=".core.UpdateTransferService" android:exported="false" android:foregroundServiceType="dataSync" />
-        <receiver android:name=".core.PackageReplacedReceiver" android:exported="true">
-            <intent-filter><action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
-        </receiver>
         <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.files" android:exported="false" android:grantUriPermissions="true">
             <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/update_file_paths" />
         </provider>
         <activity android:name=".settings.SettingsActivity" android:exported="false" />
-        <activity android:name=".magnet.SearchEngineSettingsActivity" android:exported="false" />
-        <activity android:name=".live.IptvActivity" android:exported="false" />
-        <activity android:name=".live.IptvSettingsActivity" android:exported="false" />
-        <activity android:name=".live.IptvPlayerActivity" android:exported="false" android:supportsPictureInPicture="true" android:resizeableActivity="true" android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout" />
-        <activity android:name=".magnet.PlayerActivity" android:exported="false" android:supportsPictureInPicture="true" android:resizeableActivity="true" android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout" />
         <activity android:name=".MainActivity" android:exported="true">
             <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER" /><category android:name="android.intent.category.LEANBACK_LAUNCHER" /></intent-filter>
             <intent-filter><action android:name="android.intent.action.VIEW"/><category android:name="android.intent.category.DEFAULT"/><category android:name="android.intent.category.BROWSABLE"/><data android:scheme="magnet" /></intent-filter>
