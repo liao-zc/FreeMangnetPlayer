@@ -2,6 +2,24 @@
 
 更新日期：2026-10-31
 
+## v0.3.5 本轮改动
+
+本轮新增并在 `docs/requirements-checklist.md` M 节逐项登记了用户提出的 13 项需求。代码已实现缓存片段范围显示、播放器内嵌可拖动控制层、播放任务调度优先、观看位置/时长保存、系统目录与 M3U 文件选择取消、频道选择器缩放、更新下载进度，以及 ABI 拆分发布流程。播放器将 seek 与播放控制绘制在视频 Surface 上，缓存区间由已校验 piece 映射并以不同颜色显示。新增 instrumentation 覆盖分片区间计算、播放位置按文件恢复、播放优先级策略。以下项目在本轮 GitHub Actions 完成前不提前记为通过。
+
+### 本轮验收状态
+
+| 项目 | 状态 | 验证边界 |
+|---|---|---|
+| 13 条需求清单 | 已同步 | 每项及验收方法见 `docs/requirements-checklist.md` M 节。 |
+| Android 构建、instrumentation、模拟器 UI 与分页回归 | 待本轮 Actions | 需成功执行 `scripts/run_full_ci.ps1 -PublishRelease`。 |
+| 缓存片段条 | 逻辑测试待 CI | 基于 libtorrent 的已校验 piece 显示分段；时间位置为按字节比例估算，VBR 时间轴精度有限。 |
+| 指定 Spider-Man magnet | 本轮未联网下载或播放 | 该公网 torrent 是否存活、能否起播取决于做种与节点。本轮使用受控素材验证代码，不能报告公网播放通过。 |
+| 本地与远端 APK | 待 v0.3.5 发布 | 发布工作流生成四种 ABI APK，并检查包内 JNI ABI 集合、保存文件大小和 SHA-256。 |
+
+### APK 体积说明
+
+之前的通用 APK 同时装入 arm64-v8a、armeabi-v7a、x86、x86_64 的 libtorrent 原生库，且 LibVLC 也包含多个 ABI，因此单个 APK 会包含多个设备用不到的 native payload。v0.3.5 发布流程按 ABI 分别构建，并检查每个 APK 的 `lib/` 目录只包含目标 ABI；实际体积以 Release 的 `APK-SIZES.txt` 为准。应用 ID 与签名配置保持不变，设计上支持覆盖安装并保留本地偏好和任务数据；本轮仍需 CI 确认包签名和 ABI 检查后才能作最终结论。
+
 本轮已把磁力播放、IPTV 直播、通用能力和全局设置按职责拆分，并按历史需求建立了逐项功能清单。完整架构见 [架构说明](architecture.md)，逐项结果与证据边界见 [全量功能点检清单](requirements-checklist.md)。
 
 ## 本轮重构
@@ -101,6 +119,142 @@
 ## 2026-10-31 全量 CI 与交付更新
 
 - 最新成功 CI：[41179560907](https://github.com/liao-zc/OmniPlayer/actions/runs/41179560907)，提交 3f7df41151644ac6d127d025cd1532f92521a5a7；36 项通过、0 项失败。报告见 [CI 报告与 APK artifact](https://github.com/liao-zc/OmniPlayer/actions/runs/41179560907)。
-- 本地 APK：[OmniPlayer-debug.apk](../dist/OmniPlayer-debug.apk)，307,441,494 bytes，SHA-256 B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557。它取自 CI run 41176052615；当前成功 run 和该 run 的 app/ 树逐文件相同，因此 APK 对应当前应用源码。
+- 本地 APK：`dist/OmniPlayer-debug.apk` (历史 CI 本地文件；当前公开下载请使用本报告中的 GitHub Release 链接)，307,441,494 bytes，SHA-256 B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557。它取自 CI run 41176052615；当前成功 run 和该 run 的 app/ 树逐文件相同，因此 APK 对应当前应用源码。
 - 无 Peer 行为：策略级 instrumentation 通过，真实 3 分钟 BT/UI 端到端未验证。
 - 用户提供的十条公网磁力验收按要求排除；未写成通过。
+
+## v0.3.6 控件可达性修复与本轮 CI 记录
+
+- 本轮发现：Actions run `41194980834` 的 APK 构建、instrumentation 编译、搜索分页/去重/跳页用例通过；媒体库回归未通过。截图显示控制条主体可见，但收藏按钮放在视频预览上沿，未被自动化定位，故该 run 未创建 Release。
+- 修复：将收藏图标放到播放器底部控制条，并明确设为无障碍可聚焦控件。该修改尚未由新 CI 证明，不能标为通过。
+- 版本改为 `v0.3.6` / versionCode `34`。按要求，全量 CI 成功后才发布 Release；失败 run 不发布 APK。
+- 缓存覆盖区间的时刻标签按已校验 piece 的字节范围映射到播放时间估算，VBR 文件可能存在时间轴误差；这是范围估算，不能视为精确解码时间戳。
+- APK 体积原因及 ABI 拆分方案见“APK 体积说明”；每个 ABI 包体积和 SHA-256 需以成功 Release 的 `APK-SIZES.txt`、`SHA256SUMS` 为准。
+## v0.3.6 全量 CI 结果与 v0.3.7 点检
+
+GitHub Actions [run 41196718330](https://github.com/liao-zc/OmniPlayer/actions/runs/41196718330) 已成功。报告列出 36/36 UI 检查通过，Android instrumentation、模拟器回归和 APK 构建通过。Release [v0.3.6](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.6) 已发布四种 ABI 包。
+
+| ABI | 文件大小 |
+|---|---:|
+| arm64-v8a | 114,734,853 bytes |
+| armeabi-v7a | 99,896,591 bytes |
+| x86 | 111,119,479 bytes |
+| x86_64 | 120,894,934 bytes |
+
+版本 0.3.7 增加了 CI 的真实拖动进度条检查：拖动后应改变播放位置，并把 BT 顺序下载起点切换到所选分片。该检查随下一次全量 CI 运行，成功前不作通过声明。
+## v0.3.8 最终回归结果与 v0.3.8 发布
+
+GitHub Actions [run 41198324776](https://github.com/liao-zc/OmniPlayer/actions/runs/41198324776) 全部通过：37/37 UI 点检、Android instrumentation、模拟器回归、APK 构建均成功。新增真实进度条拖动测试 `manual-timebar-seek-reprioritizes-cache-range` 通过，拖动后播放位置变化，BT 顺序下载起始分片同步变化。
+
+Release [OmniPlayer v0.3.8](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.8) 已发布。四包体积：arm64-v8a 114,734,853 bytes；armeabi-v7a 99,896,591 bytes；x86 111,119,479 bytes；x86_64 120,894,934 bytes。具体 SHA-256 见 Release 的 `SHA256SUMS`。
+
+本轮清理 `dist/`、`artifacts/` 和临时文件的本地删除操作被执行环境自动审核拦截，因此没有删除；该项保持未完成并在需求表注明。v0.3.8 / versionCode 36 用于同步本报告及再次发布。
+### v0.3.8 发布核验
+
+GitHub Actions [run 41199169525](https://github.com/liao-zc/OmniPlayer/actions/runs/41199169525) 已成功完成：37/37 UI 点检、Android instrumentation、API 35 模拟器回归和 APK 构建通过。新增手动拖动进度条用例确认播放位置变化，并确认 BT 顺序下载起始分片同步重排。
+
+GitHub Release [v0.3.8](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.8) 已发布四种 ABI APK 与 SHA-256 清单。ARM64 APK 大小为 114,734,853 bytes，SHA-256 为 `def1f210684aa535f15f758315171ae77799c9978165ed4d0f009a806999b276`。本报告不把用户给出的公网磁力记为通过；SAF 文件选择器跨厂商返回行为、真实更新服务器下载、真实 IPTV 源外观仍需设备或服务端验证。
+
+本地 ARM64 Release APK 的下载在本次会话内未完成，原因是 GitHub 资产下载速率很低；不得将已有旧版本地 APK 当作 v0.3.8。需求清单中的公网 magnet 验收仍按用户排除的十条资源处理。
+## 2026-10-31 搜索、任务、播放器和直播交互更新
+
+本轮实现了新增的12项需求：底部导航移除重复搜索并把下载/缓存合并为“任务”；搜索框旁新增搜索历史菜单，搜索动作只显示图标；历史页按搜索、播放、任务三类显示和管理，支持复制、单项删除与分类/全部清空；搜索结果去重并显示 magnet，结果数不再经客户端10条分页，页码跟随搜索源，增加大小排序；播放器增加上一个已缓存/下载文件快捷键，移除缓存区间文字，将缓存区间色带叠入时间进度条；从直播收藏播放时仍使用完整频道列表切换。
+
+验证状态：新需求已逐条登记在 `docs/requirements-checklist.md` N 节，并纳入 UI 回归脚本。待本轮 Gradle/Android instrumentation 与 GitHub Actions 完成后再填最终通过/失败证据。自动化受控搜索 fixture 验证源站页码、无本地10条分页、磁力去重、大小排序；它不代替真实公网搜索源或物理设备播放验证。
+
+### 首轮 CI 反馈
+
+CI run [41204349316](https://github.com/liao-zc/OmniPlayer/actions/runs/41204349316) 的资源检查、需求脚本编译均通过；Kotlin 编译发现播放器布局删除缓存文字控件后仍引用旧 ID。已删除残余引用，版本保持 v0.3.10，修复后重新运行全量 CI，未将本次失败标为通过。
+
+### v0.3.10 全量 CI 与发布结果
+
+CI run [41204663746](https://github.com/liao-zc/OmniPlayer/actions/runs/41204663746) 全部通过：仓库/UTF-8 检查、Android APK 与 instrumentation 构建、API 35 模拟器回归、受控 BitTorrent fixture、搜索分页 fixture，以及本轮新增需求自动检查均通过。v0.3.10 已发布四种 ABI APK，见 [GitHub Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.10)。新增需求的代码级点检均通过；真实公网直播源、多厂家遥控器/电视和真实磁力资源的播放体验未在这次受控 CI 中覆盖，不据此声称已在所有设备实测。
+## 2026-10-31 软件更新流程修复（v0.3.11）
+
+本轮将应用更新下载从 DownloadManager 改为应用可控的 HTTP Range 下载：数据先写入 `.part`，暂停、连接中断或进程退出时保留文件，继续时从当前长度请求后续字节；服务端不支持 Range 时会丢弃不连续临时内容并安全重下。设置页增加暂停、继续、立即安装操作，并显示实时字节进度。下载完成后保存 APK 路径和 ready 状态，发出“下载完成，点击打开系统安装确认”通知；设置页也显示安装确认弹窗。APK 在系统安装成功广播到达前保留，App 重启后会重新尝试打开安装确认，不会重新下载完成包。安装成功后再清理安装包和临时更新状态。
+
+更新检查弹窗与软件说明页展示 Release 简短更新说明；软件说明只显示用户可读的版本名，不展示 versionCode 或版本来源。发布工作流的 Release notes 已改为本版本更新摘要，版本升至 v0.3.11。
+
+| 检查项 | 本地结果 |
+|---|---|
+| Range / `.part` 续传实现 | CI 静态检查通过；未完成真实更新服务器断点传输演练 |
+| 暂停与继续按钮、状态持久化 | 静态检查通过；真机暂停后继续传输未演练 |
+| 安装确认通知、按钮与 APK 保留 | 构建与通知/安装入口代码检查通过；实体系统安装器交互未验证 |
+| 已下载 APK 启动恢复 | 持久化 APK 路径与启动恢复代码检查通过；未做真实覆盖安装重启演练 |
+| Release notes、隐藏 versionCode/来源描述 | 通过：Release notes 已发布；更新界面显示版本名，不显示 versionCode 或来源 |
+| Android APK 构建及模拟器回归 | 通过：Actions 41208267640；49/49 UI/静态检查、instrumentation、API 35 模拟器通过 |
+| 本地 JDK/Gradle 可用性 | 本机无 JDK/Gradle；已下载并校验 CI 发布的 arm64-v8a APK |
+
+安装本身受 Android 未知来源权限与系统确认页控制；App 可以主动打开系统流程，但不能绕过用户确认。CI 的静态更新检查脚本：`scripts/verify_update_flow.py`。
+### v0.3.11 更新功能 CI 验收
+
+GitHub Actions [run 41208267640](https://github.com/liao-zc/OmniPlayer/actions/runs/41208267640) 成功：更新流程静态回归、仓库与架构检查、APK/instrumentation 构建、API 35 模拟器测试全部通过。模拟器报告记录 49 项检查全部通过，其中 `verify_update_flow.py` 专项检查通过；见 [CI 报告 artifact](https://github.com/liao-zc/OmniPlayer/actions/runs/41208267640)。GitHub Release [OmniPlayer v0.3.11](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.11) 已发布 arm64-v8a、armeabi-v7a、x86、x86_64 APK 与 SHA-256 清单，Release notes 已写明续传、暂停/继续和安装确认变更。本地 ARM64 APK：`dist/OmniPlayer-0.3.11-arm64-v8a.apk`，114,751,755 bytes，SHA-256 `3a776011c771cc73e8c2804bcb0ebe05afc536cfdffacd2aca56e059a955efaa`。
+
+CI 验证覆盖编译、instrumentation 和静态更新流程检查；未在模拟器中对真实更新服务器进行限速/断网续传实传，也未实际安装自身更新包验证系统安装器交互。系统要求用户确认安装；这些未做的设备级动作没有标为通过。Android 更新 UI 只显示版本名，不显示 versionCode 或版本来源。
+### 本地旧产物清理状态
+
+本轮尝试清理 `dist/` 中旧版本 APK 和历史临时产物，但执行环境的自动审核拦截了删除命令，因此这些旧文件仍保留；没有把清理标为完成。当前 v0.3.11 ARM64 APK 已单独校验并保留在 `dist/OmniPlayer-0.3.11-arm64-v8a.apk`。
+## v0.3.12 第一阶段变更与验收
+
+- 磁力底部导航调整为播放、任务、收藏、历史；搜索页不再出现重复的首页/设置底部入口，历史管理从播放内容区移入独立导航页。
+- 搜索栏操作图标顺序调整为搜索、搜索历史、引擎设置；磁力顶栏设置文字和播放器设置图标显式使用黑色。
+- 完整已校验的缓存/下载文件改为 Media3 和 LibVLC 直接从本地文件读取，避免再次通过 BT 网络读取完整文件。未完成缓存仍通过 BT verified-piece 数据源等待校验块；文件预分配长度本身不被视为缓存完成。
+- 代码级验收已纳入 `scripts/verify_recent_requirements.py`。GitHub Actions 模拟器/受控种子回归尚未运行；未运行前不得将本轮标为通过或创建 Release。
+## 2026-10-31 两阶段 Release 计划与模块重构
+
+### 第一阶段：导航与缓存读取修复
+
+- 目标版本：v0.3.12，versionCode 40。
+- 更新点：底部导航改为“播放 / 任务 / 收藏 / 历史”；搜索动作改为搜索、历史、引擎设置；完整且已校验的缓存文件从本地直读，部分缓存仍读取通过校验的 BT 分片；设置字样改为黑色，右上角入口打开直播/磁播/通用/软件说明分类，保持全局设置可达。
+- 测试证据：GitHub Actions run `41214499167` 编译通过，但模拟器偏好设置用例在主页寻找不存在的“设置”按钮时失败，因此未发布。已修正产品设置入口，使磁力页顶栏进入设置分类（而非直接进入磁播子页）；偏好脚本改为从磁力页进入设置分类再打开通用设置。首个修复 run `41215602860` 因仍只打开磁播子页而失败；本次包含产品入口修正的 run `41216388591` 正在执行。重跑结果记录在下方。
+
+### 第二阶段：Gradle 模块重构
+
+- `:core` 管理跨功能共享设置、显示/字体、存储路径、更新、媒体信息和导航。
+- `:magnet` 为 Android library module，按 search、engine、player、library、settings 归档。
+- `:live` 为 Android library module，按 source、channels、player、settings 归档。
+- `:app` 作为组合根依赖 `:core`、`:magnet`、`:live`；两个 feature 只依赖 `:core` 且互不依赖。未来 web-video、music 可作为独立 feature 由应用壳组合。
+- `:ui-inspector` 是独立回归应用，不是 `:app` 依赖。
+- 模块化目标版本：v0.4.0，versionCode 41；全量 CI 通过后正式发布。
+
+### Release 与本地点检
+
+第一阶段模拟器失败的直接原因是偏好 UI 脚本沿用旧主页设置入口。产品主页当前只显示直播/磁力卡片，磁力页顶栏提供设置入口。脚本已调整为先进入磁力播放，再进入设置和通用设置。不得把该次失败当作产品功能回归通过；新 run 的最终状态、截图、APK、Release URL 和 SHA-256 应在本节补记。
+
+第二阶段的 Gradle 编译、模块 Manifest 合并、仪器测试、API 35 模拟器和完整历史需求点检应全部通过后再发布；未通过项和公网上游限制需如实记录。
+## 本轮最终结果：两阶段发布与重构验收
+
+此节为前面标注“待验证/计划”的阶段记录提供最终结论。
+
+### Release 1：v0.3.12 导航与缓存读取
+
+- 正式 Release：[v0.3.12](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.12)，含四 ABI 安装包。
+- 完整 CI：[run 41218292844](https://github.com/liao-zc/OmniPlayer/actions/runs/41218292844)，结论 success。
+- 内容：磁力底栏为“播放 / 任务 / 收藏 / 历史”；搜索区图标为搜索、历史、三点设置；缓存完整并通过校验后由播放器读取本地文件，部分缓存继续使用 BT 分片读取；移除磁力页重复的首页/设置底栏入口，设置文字改为黑色。
+
+### Release 2：v0.4.0 模块化
+
+- 正式 Release：[v0.4.0](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.4.0)，含 arm64-v8a、armeabi-v7a、x86、x86_64 四个 APK；每个拆分 APK 只包含目标 ABI 的 JNI 库。
+- 完整 CI：[run 41220234864](https://github.com/liao-zc/OmniPlayer/actions/runs/41220234864)，结论 success；包括仓库架构边界与 UTF-8 检查、APK 和 instrumentation 构建、Android API 35 模拟器、BT 多文件 fixture、搜索分页 fixture、仪器测试及 UI 回归。
+- UI 回归逐项成功：`verify_library_revision.py`、`verify_preferences_revision.py`、`verify_search_pages.py`、`verify_recent_requirements.py`、`verify_update_flow.py`；更新流程 10/10，搜索 fixture 验证源站分页、无客户端结果数上限、BTIH 去重、大小排序、上一页/下一页和返回导航。
+- 验收范围：模拟器和受控做种环境验证应用行为；不据此声称用户提供的任意公网磁力均有可用 Peer 或达到某一播放速度。
+
+### 架构边界
+
+`:app` 作为应用组合壳依赖 `:core`、`:magnet`、`:live`；`:magnet` 与 `:live` 是独立 Android library modules，二者只依赖共享的 `:core`，互不依赖。播放器、磁力搜索与 BT 引擎、直播源和频道、内容管理、各 feature 设置分别归属对应模块。未来网站视频和音乐可新增 feature library，由 `:app` 组合，并复用 `:core` 的媒体、存储、导航和通用设置能力。
+
+### 本轮点检结果
+
+| 项目 | 结果 | 证据 |
+|---|---|---|
+| 磁力底栏顺序与移除首页/设置按钮 | 通过 | v0.3.12 UI 回归和 CI |
+| 缓存完成后从本地文件读取 | 通过 | v0.3.12 缓存读取修复及受控多文件 BT/播放器回归；未完成缓存仍只读取已校验分片 |
+| 历史入口在底栏而非播放页内容区 | 通过 | v0.3.12 导航回归 |
+| 搜索右侧操作图标顺序 | 通过 | v0.3.12 搜索 UI 回归 |
+| 磁力页右上“设置”文字黑色 | 通过 | v0.3.12 UI 检查 |
+| `:core`、`:magnet`、`:live` 模块依赖边界 | 通过 | v0.4.0 架构 CI 与 Gradle 构建 |
+| 搜索分页和 BTIH 去重等回归 | 通过 | v0.4.0 受控分页 fixture |
+| Android API 35 编译、仪器测试、模拟器回归 | 通过 | CI run 41220234864 |
+| 四 ABI Release APK | 通过 | v0.4.0 Release 附件、ABI 检查与 SHA256SUMS |
+
+CI 生成的逐项截图与状态文件保存在 run 41220234864 的 `OmniPlayer-CI-report-and-debug-APK` artifact；仓库内脚本 `scripts/run_android_regressions.sh`、`scripts/run_ui_regressions.sh` 和 `scripts/summarize_ci_results.py` 可重复运行同一回归流程。

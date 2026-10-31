@@ -1,7 +1,7 @@
 plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id("org.jetbrains.kotlin.plugin.compose") }
 
 android { namespace = "com.omniplayer"; compileSdk = 35
-    defaultConfig { applicationId = "com.freemangnetplayer"; minSdk = 24; targetSdk = 35; versionCode = 29; versionName = "0.3.1"; testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    defaultConfig { applicationId = "com.freemangnetplayer"; minSdk = 24; targetSdk = 35; versionCode = 41; versionName = "0.4.0"; testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         providers.gradleProperty("targetAbi").orNull?.let { requested ->
             require(requested in setOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
             ndk { abiFilters += requested }
@@ -28,17 +28,10 @@ android { namespace = "com.omniplayer"; compileSdk = 35
 // The wrapper's 2018 native dependency pauses the session on Android 11+
 // when SELinux rejects its netlink route socket. Upgrade Java and every ABI
 // together; mixing JNI and Java versions is unsupported.
-configurations.configureEach {
-    resolutionStrategy.force(
-        "org.libtorrent4j:libtorrent4j:2.1.0-39",
-        "org.libtorrent4j:libtorrent4j-android-arm:2.1.0-39",
-        "org.libtorrent4j:libtorrent4j-android-arm64:2.1.0-39",
-        "org.libtorrent4j:libtorrent4j-android-x86:2.1.0-39",
-        "org.libtorrent4j:libtorrent4j-android-x86_64:2.1.0-39"
-    )
-}
-
 dependencies {
+    implementation(project(":core"))
+    implementation(project(":magnet"))
+    implementation(project(":live"))
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))
@@ -52,17 +45,4 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
-    implementation("androidx.media3:media3-exoplayer:1.5.1")
-    implementation("androidx.media3:media3-exoplayer-hls:1.5.1")
-    implementation("androidx.media3:media3-ui:1.5.1")
-    implementation("org.videolan.android:libvlc-all:3.6.5")
-    implementation("androidx.webkit:webkit:1.12.1")
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    // The small MIT session bridge is included as source so handle ownership
-    // and native compatibility fixes can be reviewed and compiled together.
-    implementation("org.libtorrent4j:libtorrent4j:2.1.0-39")
-    implementation("org.libtorrent4j:libtorrent4j-android-arm:2.1.0-39")
-    implementation("org.libtorrent4j:libtorrent4j-android-arm64:2.1.0-39")
-    implementation("org.libtorrent4j:libtorrent4j-android-x86:2.1.0-39")
-    implementation("org.libtorrent4j:libtorrent4j-android-x86_64:2.1.0-39")
 }

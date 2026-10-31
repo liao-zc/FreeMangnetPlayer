@@ -1,61 +1,58 @@
-# OmniPlayer 架构说明
+# OmniPlayer 架构
 
 更新日期：2026-10-31
 
-## 分层结构
+## Gradle 模块
 
 ```mermaid
 flowchart TB
-    user[手机 / 平板 / Android TV 用户]
-    app[app：应用壳与导航\nMainActivity]
-    settings[settings：全局设置界面\nSettingsActivity]
-    core[core：通用能力\n设置存储 · 外观 · 路径 · 更新 · 媒体格式 · 跨功能导航]
-    magnet[magnet：磁力功能\n搜索 · 解析/BT · 播放 · 下载/缓存 · 媒体库]
-    live[live：电视直播功能\n源读取/解析 · 频道 · 播放 · 收藏/历史]
-    engine[第三方播放与传输引擎\nMedia3 · LibVLC · libtorrent4j]
-    platform[Android 平台\n存储访问 · 前台下载服务 · PiP · 安装器]
-    user --> app
+    app[`:app` 应用壳<br/>MainActivity · 全局设置 · 外部 Intent]
+    core[`:core` Android library<br/>通用偏好 · 外观/字体 · 存储路径 · 更新 · 媒体元数据]
+    magnet[`:magnet` Android library<br/>磁力搜索 · BT 引擎 · 播放 · 任务/内容管理 · 磁力设置]
+    live[`:live` Android library<br/>直播源读取 · 频道 · 播放 · 收藏/历史 · 直播设置]
+    inspector[`:ui-inspector` 独立 UI 回归测试应用]
+    web[未来 `:web-video` feature]
+    music[未来 `:music` feature]
+
+    app --> core
     app --> magnet
     app --> live
-    app --> settings
-    app --> core
-    settings --> core
-    settings --> magnet
-    settings --> live
     magnet --> core
     live --> core
-    magnet --> engine
-    live --> engine
-    magnet --> platform
-    live --> platform
+    web -.未来依赖.-> core
+    music -.未来依赖.-> core
 ```
 
-## 代码归属
+`:app` 是组合根，提供首页、导航、外部 Magnet Intent 和设置页面。磁力与直播是独立的 Android library modules，分别拥有源代码、资源和 Android manifest。两个 feature 均只依赖共享的 `:core`，互相没有源码依赖；`SettingsActivity` 在 app 壳中组合两类设置，磁力播放器通过应用内组件名打开它，避免产生反向 Gradle 依赖。`:ui-inspector` 是独立的 UI 回归应用，由 CI 单独构建和运行，不是 `:app` 的 Gradle 依赖。
 
-| 包 | 职责 | 主要入口/文件 |
-|---|---|---|
-| `com.omniplayer` | 应用首页、跨功能导航、外部 `magnet:` Intent | `MainActivity` |
-| `com.omniplayer.core` | 两个业务共用的偏好存储、字体/背景、目录选择、更新、媒体格式和大小展示 | `SettingsStore`、`DisplaySettings`、`DirectoryPicker`、`AppUpdater`、`MediaFormats`、`ByteFormats` |
-| `com.omniplayer.magnet` | 磁力搜索 UI 与 JS 桥、引擎配置、BT 任务与 Peer 管理、流式读取、播放器、下载缓存与媒体库 | `MagnetSearchUi`、`MagnetSearchBridge`、`TorrentTasks`、`TorrentFileDataSource`、`PlayerActivity`、`LibraryStore` |
-| `com.omniplayer.live` | M3U/M3U8 地址或本地文件读取、频道解析/持久化、直播列表、直播源设置、播放器、直播收藏和历史 | `IptvPlaylistRepository`、`IptvStore`、`IptvActivity`、`IptvSettingsActivity`、`IptvPlayerActivity` |
-| `com.omniplayer.settings` | 全局设置分类与软件说明/更新入口 | `SettingsActivity` |
-| `com.masterwok.simpletorrentandroid` | 与 libtorrent JNI 会话交互的兼容层 | 本地保留的 session bridge 源码 |
+## 职责目录
 
-## 依赖边界与数据
+| Gradle 模块 | 目录 | 责任 | 主要内容 |
+|---|---|---|---|
+| `:core` | `core/src/main/java/com/omniplayer/core/preferences` | 通用偏好和显示 | `SettingsStore`、字体、背景、目录选择 |
+| `:core` | `.../media` | 共用媒体信息和格式能力 | 媒体事实、格式识别、大小展示 |
+| `:core` | `.../update`、`.../navigation` | 应用更新和跨 feature 导航 | 断点续传、安装确认、返回应用壳 |
+| `:magnet` | `magnet/src/main/java/com/omniplayer/magnet/search` | 关键词搜索和引擎设置 | 搜索 UI、网页结果桥、搜索引擎编辑 |
+| `:magnet` | `.../engine` | 磁力解析和 BT 任务发现/下载 | Torrent、Peer、Tracker、分片读取、下载服务 |
+| `:magnet` | `.../player` | 磁力资源的播放器和缓存覆盖 | Media3、LibVLC、缓存片段轨道 |
+| `:magnet` | `.../library` | 下载、缓存、收藏与磁力历史 | 记录持久化、列表管理和已存资源队列 |
+| `:magnet` | `.../settings` | 磁力专有设置 | 搜索引擎管理 Activity |
+| `:live` | `live/src/main/java/com/omniplayer/live/source` | M3U/M3U8 源读取和解析 | 网络/本地播放列表、频道数据 |
+| `:live` | `.../channels`、`.../player`、`.../settings` | 频道浏览、直播播放、直播专有设置 | 直播主页、全屏/PiP 播放器、源管理 |
+| `:app` | `app/src/main/java/com/omniplayer/settings` | 全局设置界面 | 通用、磁力、直播和软件说明的入口 |
 
-- 首页负责入口和跨功能导航；磁力搜索卡片/格式识别/磁力规范化/搜索桥接已移入 `magnet`；BT 通知和播放器返回首页通过 `core.AppNavigation` 路由，功能包不再直接导入首页 Activity。M3U 网络和本地文件读取在 `IptvPlaylistRepository`，M3U 解析与直播数据在 `IptvStore`。
-- 通用外观设置由 `core.DisplaySettings` 读取，磁力与直播 UI 使用同一套字体/背景配置。通用偏好仍沿用原 SharedPreferences 名称和键，避免升级丢失设置。
-- 磁力缓存、下载、收藏、播放队列与历史数据继续使用原本地存储格式；直播设置、收藏与观看历史仍由直播域单独存储。
-- `AndroidManifest.xml` 指向分域后的 Activity、Service 和 Receiver 类名。应用 ID 保持 `com.freemangnetplayer`，用于覆盖安装时保留用户数据。
-- 两种播放路径仍分别由 Media3/LibVLC 与 Media3 承担，Android 平台能力通过原 Activity、Service 和系统 Picker 接入。
+文件按职责目录收纳，同时保留现有 `com.omniplayer.magnet`、`com.omniplayer.live`、`com.omniplayer.core` 包名，避免无关公开组件改名和已有数据/调用路径变化。Android manifest、播放器布局和磁力图标归属对应 feature module。
 
-## 当前模块化边界
+## 扩展约束
 
-本次建立的是同一 `:app` Gradle 模块内的清晰包边界和文件边界，没有更改 Gradle 模块图。首页仍负责 WebView 搜索会话的生命周期，并作为 `AppNavigation` 的返回目标；下一阶段可把该会话抽象为 `MagnetSearchCoordinator`，并在稳定后再拆成 Gradle feature modules。暂不拆 Gradle 模块是为了避免现有 Activity、Android Manifest、JNI/native 依赖和资源目录产生不必要的发布回归。
+未来的网站视频和音乐搜索分别作为 `:web-video`、`:music` Gradle library modules 接入，由 `:app` 组合。新 feature 可以依赖 `:core` 的显示、存储和更新能力，不应依赖 `:magnet` 或 `:live` 的业务实现。需要共享的新能力应先放在 `:core` 的稳定接口中；只有确认多个 feature 具有相同播放器行为后，再抽成独立的可复用播放器模块，避免空泛抽象和 feature 间循环依赖。
 
-## 后续演进方向
+播放器数据读取仍由各 feature 的资源类型适配：磁力播放器只在整个文件已由 BT piece 校验且本地文件完整时走文件直读，部分文件继续走校验分片读取；直播播放器走网络流。共享设置、外观和媒体信息位于 `:core`。
 
-1. 保持跨域只通过 `core` 的通用设置/格式接口和应用导航入口交互。
-2. 给 BT 引擎、直播数据源和播放器分别增加明确的状态模型与可注入接口。
-3. 在 UI 与数据行为回归稳定后，再把 `magnet`、`live` 提升为独立 Gradle library modules；届时由 app 壳组合两个 feature。
-4. 不把文件列表解析、Peer 发现、收到校验分片和真实起播合并成一个“成功”状态；诊断报告应分别保留这些阶段。
+## 构建与点检
+
+```powershell
+.\gradlew.bat :core:assembleDebug :magnet:assembleDebug :live:assembleDebug :app:assembleDebug assembleDebugAndroidTest
+```
+
+完整模拟器、instrumentation、受控 BT 与搜索回归由 `.github/workflows/library.yml` 执行；模块边界静态检查在 `scripts/architecture-smoke-check.py`。详细需求及本轮验收状态见 [requirements-checklist.md](requirements-checklist.md) 和 [report.md](report.md)。

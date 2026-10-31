@@ -5,21 +5,36 @@
   const resourceName=x=>{const t=clean(x);return /magnet:\?|^https?:|^link_blocked$|^(?:(?:磁力|magnet)(?:下载|链接)?|下载|复制|播放|查看详[情细]|详情|详细|查看|更多|点击查看|点击下载)$/i.test(t)?'':t;};
   const decode = x => { const e = document.createElement('textarea'); e.innerHTML = x; return e.value; };
   let running = false, pending = 0; const linkErrors=[]; const metadata = new Map();
+  const pagerSelector='.pagination,.pager,.pages,.page-numbers';
+  function currentPageNumber() {
+    const active=document.querySelector(`${pagerSelector} .current,${pagerSelector} .active,${pagerSelector} [aria-current=page]`);
+    const value=active&&parseInt(clean(active.textContent),10); if(Number.isFinite(value)&&value>0)return value;
+    const params=new URL(location.href).searchParams;
+    for(const key of ['page','p','pg','pageNo','pageNum']){const number=parseInt(params.get(key)||'',10);if(Number.isFinite(number)&&number>0)return number;}
+    return 1;
+  }
   function nextUrl() {
     const anchors = [...document.querySelectorAll('a[href]')];
     const explicit = anchors.find(a => a.rel === 'next' || /^(下一页|下页|下一頁|next(?:\s*page)?|›|»|>)$/i.test(clean(a.textContent || a.getAttribute('aria-label'))) || /\bnext\b/i.test(a.className));
     if (explicit && !explicit.closest('[aria-disabled=true],.disabled')) {
       const u = new URL(explicit.href, location.href); if (/^https?:$/.test(u.protocol) && u.href !== location.href) return u.href;
     }
-    const current = document.querySelector('.pagination .current,.pagination .active,.pager .active,[aria-current=page]');
-    const n = current ? parseInt(clean(current.textContent),10) : NaN;
+    const n = currentPageNumber();
     const numbered = anchors.find(a => a.closest('.pagination,.pager,.pages,.page-numbers') && parseInt(clean(a.textContent),10) === n+1);
     return numbered ? numbered.href : '';
   }
   function info() {
-    const pages=[...document.querySelectorAll('.pagination a[href],.pager a[href],.pages a[href],a.page-numbers[href]')].map(a=>({page:parseInt(clean(a.textContent),10),url:a.href})).filter(p=>p.page>0);
-    const text=clean(document.body.textContent);const totalMatch=/(?:共|total)\s*(\d+)\s*(?:页|pages)/i.exec(text);
-    window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,next:nextUrl(),pending:pending,failures:failed.size,errors:[...failed],linkErrors:linkErrors,running:running,pages:pages,totalPages:totalMatch?+totalMatch[1]:0,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest('.pagination,.pager,.pages,.page-numbers'),rel:a.rel})),complete:document.readyState==="complete"&&!running&&pending===0}));
+    const pager=document.querySelector(pagerSelector), scope=pager||document;
+    const pages=[...scope.querySelectorAll('a[href]')].map(a=>({page:parseInt(clean(a.textContent),10),url:a.href})).filter(p=>p.page>0);
+    const totalText=clean(document.body.textContent||'');
+    const totalMatch=/(?:共\s*(\d+)\s*页|total\s*(\d+)\s*pages)/i.exec(totalText);
+    const last=[...scope.querySelectorAll('a[href]')].find(a=>/^(末页|尾页|last(?:\s*page)?|最后一页)$/i.test(clean(a.textContent||a.getAttribute('aria-label'))));
+    const lastParam=last&&(()=>{const params=new URL(last.href,location.href).searchParams;for(const key of ['page','p','pg','pageNo','pageNum']){const n=parseInt(params.get(key)||'',10);if(Number.isFinite(n)&&n>0)return n;}return 0;})();
+    const current=currentPageNumber(), next=nextUrl();
+    const explicitTotal=totalMatch?+(totalMatch[1]||totalMatch[2]):0;
+    const visibleLastPage=Math.max(0,...pages.map(p=>p.page));
+    const totalPages=explicitTotal||lastParam||visibleLastPage||(next?current+1:current);
+    window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,page:current,next:next,pending:pending,failures:failed.size,errors:[...failed],linkErrors:linkErrors,running:running,pages:pages,totalPages:totalPages,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest(pagerSelector),rel:a.rel})),complete:document.readyState==="complete"&&!running&&pending===0}));
   }
   function resourceTime(node, count) {
     if(!node||count>1)return '';

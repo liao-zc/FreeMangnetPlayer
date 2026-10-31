@@ -18,7 +18,8 @@ jobs:
         run: |
           python3 scripts/architecture-smoke-check.py
           python3 scripts/check_repository.py
-          python3 -m py_compile scripts/architecture-smoke-check.py scripts/check_repository.py scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/summarize_ci_results.py
+          python3 -m py_compile scripts/architecture-smoke-check.py scripts/check_repository.py scripts/verify_apk_abi.py scripts/verify_library_revision.py scripts/verify_preferences_revision.py scripts/verify_search_pages.py scripts/verify_recent_requirements.py scripts/verify_update_flow.py scripts/summarize_ci_results.py
+          python3 scripts/verify_update_flow.py
       - uses: actions/setup-java@v4
         with: {distribution: temurin, java-version: '17'}
       - uses: android-actions/setup-android@v3
@@ -38,6 +39,10 @@ jobs:
       - name: Build APK and Android instrumentation APK
         id: build_apk
         run: gradle --no-daemon assembleDebug assembleDebugAndroidTest
+      - name: Preserve universal CI APK before ABI packaging
+        run: |
+          mkdir -p ci-artifacts
+          cp app/build/outputs/apk/debug/app-debug.apk ci-artifacts/OmniPlayer-debug-universal.apk
       - name: Prepare controlled multi-file BitTorrent fixture
         run: |
           sudo apt-get update -qq
@@ -84,10 +89,23 @@ jobs:
           VERSION=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n 1)
           test -n "$VERSION"
           TAG="v$VERSION"
-          APK="OmniPlayer-$VERSION.apk"
-          cp app/build/outputs/apk/debug/app-debug.apk "$APK"
-          gh release create "$TAG" "$APK" --repo "${GITHUB_REPOSITORY}" --target "$GITHUB_SHA" --title "OmniPlayer $TAG" --notes "API 35 全量 CI 与模拟器回归通过后发布。安装包版本：$VERSION。"
-          echo "Published https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${APK}" >> "$GITHUB_STEP_SUMMARY"
+          mkdir -p release-assets
+          for ABI in arm64-v8a armeabi-v7a x86 x86_64; do
+            gradle --no-daemon -PtargetAbi="$ABI" assembleDebug
+            APK="OmniPlayer-$VERSION-$ABI.apk"
+            cp app/build/outputs/apk/debug/app-debug.apk "release-assets/$APK"
+            python3 scripts/verify_apk_abi.py "release-assets/$APK" "$ABI"
+            sha256sum "release-assets/$APK" >> release-assets/SHA256SUMS
+            stat -c '%n %s bytes' "release-assets/$APK" >> release-assets/APK-SIZES.txt
+          done
+          case "$VERSION" in
+            0.3.12) NOTES='磁力导航调整为播放、任务、收藏、历史；搜索栏操作顺序调整；已验证完整的缓存文件改为本地读取，避免重复下载。' ;;
+            0.4.0) NOTES='完成 Gradle 架构重构：共享能力归入 core，磁力与直播拆成独立 library modules，由 OmniPlayer 应用壳组合；保留旧安装数据与功能入口。' ;;
+            *) NOTES='OmniPlayer 功能、稳定性与兼容性更新。' ;;
+          esac
+          gh release create "$TAG" release-assets/OmniPlayer-*.apk release-assets/SHA256SUMS release-assets/APK-SIZES.txt --repo "${GITHUB_REPOSITORY}" --target "$GITHUB_SHA" --title "OmniPlayer $TAG" --notes "$NOTES"
+          for APK in release-assets/OmniPlayer-*.apk; do echo "Published https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/$(basename "$APK")" >> "$GITHUB_STEP_SUMMARY"; done
+          echo "Published split APKs to ${TAG}; native payload was limited to each target ABI." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -95,7 +113,8 @@ jobs:
           path: |
             manual-shots/
             app/build/outputs/androidTest-results/
-            app/build/outputs/apk/debug/app-debug.apk
+            ci-artifacts/OmniPlayer-debug-universal.apk
             scripts/run_ui_regressions.sh
             scripts/run_android_regressions.sh
             scripts/summarize_ci_results.py
+            scripts/verify_update_flow.py

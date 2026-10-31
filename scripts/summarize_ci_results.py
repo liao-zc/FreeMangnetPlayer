@@ -13,7 +13,7 @@ if status_file.exists():
             name, code = line.split("\t", 1)
             script_status.append((name, int(code)))
 checks = []
-for filename in ("library-verification.json", "preferences-verification.json", "pagination-verification.json"):
+for filename in ("library-verification.json", "preferences-verification.json", "pagination-verification.json", "recent-requirements-verification.json"):
     source = root / filename
     if not source.exists():
         continue

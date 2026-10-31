@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -96,6 +97,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (savedInstanceState == null) PendingUpdateInstaller.resetForAppLaunch()
+        val updateState = SettingsStore.prefs(this).getString("update-state", "")
+        if (updateState == "queued" || updateState == "downloading") AppUpdater.resume(this)
         TorrentTasks.initialize(this)
         val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()?.let(::normalizeMagnetUri)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
@@ -134,6 +138,7 @@ class MainActivity : ComponentActivity() {
                 var magnet by remember { mutableStateOf("") }
                 var searchProviders by remember { mutableStateOf(SearchEngineStore.load(this@MainActivity)) }
                 var selectedTab by remember { mutableStateOf(intent.getStringExtra("open-tab") ?: if (inbound != null || !requestedQuery.isNullOrBlank()) "搜索" else "门户") }
+                var selectedTaskCache by remember { mutableStateOf(false) }
                 SideEffect { navigateHome = { selectedTab = "门户" } }
                 var showEngineMenu by remember { mutableStateOf(false) }
                 var showCustomDialog by remember { mutableStateOf(false) }
@@ -174,7 +179,7 @@ class MainActivity : ComponentActivity() {
                 }
                 BackHandler(enabled = selectedTab == "门户") { finish() }
                 BackHandler(enabled = selectedTab == "历史") { selectedTab = "播放" }
-                BackHandler(enabled = selectedTab in setOf("搜索", "播放", "下载", "收藏", "缓存")) { selectedTab = "门户" }
+                BackHandler(enabled = selectedTab in setOf("搜索", "播放", "下载", "收藏", "缓存", "任务")) { selectedTab = "门户" }
 
                 fun reloadLibrary() {
                     TorrentTasks.tasks.values.forEach { StoredVideos.sync(this@MainActivity, it) }
@@ -321,32 +326,17 @@ class MainActivity : ComponentActivity() {
                             title = { Text(if (selectedTab == "搜索结果") "搜索结果" else "磁力播放") },
                             navigationIcon = { IconButton(onClick = { if (selectedTab == "搜索结果") selectedTab = "搜索" else selectedTab = "门户" }) { Icon(Icons.Default.ArrowBack, if (selectedTab == "搜索结果") "返回搜索" else "返回主页") } },
                             actions = { TextButton(
-                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "magnet")) },
+                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "menu")) },
                                 modifier = Modifier.semantics { contentDescription = "磁播模块设置" }
-                            ) { Text("设置") } }
+                            ) { Text("设置", color = Color.Black) } }
                         )
                     },
                     bottomBar = {
-                        NavigationBar(containerColor = Color.White) {
-                            NavigationBarItem(
-                                selected = selectedTab == "门户",
-                                onClick = { selectedTab = "门户" },
-                                icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                                label = { Text("首页") }
-                            )
-                            NavigationBarItem(
-                                selected = selectedTab == "设置",
-                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "menu")) },
-                                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                                label = { Text("设置") }
-                            )
-                            if (magnetSection) {
-                                NavigationBarItem(selected = selectedTab == "搜索" || selectedTab == "搜索结果", onClick = { selectedTab = "搜索" }, icon = { Icon(Icons.Default.Search, null) }, label = { Text("搜索") })
+                        if (magnetSection) NavigationBar(containerColor = Color.White) {
                                 NavigationBarItem(selected = selectedTab == "播放" || selectedTab == "缓存", onClick = { selectedTab = "播放"; reloadLibrary() }, icon = { Icon(Icons.Default.PlayArrow, null) }, label = { Text("播放") })
-                                NavigationBarItem(selected = selectedTab == "下载", onClick = { selectedTab = "下载"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("下载") })
+                                NavigationBarItem(selected = selectedTab in setOf("任务", "下载", "缓存"), onClick = { selectedTab = "任务"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("任务") })
                                 NavigationBarItem(selected = selectedTab == "收藏", onClick = { selectedTab = "收藏"; reloadLibrary() }, icon = { Icon(Icons.Default.Bookmarks, null) }, label = { Text("收藏") })
-                            }
-
+                                NavigationBarItem(selected = selectedTab == "历史", onClick = { selectedTab = "历史" }, icon = { Icon(Icons.Default.History, null) }, label = { Text("历史") })
                         }
                     }
                 ) { insets ->
@@ -400,11 +390,20 @@ class MainActivity : ComponentActivity() {
                             )
                             "历史" -> HistoryScreen(onBack={ selectedTab="播放" }, onOpen={ kind,entry -> if(kind=="搜索") {keyword=entry.title;beginSearch()} else openTorrent(MagnetResult(entry.title,entry.source),"play") })
                             "播放" -> Column {
-                                Row { TextButton(onClick={selectedTab="历史"}) { Text("历史记录") }; TextButton(onClick = { selectedTab = "缓存"; reloadLibrary() }) { Text("缓存视频 (${caches.count { it.unplayableReason.isBlank() }})") } }
+                                Row { TextButton(onClick = { selectedTaskCache = true; selectedTab = "任务"; reloadLibrary() }) { Text("缓存视频 (${caches.count { it.unplayableReason.isBlank() }})") } }
                                 ManagedLibrary("播放列表", playbacks, "播放", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             }
-                            "缓存" -> ManagedLibrary("缓存视频", caches, "缓存", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
-                            "下载" -> ManagedLibrary("下载任务", downloads, "下载", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                            "缓存" -> { selectedTaskCache = true; selectedTab = "任务" }
+                            "任务" -> Column {
+                                val taskTab = if (selectedTaskCache) "缓存" else "下载"
+                                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    FilterChip(selected = taskTab == "下载", onClick = { selectedTaskCache = false }, label = { Text("下载 (${downloads.size})") })
+                                    FilterChip(selected = taskTab == "缓存", onClick = { selectedTaskCache = true }, label = { Text("缓存 (${caches.size})") })
+                                }
+                                if (taskTab == "下载") ManagedLibrary("下载任务", downloads, "下载", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                                else ManagedLibrary("缓存视频", caches, "缓存", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
+                            }
+                            "下载" -> { selectedTab = "任务" }
                             "收藏" -> ManagedLibrary("我的收藏", favorites, "收藏", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             else -> SearchHome(
                                 keyword = keyword,
@@ -421,6 +420,8 @@ class MainActivity : ComponentActivity() {
                                     showEngineMenu = false
                                 },
                                 onCustomEngine = { showEngineMenu = false; showCustomDialog = true },
+                                recentSearches = HistoryStore.read(this@MainActivity, "搜索").map { it.title },
+                                onChooseSearchHistory = { keyword = it; beginSearch() },
                                 magnet = magnet,
                                 onMagnetChange = { magnet = it; error = "" },
                                 onParseMagnet = {
@@ -452,7 +453,10 @@ class MainActivity : ComponentActivity() {
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(debug) java.io.File(filesDir,"search-scan.json").writeText(row.toString())
                                         if(generation==searchTrigger && !searchComplete) {
-                                            scannerReady=row.optBoolean("complete");if(row.optInt("totalPages")>0) sourcePages=row.getInt("totalPages")
+                                            scannerReady=row.optBoolean("complete")
+                                            val observedTotal = row.optInt("totalPages")
+                                            if (observedTotal > 0) sourcePages = observedTotal
+                                            else if (row.optBoolean("complete") && row.optString("next").isBlank()) sourcePages = pageNumber
                                             row.optJSONArray("pages")?.let { array -> for(i in 0 until array.length()) {val link=array.getJSONObject(i);pageUrls[link.getInt("page")]=link.getString("url") } }
                                         }
                                      } }, onMagnet = { title, link ->
@@ -605,7 +609,7 @@ class MainActivity : ComponentActivity() {
                     AlertDialog(
                         onDismissRequest = { availableUpdate = null },
                         title = { Text("发现 OmniPlayer 新版本 ${update.version}") },
-                        text = { Text("更新包下载后会打开 Android 系统安装确认页。安装需要系统确认；完成后会尝试重新打开应用。应用设置和私有缓存会保留。") },
+                        text = { Text(buildString { append("更新包下载后会打开系统安装确认页；应用设置和缓存会保留。"); if (update.notes.isNotBlank()) { append("\n\n更新说明：\n"); append(update.notes.take(1800)) } }) },
                         confirmButton = { TextButton(onClick = {
                             updateScope.launch(Dispatchers.IO) { runCatching { AppUpdater.enqueue(this@MainActivity, update) } }
                             availableUpdate = null

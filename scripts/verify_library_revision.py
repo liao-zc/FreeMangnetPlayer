@@ -53,8 +53,9 @@ def control(name):
         t=tree()
         n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
         if n is not None: tap(n);time.sleep(.4);return
-        if name == 'player_quality':
-            n=next((n for n in t.iter('node') if n.get('text') in ('画质','画质设置') and actionable(n)),None)
+        labels={'player_quality':'\u753b\u8d28\u8bbe\u7f6e','player_files':'\u5207\u6362\u89c6\u9891','player_next':'\u4e0b\u4e00\u4e2a\u5df2\u7f13\u5b58\u89c6\u9891'}
+        if name in labels:
+            n=next((n for n in t.iter('node') if n.get('content-desc')==labels[name] and actionable(n)),None)
             if n is not None: tap(n);time.sleep(.4);return
         if not tapped:
             surface=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
@@ -66,8 +67,29 @@ def control(name):
     (OUT/'library-control-failure-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
     (OUT/'library-control-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
     screenshot('library-control-failure.png')
-    raise AssertionError('Missing visible built-in control '+name)
+    ui=tree(); raise AssertionError({'control':name,'state':state(),'ui':[n.attrib for n in ui.iter('node')]})
 
+def scrub_player_timebar():
+    """Exercise the embedded seek bar and confirm BT download reprioritization."""
+    before=wait(lambda s:s.get('playing') and s.get('duration',0)>0)
+    start_piece=before.get('streamRangeStart',-1)
+    deadline=time.monotonic()+8
+    bar=None
+    while time.monotonic()<deadline:
+        root=tree()
+        bar=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/player_progress') and actionable(n)),None)
+        if bar is not None: break
+        surface=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
+        if surface is not None: tap(surface)
+        time.sleep(.25)
+    assert bar is not None,'Embedded video time bar is not exposed as an actionable control'
+    left,top,right,bottom=map(int,re.findall(r'\d+',bar.get('bounds','')))
+    y=(top+bottom)//2
+    target=left+int((right-left)*.62)
+    adb('shell','input','swipe',str(left+max(4,(right-left)//12)),str(y),str(target),str(y),'600')
+    moved=wait(lambda s:s.get('position',0)>before.get('position',0)+10_000,timeout=15)
+    assert moved.get('streamRangeStart',-1)>start_piece,{'beforePiece':start_piece,'afterPiece':moved.get('streamRangeStart'),'before':before,'after':moved}
+    record('manual-timebar-seek-reprioritizes-cache-range',beforePosition=before.get('position'),afterPosition=moved.get('position'),beforePiece=start_piece,afterPiece=moved.get('streamRangeStart'))
 def open_cache(title):
     root=tree();parents={child:parent for parent in root.iter() for child in parent}
     node=next(n for n in root.iter('node') if n.get('text')==title)
@@ -114,15 +136,18 @@ played=wait(lambda s:s.get('playing') and s.get('position',0)>800)
 assert played['qualityHeight']==0;record('default-original-quality',state=played)
 control('player_quality');require_visible('原画质');screenshot('library-01-quality-options.png');find_and_tap('原画质')
 record('quality-control-inside-player-with-no-transcoding-claim')
+scrub_player_timebar()
 control('player_files');screenshot('library-selection-before.png');find_and_tap('全选');screenshot('library-selection-after.png');find_and_tap('完成')
 selection=wait(lambda s:len([f for f in s.get('files',[]) if f.get('selected') and f['path'].endswith(('Episode-01.mp4','Episode-02.mp4'))])==2,timeout=15)
 record('multi-file-selection-before-cache',state=selection)
 tap_action('缓存');poll(lambda:len(caches())>=2);screenshot('library-02-retained-files.png')
 record('explicit-cache-records-files-before-completion',entries=caches())
-partial=wait(lambda s:any(f['path'].endswith('Episode-02.mp4') and 0<f['done']<f['size'] for f in s.get('files',[])))
-assert any(q['index']==next(f['index'] for f in partial['files'] if f['path'].endswith('Episode-02.mp4')) for q in partial['storedQueue'])
+partial=wait(lambda s:any(f['path'].endswith(('Episode-02.mp4','MultiQuality.mp4')) and 0<f['done']<f['size'] for f in s.get('files',[])))
+partial_path=next(f['path'] for f in partial['files'] if f['path'].endswith(('Episode-02.mp4','MultiQuality.mp4')) and 0<f['done']<f['size'])
+partial_name=partial_path.rsplit('/',1)[-1]
+assert any(q['index']==next(f['index'] for f in partial['files'] if f['path']==partial_path) for q in partial['storedQueue'])
 assert all(q['done']>0 for q in partial['storedQueue'])
-record('partial-downloaded-video-auto-enters-queue',state=partial)
+record('partial-downloaded-video-auto-enters-queue',partialFile=partial_path,state=partial)
 adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(source),'-f','0x14000000','--es','mode','play')
 def player_foreground():
     activities=adb('shell','dumpsys','activity','activities')
@@ -132,12 +157,12 @@ while time.monotonic()<end and not player_foreground(): time.sleep(.25)
 assert player_foreground(),'Magnet VIEW intent did not bring PlayerActivity to foreground'
 reopened=wait(lambda s:s.get('playing') and s.get('position',0)>300)
 record('player-reopened-through-magnet-intent',state=reopened)
-control('player_files');require_visible('已缓存 / 下载的视频','Episode-02.mp4');screenshot('library-03-stored-queue.png')
-find_and_tap('完成');control('player_next');switched=wait(lambda s:s.get('playing') and any(f['index']==s.get('currentFile') and f['path'].endswith('Episode-02.mp4') for f in s.get('files',[])))
+control('player_files');require_visible('已缓存 / 下载的视频',partial_name);screenshot('library-03-stored-queue.png')
+find_and_tap('完成');control('player_next');switched=wait(lambda s:s.get('playing') and any(f['index']==s.get('currentFile') and f['path']==partial_path for f in s.get('files',[])))
 record('next-control-switches-to-partial-video',state=switched);screenshot('library-04-queue-playing.png')
 old_folder=state()['folder'];tap_action('下载');wait(lambda s:s.get('folder')!=old_folder and s.get('playing'));poll(lambda:len(entries('download-entries'))>=2);record('download-library-indexes-individual-files',entries=entries('download-entries'))
 control('player_favorite');record('favorite-file-record',entries=entries('favorite-entries'))
-restart();require_visible('缓存视频');find_and_tap('缓存视频');require_visible('Episode-01.mp4','Episode-02.mp4');screenshot('library-05-cache-after-restart.png')
+restart();require_visible('缓存视频');find_and_tap('缓存视频');require_visible('Episode-01.mp4',partial_name);screenshot('library-05-cache-after-restart.png')
 record('cache-entry-discoverable-after-process-restart',entries=caches())
 open_cache('Episode-01.mp4');resumed=wait(lambda s:s.get('playing'));record('cached-file-reopens-and-plays',state=resumed)
 control('player_files');find_and_tap('切换播放：MultiQuality.mp4')

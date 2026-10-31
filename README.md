@@ -6,6 +6,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - **电视直播**：添加多个 M3U/M3U8 地址或导入本地播放列表，按分组查看频道，收藏、观看历史、全屏和画中画。
 - **磁力播放**：在应用内搜索或粘贴 magnet，查看文件列表，播放、缓存、下载并管理收藏/历史。
+- **搜索和任务管理**：搜索结果按源站翻页并去重显示磁力链接；下载与缓存集中在任务页，搜索/播放/任务历史分开管理。
 - **通用设置**：字体、背景、存储访问与软件更新入口。
 
 ## 架构和验收文档
@@ -21,12 +22,17 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前发布版本：`v0.3.1`（versionCode `29`）
-- APK 下载：[OmniPlayer-0.3.1.apk](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.1/OmniPlayer-0.3.1.apk)
-- 本地 APK：[`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)，与 GitHub Release 资产 SHA-256 一致。
-- 模块：`:app`、`:ui-inspector`
+- 当前模块化开发版本：`v0.4.0`；正式发布状态以 [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases) 为准。
+- v0.4.0 已正式发布，包含 `:core`、`:magnet`、`:live` 模块化架构；v0.3.12 和 v0.4.0 均通过完整 CI 与模拟器回归。
+- [v0.4.0 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.4.0)，SHA-256 清单和大小见 Release 附件。本地 ARM64 APK 位于 `dist/OmniPlayer-0.4.0-arm64-v8a.apk`；也可直接下载 [ARM64 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.4.0/OmniPlayer-0.4.0-arm64-v8a.apk)。
+- Gradle 模块：`:app`（应用组合壳）、`:core`（共享能力）、`:magnet`（磁力播放）、`:live`（电视直播）、`:ui-inspector`（独立 UI 回归应用）。`:magnet` 与 `:live` 均为 Android library module，只依赖 `:core`，互不依赖。
 - 核心技术：Kotlin、Jetpack Compose、Media3、LibVLC、libtorrent4j
 
+## 模块扩展方式
+
+应用壳 `:app` 组合各功能；`:core` 管理跨功能可复用的偏好、媒体信息、更新和导航能力。磁力业务按搜索、BT 引擎、播放器、内容库和设置组织在 `:magnet`；直播按播放列表解析、频道、播放器和设置组织在 `:live`。未来网站视频和音乐可以分别加入新的 Android library modules，由应用壳组合，并按稳定接口复用 `:core`，不需要改动其他 feature 的内部实现。
+
+独立 UI 检查应用 `:ui-inspector` 只由 CI 构建，用于验证实际安装的播放器界面。
 ## 重要说明
 
 磁力文件列表出现并不代表已连接 Peer 或已经取得可播放视频分片。不同种子的首帧等待和速度可能差异很大；本项目不保证公网种子均可播放、不保证固定下载速度，也不声称支持所有编码组合。完整实测证据与未通过项请看全量点检报告。
@@ -42,4 +48,8 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 .\scripts\run_full_ci.ps1
 ```
 
-脚本会无限退避重试推送当前分支，启动 `library.yml` 全量 Android/媒体库/偏好/搜索分页回归并等待完成；最新 APK 提取至 `dist/OmniPlayer-debug.apk`，逐项 CI 报告保存至 `artifacts/ci/<run-id>/`。发布时可加 `-PublishRelease`：CI 全部通过后会自动创建版本 Release 并上传 APK。失败测试的截图和状态文件保留在 Actions artifact 中。
+脚本会无限退避重试推送当前分支，启动 `library.yml` 全量 Android/媒体库/偏好/搜索分页回归并等待完成；通用 CI APK 提取至 `dist/OmniPlayer-debug.apk`，逐项 CI 报告保存至 `artifacts/ci/<run-id>/`。发布时可加 `-PublishRelease`：CI 全部通过后会自动创建版本 Release 并上传四种 ABI APK、体积和 SHA-256 清单。失败测试的截图和状态文件保留在 Actions artifact 中。
+
+### 软件更新
+
+更新下载支持 HTTP Range 断点续传，并可在设置中暂停或继续。下载完成后，应用会保留安装包并提供系统安装确认入口；若暂不安装，可重新打开应用或在软件说明页选择“立即安装”。更新说明随版本发布并在更新确认页显示。Android 系统仍要求用户确认安装。

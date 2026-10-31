@@ -60,9 +60,13 @@ $artifact = ($artifactResponse | ConvertFrom-Json).artifacts | Where-Object { $_
 if (-not $artifact) { throw "CI run $runId did not publish the expected APK/report artifact." }
 $apkPath = Join-Path (Get-Location) 'dist/OmniPlayer-debug.apk'
 $reportPath = Join-Path $out 'OmniPlayer-CI-Report.md'
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/download_ci_artifact.ps1 -ArtifactId $artifact.id -EntryPath 'app/build/outputs/apk/debug/app-debug.apk' -OutputFile $apkPath
-if ($LASTEXITCODE -ne 0) { throw "Could not extract the APK from run $runId." }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/download_ci_artifact.ps1 -ArtifactId $artifact.id -EntryPath 'manual-shots/OmniPlayer-CI-Report.md' -OutputFile $reportPath
 if ($LASTEXITCODE -ne 0) { throw "Could not extract the report from run $runId." }
+if ($runCode -eq 0) {
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/download_ci_artifact.ps1 -ArtifactId $artifact.id -EntryPath 'ci-artifacts/OmniPlayer-debug-universal.apk' -OutputFile $apkPath
+    if ($LASTEXITCODE -ne 0) { throw "Successful CI run $runId did not contain the universal APK artifact." }
+} else {
+    Write-Host "CI run $runId failed; its report was downloaded. APK extraction is skipped because the build may not have produced one."
+}
 Write-Host "Downloaded APK to $apkPath and CI report to $reportPath"
 if ($runCode -ne 0) { throw "CI run $runId failed. Inspect $out/OmniPlayer-CI-Report.md and the workflow logs." }

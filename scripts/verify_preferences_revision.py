@@ -39,8 +39,9 @@ def control(name):
         node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
         if node is not None:
             b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
-        if name=='player_quality':
-            node=next((n for n in t.iter('node') if n.get('content-desc')=='画质设置' and actionable(n)),None)
+        labels={'player_quality':'\u753b\u8d28\u8bbe\u7f6e'}
+        if name in labels:
+            node=next((n for n in t.iter('node') if n.get('content-desc')==labels[name] and actionable(n)),None)
             if node is not None:
                 b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
         if not tapped:
@@ -54,7 +55,7 @@ def control(name):
     screenshot('preferences-failed-'+name+'.png')
     (OUT/'preferences-failed-ui.xml').write_text(adb('shell','cat','/sdcard/window.xml'),encoding='utf-8')
     (OUT/'preferences-failed-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
-    raise AssertionError('Player control was not visible: '+name)
+    ui=ET.fromstring(adb('shell','cat','/sdcard/window.xml')); raise AssertionError({'control':name,'state':state(),'ui':[n.attrib for n in ui.iter('node')]})
 def tap_exact(label):
     end=time.monotonic()+15
     while time.monotonic()<end:
@@ -71,7 +72,7 @@ def tap_exact(label):
     raise AssertionError('Exact enabled action unavailable: '+label)
 adb('shell','wm','size','1080x2400')
 adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote('门户'))
-find_and_tap('设置');find_and_tap('通用设置');require_visible('显示与字体','小','✓ 标准','大','超大','黑体','宋体','楷体')
+find_and_tap('磁力播放');find_and_tap('设置');find_and_tap('通用设置');require_visible('显示与字体','小','✓ 标准','大','超大','黑体','宋体','楷体')
 screenshot('preferences-01-font-settings.png');record('display-font-module-and-four-presets')
 find_and_tap('大');find_and_tap('宋体');screenshot('preferences-02-song-large.png')
 assert next(n for n in prefs() if n.get('name')=='font-face').get('value',next(n for n in prefs() if n.get('name')=='font-face').text)=='宋体'
@@ -95,7 +96,7 @@ assert entries('history-播放') and entries('history-缓存');record('play-and-
 adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote('收藏'))
 find_and_tap('全选');find_and_tap('下载所选');find_and_tap('下载');require_visible('下载任务')
 assert entries('download-entries');assert entries('history-下载');screenshot('preferences-07-selected-favorite-download.png');record('favorite-select-all-download-visible-in-library',entries=entries('download-entries'))
-find_and_tap('播放');find_and_tap('历史记录');require_visible('历史记录','清空搜索记录','清空全部记录')
+find_and_tap('历史');require_visible('历史记录','清空搜索记录','清空全部记录')
 tap_exact('播放');require_visible('清空播放记录');screenshot('preferences-08-playback-history.png');record('independent-history-module-and-timed-progress')
 find_and_tap('清空播放记录');find_and_tap('确认清空');assert not entries('history-播放');assert entries('history-缓存');record('clear-single-history-keeps-other-records')
 find_and_tap('清空全部记录');find_and_tap('确认清空');assert all(not entries('history-'+k) for k in ['搜索','播放','下载','缓存']);record('clear-all-history-keeps-favorites',favorites=entries('favorite-entries'))

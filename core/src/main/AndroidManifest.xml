@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application>
+        <service android:name="com.omniplayer.core.UpdateTransferService" android:exported="false" android:foregroundServiceType="dataSync" />
+        <receiver android:name="com.omniplayer.core.PackageReplacedReceiver" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.MY_PACKAGE_REPLACED" /></intent-filter>
+        </receiver>
+    </application>
+</manifest>
