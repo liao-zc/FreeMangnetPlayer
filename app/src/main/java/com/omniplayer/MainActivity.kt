@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
@@ -327,29 +328,15 @@ class MainActivity : ComponentActivity() {
                             actions = { TextButton(
                                 onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "magnet")) },
                                 modifier = Modifier.semantics { contentDescription = "磁播模块设置" }
-                            ) { Text("设置") } }
+                            ) { Text("设置", color = Color.Black) } }
                         )
                     },
                     bottomBar = {
-                        NavigationBar(containerColor = Color.White) {
-                            NavigationBarItem(
-                                selected = selectedTab == "门户",
-                                onClick = { selectedTab = "门户" },
-                                icon = { Icon(Icons.Default.Home, contentDescription = null) },
-                                label = { Text("首页") }
-                            )
-                            NavigationBarItem(
-                                selected = selectedTab == "设置",
-                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "menu")) },
-                                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                                label = { Text("设置") }
-                            )
-                            if (magnetSection) {
+                        if (magnetSection) NavigationBar(containerColor = Color.White) {
                                 NavigationBarItem(selected = selectedTab == "播放" || selectedTab == "缓存", onClick = { selectedTab = "播放"; reloadLibrary() }, icon = { Icon(Icons.Default.PlayArrow, null) }, label = { Text("播放") })
                                 NavigationBarItem(selected = selectedTab in setOf("任务", "下载", "缓存"), onClick = { selectedTab = "任务"; reloadLibrary() }, icon = { Icon(Icons.Default.Download, null) }, label = { Text("任务") })
                                 NavigationBarItem(selected = selectedTab == "收藏", onClick = { selectedTab = "收藏"; reloadLibrary() }, icon = { Icon(Icons.Default.Bookmarks, null) }, label = { Text("收藏") })
-                            }
-
+                                NavigationBarItem(selected = selectedTab == "历史", onClick = { selectedTab = "历史" }, icon = { Icon(Icons.Default.History, null) }, label = { Text("历史") })
                         }
                     }
                 ) { insets ->
@@ -403,7 +390,7 @@ class MainActivity : ComponentActivity() {
                             )
                             "历史" -> HistoryScreen(onBack={ selectedTab="播放" }, onOpen={ kind,entry -> if(kind=="搜索") {keyword=entry.title;beginSearch()} else openTorrent(MagnetResult(entry.title,entry.source),"play") })
                             "播放" -> Column {
-                                Row { TextButton(onClick={selectedTab="历史"}) { Text("历史记录") }; TextButton(onClick = { selectedTaskCache = true; selectedTab = "任务"; reloadLibrary() }) { Text("缓存视频 (${caches.count { it.unplayableReason.isBlank() }})") } }
+                                Row { TextButton(onClick = { selectedTaskCache = true; selectedTab = "任务"; reloadLibrary() }) { Text("缓存视频 (${caches.count { it.unplayableReason.isBlank() }})") } }
                                 ManagedLibrary("播放列表", playbacks, "播放", { openTorrent(MagnetResult(it.title, it.source), "play") }, { reloadLibrary() })
                             }
                             "缓存" -> { selectedTaskCache = true; selectedTab = "任务" }

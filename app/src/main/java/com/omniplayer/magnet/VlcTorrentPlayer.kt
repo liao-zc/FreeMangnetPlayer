@@ -1,6 +1,7 @@
 package com.omniplayer.magnet
 import com.omniplayer.core.*
 import android.content.Context
+import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.view.Surface
@@ -17,15 +18,16 @@ import org.videolan.libvlc.interfaces.IMedia
 import org.json.JSONObject
 
 /** Media3 control-compatible software decoder for RealMedia containers. */
-internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskFile) : SimpleBasePlayer(Looper.getMainLooper()) {
+internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskFile, readVerifiedLocalFile: Boolean = false) : SimpleBasePlayer(Looper.getMainLooper()) {
     internal data class TrackChoice(val id: Int, val label: String, val selected: Boolean)
     private val torrentTask = task
-    private val stream = TorrentHttpStream(task, file)
+    private val stream = if (readVerifiedLocalFile) null else TorrentHttpStream(task, file)
+    private val mediaUri = stream?.uri ?: Uri.fromFile(java.io.File(task.folder, file.path))
     private val subtitleStreams = mutableListOf<TorrentHttpStream>()
     private val library = LibVLC(context.applicationContext, arrayListOf("--network-caching=300", "--file-caching=300", "--no-video-title-show"))
     private val decoder = MediaPlayer(library)
     private val main = Handler(Looper.getMainLooper())
-    private val item = MediaItem.fromUri(stream.uri)
+    private val item = MediaItem.fromUri(mediaUri)
     private var wanted = false
     private var ready = false
     private var ended = false
@@ -49,7 +51,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
             invalidateState(); main.postDelayed(this, 250)
         } }
     }
-    fun debugInfo() = stream.debugInfo().put("vlcLastEvent", lastEvent).put("vlcLastAction", lastAction)
+    fun debugInfo() = (stream?.debugInfo() ?: JSONObject().put("source", "verified-local-file")).put("vlcLastEvent", lastEvent).put("vlcLastAction", lastAction)
         .put("vlcIsPlaying", decoder.isPlaying).put("vlcVideoTracks", decoder.videoTracksCount)
         .put("vlcAudioTracks", decoder.audioTracksCount).put("vlcLengthMs", decoder.length)
         .put("videoOutputClass", output?.javaClass?.name.orEmpty()).put("vlcViewsAttached", decoder.vlcVout.areViewsAttached())
@@ -67,7 +69,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     fun selectSubtitleTrack(id: Int) { decoder.setSpuTrack(id) }
 
     init {
-        val media = Media(library, stream.uri)
+        val media = Media(library, mediaUri)
         // High-resolution HEVC (including Dolby Vision releases) is too costly
         // to decode in software on many Android TV/phone CPUs. Prefer MediaCodec
         // and let LibVLC fall back itself when the device lacks a compatible one.
@@ -75,14 +77,15 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         decoder.media = media; media.release()
         val directory = file.path.substringBeforeLast('/', "")
         task.files.filter { candidate ->
-            candidate.path.substringBeforeLast('/', "") == directory &&
+                candidate.path.substringBeforeLast('/', "") == directory &&
+                (!readVerifiedLocalFile || (candidate.size > 0 && candidate.done >= candidate.size && java.io.File(task.folder, candidate.path).isFile && java.io.File(task.folder, candidate.path).length() >= candidate.size)) &&
                 candidate.path.substringAfterLast('.', "").lowercase() in setOf("srt", "vtt", "ass", "ssa")
         }.forEachIndexed { index, subtitle ->
-            val subtitleStream = TorrentHttpStream(task, subtitle)
+            val subtitleUri = if (readVerifiedLocalFile) Uri.fromFile(java.io.File(task.folder, subtitle.path)) else TorrentHttpStream(task, subtitle).let { stream -> subtitleStreams += stream; stream.uri }
             val added = runCatching {
-                decoder.addSlave(IMedia.Slave.Type.Subtitle, subtitleStream.uri, index == 0)
+                decoder.addSlave(IMedia.Slave.Type.Subtitle, subtitleUri, index == 0)
             }.isSuccess
-            if (added) subtitleStreams += subtitleStream else subtitleStream.close()
+            if (!added && !readVerifiedLocalFile) subtitleStreams.removeLastOrNull()?.close()
         }
         decoder.setEventListener { event ->
             lastEvent = event.type.toString()
@@ -181,7 +184,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
     override fun handleRelease(): ListenableFuture<*> {
         released = true; wanted = false; main.removeCallbacks(refresh)
         decoder.setEventListener(null); decoder.vlcVout.detachViews(); ownedOutputSurface?.release(); ownedOutputSurface = null; decoder.stop(); decoder.release()
-        stream.close(); subtitleStreams.forEach { it.close() }; subtitleStreams.clear(); library.release()
+        stream?.close(); subtitleStreams.forEach { it.close() }; subtitleStreams.clear(); library.release()
         return Futures.immediateVoidFuture()
     }
 }

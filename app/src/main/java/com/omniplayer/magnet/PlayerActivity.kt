@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.*
 import androidx.media3.datasource.*
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -212,7 +213,7 @@ class PlayerActivity : ComponentActivity() {
                         IconButton(onClick = { finish() }) { Icon(Icons.Default.ArrowBack, "返回上一级") }
                         Text(title, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
                         IconButton(onClick = { startActivity(Intent(this@PlayerActivity, SettingsActivity::class.java).putExtra("section", "magnet")) }) {
-                            Icon(Icons.Default.Settings, "设置")
+                            Icon(Icons.Default.Settings, "设置", tint = Color.Black)
                         }
                     }
                     val compact = LocalConfiguration.current.screenHeightDp < 720
@@ -376,11 +377,16 @@ class PlayerActivity : ComponentActivity() {
     private fun startPlayback(task: TorrentTask, file: TaskFile, forceSoftware: Boolean = false) {
         task.playbackFailed = false
         val realMedia = forceSoftware || MediaFormats.useSoftware(file.path)
-        val media: Player = if (realMedia) VlcTorrentPlayer(this, task, file) else ExoPlayer.Builder(this)
+        val localFile = File(task.folder, file.path)
+        val verifiedLocalFile = file.size > 0 && file.done >= file.size && localFile.isFile && localFile.length() >= file.size
+        val media: Player = if (realMedia) VlcTorrentPlayer(this, task, file, verifiedLocalFile) else ExoPlayer.Builder(this)
             .setRenderersFactory(androidx.media3.exoplayer.DefaultRenderersFactory(this).setEnableDecoderFallback(true))
             .setSeekBackIncrementMs(15000).setSeekForwardIncrementMs(15000)
             .setLoadControl(DefaultLoadControl.Builder().setBufferDurationsMs(1500, 15000, 300, 750).build())
-            .setMediaSourceFactory(DefaultMediaSourceFactory(DataSource.Factory { TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }, task.nativeLock) })).build()
+            .setMediaSourceFactory(DefaultMediaSourceFactory(
+                if (verifiedLocalFile) DefaultDataSource.Factory(this)
+                else DataSource.Factory { TorrentFileDataSource({ task.handle }, { task.engine?.cacheFlushGeneration ?: -1L }, task.nativeLock) }
+            )).build()
         var playedOnce = false
         task.renderedFrameAt = 0L
         media.addListener(object : Player.Listener {
@@ -420,13 +426,14 @@ class PlayerActivity : ComponentActivity() {
             val directory = file.path.substringBeforeLast('/', "")
             val subtitleItems = task.files.filter { candidate ->
                 candidate.path.substringBeforeLast('/', "") == directory &&
+                    (!verifiedLocalFile || (candidate.size > 0 && candidate.done >= candidate.size && File(task.folder, candidate.path).isFile && File(task.folder, candidate.path).length() >= candidate.size)) &&
                     candidate.path.substringAfterLast('.', "").lowercase() in setOf("srt", "vtt")
             }.map { subtitle ->
                 val mime = if (subtitle.path.endsWith(".vtt", true)) MimeTypes.TEXT_VTT else MimeTypes.APPLICATION_SUBRIP
                 MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(File(task.folder, subtitle.path)))
                     .setMimeType(mime).setLanguage("und").setSelectionFlags(C.SELECTION_FLAG_AUTOSELECT).build()
             }
-            val item = MediaItem.Builder().setMediaId(file.path).setUri(Uri.fromFile(File(task.folder, file.path)))
+            val item = MediaItem.Builder().setMediaId(file.path).setUri(Uri.fromFile(localFile))
                 .setSubtitleConfigurations(subtitleItems).build()
             media.setMediaItem(item)
         }

@@ -120,6 +120,7 @@ internal fun SearchHome(
                 shape = RoundedCornerShape(18.dp),
                 colors = OutlinedTextFieldDefaults.colors(unfocusedContainerColor = Color.White, focusedContainerColor = Color.White)
             )
+            IconButton(onClick = onSearch, modifier = Modifier.size(48.dp).semantics { contentDescription = "执行关键词搜索" }) { Icon(Icons.Default.Search, "搜索", tint = Color.White) }
             var historyMenu by remember { mutableStateOf(false) }
             Box {
                 IconButton(onClick = { historyMenu = true }, modifier = Modifier.size(48.dp).semantics { contentDescription = "搜索历史" }) { Icon(Icons.Default.History, "搜索历史", tint = Color.White) }
@@ -128,7 +129,6 @@ internal fun SearchHome(
                     recentSearches.take(50).forEach { query -> DropdownMenuItem(text = { Text(query, maxLines = 1, overflow = TextOverflow.Ellipsis) }, onClick = { historyMenu = false; onChooseSearchHistory(query) }) }
                 }
             }
-            IconButton(onClick = onSearch, modifier = Modifier.size(48.dp).semantics { contentDescription = "执行关键词搜索" }) { Icon(Icons.Default.Search, "搜索", tint = Color.White) }
             Box {
                 IconButton(onClick = { onEngineMenu(true) }, modifier = Modifier.size(54.dp)) {
                     Icon(Icons.Default.MoreVert, contentDescription = "选择搜索引擎", tint = Color.White, modifier = Modifier.size(30.dp))

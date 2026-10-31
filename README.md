@@ -22,7 +22,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前版本：`v0.3.11`（全量 CI 与 API 35 模拟器回归通过）。
+- 当前开发版本：`v0.3.12`；本轮全量 CI 完成后再更新正式发布状态。
 - v0.3.11 已按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；更新器支持 HTTP Range 断点续传、暂停/继续和系统安装确认。旧通用包包含所有 ABI 的原生库，因此体积较大，ABI 拆包减少了单包内的无关原生库。
 - [v0.3.11 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.11)，SHA-256 清单和大小见 Release 附件。本地 ARM64 APK 位于 `dist/OmniPlayer-0.3.11-arm64-v8a.apk`；也可直接下载 [ARM64 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.11/OmniPlayer-0.3.11-arm64-v8a.apk)。
 - 模块：`:app`、`:ui-inspector`
