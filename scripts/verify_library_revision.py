@@ -118,7 +118,6 @@ control('player_files');screenshot('library-selection-before.png');find_and_tap(
 selection=wait(lambda s:len([f for f in s.get('files',[]) if f.get('selected') and f['path'].endswith(('Episode-01.mp4','Episode-02.mp4'))])==2,timeout=15)
 record('multi-file-selection-before-cache',state=selection)
 tap_action('缓存');poll(lambda:len(caches())>=2);screenshot('library-02-retained-files.png')
-control('exo_play_pause')  # Keep the short fixture clip alive while the next file buffers.
 record('explicit-cache-records-files-before-completion',entries=caches())
 partial=wait(lambda s:any(f['path'].endswith('Episode-02.mp4') and 0<f['done']<f['size'] for f in s.get('files',[])))
 assert any(q['index']==next(f['index'] for f in partial['files'] if f['path'].endswith('Episode-02.mp4')) for q in partial['storedQueue'])
