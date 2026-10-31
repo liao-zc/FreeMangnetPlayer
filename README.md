@@ -22,7 +22,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前开发版本：`v0.3.12`；当前发布状态以 [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases) 为准。
+- 当前模块化开发版本：`v0.4.0`；正式发布状态以 [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases) 为准。
 - v0.3.11 已按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；更新器支持 HTTP Range 断点续传、暂停/继续和系统安装确认。旧通用包包含所有 ABI 的原生库，因此体积较大，ABI 拆包减少了单包内的无关原生库。
 - [v0.3.11 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.11)，SHA-256 清单和大小见 Release 附件。本地 ARM64 APK 位于 `dist/OmniPlayer-0.3.11-arm64-v8a.apk`；也可直接下载 [ARM64 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.11/OmniPlayer-0.3.11-arm64-v8a.apk)。
 - Gradle 模块：`:app`（应用组合壳）、`:core`（共享能力）、`:magnet`（磁力播放）、`:live`（电视直播）、`:ui-inspector`（独立 UI 回归应用）。`:magnet` 与 `:live` 均为 Android library module，只依赖 `:core`，互不依赖。
