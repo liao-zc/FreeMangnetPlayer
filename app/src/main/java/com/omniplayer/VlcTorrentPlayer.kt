@@ -13,6 +13,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import org.videolan.libvlc.LibVLC
 import org.videolan.libvlc.Media
 import org.videolan.libvlc.MediaPlayer
+import org.videolan.libvlc.interfaces.IMedia
 import org.json.JSONObject
 
 /** Media3 control-compatible software decoder for RealMedia containers. */
@@ -71,6 +72,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         // to decode in software on many Android TV/phone CPUs. Prefer MediaCodec
         // and let LibVLC fall back itself when the device lacks a compatible one.
         media.setHWDecoderEnabled(true, false)
+        decoder.media = media; media.release()
         val directory = file.path.substringBeforeLast('/', "")
         task.files.filter { candidate ->
             candidate.path.substringBeforeLast('/', "") == directory &&
@@ -78,11 +80,10 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         }.forEachIndexed { index, subtitle ->
             val subtitleStream = TorrentHttpStream(task, subtitle)
             val added = runCatching {
-                media.addSlave(Media.Slave.Type.Subtitle, subtitleStream.uri.toString(), index == 0)
-            }.getOrDefault(false)
+                decoder.addSlave(IMedia.Slave.Type.Subtitle, subtitleStream.uri, index == 0)
+            }.isSuccess
             if (added) subtitleStreams += subtitleStream else subtitleStream.close()
         }
-        decoder.media = media; media.release()
         decoder.setEventListener { event ->
             lastEvent = event.type.toString()
             main.post {
