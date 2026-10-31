@@ -27,7 +27,7 @@ def tree():
 def tap(n):
     b=list(map(int,re.findall(r'\d+',n.get('bounds',''))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
 def actionable(node):
-    if node is None or node.get('visible-to-user') != 'true': return False
+    if node is None or node.get('visible-to-user') == 'false' or node.get('enabled') == 'false': return False
     b=list(map(int,re.findall(r'\d+',node.get('bounds',''))))
     return len(b)==4 and b[2]>b[0] and b[3]>b[1]
 def control(name):

@@ -38,7 +38,7 @@ def tap(node):
     adb('shell','input','tap',str((x1+x2)//2),str((y1+y2)//2))
 
 def visible_action(node):
-    if node is None or node.get('visible-to-user') != 'true': return False
+    if node is None or node.get('visible-to-user') == 'false' or node.get('enabled') == 'false': return False
     x1,y1,x2,y2=bounds(node)
     return x2>x1 and y2>y1
 def controller(id=None):
