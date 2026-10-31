@@ -96,7 +96,7 @@ assert entries('history-播放') and entries('history-缓存');record('play-and-
 adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote('收藏'))
 find_and_tap('全选');find_and_tap('下载所选');find_and_tap('下载');require_visible('下载任务')
 assert entries('download-entries');assert entries('history-下载');screenshot('preferences-07-selected-favorite-download.png');record('favorite-select-all-download-visible-in-library',entries=entries('download-entries'))
-find_and_tap('播放');find_and_tap('历史记录');require_visible('历史记录','清空搜索记录','清空全部记录')
+find_and_tap('历史');require_visible('历史记录','清空搜索记录','清空全部记录')
 tap_exact('播放');require_visible('清空播放记录');screenshot('preferences-08-playback-history.png');record('independent-history-module-and-timed-progress')
 find_and_tap('清空播放记录');find_and_tap('确认清空');assert not entries('history-播放');assert entries('history-缓存');record('clear-single-history-keeps-other-records')
 find_and_tap('清空全部记录');find_and_tap('确认清空');assert all(not entries('history-'+k) for k in ['搜索','播放','下载','缓存']);record('clear-all-history-keeps-favorites',favorites=entries('favorite-entries'))
