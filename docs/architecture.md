@@ -9,7 +9,7 @@ flowchart TB
     user[手机 / 平板 / Android TV 用户]
     app[app：应用壳与导航\nMainActivity]
     settings[settings：全局设置界面\nSettingsActivity]
-    core[core：通用能力\n设置存储 · 外观 · 路径 · 更新 · 媒体格式]
+    core[core：通用能力\n设置存储 · 外观 · 路径 · 更新 · 媒体格式 · 跨功能导航]
     magnet[magnet：磁力功能\n搜索 · 解析/BT · 播放 · 下载/缓存 · 媒体库]
     live[live：电视直播功能\n源读取/解析 · 频道 · 播放 · 收藏/历史]
     engine[第三方播放与传输引擎\nMedia3 · LibVLC · libtorrent4j]
@@ -43,7 +43,7 @@ flowchart TB
 
 ## 依赖边界与数据
 
-- 首页负责入口和跨功能导航；磁力搜索卡片/格式识别/磁力规范化/搜索桥接已移入 `magnet`；M3U 网络和本地文件读取在 `IptvPlaylistRepository`，M3U 解析与直播数据在 `IptvStore`。
+- 首页负责入口和跨功能导航；磁力搜索卡片/格式识别/磁力规范化/搜索桥接已移入 `magnet`；BT 通知和播放器返回首页通过 `core.AppNavigation` 路由，功能包不再直接导入首页 Activity。M3U 网络和本地文件读取在 `IptvPlaylistRepository`，M3U 解析与直播数据在 `IptvStore`。
 - 通用外观设置由 `core.DisplaySettings` 读取，磁力与直播 UI 使用同一套字体/背景配置。通用偏好仍沿用原 SharedPreferences 名称和键，避免升级丢失设置。
 - 磁力缓存、下载、收藏、播放队列与历史数据继续使用原本地存储格式；直播设置、收藏与观看历史仍由直播域单独存储。
 - `AndroidManifest.xml` 指向分域后的 Activity、Service 和 Receiver 类名。应用 ID 保持 `com.freemangnetplayer`，用于覆盖安装时保留用户数据。
@@ -51,7 +51,7 @@ flowchart TB
 
 ## 当前模块化边界
 
-本次建立的是同一 `:app` Gradle 模块内的清晰包边界和文件边界，没有更改 Gradle 模块图。首页仍负责 WebView 搜索会话的生命周期和 Activity 导航；下一阶段可把该会话抽象为 `MagnetSearchCoordinator`，并在稳定后再拆成 Gradle feature modules。暂不拆 Gradle 模块是为了避免现有 Activity、Android Manifest、JNI/native 依赖和资源目录产生不必要的发布回归。
+本次建立的是同一 `:app` Gradle 模块内的清晰包边界和文件边界，没有更改 Gradle 模块图。首页仍负责 WebView 搜索会话的生命周期，并作为 `AppNavigation` 的返回目标；下一阶段可把该会话抽象为 `MagnetSearchCoordinator`，并在稳定后再拆成 Gradle feature modules。暂不拆 Gradle 模块是为了避免现有 Activity、Android Manifest、JNI/native 依赖和资源目录产生不必要的发布回归。
 
 ## 后续演进方向
 

@@ -1,5 +1,4 @@
 package com.omniplayer.magnet
-import com.omniplayer.MainActivity
 import com.omniplayer.core.*
 import android.app.*
 import android.content.Intent
@@ -34,7 +33,7 @@ class DownloadService : Service() {
         val active = tasks.count { !it.paused && !it.cancelled && !it.complete }
         if (active > 0) downloadWakeLock.acquire(10 * 60 * 1000L)
         else if (downloadWakeLock.isHeld) downloadWakeLock.release()
-        val pending = PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java).putExtra("open-tab", "下载"), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val pending = PendingIntent.getActivity(this, 0, AppNavigation.home(this, "下载"), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         fun action(value: String) = PendingIntent.getService(this, value.hashCode(), Intent(this, DownloadService::class.java).setAction(value), PendingIntent.FLAG_IMMUTABLE)
         val builder = if (Build.VERSION.SDK_INT >= 26) Notification.Builder(this, "downloads") else Notification.Builder(this)
         val notification = builder.setSmallIcon(android.R.drawable.stat_sys_download).setContentTitle("OmniPlayer")

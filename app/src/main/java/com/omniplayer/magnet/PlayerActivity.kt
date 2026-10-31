@@ -1,5 +1,4 @@
 package com.omniplayer.magnet
-import com.omniplayer.MainActivity
 import com.omniplayer.R
 import com.omniplayer.core.*
 import android.app.PictureInPictureParams
@@ -195,7 +194,7 @@ class PlayerActivity : ComponentActivity() {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         OutlinedButton(onClick = { finish() }, modifier = Modifier.weight(1f).height(52.dp)) { Text("返回搜索") }
                         Button(onClick = {
-                            startActivity(Intent(this@PlayerActivity, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP).putExtra("open-tab", "门户"))
+                            startActivity(AppNavigation.home(this@PlayerActivity, "门户"))
                             finish()
                         }, modifier = Modifier.weight(1f).height(52.dp)) { Text("返回主页") }
                     }
