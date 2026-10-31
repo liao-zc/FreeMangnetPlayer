@@ -53,8 +53,9 @@ def control(name):
         t=tree()
         n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
         if n is not None: tap(n);time.sleep(.4);return
-        if name == 'player_quality':
-            n=next((n for n in t.iter('node') if n.get('text') in ('画质','画质设置') and actionable(n)),None)
+        labels={'player_quality':'\u753b\u8d28\u8bbe\u7f6e','player_files':'\u5207\u6362\u89c6\u9891','player_next':'\u4e0b\u4e00\u4e2a\u5df2\u7f13\u5b58\u89c6\u9891'}
+        if name in labels:
+            n=next((n for n in t.iter('node') if n.get('content-desc')==labels[name] and actionable(n)),None)
             if n is not None: tap(n);time.sleep(.4);return
         if not tapped:
             surface=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)

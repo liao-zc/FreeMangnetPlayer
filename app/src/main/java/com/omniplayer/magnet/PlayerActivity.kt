@@ -23,6 +23,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.*
@@ -536,54 +538,79 @@ class PlayerActivity : ComponentActivity() {
     }
     @Composable
     private fun VideoSurface(modifier: Modifier, onQuality: () -> Unit = {}, onFiles: () -> Unit) {
-        AndroidView(factory = { context ->
-            (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
-                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_YES
-                setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
-                setShutterBackgroundColor(android.graphics.Color.BLACK)
-                controllerShowTimeoutMs = 60000
-                setOnClickListener { showEmbeddedControls(this) }
-                setShowRewindButton(true); setShowFastForwardButton(true)
-                findViewById<View>(R.id.player_fullscreen).setOnClickListener { changeFullscreen(!fullscreen) }
-                findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }
-                findViewById<View>(R.id.player_files).setOnClickListener { onFiles() }
-                findViewById<View>(R.id.player_speed).setOnClickListener { cycleSpeed() }
-                findViewById<View>(R.id.player_next).setOnClickListener { playNextStored() }
-                findViewById<View>(R.id.player_favorite).setOnClickListener { toggleFavorite() }
-                findViewById<View>(R.id.player_quality).setOnClickListener { onQuality() }
-                findViewById<View>(R.id.player_tracks).setOnClickListener { showTrackMenu() }
-                findViewById<androidx.media3.ui.DefaultTimeBar>(R.id.player_progress).addListener(object : androidx.media3.ui.TimeBar.OnScrubListener {
-                    override fun onScrubStart(timeBar: androidx.media3.ui.TimeBar, position: Long) {
-                        scrubbing = true; resumeAfterScrub = this@PlayerActivity.player?.playWhenReady == true
-                        this@PlayerActivity.player?.pause()
-                    }
-                    override fun onScrubMove(timeBar: androidx.media3.ui.TimeBar, position: Long) {
-                        findViewById<TextView>(R.id.player_position).text = formatTime(position)
-                    }
-                    override fun onScrubStop(timeBar: androidx.media3.ui.TimeBar, position: Long, canceled: Boolean) {
-                        if (!canceled) {
-                            this@PlayerActivity.player?.seekTo(position)
-                            task?.let { TorrentTasks.prioritizeSeek(it, position, this@PlayerActivity.player?.duration ?: 0L) }
-                        }
-                        scrubbing = false
-                        if (resumeAfterScrub) this@PlayerActivity.player?.play()
-                    }
-                })
-                activeView = this
+        var controlsVisible by remember(player) { mutableStateOf(true) }
+        var position by remember(player) { mutableLongStateOf(0L) }
+        var duration by remember(player) { mutableLongStateOf(0L) }
+        var scrubPosition by remember(player) { mutableFloatStateOf(0f) }
+        LaunchedEffect(player) {
+            while (true) {
+                duration = player?.duration?.takeIf { it > 0 } ?: 0L
+                if (!scrubbing) position = player?.currentPosition?.coerceAtLeast(0) ?: 0L
+                delay(250)
             }
-        }, update = { view ->
-            val playerChanged = view.player !== player
-            val shouldUseController = !floating
-            if (view.useController != shouldUseController) view.useController = shouldUseController
-            if (playerChanged) {
-                view.player = player
-                if (player != null && !floating) showEmbeddedControls(view)
+        }
+        LaunchedEffect(controlsVisible, player) {
+            if (controlsVisible && player?.isPlaying == true) {
+                delay(6000)
+                controlsVisible = false
             }
-            if (player != null && !floating && !view.isControllerFullyVisible) showEmbeddedControls(view)
-            if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
-            view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
-            view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
-        }, onRelease = { view -> if (activeView === view) activeView = null; view.player = null }, modifier = modifier.background(Color.Black))
+        }
+        Box(modifier.background(Color.Black)) {
+            AndroidView(factory = { context ->
+                (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
+                    setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+                    setShutterBackgroundColor(android.graphics.Color.BLACK)
+                    useController = false
+                    activeView = this
+                }
+            }, update = { view ->
+                if (view.player !== player) view.player = player
+                view.useController = false
+                if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
+            }, onRelease = { view -> if (activeView === view) activeView = null; view.player = null }, modifier = Modifier.fillMaxSize())
+            Box(Modifier.fillMaxSize().clickable { controlsVisible = !controlsVisible })
+            if (controlsVisible && !floating) {
+                IconButton(onClick = { toggleFavorite() }, modifier = Modifier.align(Alignment.TopEnd).padding(8.dp)) {
+                    val currentTask = task
+                    val currentFile = currentTask?.files?.firstOrNull { it.index == currentTask.playingIndex }
+                    val link = if (currentTask != null && currentFile != null) StoredVideos.fileSource(currentTask, currentFile) else currentTask?.source.orEmpty()
+                    Text(if (LibraryStore.readFavorites(this@PlayerActivity).any { it.source == link }) "♥" else "♡", color = Color.White, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.semantics { contentDescription = "\u6536\u85cf\u89c6\u9891" })
+                }
+                Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Color(0xCC080B10)).padding(horizontal = 8.dp, vertical = 4.dp)) {
+                    val currentTask = task
+                    val currentFile = currentTask?.files?.firstOrNull { it.index == currentTask.playingIndex }
+                    if (currentTask != null && currentFile != null) {
+                        val ranges = TorrentTasks.verifiedRanges(currentTask, currentFile)
+                        CacheCoverageTrack(ranges, currentFile.size, Modifier.fillMaxWidth().height(5.dp))
+                        Text("${bytes(currentFile.done)} / ${bytes(currentFile.size)} · ${CacheCoverage.describe(ranges, currentFile.size, duration)}", color = Color.White, maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.labelSmall)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(formatTime(if (scrubbing) (scrubPosition * duration).toLong() else position), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                        Slider(value = if (scrubbing) scrubPosition else if (duration > 0) (position.toFloat() / duration).coerceIn(0f, 1f) else 0f, onValueChange = { scrubPosition = it; scrubbing = true }, onValueChangeFinished = {
+                            val target = (scrubPosition * duration).toLong().coerceIn(0L, duration)
+                            player?.seekTo(target)
+                            task?.let { TorrentTasks.prioritizeSeek(it, target, duration) }
+                            position = target
+                            scrubbing = false
+                        }, enabled = duration > 0, modifier = Modifier.weight(1f).height(32.dp), colors = SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color(0xFF29CEC0), inactiveTrackColor = Color.Gray))
+                        Text(formatTime(duration), color = Color.White, style = MaterialTheme.typography.labelSmall)
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = { player?.seekTo(((player?.currentPosition ?: 0L) - 15_000L).coerceAtLeast(0L)) }) { Text("−15s", color = Color.White) }
+                        TextButton(onClick = { if (player?.isPlaying == true) player?.pause() else player?.play() }) { Text(if (player?.isPlaying == true) "Ⅱ" else "▶", color = Color.White, modifier = Modifier.semantics { contentDescription = "\u64ad\u653e\u6216\u6682\u505c" }) }
+                        TextButton(onClick = { player?.seekTo(((player?.currentPosition ?: 0L) + 15_000L).coerceAtMost(duration)) }) { Text("+15s", color = Color.White) }
+                        TextButton(onClick = { cycleSpeed() }) { Text("${speed}×", color = Color.White, modifier = Modifier.semantics { contentDescription = "\u64ad\u653e\u500d\u901f" }) }
+                    }
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly, verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(onClick = onQuality) { Text("\u753b\u8d28", color = Color.White, modifier = Modifier.semantics { contentDescription = "\u753b\u8d28\u8bbe\u7f6e" }) }
+                        TextButton(onClick = { showTrackMenu() }) { Text("\u97f3\u8f68/CC", color = Color.White, modifier = Modifier.semantics { contentDescription = "\u97f3\u8f68\u4e0e\u5b57\u5e55" }) }
+                        TextButton(onClick = onFiles) { Text("\u5217\u8868", color = Color.White, modifier = Modifier.semantics { contentDescription = "\u5207\u6362\u89c6\u9891" }) }
+                        TextButton(onClick = { enterFloating() }) { Text("PIP", color = Color.White, modifier = Modifier.semantics { contentDescription = "\u60ac\u6d6e\u64ad\u653e" }) }
+                        TextButton(onClick = { changeFullscreen(!fullscreen) }) { Text(if (fullscreen) "\u9000\u51fa\u5168\u5c4f" else "\u5168\u5c4f", color = Color.White, modifier = Modifier.semantics { contentDescription = if (fullscreen) "\u9000\u51fa\u5168\u5c4f" else "\u5168\u5c4f\u64ad\u653e" }) }
+                    }
+                }
+            }
+        }
     }
     private fun formatTime(value: Long): String {
         val seconds = (value.coerceAtLeast(0) / 1000)

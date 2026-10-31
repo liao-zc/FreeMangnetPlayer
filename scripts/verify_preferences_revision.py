@@ -39,8 +39,9 @@ def control(name):
         node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
         if node is not None:
             b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
-        if name=='player_quality':
-            node=next((n for n in t.iter('node') if n.get('content-desc')=='画质设置' and actionable(n)),None)
+        labels={'player_quality':'\u753b\u8d28\u8bbe\u7f6e'}
+        if name in labels:
+            node=next((n for n in t.iter('node') if n.get('content-desc')==labels[name] and actionable(n)),None)
             if node is not None:
                 b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
         if not tapped:
