@@ -47,6 +47,12 @@ for module, sections in {"core": ("preferences", "media", "update", "navigation"
         if not (root / module / "src/main/java/com/omniplayer" / module / section).is_dir():
             raise SystemExit(f"Missing {module}/{section} responsibility folder")
 print("Checked app composition, Gradle library modules, source relocation, responsibility folders, and acyclic feature boundaries")
+bridge_in_app = root / "app/src/main/java/com/masterwok/simpletorrentandroid"
+bridge_in_magnet = root / "magnet/src/main/java/com/masterwok/simpletorrentandroid"
+if bridge_in_app.exists() and any(bridge_in_app.rglob("*.kt")):
+    raise SystemExit("BitTorrent session bridge remains in the app shell")
+if not (bridge_in_magnet / "TorrentSession.kt").is_file():
+    raise SystemExit("BitTorrent session bridge is missing from :magnet")
 for module in ("core", "magnet", "live"):
     gradle_file = (root / module / "build.gradle.kts").read_text(encoding="utf-8")
     if 'id("com.android.library")' not in gradle_file:
