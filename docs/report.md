@@ -98,14 +98,14 @@
 
 ## 验证阻塞与下一步
 
-1. 本机没有 Java/JDK，故本机 Gradle 启动失败；GitHub Actions 已完成实际 Kotlin/资源编译：首次发现 nullable 类型错误并修正，后续 Android APK 构建通过（[run 41154902413](https://github.com/liao-zc/OmniPlayer/actions/runs/41154902413)）。
-2. Android API 35 模拟器的当前 UI 点检通过（[run 41155642023](https://github.com/liao-zc/OmniPlayer/actions/runs/41155642023)），取得 14 张当前界面截图，见 `docs/screenshots/current-ui/`。本轮尚未发布新 APK。
+1. 本机没有 Java/JDK，故本机 Gradle 启动失败；GitHub Actions 已完成实际 Kotlin/资源编译：中间运行先后发现 nullable 类型与缺失 import 编译错误并修正；后续 Android APK 构建及模拟器 UI 工作流通过（[build/UI run 41156594845](https://github.com/liao-zc/OmniPlayer/actions/runs/41156594845)）。
+2. Android API 35 模拟器的当前 UI 点检通过（[run 41156594845](https://github.com/liao-zc/OmniPlayer/actions/runs/41156594845)），取得 14 张当前界面截图，见 `docs/screenshots/current-ui/`。本轮尚未发布新 APK。
 3. 导航与设置 UI 已通过模拟器；搜索分页算法的本轮 UI 回归、直播播放控件的画面内位置仍未单独自动化。BT 公网起播需分别记录元数据、Peers、校验字节、首帧与持续播放。
 4. 新 magnet 的 `dn` 明确是字幕 `.srt`，应先检查 torrent 文件清单及 `so=1` 对应文件；只有选择视频文件并出现视频首帧，才能通过边下边播验收。
 
 ### 本轮模拟器截图
 
-截图来自 GitHub Actions run 41155642023（Android API 35 Pixel 2 模拟器）：
+截图来自 GitHub Actions run 41156594845（Android API 35 Pixel 2 模拟器）：
 
 - [01 首页（含底栏设置）](screenshots/current-ui/01-home.png)
 - [03 全局设置分类](screenshots/current-ui/03-settings.png)
