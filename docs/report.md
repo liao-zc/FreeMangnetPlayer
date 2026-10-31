@@ -222,3 +222,39 @@ CI 验证覆盖编译、instrumentation 和静态更新流程检查；未在模�
 第一阶段模拟器失败的直接原因是偏好 UI 脚本沿用旧主页设置入口。产品主页当前只显示直播/磁力卡片，磁力页顶栏提供设置入口。脚本已调整为先进入磁力播放，再进入设置和通用设置。不得把该次失败当作产品功能回归通过；新 run 的最终状态、截图、APK、Release URL 和 SHA-256 应在本节补记。
 
 第二阶段的 Gradle 编译、模块 Manifest 合并、仪器测试、API 35 模拟器和完整历史需求点检应全部通过后再发布；未通过项和公网上游限制需如实记录。
+## 本轮最终结果：两阶段发布与重构验收
+
+此节为前面标注“待验证/计划”的阶段记录提供最终结论。
+
+### Release 1：v0.3.12 导航与缓存读取
+
+- 正式 Release：[v0.3.12](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.12)，含四 ABI 安装包。
+- 完整 CI：[run 41218292844](https://github.com/liao-zc/OmniPlayer/actions/runs/41218292844)，结论 success。
+- 内容：磁力底栏为“播放 / 任务 / 收藏 / 历史”；搜索区图标为搜索、历史、三点设置；缓存完整并通过校验后由播放器读取本地文件，部分缓存继续使用 BT 分片读取；移除磁力页重复的首页/设置底栏入口，设置文字改为黑色。
+
+### Release 2：v0.4.0 模块化
+
+- 正式 Release：[v0.4.0](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.4.0)，含 arm64-v8a、armeabi-v7a、x86、x86_64 四个 APK；每个拆分 APK 只包含目标 ABI 的 JNI 库。
+- 完整 CI：[run 41220234864](https://github.com/liao-zc/OmniPlayer/actions/runs/41220234864)，结论 success；包括仓库架构边界与 UTF-8 检查、APK 和 instrumentation 构建、Android API 35 模拟器、BT 多文件 fixture、搜索分页 fixture、仪器测试及 UI 回归。
+- UI 回归逐项成功：`verify_library_revision.py`、`verify_preferences_revision.py`、`verify_search_pages.py`、`verify_recent_requirements.py`、`verify_update_flow.py`；更新流程 10/10，搜索 fixture 验证源站分页、无客户端结果数上限、BTIH 去重、大小排序、上一页/下一页和返回导航。
+- 验收范围：模拟器和受控做种环境验证应用行为；不据此声称用户提供的任意公网磁力均有可用 Peer 或达到某一播放速度。
+
+### 架构边界
+
+`:app` 作为应用组合壳依赖 `:core`、`:magnet`、`:live`；`:magnet` 与 `:live` 是独立 Android library modules，二者只依赖共享的 `:core`，互不依赖。播放器、磁力搜索与 BT 引擎、直播源和频道、内容管理、各 feature 设置分别归属对应模块。未来网站视频和音乐可新增 feature library，由 `:app` 组合，并复用 `:core` 的媒体、存储、导航和通用设置能力。
+
+### 本轮点检结果
+
+| 项目 | 结果 | 证据 |
+|---|---|---|
+| 磁力底栏顺序与移除首页/设置按钮 | 通过 | v0.3.12 UI 回归和 CI |
+| 缓存完成后从本地文件读取 | 通过 | v0.3.12 缓存读取修复及受控多文件 BT/播放器回归；未完成缓存仍只读取已校验分片 |
+| 历史入口在底栏而非播放页内容区 | 通过 | v0.3.12 导航回归 |
+| 搜索右侧操作图标顺序 | 通过 | v0.3.12 搜索 UI 回归 |
+| 磁力页右上“设置”文字黑色 | 通过 | v0.3.12 UI 检查 |
+| `:core`、`:magnet`、`:live` 模块依赖边界 | 通过 | v0.4.0 架构 CI 与 Gradle 构建 |
+| 搜索分页和 BTIH 去重等回归 | 通过 | v0.4.0 受控分页 fixture |
+| Android API 35 编译、仪器测试、模拟器回归 | 通过 | CI run 41220234864 |
+| 四 ABI Release APK | 通过 | v0.4.0 Release 附件、ABI 检查与 SHA256SUMS |
+
+CI 生成的逐项截图与状态文件保存在 run 41220234864 的 `OmniPlayer-CI-report-and-debug-APK` artifact；仓库内脚本 `scripts/run_android_regressions.sh`、`scripts/run_ui_regressions.sh` 和 `scripts/summarize_ci_results.py` 可重复运行同一回归流程。
