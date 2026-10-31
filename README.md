@@ -20,7 +20,7 @@ Additional M3U/M3U8 sources can be configured by URL or imported from a device f
 
 ## Verification
 
-The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The v0.3.0 APK is published. Full APK playback acceptance is complete but **failed: 0/10 supplied public magnets rendered a first frame within 120 seconds**. The fixed magnet received 0 payload bytes; the Spider-Man test received 4.8 MB but verified none of its startup pieces. See the [dated playback report](docs/report.md#v030-full-public-playback-retest-2026-10-31) and [run 41148360586](https://github.com/liao-zc/OmniPlayer/actions/runs/41148360586).
+The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The v0.3.0 APK is published. Full APK playback acceptance **failed: 0/10 supplied public magnets rendered a first frame within 120 seconds**. The fixed magnet received 0 payload bytes; the Spider-Man test received 4.8 MB but verified none of its startup pieces. Controlled tests passed playback and SHA-256 checks for 16 formats and search pagination; the reference APK exited in the emulator, so same-device comparison was inconclusive. See the [dated report](docs/report.md#v030-full-public-playback-retest-2026-10-31), [public run](https://github.com/liao-zc/OmniPlayer/actions/runs/41148360586) and [controlled comparison run](https://github.com/liao-zc/OmniPlayer/actions/runs/41151191785).
 
 ## Download
 

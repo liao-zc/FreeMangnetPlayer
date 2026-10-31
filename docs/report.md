@@ -663,3 +663,7 @@ This section records the current code changes. The Android APK build passed on G
 | OmniPlayer on the same emulator and magnet | OmniPlayer remained open for 120 seconds and showed metadata, but had 0 peers, 0 seeds, 0 payload bytes and no rendered frame for the fixed magnet. It correctly did not claim playback. |
 | Evidence | Full test run and screenshot artifacts: [Actions run 41151191785](https://github.com/liao-zc/OmniPlayer/actions/runs/41151191785). Filename-free structured results: [controlled comparison JSON](evidence/v0.3.0-controlled-comparison-41151191785.json). |
 | Conclusion | The controlled seeder confirms that the app can decode and play these 16 test formats while the torrent downloads, and that completed bytes match their hashes. It does **not** meet the separate public-magnet 10/10 requirement, and the reference APK's emulator crash means there is no fair same-device playback comparison. |
+
+## Workspace and cleanup status (2026-10-31)
+
+The active source workspace is `C:\Users\gnsfb\Downloads\FreeMagnetPlayer` on branch `improve/modern-bt-engine`; the five documentation/evidence files in this update were byte-checked against the GitHub branch. A sibling `C:\Users\gnsfb\Downloads\OmniPlayer` is an older v0.2.7 clone (`74afaec`). Removing that stale clone and generated `.tmp-*` folders was attempted, but the filesystem safety review rejected the recursive deletion. Those local folders therefore remain; no deletion bypass was attempted. The retained Android application ID is required for in-place upgrades and app-data preservation.
