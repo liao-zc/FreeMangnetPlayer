@@ -396,4 +396,4 @@ Actions run 41208267640 已成功；更新流程专项检查、APK/instrumentati
 | 12 | v0.4.0 正式 Release 及四 ABI APK | 通过 | [Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.4.0)，CI run 41220234864 success，四种 ABI 资产与 SHA256SUMS 已发布 |
 
 模拟器受控 fixture 的通过不代表用户给出的公网磁力在任意网络环境都有可用节点或保证速度；该限制不计作本轮代码回归失败，也没有伪报为公网实测通过。
-| 13 | 本地保留与远端一致的 v0.4.0 ARM64 APK | 通过 | dist/OmniPlayer-0.4.0-arm64-v8a.apk，114,751,818 bytes，SHA-256 $hash 与 Release 一致。 |
+| 13 | 本地保留与远端一致的 v0.4.0 ARM64 APK | 通过 | `dist/OmniPlayer-0.4.0-arm64-v8a.apk`，114,751,818 bytes，SHA-256 `59fe9abc10d2b2b23dad49e10a448d8081422bf365ae33ec4ca24bb72f4759d6` 与 Release 一致。 |
