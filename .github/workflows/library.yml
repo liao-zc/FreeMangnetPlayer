@@ -98,7 +98,12 @@ jobs:
             sha256sum "release-assets/$APK" >> release-assets/SHA256SUMS
             stat -c '%n %s bytes' "release-assets/$APK" >> release-assets/APK-SIZES.txt
           done
-          gh release create "$TAG" release-assets/OmniPlayer-*.apk release-assets/SHA256SUMS release-assets/APK-SIZES.txt --repo "${GITHUB_REPOSITORY}" --target "$GITHUB_SHA" --title "OmniPlayer $TAG" --notes "OmniPlayer $TAG：更新包支持断点续传和暂停/继续；下载完成后提供系统安装确认，取消或稍后安装时保留安装包；应用设置与缓存继续保留。"
+          case "$VERSION" in
+            0.3.12) NOTES='磁力导航调整为播放、任务、收藏、历史；搜索栏操作顺序调整；已验证完整的缓存文件改为本地读取，避免重复下载。' ;;
+            0.4.0) NOTES='完成 Gradle 架构重构：共享能力归入 core，磁力与直播拆成独立 library modules，由 OmniPlayer 应用壳组合；保留旧安装数据与功能入口。' ;;
+            *) NOTES='OmniPlayer 功能、稳定性与兼容性更新。' ;;
+          esac
+          gh release create "$TAG" release-assets/OmniPlayer-*.apk release-assets/SHA256SUMS release-assets/APK-SIZES.txt --repo "${GITHUB_REPOSITORY}" --target "$GITHUB_SHA" --title "OmniPlayer $TAG" --notes "$NOTES"
           for APK in release-assets/OmniPlayer-*.apk; do echo "Published https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/$(basename "$APK")" >> "$GITHUB_STEP_SUMMARY"; done
           echo "Published split APKs to ${TAG}; native payload was limited to each target ABI." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
