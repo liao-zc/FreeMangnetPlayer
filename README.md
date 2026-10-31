@@ -22,7 +22,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前版本：`v0.3.10`（versionCode `38`），全量 CI 已通过并发布。
+- 当前版本：`v0.3.11`（更新流程优化版本；全量 CI 与发布待验证）。
 - v0.3.10 已按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；旧通用包包含四种 ABI 的 libtorrent 和 LibVLC 原生库，因此体积较大，ABI 拆包减少了单包内的无关原生库。
 - [v0.3.10 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.10)，SHA-256 清单和大小见 Release 附件。CI 通用 APK 下载到 [`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)。
 - 模块：`:app`、`:ui-inspector`
@@ -44,3 +44,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 ```
 
 脚本会无限退避重试推送当前分支，启动 `library.yml` 全量 Android/媒体库/偏好/搜索分页回归并等待完成；通用 CI APK 提取至 `dist/OmniPlayer-debug.apk`，逐项 CI 报告保存至 `artifacts/ci/<run-id>/`。发布时可加 `-PublishRelease`：CI 全部通过后会自动创建版本 Release 并上传四种 ABI APK、体积和 SHA-256 清单。失败测试的截图和状态文件保留在 Actions artifact 中。
+
+### 软件更新
+
+更新下载支持 HTTP Range 断点续传，并可在设置中暂停或继续。下载完成后，应用会保留安装包并提供系统安装确认入口；若暂不安装，可重新打开应用或在软件说明页选择“立即安装”。更新说明随版本发布并在更新确认页显示。Android 系统仍要求用户确认安装。

@@ -169,3 +169,20 @@ CI run [41204349316](https://github.com/liao-zc/OmniPlayer/actions/runs/41204349
 ### v0.3.10 全量 CI 与发布结果
 
 CI run [41204663746](https://github.com/liao-zc/OmniPlayer/actions/runs/41204663746) 全部通过：仓库/UTF-8 检查、Android APK 与 instrumentation 构建、API 35 模拟器回归、受控 BitTorrent fixture、搜索分页 fixture，以及本轮新增需求自动检查均通过。v0.3.10 已发布四种 ABI APK，见 [GitHub Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.10)。新增需求的代码级点检均通过；真实公网直播源、多厂家遥控器/电视和真实磁力资源的播放体验未在这次受控 CI 中覆盖，不据此声称已在所有设备实测。
+## 2026-10-31 软件更新流程修复（v0.3.11）
+
+本轮将应用更新下载从 DownloadManager 改为应用可控的 HTTP Range 下载：数据先写入 `.part`，暂停、连接中断或进程退出时保留文件，继续时从当前长度请求后续字节；服务端不支持 Range 时会丢弃不连续临时内容并安全重下。设置页增加暂停、继续、立即安装操作，并显示实时字节进度。下载完成后保存 APK 路径和 ready 状态，发出“下载完成，点击打开系统安装确认”通知；设置页也显示安装确认弹窗。APK 在系统安装成功广播到达前保留，App 重启后会重新尝试打开安装确认，不会重新下载完成包。安装成功后再清理安装包和临时更新状态。
+
+更新检查弹窗与软件说明页展示 Release 简短更新说明；软件说明只显示用户可读的版本名，不展示 versionCode 或版本来源。发布工作流的 Release notes 已改为本版本更新摘要，版本升至 v0.3.11。
+
+| 检查项 | 本地结果 |
+|---|---|
+| Range / `.part` 续传实现 | 静态代码检查待运行 |
+| 暂停与继续按钮、状态持久化 | 静态代码检查待运行 |
+| 安装确认通知、按钮与 APK 保留 | 静态代码检查待运行；实体 Android 安装器待设备验证 |
+| 已下载 APK 启动恢复 | 静态代码检查待运行 |
+| Release notes、隐藏 versionCode/来源描述 | 静态代码检查待运行 |
+| Android APK 构建及模拟器回归 | 待 GitHub Actions |
+| 本地 JDK/Gradle 可用性 | 待检查 |
+
+安装本身受 Android 未知来源权限与系统确认页控制；App 可以主动打开系统流程，但不能绕过用户确认。CI 的静态更新检查脚本：`scripts/verify_update_flow.py`。
