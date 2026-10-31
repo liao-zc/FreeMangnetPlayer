@@ -130,3 +130,15 @@
 - 版本改为 `v0.3.6` / versionCode `34`。按要求，全量 CI 成功后才发布 Release；失败 run 不发布 APK。
 - 缓存覆盖区间的时刻标签按已校验 piece 的字节范围映射到播放时间估算，VBR 文件可能存在时间轴误差；这是范围估算，不能视为精确解码时间戳。
 - APK 体积原因及 ABI 拆分方案见“APK 体积说明”；每个 ABI 包体积和 SHA-256 需以成功 Release 的 `APK-SIZES.txt`、`SHA256SUMS` 为准。
+## v0.3.6 全量 CI 结果与 v0.3.7 点检
+
+GitHub Actions [run 41196718330](https://github.com/liao-zc/OmniPlayer/actions/runs/41196718330) 已成功。报告列出 36/36 UI 检查通过，Android instrumentation、模拟器回归和 APK 构建通过。Release [v0.3.6](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.6) 已发布四种 ABI 包。
+
+| ABI | 文件大小 |
+|---|---:|
+| arm64-v8a | 114,734,853 bytes |
+| armeabi-v7a | 99,896,591 bytes |
+| x86 | 111,119,479 bytes |
+| x86_64 | 120,894,934 bytes |
+
+版本 0.3.7 增加了 CI 的真实拖动进度条检查：拖动后应改变播放位置，并把 BT 顺序下载起点切换到所选分片。该检查随下一次全量 CI 运行，成功前不作通过声明。

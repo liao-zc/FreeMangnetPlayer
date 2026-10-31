@@ -21,8 +21,8 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前开发版本：`v0.3.5`（versionCode `33`）；Release 会在本轮全量 CI 通过后创建。
-- v0.3.5 将按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；安装时选择与设备处理器对应的版本。旧单包同时包含四种 ABI 的 libtorrent 和 LibVLC 原生库，因此体积较大；分包会保留每个应用包内对应 ABI 的原生库。
+- 当前开发版本：`v0.3.7`（versionCode `35`）；Release 会在本轮全量 CI 通过后创建。
+- v0.3.7 将按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；安装时选择与设备处理器对应的版本。旧单包同时包含四种 ABI 的 libtorrent 和 LibVLC 原生库，因此体积较大；分包会保留每个应用包内对应 ABI 的原生库。
 - Release 发布后，APK 和 SHA-256 清单见 [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases)。CI 通用 APK 会下载到 [`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)。
 - 模块：`:app`、`:ui-inspector`
 - 核心技术：Kotlin、Jetpack Compose、Media3、LibVLC、libtorrent4j

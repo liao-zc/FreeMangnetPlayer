@@ -69,6 +69,27 @@ def control(name):
     screenshot('library-control-failure.png')
     ui=tree(); raise AssertionError({'control':name,'state':state(),'ui':[n.attrib for n in ui.iter('node')]})
 
+def scrub_player_timebar():
+    """Exercise the embedded seek bar and confirm BT download reprioritization."""
+    before=wait(lambda s:s.get('playing') and s.get('duration',0)>0)
+    start_piece=before.get('streamRangeStart',-1)
+    deadline=time.monotonic()+8
+    bar=None
+    while time.monotonic()<deadline:
+        root=tree()
+        bar=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/player_progress') and actionable(n)),None)
+        if bar is not None: break
+        surface=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
+        if surface is not None: tap(surface)
+        time.sleep(.25)
+    assert bar is not None,'Embedded video time bar is not exposed as an actionable control'
+    left,top,right,bottom=map(int,re.findall(r'\d+',bar.get('bounds','')))
+    y=(top+bottom)//2
+    target=left+int((right-left)*.62)
+    adb('shell','input','swipe',str(left+max(4,(right-left)//12)),str(y),str(target),str(y),'600')
+    moved=wait(lambda s:s.get('position',0)>before.get('position',0)+10_000,timeout=15)
+    assert moved.get('streamRangeStart',-1)>start_piece,{'beforePiece':start_piece,'afterPiece':moved.get('streamRangeStart'),'before':before,'after':moved}
+    record('manual-timebar-seek-reprioritizes-cache-range',beforePosition=before.get('position'),afterPosition=moved.get('position'),beforePiece=start_piece,afterPiece=moved.get('streamRangeStart'))
 def open_cache(title):
     root=tree();parents={child:parent for parent in root.iter() for child in parent}
     node=next(n for n in root.iter('node') if n.get('text')==title)
@@ -115,6 +136,7 @@ played=wait(lambda s:s.get('playing') and s.get('position',0)>800)
 assert played['qualityHeight']==0;record('default-original-quality',state=played)
 control('player_quality');require_visible('原画质');screenshot('library-01-quality-options.png');find_and_tap('原画质')
 record('quality-control-inside-player-with-no-transcoding-claim')
+scrub_player_timebar()
 control('player_files');screenshot('library-selection-before.png');find_and_tap('全选');screenshot('library-selection-after.png');find_and_tap('完成')
 selection=wait(lambda s:len([f for f in s.get('files',[]) if f.get('selected') and f['path'].endswith(('Episode-01.mp4','Episode-02.mp4'))])==2,timeout=15)
 record('multi-file-selection-before-cache',state=selection)
