@@ -122,3 +122,11 @@
 - 本地 APK：[OmniPlayer-debug.apk](../dist/OmniPlayer-debug.apk)，307,441,494 bytes，SHA-256 B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557。它取自 CI run 41176052615；当前成功 run 和该 run 的 app/ 树逐文件相同，因此 APK 对应当前应用源码。
 - 无 Peer 行为：策略级 instrumentation 通过，真实 3 分钟 BT/UI 端到端未验证。
 - 用户提供的十条公网磁力验收按要求排除；未写成通过。
+
+## v0.3.6 控件可达性修复与本轮 CI 记录
+
+- 本轮发现：Actions run `41194980834` 的 APK 构建、instrumentation 编译、搜索分页/去重/跳页用例通过；媒体库回归未通过。截图显示控制条主体可见，但收藏按钮放在视频预览上沿，未被自动化定位，故该 run 未创建 Release。
+- 修复：将收藏图标放到播放器底部控制条，并明确设为无障碍可聚焦控件。该修改尚未由新 CI 证明，不能标为通过。
+- 版本改为 `v0.3.6` / versionCode `34`。按要求，全量 CI 成功后才发布 Release；失败 run 不发布 APK。
+- 缓存覆盖区间的时刻标签按已校验 piece 的字节范围映射到播放时间估算，VBR 文件可能存在时间轴误差；这是范围估算，不能视为精确解码时间戳。
+- APK 体积原因及 ABI 拆分方案见“APK 体积说明”；每个 ABI 包体积和 SHA-256 需以成功 Release 的 `APK-SIZES.txt`、`SHA256SUMS` 为准。
