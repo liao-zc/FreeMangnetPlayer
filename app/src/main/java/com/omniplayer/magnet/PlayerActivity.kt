@@ -689,7 +689,6 @@ class PlayerActivity : ComponentActivity() {
                 typeface=DisplaySettings.typeface(this@PlayerActivity)
             }
             val ranges = TorrentTasks.verifiedRanges(t, f)
-            view.findViewById<TextView>(R.id.player_cache_ranges)?.visibility = View.GONE
             view.findViewById<CacheCoverageView>(R.id.player_cache_coverage)?.submit(ranges, f.size, "已缓存区间")
             if(player?.isPlaying==true && System.currentTimeMillis()-lastHistoryAt>5000) {lastHistoryAt=System.currentTimeMillis();LibraryStore.addPlayback(this,f.path.substringAfterLast('/'),link,player?.currentPosition ?: 0,duration)}
         }
