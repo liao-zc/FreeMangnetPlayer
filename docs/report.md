@@ -15,8 +15,8 @@
 
 | # | 要求 | 状态 | 结果与证据 |
 |---|---|---|---|
-| 1 | 首页底部提供统一设置入口 | 通过（代码） | MainActivity 底栏增加“设置”，打开全局设置菜单；未能本机编译验证。 |
-| 2 | 检查更新移出磁播设置 | 通过（代码） | 磁播分区不再显示软件更新快捷项；更新检查位于全局“软件说明”。 |
+| 1 | 首页底部提供统一设置入口 | 通过（CI UI） | Android API 35 模拟器通过；截图：[首页](screenshots/current-ui/01-home.png)、[全局设置](screenshots/current-ui/03-settings.png)。 |
+| 2 | 检查更新移出磁播设置 | 通过（CI UI） | 更新开关与手动检查在全局“软件说明”；磁播设置页保留专属选项。截图：[软件说明](screenshots/current-ui/06-about.png)、[磁播设置](screenshots/current-ui/04-magnet-settings.png)。 |
 | 3 | 两类设置独立、全局完整呈现且状态同步 | 部分 | 全局菜单链接直播设置、磁播设置、通用、软件说明；共用偏好设置读取相同 SharedPreferences。需真机逐项修改后重进各分区验证同步。 |
 | 4 | 版本号与实际发布版本一致 | 通过（代码核对） | 安装版本取 PackageInfo；更新版本取 GitHub Release。远端最新 tag 已核实为 v0.3.0（2026-10-31 发布）。删除了设置页手写的旧日期。当前未发布新版本。 |
 | 5 | 直播设置返回键与顶部返回均可用 | 部分 | 全局设置页加入 BackHandler，子页系统返回回到分类菜单；直播源设置通过 finish 返回调用方。尚未设备点验。 |
@@ -35,7 +35,7 @@
 | 18 | 频道选择浅色背景、名称左对齐 | 通过（代码） | 频道选择弹窗背景改浅色，行内容使用左对齐布局。 |
 | 19 | 聊天中汇总历史需求 | 通过（文档/回复） | 本报告后半部按功能类别归纳历史要求；最终回复提供精简分类总览。 |
 | 20 | 每项需求点检并说明原因 | 通过（本报告） | 本表逐项给出状态和证据边界；历史需求按类别列出逐项状态。 |
-| 21 | 更新仓库首页 README | 本地已更新，远端待同步 | README 已重写为 OmniPlayer 说明，UTF-8 无 BOM，并已上传到开发分支；主分支首页 README 仍需同步。 |
+| 21 | 更新仓库首页 README | 通过（远端已同步） | 默认分支 main 和开发分支均已更新 README 与本报告；GitHub Contents API 校验文本 SHA-256 与本地一致，UTF-8 无 NUL。 |
 
 ## 历史需求汇总与状态
 
@@ -98,7 +98,23 @@
 
 ## 验证阻塞与下一步
 
-1. 本机没有 Java/JDK，`gradlew :app:assembleDebug` 在 Gradle 启动阶段失败（`JAVA_HOME is not set and no 'java' command could be found`）；这不是 Kotlin 编译结果。
-2. 本机无法产出新的 APK、截取更新后的真实设备截图，亦未完成本轮 APK 点检。
-3. 必须通过 GitHub Actions 编译后，再用含 Android 模拟器的任务回归导航/搜索页数/直播 UI；BT 公网起播需单独记录元数据、Peers、校验字节、首帧与持续播放。
+1. 本机没有 Java/JDK，故本机 Gradle 启动失败；GitHub Actions 已完成实际 Kotlin/资源编译：首次发现 nullable 类型错误并修正，后续 Android APK 构建通过（[run 41154902413](https://github.com/liao-zc/OmniPlayer/actions/runs/41154902413)）。
+2. Android API 35 模拟器的当前 UI 点检通过（[run 41155642023](https://github.com/liao-zc/OmniPlayer/actions/runs/41155642023)），取得 14 张当前界面截图，见 `docs/screenshots/current-ui/`。本轮尚未发布新 APK。
+3. 导航与设置 UI 已通过模拟器；搜索分页算法的本轮 UI 回归、直播播放控件的画面内位置仍未单独自动化。BT 公网起播需分别记录元数据、Peers、校验字节、首帧与持续播放。
 4. 新 magnet 的 `dn` 明确是字幕 `.srt`，应先检查 torrent 文件清单及 `so=1` 对应文件；只有选择视频文件并出现视频首帧，才能通过边下边播验收。
+
+### 本轮模拟器截图
+
+截图来自 GitHub Actions run 41155642023（Android API 35 Pixel 2 模拟器）：
+
+- [01 首页（含底栏设置）](screenshots/current-ui/01-home.png)
+- [03 全局设置分类](screenshots/current-ui/03-settings.png)
+- [04 磁播设置](screenshots/current-ui/04-magnet-settings.png)
+- [06 软件说明与更新](screenshots/current-ui/06-about.png)
+- [07 电视直播列表](screenshots/current-ui/07-live-channels.png)
+- [08 直播源设置](screenshots/current-ui/08-live-source-settings.png)
+- [10 直播入口打开的源设置](screenshots/current-ui/10-live-module-settings.png)
+- [13 工具栏返回搜索关键词](screenshots/current-ui/13-search-toolbar-returns-to-keyword.png)
+- [14 系统返回搜索关键词](screenshots/current-ui/14-search-system-back-returns-to-keyword.png)
+
+该模拟器点检验证导航和设置界面，并未播放真实 IPTV 视频或公网 BT 视频。
