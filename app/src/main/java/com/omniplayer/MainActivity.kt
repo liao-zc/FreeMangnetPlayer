@@ -461,7 +461,7 @@ class MainActivity : ComponentActivity() {
                                             val link=normalizeMagnetUri(row.optString("source"))
                                             val identity=magnetIdentity(link.orEmpty())
                                             val index=results.indexOfFirst { magnetIdentity(it.magnet)==identity }
-                                            if(index>=0) { val old=results[index];val foundBytes=row.optLong("bytes");val foundSize=row.optString("sizeText");results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=foundBytes.takeIf { it>0L } ?: old.bytes,sizeText=foundSize.takeIf { it.isNotBlank() } ?: old.sizeText,type=row.optString("type","视频"),heat=row.optString("heat").ifBlank { old.heat },publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt },format=row.optString("format").ifBlank { old.format }) }
+                                            if(index>=0) { val old=results[index];val foundBytes=row.optLong("bytes");val foundSize=row.optString("sizeText");results[index]=old.copy(title=old.title.takeIf { it.isNotBlank() && it != "待获取文件名" } ?: row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) }.orEmpty(),bytes=foundBytes.takeIf { it>0L } ?: old.bytes,sizeText=foundSize.takeIf { it.isNotBlank() } ?: old.sizeText,type=row.optString("type","视频"),heat=row.optString("heat").ifBlank { old.heat },publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt },format=row.optString("format").ifBlank { old.format }) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(debug) java.io.File(filesDir,"search-scan.json").writeText(row.toString())
@@ -801,7 +801,7 @@ private fun SearchResultsScreen(
     Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { if (localPage > 1) localPage-- else onPrevious() }, enabled = canGoPrevious, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }
-            Text("第 $localPage / $localPageCount 页${if (totalPages > 0) " · 源站 $page / $totalPages" else ""}", style = MaterialTheme.typography.bodySmall,
+            Text("第 $localPage / $localPageCount 页${if (totalPages > 0) " · 源站第 $page / $totalPages 页" else ""}", style = MaterialTheme.typography.bodySmall,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转结果页；当前第 $localPage 页，共 $localPageCount 页" })
             Box {
                 IconButton(onClick = { sortMenu = true }, modifier = Modifier.semantics { contentDescription = "排序：$sortMode" }) { Icon(Icons.Default.Sort, "排序") }
@@ -835,7 +835,7 @@ private fun SearchResultsScreen(
                 Text("结果页范围：1–$localPageCount", style = MaterialTheme.typography.bodySmall)
                 Text("源站页：", style = MaterialTheme.typography.bodySmall)
                 Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    knownPages.sorted().forEach { sourcePage -> TextButton(onClick = { onJump(sourcePage); jumpDialog = false }) { Text("$sourcePage") } }
+                    knownPages.sorted().forEach { sourcePage -> TextButton(onClick = { onJump(sourcePage); jumpDialog = false }, modifier = Modifier.semantics { contentDescription = "源站第 $sourcePage 页" }) { Text("$sourcePage") } }
                 }
             } },
             confirmButton = { TextButton(onClick = {
