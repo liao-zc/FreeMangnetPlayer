@@ -1,6 +1,7 @@
 param(
     [ValidateRange(0,1000)][int]$PushAttempts = 0,
-    [ValidateRange(1,300)][int]$InitialDelaySeconds = 5
+    [ValidateRange(1,300)][int]$InitialDelaySeconds = 5,
+    [switch]$PublishRelease
 )
 $ErrorActionPreference = 'Stop'
 try { $PSNativeCommandUseErrorActionPreference = $false } catch {}
@@ -37,7 +38,9 @@ while ($true) {
 Write-Host "Dispatching $workflow for $branch"
 $savedPreference = $ErrorActionPreference
 $ErrorActionPreference = 'Continue'
-$dispatchOutput = & gh workflow run $workflow --repo $repo --ref $branch 2>&1
+$dispatchArgs = @('workflow', 'run', $workflow, '--repo', $repo, '--ref', $branch)
+if ($PublishRelease) { $dispatchArgs += @('-f', 'publish_release=true') }
+$dispatchOutput = & gh @dispatchArgs 2>&1
 $dispatchCode = $LASTEXITCODE
 $ErrorActionPreference = $savedPreference
 $dispatchText = $dispatchOutput -join "`n"

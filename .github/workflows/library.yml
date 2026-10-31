@@ -1,8 +1,14 @@
 name: OmniPlayer full audit, UI regressions, search pagination, and APK
 on:
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: Publish the tested APK as a versioned GitHub Release
+        required: false
+        type: boolean
+        default: false
 permissions:
-  contents: read
+  contents: write
 jobs:
   full-audit:
     runs-on: ubuntu-latest
@@ -70,6 +76,18 @@ jobs:
           python3 scripts/summarize_ci_results.py
           echo '## Emulator regression suites' >> "$GITHUB_STEP_SUMMARY"
           cat manual-shots/OmniPlayer-CI-Report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish tested APK to GitHub Releases
+        if: ${{ inputs.publish_release && success() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(sed -n 's/.*versionName = "\([^"]*\)".*/\1/p' app/build.gradle.kts | head -n 1)
+          test -n "$VERSION"
+          TAG="v$VERSION"
+          APK="OmniPlayer-$VERSION.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$APK"
+          gh release create "$TAG" "$APK" --repo "${GITHUB_REPOSITORY}" --target "$GITHUB_SHA" --title "OmniPlayer $TAG" --notes "API 35 全量 CI 与模拟器回归通过后发布。安装包版本：$VERSION。"
+          echo "Published https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}/${APK}" >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
