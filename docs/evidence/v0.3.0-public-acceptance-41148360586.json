@@ -1,0 +1,261 @@
+{
+    "title":  "OmniPlayer v0.3.0 public magnet acceptance",
+    "run":  "https://github.com/liao-zc/OmniPlayer/actions/runs/41148360586",
+    "sourceCommit":  "6e48c8d",
+    "testedAtUtc":  "2026-10-31",
+    "result":  "0/10 user-provided resources started a rendered first frame; exact magnet likewise failed",
+    "resources":  [
+                      {
+                          "category":  "本轮 MKV 起播回归",
+                          "hash":  "172241866C3C439CAB4548115ED1A0250B09FA52",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  4,
+                          "seeds":  4,
+                          "payloadBytes":  4827954,
+                          "peakPayloadBytesPerSecond":  96693,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - 172241 (udp://tracker.peerfect.org:6969/announce)[[::]:36783-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.11
+                      },
+                      {
+                          "category":  "电影",
+                          "hash":  "B3D7179216306E63081AC0DDA84A714B183263F4",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  0,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - b3d717 (udp://tracker.peerfect.org:6969/announce)[[::]:44395-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.87
+                      },
+                      {
+                          "category":  "电影",
+                          "hash":  "D455858E4FCA306FCF315B1229CAF4AC4E065DBA",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  false,
+                          "peers":  1,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - d45585 (udp://explodie.org:6969/announce)[0.0.0.0:36035-v1] timed out \"\" (3)",
+                          "testSeconds":  119.92
+                      },
+                      {
+                          "category":  "电影",
+                          "hash":  "6E00F1E081B67749B48141D38950BF6343BC5F10",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  1,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - 6e00f1 (udp://tracker.peerfect.org:6969/announce)[[::]:35427-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.77
+                      },
+                      {
+                          "category":  "动漫",
+                          "hash":  "665ED0FDA70B0AAFBE2ABE656EE0EA9DAE975389",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  0,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - 665ed0 (udp://tracker.peerfect.org:6969/announce)[[::]:43579-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.76
+                      },
+                      {
+                          "category":  "动漫",
+                          "hash":  "840B33399D8C3AC57CF1CD9346ABE31236DDB4C1",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  2,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - 840b33 (udp://explodie.org:6969/announce)[0.0.0.0:43923-v1] timed out \"\" (3)",
+                          "testSeconds":  119.7
+                      },
+                      {
+                          "category":  "动漫",
+                          "hash":  "571BB0140930A9B46DBA127D2F23B3EAF6B53530",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  0,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - 571bb0 (udp://tracker.peerfect.org:6969/announce)[[::]:44027-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.68
+                      },
+                      {
+                          "category":  "剧集",
+                          "hash":  "FCF228066E11199A85F97AFC023A39BAA482C5B6",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  0,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - fcf228 (udp://tracker.peerfect.org:6969/announce)[[::]:32785-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.34
+                      },
+                      {
+                          "category":  "剧集",
+                          "hash":  "DA0AF5B9CE6BA74445F32576E7C90DD004A89A7F",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  0,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "ExoPlayerImpl",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - da0af5 (udp://tracker.peerfect.org:6969/announce)[[::]:43619-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.69
+                      },
+                      {
+                          "category":  "剧集",
+                          "hash":  "C79263E0F308865FBF3A9613F1B2A8DEF1EBAAAA",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  false,
+                          "peers":  2,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - c79263 (udp://explodie.org:6969/announce)[0.0.0.0:45083-v1] timed out \"\" (3)",
+                          "testSeconds":  119.57
+                      },
+                      {
+                          "category":  "纪录片",
+                          "hash":  "A56FB49D397F177938F8BC5BFBAA7D032DCD074A",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  0,
+                          "seeds":  0,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "VlcTorrentPlayer",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - a56fb4 (udp://tracker.peerfect.org:6969/announce)[[::]:33545-v1] skipping tracker announce (unreachable) \"\" (3)",
+                          "testSeconds":  119.69
+                      },
+                      {
+                          "category":  "原指定资源",
+                          "hash":  "2362347540B27D8A4142AF2BBE0A071F26A3B7A1",
+                          "passed":  false,
+                          "firstFrameSeconds":  null,
+                          "sustainedPlayback":  false,
+                          "metadata":  true,
+                          "peers":  1,
+                          "seeds":  1,
+                          "payloadBytes":  0,
+                          "peakPayloadBytesPerSecond":  0,
+                          "verifiedStartupPieces":  [
+
+                                                    ],
+                          "decoder":  "VlcTorrentPlayer",
+                          "renderedFrameAt":  0,
+                          "videoHeight":  0,
+                          "playerError":  "",
+                          "networkDiagnostic":  "TRACKER_ERROR - tracker_error - 236234 (udp://explodie.org:6969/announce)[0.0.0.0:33089-v1] timed out \"\" (3)",
+                          "testSeconds":  119.36
+                      }
+                  ]
+}

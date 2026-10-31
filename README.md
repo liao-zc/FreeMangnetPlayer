@@ -5,7 +5,7 @@ OmniPlayer is an Android media app for IPTV live channels and magnet-link search
 ## Current development state
 
 - Current release: **v0.3.0** ([GitHub Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.0)).
-- The **v0.3.0** release includes LibVLC embedded audio/subtitle selection and same-folder SRT/VTT/ASS/SSA subtitle streams. Android APK CI passed (run [41149346604](https://github.com/liao-zc/OmniPlayer/actions/runs/41149346604)); device-level track switching and public magnet playback remain unverified.
+- The **v0.3.0** release includes LibVLC embedded audio/subtitle selection and same-folder SRT/VTT/ASS/SSA subtitle streams. Android APK CI passed (run [41149346604](https://github.com/liao-zc/OmniPlayer/actions/runs/41149346604)); device-level track switching is unverified. The full public magnet playback retest failed 0/10 first frames; details are in the dated report below.
 - Android package ID remains `com.freemangnetplayer` so signed upgrades can retain the existing app's private settings and data.
 - Supported playback depends on container/codec support in Android Media3, device decoders, or LibVLC. No Android player can guarantee every codec and profile on every device.
 
@@ -20,7 +20,7 @@ Additional M3U/M3U8 sources can be configured by URL or imported from a device f
 
 ## Verification
 
-The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The v0.3.0 APK is published. The ten public magnet acceptance test is still running; the previous native probe found 0 payload bytes across all ten resources. Do not interpret a successful APK build as proof of P2P playback.
+The complete, itemized functional report, including unresolved playback cases and prior test evidence, is in [docs/report.md](docs/report.md). The v0.3.0 APK is published. Full APK playback acceptance is complete but **failed: 0/10 supplied public magnets rendered a first frame within 120 seconds**. The fixed magnet received 0 payload bytes; the Spider-Man test received 4.8 MB but verified none of its startup pieces. See the [dated playback report](docs/report.md#v030-full-public-playback-retest-2026-10-31) and [run 41148360586](https://github.com/liao-zc/OmniPlayer/actions/runs/41148360586).
 
 ## Download
 

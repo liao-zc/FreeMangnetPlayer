@@ -1,0 +1,189 @@
+{
+    "title":  "OmniPlayer controlled player/search comparison",
+    "run":  "https://github.com/liao-zc/OmniPlayer/actions/runs/41151191785",
+    "testedAtUtc":  "2026-10-31",
+    "emulator":  "Android API 30 x86_64 Google APIs",
+    "formats":  {
+                    "fixtures":  [
+                                     {
+                                         "extension":  "mp4",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  6.51,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "mkv",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  7.69,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "webm",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  5.11,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "avi",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  38.50,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "flv",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  30.37,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "wmv",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  4.31,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "mpg",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  8.62,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "ts",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  4.67,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "m2ts",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  5.42,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "mov",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  4.48,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "3gp",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  4.15,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "rm",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  47.32,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "ogv",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  3.87,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "av1.mp4",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  3.11,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "vp8.webm",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  4.69,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "h263.3gp",
+                                         "passed":  true,
+                                         "expectedUnsupported":  false,
+                                         "playbackSeconds":  3.54,
+                                         "downloadSha256Matched":  true
+                                     },
+                                     {
+                                         "extension":  "broken",
+                                         "passed":  true,
+                                         "expectedUnsupported":  true,
+                                         "playbackSeconds":  2.41,
+                                         "downloadSha256Matched":  null
+                                     }
+                                 ],
+                    "total":  17,
+                    "passed":  17
+                },
+    "searchPagination":  [
+                             {
+                                 "check":  "source-page-1",
+                                 "passed":  true,
+                                 "resultCount":  39
+                             },
+                             {
+                                 "check":  "single-page-controls-and-time-heat-match-sorting",
+                                 "passed":  true,
+                                 "resultCount":  39
+                             },
+                             {
+                                 "check":  "source-page-2",
+                                 "passed":  true,
+                                 "resultCount":  17
+                             },
+                             {
+                                 "check":  "source-page-3",
+                                 "passed":  true,
+                                 "resultCount":  0
+                             },
+                             {
+                                 "check":  "previous-page",
+                                 "passed":  true,
+                                 "resultCount":  17
+                             },
+                             {
+                                 "check":  "jump-to-known-page",
+                                 "passed":  true,
+                                 "resultCount":  null
+                             },
+                             {
+                                 "check":  "back-restores-search-not-home",
+                                 "passed":  true,
+                                 "resultCount":  null
+                             }
+                         ],
+    "referenceApp":  {
+                         "version":  "1.5.0",
+                         "name":  "Magnet_player",
+                         "installed":  true,
+                         "playbackBaseline":  "Unavailable: app process exited and emulator returned to launcher",
+                         "processExited":  true,
+                         "nativeTranslationPresent":  true,
+                         "launchWaitSeconds":  5
+                     },
+    "omniPlayer":  {
+                       "speedLimitBytesPerSecond":  0,
+                       "renderedFrameAt":  0,
+                       "seeds":  0,
+                       "metadata":  true,
+                       "sampleSeconds":  120.41,
+                       "networkStatus":  "尚无可连接资源节点，正在重新发现；应用未限速",
+                       "payloadBytes":  0,
+                       "playing":  false,
+                       "peers":  0
+                   },
+    "claimBoundary":  "Controlled clips demonstrate decoder/container playback and hash-verified downloads only. They do not demonstrate public magnet availability or a same-resource performance win against Magnet_player."
+}
