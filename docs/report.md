@@ -30,6 +30,16 @@
 指定公网磁力的边下边播仍有明显首帧延迟。历史 Actions `41158983146` 测得一个指定资源约 0.1% 下载量时出首帧，但等待约 107 秒，有效速度约 175–736 KB/s。因此这不满足“快速起播”，也不能证明用户提供的十条资源达到 90% 成功率或最低 2 MB/s。可用 Peer/Tracker、做种状态、路由器和网络质量会改变结果，客户端无法凭算法为无种/无可用节点资源制造数据。
 
 全功能表将每项标成通过、部分或未通过，并注明本轮实测、历史证据或尚缺的设备/公网条件。重构后的编译与 instrumentation 已通过，但这不代表所有历史 UI、所有直播源、真实公网种子和多机型体验均在本轮逐项实测通过。
+
+## v0.3.1 APK 发布核验
+
+| 项目 | 结果 |
+|---|---|
+| APK 构建与模拟器回归 | 通过：GitHub Actions [41183135730](https://github.com/liao-zc/OmniPlayer/actions/runs/41183135730)，API 35 回归全部完成 |
+| GitHub Release | 已发布：[OmniPlayer v0.3.1](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.1) |
+| 远端 APK | [OmniPlayer-0.3.1.apk](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.1/OmniPlayer-0.3.1.apk)，307,441,494 bytes |
+| 本地 APK | `dist/OmniPlayer-debug.apk`，307,441,494 bytes，与远端一致 |
+| SHA-256 | `23AB8726EB0B33B83F5D886089C853A32157D9EBD60DA388F2D6981D474B7A12`（本地计算值与 GitHub Release asset digest 一致） |
 ## 2026-10-31 当前分支复核补记
 
 | 检查 | 结果 |

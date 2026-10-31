@@ -21,7 +21,9 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前发布版本：`v0.3.0`（versionCode `28`）
+- 当前发布版本：`v0.3.1`（versionCode `29`）
+- APK 下载：[OmniPlayer-0.3.1.apk](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.1/OmniPlayer-0.3.1.apk)
+- 本地 APK：[`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)，与 GitHub Release 资产 SHA-256 一致。
 - 模块：`:app`、`:ui-inspector`
 - 核心技术：Kotlin、Jetpack Compose、Media3、LibVLC、libtorrent4j
 
@@ -40,4 +42,4 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 .\scripts\run_full_ci.ps1
 ```
 
-脚本会无限退避重试推送当前分支，启动 `library.yml` 全量 Android/媒体库/偏好/搜索分页回归并等待完成；最新 APK 提取至 `dist/OmniPlayer-debug.apk`，逐项 CI 报告保存至 `artifacts/ci/<run-id>/`。失败测试的截图和状态文件保留在 Actions artifact 中。
+脚本会无限退避重试推送当前分支，启动 `library.yml` 全量 Android/媒体库/偏好/搜索分页回归并等待完成；最新 APK 提取至 `dist/OmniPlayer-debug.apk`，逐项 CI 报告保存至 `artifacts/ci/<run-id>/`。发布时可加 `-PublishRelease`：CI 全部通过后会自动创建版本 Release 并上传 APK。失败测试的截图和状态文件保留在 Actions artifact 中。

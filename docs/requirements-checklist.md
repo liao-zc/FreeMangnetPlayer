@@ -234,3 +234,11 @@
 | 无 Peer 告警与槽位策略 | 策略级通过；真实 BT/UI 端到端未验证 | TaskLanePolicyTest.confirmedNoDataWarningPersistsAndDoesNotConsumeDownloadOrCacheSlots 验证告警阈值、记录和并发槽位。不能据此声称真实网络无 Peer 流程已端到端通过。 |
 | 十条指定公网磁力验收 | 按用户要求排除 | 本轮未测试，也不报告为通过。 |
 | 本地 APK | 可用 | dist/OmniPlayer-debug.apk，307,441,494 bytes，SHA-256 B8E3A1BD7F165EDD083E87FAF0713AAA4F53290A801C176CAB83A31C86D94557。APK 来自成功 CI run 41176052615；该 run 与当前 run 的 app/ 源码树逐文件相同（Git 比较 8f39f730..3f7df411），后续差异仅在文档/CI 元数据。 |
+
+## v0.3.1 最新 APK 发布校正
+
+| 项目 | 状态 | 证据 |
+|---|---|---|
+| Release APK | 已发布 | [OmniPlayer v0.3.1](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.1)，资产 `OmniPlayer-0.3.1.apk` |
+| 本地与远端 APK 一致 | 通过 | `dist/OmniPlayer-debug.apk` 与 Release 资产均为 307,441,494 bytes；本地 SHA-256 `23AB8726EB0B33B83F5D886089C853A32157D9EBD60DA388F2D6981D474B7A12`，与 GitHub asset digest 相同 |
+| 构建与 API 35 模拟器回归 | 通过 | Actions [41183135730](https://github.com/liao-zc/OmniPlayer/actions/runs/41183135730) |
