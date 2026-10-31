@@ -36,9 +36,9 @@
 |---|---|
 | 最新架构拆分代码构建与 API 35 instrumentation | 通过：Actions [41162813195](https://github.com/liao-zc/OmniPlayer/actions/runs/41162813195) |
 | GitHub Markdown 渲染 | 通过：Actions [41165205364](https://github.com/liao-zc/OmniPlayer/actions/runs/41165205364) |
-| 当前分支全量媒体库/设置/搜索分页回归 | 五轮未通过控制层探测：`41164610686`、`41165205509`、`41165851825`、`41166377619`、`41166934395`。视频可播放；诊断显示控制根节点在探测结束时为 `GONE`，子控件存在。现将控制显示超时从 5 秒延长到 15 秒并保留触屏显现逻辑，第六轮 Actions `41167470912` 待验证。 |
+| 当前分支全量媒体库/设置/搜索分页回归 | 前六轮媒体库综合回归分别在画质控件检测处停止。Actions `41167470912` 的播放器截图和 Android 视图树已确认控件实际显示，失败原因为测试脚本误把缺少 `visible-to-user` 字段当作不可见。截图见 [播放器控制条](screenshots/current-ui/16-player-controls.png)。已改为对 Android 原生控件按可见状态与有效边界判断，第七轮媒体库 Actions `41168057232`、播放器细项 Actions `41168059729` 正在重跑。 |
 | 当前分支截图采集 | 通过：Actions [41164612904](https://github.com/liao-zc/OmniPlayer/actions/runs/41164612904)，14 张手机模拟器截图已更新到 `docs/screenshots/current-ui/`。该截图任务与最新播放器控制条顺序调整只差一行，不影响截图中的设置和直播页面。 |
-| 最新播放器控制条回归 | 进行中：Actions [41167470912](https://github.com/liao-zc/OmniPlayer/actions/runs/41167470912)，验证 15 秒显示时长与触屏显现逻辑。此前五轮未通过控制层探测，后续偏好/分页检查未执行。 |
+| 最新播放器控制条回归 | 进行中：Actions [41168057232](https://github.com/liao-zc/OmniPlayer/actions/runs/41168057232)，验证修正后的原生控件可见性判定；之前失败源于自动化错误判定，后续偏好/分页检查未执行。 |
 | 公网磁力快速起播 | 未通过：历史受控/公网证据仍显示启动慢，无法证明十条用户磁力达到 90% 成功或 2 MB/s。 |
 
 `41163294809` 已通过编译和 instrumentation 单元/组件测试，但后续综合脚本在播放器画质控件检查处停止，因此后续偏好与搜索分页阶段未执行。修复后的完整结果应以新的 CI run 为准。本地项目文件夹仍名为 `FreeMagnetPlayer`，安装包 ID `com.freemangnetplayer` 为兼容旧安装而保留；界面和仓库名称为 OmniPlayer。
