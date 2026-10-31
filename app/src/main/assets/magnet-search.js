@@ -26,12 +26,14 @@
   function info() {
     const pager=document.querySelector(pagerSelector), scope=pager||document;
     const pages=[...scope.querySelectorAll('a[href]')].map(a=>({page:parseInt(clean(a.textContent),10),url:a.href})).filter(p=>p.page>0);
-    const pagerText=clean(scope.textContent||'');
-    const totalMatch=/(?:共|total)\s*(\d+)\s*(?:页|pages)/i.exec(pagerText);
+    const totalText=clean(document.body.textContent||'');
+    const totalMatch=/(?:共\s*(\d+)\s*页|total\s*(\d+)\s*pages)/i.exec(totalText);
     const last=[...scope.querySelectorAll('a[href]')].find(a=>/^(末页|尾页|last(?:\s*page)?|最后一页)$/i.test(clean(a.textContent||a.getAttribute('aria-label'))));
     const lastParam=last&&(()=>{const params=new URL(last.href,location.href).searchParams;for(const key of ['page','p','pg','pageNo','pageNum']){const n=parseInt(params.get(key)||'',10);if(Number.isFinite(n)&&n>0)return n;}return 0;})();
     const current=currentPageNumber(), next=nextUrl();
-    const totalPages=Math.max(totalMatch?+totalMatch[1]:0,lastParam||0,...pages.map(p=>p.page),next?current+1:current);
+    const explicitTotal=totalMatch?+(totalMatch[1]||totalMatch[2]):0;
+    const visibleLastPage=Math.max(0,...pages.map(p=>p.page));
+    const totalPages=Math.max(explicitTotal,lastParam||0,visibleLastPage,next?current+1:current);
     window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,page:current,next:next,pending:pending,failures:failed.size,errors:[...failed],linkErrors:linkErrors,running:running,pages:pages,totalPages:totalPages,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest(pagerSelector),rel:a.rel})),complete:document.readyState==="complete"&&!running&&pending===0}));
   }
   function resourceTime(node, count) {

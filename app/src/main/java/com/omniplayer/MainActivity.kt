@@ -454,8 +454,8 @@ class MainActivity : ComponentActivity() {
                                         if(generation==searchTrigger && !searchComplete) {
                                             scannerReady=row.optBoolean("complete")
                                             val observedTotal = row.optInt("totalPages")
-                                            if (observedTotal > 0) sourcePages = maxOf(sourcePages, observedTotal)
-                                            else if (row.optBoolean("complete") && row.optString("next").isBlank()) sourcePages = maxOf(sourcePages, pageNumber)
+                                            if (observedTotal > 0) sourcePages = observedTotal
+                                            else if (row.optBoolean("complete") && row.optString("next").isBlank()) sourcePages = pageNumber
                                             row.optJSONArray("pages")?.let { array -> for(i in 0 until array.length()) {val link=array.getJSONObject(i);pageUrls[link.getInt("page")]=link.getString("url") } }
                                         }
                                      } }, onMagnet = { title, link ->

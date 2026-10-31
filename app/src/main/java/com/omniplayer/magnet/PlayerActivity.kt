@@ -572,9 +572,12 @@ class PlayerActivity : ComponentActivity() {
             }
         }, update = { view ->
             val playerChanged = view.player !== player
-            view.useController = !floating
-            view.player = player
-            if (playerChanged && player != null && !floating) showEmbeddedControls(view)
+            val shouldUseController = !floating
+            if (view.useController != shouldUseController) view.useController = shouldUseController
+            if (playerChanged) {
+                view.player = player
+                if (player != null && !floating) showEmbeddedControls(view)
+            }
             if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
             view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
             view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
