@@ -24,4 +24,7 @@ The complete, itemized functional report, including unresolved playback cases an
 
 ## Download
 
-- [Universal APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0.apk)\n- [ARM64 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-arm64-v8a.apk)\n- [ARMv7 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-armeabi-v7a.apk)\n- [OmniPlayer source archive](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-source.zip)
+- [Universal APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0.apk)
+- [ARM64 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-arm64-v8a.apk)
+- [ARMv7 APK](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-armeabi-v7a.apk)
+- [OmniPlayer source archive](https://github.com/liao-zc/OmniPlayer/releases/download/v0.3.0/OmniPlayer-v0.3.0-source.zip)
