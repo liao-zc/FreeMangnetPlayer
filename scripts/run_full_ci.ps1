@@ -3,6 +3,7 @@ param(
     [ValidateRange(1,300)][int]$InitialDelaySeconds = 5
 )
 $ErrorActionPreference = 'Stop'
+try { $PSNativeCommandUseErrorActionPreference = $false } catch {}
 $repo = 'liao-zc/OmniPlayer'
 $workflow = 'library.yml'
 $branch = (git branch --show-current).Trim()
@@ -10,8 +11,11 @@ if (-not $branch) { throw 'Unable to determine current Git branch.' }
 $delay = $InitialDelaySeconds
 for ($attempt = 1; $attempt -le $PushAttempts; $attempt++) {
     Write-Host "Push attempt $attempt/$PushAttempts to origin/$branch"
-    $pushOutput = & git push --set-upstream origin "HEAD:$branch" 2>&1
+    $savedPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    $pushOutput = & git -c http.version=HTTP/1.1 push --set-upstream origin "HEAD:$branch" 2>&1
     $pushCode = $LASTEXITCODE
+    $ErrorActionPreference = $savedPreference
     $pushOutput | ForEach-Object { Write-Host $_ }
     if ($pushCode -eq 0) { break }
     $pushText = $pushOutput -join "`n"
