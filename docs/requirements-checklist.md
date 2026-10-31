@@ -190,4 +190,4 @@
 | 18 | 频道选择器浅色背景、名称左对齐 | 部分 | 直播列表截图见 `screenshots/current-ui/07-live-channels.png`；播放器内频道选择器尚未单独截图确认。 |
 | 19 | 完整汇总历史要求，不遗漏 | 通过（文档覆盖） | A–J 节覆盖历次入口、设置、搜索、BT、播放器、直播、命名、文档与清理需求；本节补充最近 21 项。 |
 | 20 | 每项功能标记结果与原因并形成报告 | 通过（文档） | `docs/requirements-checklist.md` 逐项列状态和证据，`docs/report.md` 记录执行结果及限制。 |
-| 21 | GitHub 首页 README 更新为 OmniPlayer | 待同步核验 | 本地 README 为 UTF-8 OmniPlayer 版；本轮最终推送后必须再次检查远端 blob 与 Markdown 渲染。 |
+| 21 | GitHub 首页 README 更新为 OmniPlayer | 通过 | 远端 README 已为 OmniPlayer 并增加架构/点检/截图入口；GitHub Markdown 检查 Actions `41165205364` 通过。 |
