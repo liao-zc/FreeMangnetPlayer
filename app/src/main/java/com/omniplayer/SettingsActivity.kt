@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.background
@@ -75,6 +76,7 @@ class SettingsActivity : ComponentActivity() {
                 val updateScope = rememberCoroutineScope()
                 val entrySection = intent.getStringExtra("section") ?: "menu"
                 var section by remember { mutableStateOf(entrySection) }
+                BackHandler(enabled = section != entrySection) { section = "menu" }
                 var download by remember { mutableStateOf(SettingsStore.root(this, true).absolutePath) }
                 var cache by remember { mutableStateOf(SettingsStore.root(this, false).absolutePath) }
                 var downloads by remember { mutableStateOf(SettingsStore.maxDownloads(this).toString()) }
@@ -98,14 +100,13 @@ class SettingsActivity : ComponentActivity() {
                 val pkg = packageManager.getPackageInfo(packageName, 0)
                 @Suppress("DEPRECATION") val legacyVersion = pkg.versionCode
                 val version = if (Build.VERSION.SDK_INT >= 28) pkg.longVersionCode.toString() else legacyVersion.toString()
-                val updated = "2026-10-30"
 
                 Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { if (section == entrySection) finish() else section = "menu" }) { Icon(Icons.Default.ArrowBack, if (section == entrySection) "返回" else "返回设置分类") }
                         Text(when(section) { "magnet" -> "磁播设置"; "general" -> "通用设置"; "about" -> "软件说明"; else -> "设置" }, style = MaterialTheme.typography.titleLarge)
                         Spacer(Modifier.weight(1f))
-                        if (section != "about") TextButton(onClick = { section = "about" }) { Text("软件更新") }
+                        if (section == "menu") TextButton(onClick = { section = "about" }) { Text("软件更新") }
                         TextButton(onClick = { finish() }) { Text("首页") }
                     }
                     when (section) {
@@ -160,7 +161,7 @@ class SettingsActivity : ComponentActivity() {
                                 dismissButton = { TextButton(onClick = { updateRelease = null }) { Text("取消") } }
                             ) }
                             Text("版本：${pkg.versionName}（versionCode $version）")
-                            Text("最近更新：$updated")
+                            Text("当前安装版本号来自应用包，更新版本号来自 GitHub Release。")
                             Text("电视直播与磁力播放工具", style = MaterialTheme.typography.bodyMedium)
                         }
                         "magnet" -> Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {

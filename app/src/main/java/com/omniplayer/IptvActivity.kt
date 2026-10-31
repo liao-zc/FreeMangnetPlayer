@@ -439,10 +439,10 @@ class IptvPlayerActivity : ComponentActivity() {
                     AndroidView(factory = { context ->
                         PlayerView(context).apply {
                             useController = false
-                            setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
+                            setShowBuffering(PlayerView.SHOW_BUFFERING_NEVER)
                         }
-                    }, update = { it.player = player }, modifier = if (fullScreen) Modifier.fillMaxSize() else Modifier.padding(top = 90.dp).fillMaxWidth().height(240.dp).align(Alignment.TopCenter))
-                    if (!fullScreen) Column(Modifier.align(Alignment.TopCenter).padding(top = 342.dp).fillMaxWidth().fillMaxHeight().background(DisplaySettings.background(this@IptvPlayerActivity))) {
+                    }, update = { it.player = player }, modifier = if (fullScreen) Modifier.fillMaxSize() else Modifier.padding(top = 90.dp).fillMaxWidth().height(220.dp).align(Alignment.TopCenter))
+                    if (!fullScreen) Column(Modifier.align(Alignment.TopCenter).padding(top = 370.dp).fillMaxWidth().fillMaxHeight().background(DisplaySettings.background(this@IptvPlayerActivity))) {
                         Row(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                             Text("频道列表 · ${channelChoices.size}", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
                             Text("按分组快速切换", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
@@ -475,7 +475,7 @@ class IptvPlayerActivity : ComponentActivity() {
                             Button(onClick = { retry++ }) { Text("重试") }
                         }
                     } else if (buffering) CircularProgressIndicator(Modifier.align(Alignment.Center), color = Color.White)
-                    if (!pipMode && (!fullScreen || fullScreenControls)) Row(Modifier.align(Alignment.TopCenter).then(if (fullScreen) Modifier else Modifier.statusBarsPadding().padding(top = 12.dp)).fillMaxWidth().padding(horizontal = 12.dp).shadow(8.dp, RoundedCornerShape(18.dp)).background(Color(0xE6202124), RoundedCornerShape(18.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    if (!pipMode && (!fullScreen || fullScreenControls)) Row(Modifier.align(if (fullScreen) Alignment.BottomCenter else Alignment.TopCenter).then(if (fullScreen) Modifier.navigationBarsPadding().padding(bottom = 12.dp) else Modifier.padding(top = 312.dp)).fillMaxWidth().padding(horizontal = 12.dp).shadow(8.dp, RoundedCornerShape(18.dp)).background(Color(0xE6202124), RoundedCornerShape(18.dp)).padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = ::goBack, modifier = Modifier.size(56.dp)) { Icon(Icons.Default.ArrowBack, "返回", tint = Color.White) }
                         Column(Modifier.weight(1f)) {
                             Text(currentChannel.name, color = Color.White, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -517,7 +517,8 @@ class IptvPlayerActivity : ComponentActivity() {
                     }
                     if (showChannels) AlertDialog(
                         onDismissRequest = { showChannels = false },
-                        title = { Text("选择频道 · ${channelChoices.size}") },
+                        containerColor = Color(0xFFF4F7F6),
+                        title = { Text("选择频道 · ${channelChoices.size}", color = Color(0xFF14202B)) },
                         text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                                 channelGroups.forEach { item ->
@@ -527,7 +528,9 @@ class IptvPlayerActivity : ComponentActivity() {
                             LazyColumn(Modifier.heightIn(max = 420.dp)) {
                                 items(filteredChannelChoices, key = { it.id }) { item ->
                                     TextButton(onClick = { currentChannel = item; showChannels = false }, modifier = Modifier.fillMaxWidth()) {
-                                        Text(if (item.id == currentChannel.id) "▶  ${item.name}" else item.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                                            Text(if (item.id == currentChannel.id) "▶  ${item.name}" else item.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color(0xFF14202B))
+                                        }
                                     }
                                 }
                             }

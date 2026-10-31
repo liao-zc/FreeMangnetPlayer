@@ -421,7 +421,7 @@ object TorrentTasks {
                             hasMetadata = task.files.isNotEmpty(), requestedVideo = requestedVideo,
                             hasVerifiedBytes = hasVerifiedBytes, payloadBytes = task.payloadBytes,
                             peerCount = task.peers + task.connectionCount, metadataAgeMs = metadataAge)) {
-                        task.unplayableReason = "⚠ 暂无可用资源节点：已读取视频文件信息，但 3 分钟内没有 Peer 或有效视频数据，当前无法播放。此提示会保留；重新尝试前不会计入下载/缓存数量。"
+                        task.unplayableReason = "找不到资源：已读取文件信息，但 3 分钟内未发现可连接节点或有效数据。此任务已暂停，提示会保留；可以手动重试或删除。"
                         task.paused = true
                         task.engine?.pause()
                         LibraryStore.markUnplayable(context, task, task.unplayableReason)
@@ -463,7 +463,7 @@ object TorrentTasks {
                         else -> "正在下载 / 缓存，可边下边播"
                     }
                     StoredVideos.sync(context, task)
-                    if (task.download) LibraryStore.updateDownload(context, task.title, task.source, task.status, task.done, task.total)
+                    if (task.download && task.unplayableReason.isBlank()) LibraryStore.updateDownload(context, task.title, task.source, task.status, task.done, task.total)
                     if (ticks++ % 4 == 0) { persist(); schedule() }
                     if (task.complete && task.viewers == 0) break
                 }

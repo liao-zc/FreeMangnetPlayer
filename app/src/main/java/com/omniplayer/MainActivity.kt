@@ -347,6 +347,12 @@ class MainActivity : ComponentActivity() {
                                 icon = { Icon(Icons.Default.Home, contentDescription = null) },
                                 label = { Text("首页") }
                             )
+                            NavigationBarItem(
+                                selected = selectedTab == "设置",
+                                onClick = { startActivity(Intent(this@MainActivity, SettingsActivity::class.java).putExtra("section", "menu")) },
+                                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                                label = { Text("设置") }
+                            )
                             if (magnetSection) {
                                 NavigationBarItem(selected = selectedTab == "搜索" || selectedTab == "搜索结果", onClick = { selectedTab = "搜索" }, icon = { Icon(Icons.Default.Search, null) }, label = { Text("搜索") })
                                 NavigationBarItem(selected = selectedTab == "播放" || selectedTab == "缓存", onClick = { selectedTab = "播放"; reloadLibrary() }, icon = { Icon(Icons.Default.PlayArrow, null) }, label = { Text("播放") })
@@ -452,7 +458,8 @@ class MainActivity : ComponentActivity() {
                                     searchBridge = MagnetSearchBridge(onResource={ row -> runOnUiThread {
                                         if(generation==searchTrigger && selectedTab=="搜索结果" && !searchComplete) {
                                             val link=normalizeMagnetUri(row.optString("source"))
-                                            val index=results.indexOfFirst { it.magnet==link }
+                                            val identity=magnetIdentity(link)
+                                            val index=results.indexOfFirst { magnetIdentity(it.magnet)==identity }
                                             if(index>=0) { val old=results[index];val foundBytes=row.optLong("bytes");val foundSize=row.optString("sizeText");results[index]=old.copy(title=row.optString("title").takeIf { it.isNotBlank() && !it.startsWith("magnet:",true) } ?: old.title,bytes=foundBytes.takeIf { it>0L } ?: old.bytes,sizeText=foundSize.takeIf { it.isNotBlank() } ?: old.sizeText,type=row.optString("type","视频"),heat=row.optString("heat").ifBlank { old.heat },publishedAt=row.optString("publishedAt").ifBlank { old.publishedAt },format=row.optString("format").ifBlank { old.format }) }
                                         }
                                     } }, onPagination={ row -> runOnUiThread {
@@ -463,9 +470,9 @@ class MainActivity : ComponentActivity() {
                                         }
                                      } }, onMagnet = { title, link ->
                                         runOnUiThread {
-                                            if (generation == searchTrigger && !searchComplete && selectedTab == "搜索结果" && results.none { it.magnet == link }) {
+                                            if (generation == searchTrigger && !searchComplete && selectedTab == "搜索结果" && isRelevantSearchTitle(activeQuery, title.ifBlank { magnetTitle(link) })) {
                                                 val name = title.ifBlank { magnetTitle(link) }
-                                                results.add(MagnetResult(name, link, format = detectResourceFormat(name, link)))
+                                                if (results.none { magnetIdentity(it.magnet) == magnetIdentity(link) }) results.add(MagnetResult(name, link, format = detectResourceFormat(name, link)))
                                                 searchState = "results"
                                                 searchMessage = ""
                                             }
@@ -776,6 +783,7 @@ private fun SearchResultsScreen(
     var jumpPage by remember { mutableStateOf("") }
     var jumpError by remember { mutableStateOf("") }
     val list = androidx.compose.foundation.lazy.rememberLazyListState()
+    var localPage by remember(keyword, engine, page) { mutableIntStateOf(1) }
     val sortedResults = remember(results.toList(), sortMode) {
         when (sortMode) {
             "时间" -> results.sortedWith(compareByDescending<MagnetResult> { parsePublishedDate(it.publishedAt) }.thenByDescending { it.title.length })
@@ -783,11 +791,16 @@ private fun SearchResultsScreen(
             else -> results.sortedWith(compareByDescending<MagnetResult> { item -> keyword.lowercase().split(' ').count { word -> word.isNotBlank() && item.title.lowercase().contains(word) } }.thenByDescending { it.title.length })
         }
     }
+    val localPageCount = ((sortedResults.size + 9) / 10).coerceAtLeast(1)
+    LaunchedEffect(localPageCount) { if (localPage > localPageCount) localPage = localPageCount }
+    val visibleResults = sortedResults.drop((localPage - 1) * 10).take(10)
+    val canGoPrevious = localPage > 1 || page > 1
+    val canGoNext = localPage < localPageCount || nextAvailable
     LaunchedEffect(page, keyword) { list.scrollToItem(0) }
     Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onPrevious, enabled = page > 1, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }
-            Text("$keyword · ${if (totalPages > 0) "$page / $totalPages" else "第 $page"} 页", style = MaterialTheme.typography.bodySmall,
+            IconButton(onClick = { if (localPage > 1) localPage-- else onPrevious() }, enabled = canGoPrevious, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }
+            Text("第 $localPage / $localPageCount 页${if (totalPages > 0) " · 源站 $page / $totalPages" else ""}", style = MaterialTheme.typography.bodySmall,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转页面；当前第 $page 页" })
             Box {
                 IconButton(onClick = { sortMenu = true }, modifier = Modifier.semantics { contentDescription = "排序：$sortMode" }) { Icon(Icons.Default.Sort, "排序") }
@@ -796,13 +809,13 @@ private fun SearchResultsScreen(
                         text = { Text(if (sortMode == option) "✓ $option" else option) }, onClick = { sortMode = option; sortMenu = false }) }
                 }
             }
-            IconButton(onClick = onNext, enabled = nextAvailable, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
+            IconButton(onClick = { if (localPage < localPageCount) localPage++ else onNext() }, enabled = canGoNext, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
         }
         if (state == "loading" || message == "搜索中") LinearProgressIndicator(Modifier.fillMaxWidth())
         if (state in listOf("error", "timeout") || message == "搜索未完成") Text("搜索未完成", color = MaterialTheme.colorScheme.error)
         if (results.isNotEmpty()) {
             LazyColumn(Modifier.weight(1f), state = list, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                items(sortedResults, key = { it.magnet }) { item -> MagnetResultCard(item, onParse, onDownload) }
+                items(visibleResults, key = { magnetIdentity(it.magnet) }) { item -> MagnetResultCard(item, onParse, onDownload) }
             }
         } else if (state != "loading") {
             Text(if (state == "empty") "没有搜索结果" else "搜索未完成", Modifier.padding(16.dp))
@@ -818,12 +831,13 @@ private fun SearchResultsScreen(
                 OutlinedTextField(jumpPage, { jumpPage = it.filter(Char::isDigit).take(6) }, label = { Text("输入页码") }, singleLine = true,
                     modifier = Modifier.focusRequester(requester), keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
                 if (jumpError.isNotBlank()) Text(jumpError, color = MaterialTheme.colorScheme.error)
-                Text("可跳转已发现页面：${knownPages.sorted().joinToString().ifBlank { "暂无" }}", style = MaterialTheme.typography.bodySmall)
+                Text("结果页 1–$localPageCount；源站页：${knownPages.sorted().joinToString().ifBlank { "暂无" }}", style = MaterialTheme.typography.bodySmall)
             } },
             confirmButton = { TextButton(onClick = {
                 val target = jumpPage.toIntOrNull()
-                if (target != null && target in knownPages) { onJump(target); jumpDialog = false }
-                else jumpError = "该页地址尚未发现，请先用上一页或下一页浏览"
+                if (target != null && target in 1..localPageCount) { localPage = target; jumpDialog = false }
+                else if (target != null && target in knownPages) { onJump(target); jumpDialog = false }
+                else jumpError = "请输入当前结果页范围内的页码，或已发现的源站页码"
             }) { Text("跳转") } },
             dismissButton = { TextButton(onClick = { jumpDialog = false }) { Text("取消") } })
     }
@@ -842,8 +856,7 @@ private fun MagnetResultCard(item: MagnetResult, onParse: (MagnetResult) -> Unit
     Card(Modifier.fillMaxWidth(),colors=CardDefaults.cardColors(containerColor=Color.White)) {
         Column(Modifier.fillMaxWidth().padding(horizontal=10.dp,vertical=6.dp),verticalArrangement=Arrangement.spacedBy(3.dp)) {
             Text("${item.title.ifBlank { "待获取文件名" }} · ${item.format.ifBlank { detectResourceFormat(item.title, item.magnet).ifBlank { "格式待解析" } }}",style=textStyle)
-            Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "搜索源未提供大小；解析后读取" }} · ${item.type} · 热度 ${item.heat.ifBlank { "未提供评分" }}",style=textStyle)
-            Text("资源上架时间："+item.publishedAt.ifBlank { "来源未提供；magnet 地址不含创建时间" },style=textStyle)
+            Text("${item.sizeText.ifBlank { if(item.bytes>0) formatLibraryBytes(item.bytes) else "大小 —" }} · ${item.format.ifBlank { detectResourceFormat(item.title, item.magnet).ifBlank { "格式 —" } }} · ${item.publishedAt.ifBlank { "时间 —" }}",style=textStyle)
             Row {
                 TextButton(onClick={onParse(item)}) { Text("播放",style=textStyle) }
                 TextButton(onClick={onDownload(item)}) { Text("下载 / 缓存",style=textStyle) }
@@ -857,6 +870,25 @@ private fun magnetTitle(magnet: String): String = runCatching {
     val dn = Regex("(?:[?&])dn=([^&]+)", RegexOption.IGNORE_CASE).find(magnet)?.groupValues?.get(1)
     if (dn.isNullOrBlank()) "磁力资源" else java.net.URLDecoder.decode(dn, "UTF-8")
 }.getOrDefault("磁力资源")
+
+internal fun magnetIdentity(magnet: String): String {
+    val normalized = normalizeMagnetUri(magnet).orEmpty()
+    val hash = Regex("(?i)xt=urn:btih:([0-9a-f]{40})").find(normalized)?.groupValues?.get(1)
+    return hash?.lowercase() ?: normalized.ifBlank { magnet.trim() }
+}
+
+internal fun isRelevantSearchTitle(keyword: String, title: String): Boolean {
+    val query = keyword.lowercase().trim()
+    val candidate = title.lowercase().trim()
+    if (query.isBlank() || candidate.isBlank() || candidate == "待获取文件名" || candidate == "磁力资源") return false
+    fun compact(value: String) = value.replace(Regex("[^\\p{IsHan}a-z0-9]+"), "")
+    if (compact(candidate).contains(compact(query))) return true
+    val queryTerms = Regex("[\\p{IsHan}]+|[a-z0-9]+", RegexOption.IGNORE_CASE).findAll(query).map { it.value }.filter { it.length > 1 }.toList()
+    if (queryTerms.isEmpty()) return false
+    val titleTerms = Regex("[\\p{IsHan}]+|[a-z0-9]+", RegexOption.IGNORE_CASE).findAll(candidate).map { it.value }.toList()
+    val hits = queryTerms.count { term -> titleTerms.any { it.contains(term) || term.contains(it) && it.length > 2 } }
+    return hits > 0 && hits * 2 >= queryTerms.size
+}
 
 internal fun detectResourceFormat(name: String, magnet: String): String {
     val dn = runCatching { Regex("(?:[?&])dn=([^&]+)", RegexOption.IGNORE_CASE).find(magnet)?.groupValues?.get(1)?.let { java.net.URLDecoder.decode(it, "UTF-8") }.orEmpty() }.getOrDefault("")
