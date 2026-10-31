@@ -505,6 +505,12 @@ class PlayerActivity : ComponentActivity() {
         old.stop()
         old.release()
     }
+    private fun showEmbeddedControls(view: PlayerView) {
+        if (floating) return
+        view.useController = true
+        view.showController()
+        view.findViewById<View>(R.id.exo_controller)?.visibility = View.VISIBLE
+    }
     @Composable
     private fun VideoSurface(modifier: Modifier, onQuality: () -> Unit = {}, onFiles: () -> Unit) {
         AndroidView(factory = { context ->
@@ -512,7 +518,7 @@ class PlayerActivity : ComponentActivity() {
                 setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                 setShutterBackgroundColor(android.graphics.Color.BLACK)
                 controllerShowTimeoutMs = 5000
-                setOnClickListener { showController() }
+                setOnClickListener { showEmbeddedControls(this) }
                 setShowRewindButton(true); setShowFastForwardButton(true)
                 findViewById<View>(R.id.player_fullscreen).setOnClickListener { changeFullscreen(!fullscreen) }
                 findViewById<View>(R.id.player_pip).setOnClickListener { enterFloating() }
@@ -545,7 +551,7 @@ class PlayerActivity : ComponentActivity() {
             val playerChanged = view.player !== player
             view.useController = !floating
             view.player = player
-            if (playerChanged && player != null && !floating) view.showController()
+            if (playerChanged && player != null && !floating) showEmbeddedControls(view)
             if (player is VlcTorrentPlayer) view.findViewById<View>(androidx.media3.ui.R.id.exo_shutter)?.visibility = View.GONE
             view.findViewById<TextView>(R.id.player_speed).text = "${speed}×"
             view.findViewById<View>(R.id.player_fullscreen).contentDescription = if (fullscreen) "退出全屏" else "全屏播放"
