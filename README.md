@@ -12,9 +12,9 @@ Playback depends on codec support and on the torrent having reachable peers. The
 
 ## Current development
 
-The `improve/modern-bt-engine` branch has passed Android APK compilation, the current UI walkthrough, and a controlled Android search pagination test (37/17/0 results across three source pages; no more than 10 per local page). See [run 41158145082](https://github.com/liao-zc/OmniPlayer/actions/runs/41158145082). The latest settings, search paging/deduplication, and IPTV control changes are not part of a newly published APK. Its full checklist, historical requirement summary, screenshots, and known test limits are in [docs/report.md](docs/report.md).
+The `improve/modern-bt-engine` branch has passed Android APK compilation, the current UI walkthrough, a controlled search-pagination test (37/17/0 results across three source pages; at most 10 per local page), and an end-to-end playback run for the latest user-supplied magnet. That magnet rendered a video frame and played for 20 seconds while only about 0.2% of the video had downloaded, but first-frame startup took about 107 seconds and speed varied around 175–236 KB/s. See [playback run 41158983146](https://github.com/liao-zc/OmniPlayer/actions/runs/41158983146) and the [full checklist and evidence](docs/report.md). These development changes are not part of a newly published APK; the latest release remains v0.3.0.
 
-Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest magnet supplied for playback declares an `.srt` file with `so=1`; inspect the torrent file list before treating that selected file as a video.
+Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest test magnet declares `.srt` with `so=1`, while the torrent also contains an MKV; the app selected the MKV and achieved playback in the CI emulator. This does not establish fast startup or guarantee playback for other torrents.
 
 ## Build and download
 
