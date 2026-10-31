@@ -7,7 +7,7 @@ updater = (ROOT / "core/src/main/java/com/omniplayer/core/update/AppUpdater.kt")
 service = (ROOT / "core/src/main/java/com/omniplayer/core/update/UpdateTransferService.kt").read_text(encoding="utf-8")
 settings = (ROOT / "app/src/main/java/com/omniplayer/settings/SettingsActivity.kt").read_text(encoding="utf-8")
 main = (ROOT / "app/src/main/java/com/omniplayer/MainActivity.kt").read_text(encoding="utf-8")
-manifest = (ROOT / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
+manifest = (ROOT / "app/src/main/AndroidManifest.xml").read_text(encoding="utf-8") + (ROOT / "core/src/main/AndroidManifest.xml").read_text(encoding="utf-8")
 workflow = (ROOT / ".github/workflows/library.yml").read_text(encoding="utf-8")
 
 checks = {
@@ -20,7 +20,7 @@ checks = {
     "update notes shown": 'release.notes' in settings and 'update.notes' in main,
     "no version code/source text in update info": 'versionCode $version' not in settings and '版本号来自' not in settings and 'updateStatus = "正在检查 GitHub' not in settings,
     "foreground service declared": '.core.UpdateTransferService' in manifest and 'FOREGROUND_SERVICE_DATA_SYNC' in manifest,
-    "release notes supplied": '--notes "OmniPlayer' in workflow,
+    "versioned release notes supplied": '0.3.12) NOTES=' in workflow and '0.4.0) NOTES=' in workflow and '--notes "$NOTES"' in workflow,
 }
 failed = [name for name, ok in checks.items() if not ok]
 for name, ok in checks.items():
