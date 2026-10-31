@@ -138,6 +138,7 @@ control('player_quality');find_and_tap('480p');low=wait(lambda s:s.get('playing'
 record('existing-lower-resolution-track-selects-real-360p',before=high,after=low);screenshot('library-10-low-quality-track.png')
 control('player_quality');find_and_tap('原画质');wait(lambda s:s.get('qualityHeight')==0 and s.get('videoHeight')==720)
 record('original-quality-restores-highest-track')
+control('player_favorite');assert entries('favorite-entries');record('favorite-created-for-delete-regression',entries=entries('favorite-entries'))
 restart('收藏');require_visible('我的收藏');find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not entries('favorite-entries'))
 assert caches();record('favorite-delete-keeps-cache-files');screenshot('library-06-favorite-delete.png')
 restart('播放');find_and_tap('全选');find_and_tap('删除所选');find_and_tap('确认删除');poll(lambda:not entries('playback-entries'))
