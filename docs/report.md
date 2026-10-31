@@ -142,10 +142,17 @@ GitHub Actions [run 41196718330](https://github.com/liao-zc/OmniPlayer/actions/r
 | x86_64 | 120,894,934 bytes |
 
 版本 0.3.7 增加了 CI 的真实拖动进度条检查：拖动后应改变播放位置，并把 BT 顺序下载起点切换到所选分片。该检查随下一次全量 CI 运行，成功前不作通过声明。
-## v0.3.7 最终回归结果与 v0.3.8 发布
+## v0.3.8 最终回归结果与 v0.3.8 发布
 
 GitHub Actions [run 41198324776](https://github.com/liao-zc/OmniPlayer/actions/runs/41198324776) 全部通过：37/37 UI 点检、Android instrumentation、模拟器回归、APK 构建均成功。新增真实进度条拖动测试 `manual-timebar-seek-reprioritizes-cache-range` 通过，拖动后播放位置变化，BT 顺序下载起始分片同步变化。
 
-Release [OmniPlayer v0.3.7](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.7) 已发布。四包体积：arm64-v8a 114,734,849 bytes；armeabi-v7a 99,896,587 bytes；x86 111,119,475 bytes；x86_64 120,894,930 bytes。具体 SHA-256 见 Release 的 `SHA256SUMS`。
+Release [OmniPlayer v0.3.8](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.8) 已发布。四包体积：arm64-v8a 114,734,853 bytes；armeabi-v7a 99,896,591 bytes；x86 111,119,479 bytes；x86_64 120,894,934 bytes。具体 SHA-256 见 Release 的 `SHA256SUMS`。
 
 本轮清理 `dist/`、`artifacts/` 和临时文件的本地删除操作被执行环境自动审核拦截，因此没有删除；该项保持未完成并在需求表注明。v0.3.8 / versionCode 36 用于同步本报告及再次发布。
+### v0.3.8 发布核验
+
+GitHub Actions [run 41199169525](https://github.com/liao-zc/OmniPlayer/actions/runs/41199169525) 已成功完成：37/37 UI 点检、Android instrumentation、API 35 模拟器回归和 APK 构建通过。新增手动拖动进度条用例确认播放位置变化，并确认 BT 顺序下载起始分片同步重排。
+
+GitHub Release [v0.3.8](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.8) 已发布四种 ABI APK 与 SHA-256 清单。ARM64 APK 大小为 114,734,853 bytes，SHA-256 为 `def1f210684aa535f15f758315171ae77799c9978165ed4d0f009a806999b276`。本报告不把用户给出的公网磁力记为通过；SAF 文件选择器跨厂商返回行为、真实更新服务器下载、真实 IPTV 源外观仍需设备或服务端验证。
+
+本地 ARM64 Release APK 的下载在本次会话内未完成，原因是 GitHub 资产下载速率很低；不得将已有旧版本地 APK 当作 v0.3.8。需求清单中的公网 magnet 验收仍按用户排除的十条资源处理。

@@ -21,9 +21,9 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 
 - Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
 - 显示名称：OmniPlayer
-- 当前开发版本：`v0.3.8`（versionCode `36`）；Release 会在本轮全量 CI 通过后创建。
-- v0.3.8 将按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；安装时选择与设备处理器对应的版本。旧单包同时包含四种 ABI 的 libtorrent 和 LibVLC 原生库，因此体积较大；分包会保留每个应用包内对应 ABI 的原生库。
-- Release 发布后，APK 和 SHA-256 清单见 [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases)。CI 通用 APK 会下载到 [`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)。
+- 当前开发版本：`v0.3.9`（versionCode `37`）。v0.3.8 已通过全量 CI 并正式发布；本轮报告与需求清单校准后再次执行 CI 并发布 v0.3.9。
+- v0.3.8 已按 ABI 发布 arm64-v8a、armeabi-v7a、x86、x86_64 四种 APK；旧通用包包含四种 ABI 的 libtorrent 和 LibVLC 原生库，因此体积较大，ABI 拆包减少了单包内的无关原生库。
+- [v0.3.8 Release 与 APK 下载](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.8)，SHA-256 清单和大小见 Release 附件。CI 通用 APK 下载到 [`dist/OmniPlayer-debug.apk`](dist/OmniPlayer-debug.apk)。
 - 模块：`:app`、`:ui-inspector`
 - 核心技术：Kotlin、Jetpack Compose、Media3、LibVLC、libtorrent4j
 
