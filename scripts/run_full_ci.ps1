@@ -32,17 +32,17 @@ for ($attempt = 1; $attempt -le $PushAttempts; $attempt++) {
     $delay = [Math]::Min(60, $delay * 2)
 }
 Write-Host "Dispatching $workflow for $branch"
-gh workflow run $workflow --repo $repo --ref $branch
-if ($LASTEXITCODE -ne 0) { throw 'GitHub Actions dispatch failed.' }
-$sha = (git rev-parse HEAD).Trim()
-$runId = $null
-for ($poll = 0; $poll -lt 24 -and -not $runId; $poll++) {
-    $query = ".[] | select(.headSha==`"$sha`") | .databaseId"
-    $runId = gh run list --repo $repo --workflow $workflow --branch $branch --limit 20 --json databaseId,headSha --jq $query
-    if ($LASTEXITCODE -ne 0) { throw 'Could not query the dispatched Actions run.' }
-    if (-not $runId) { Start-Sleep -Seconds 5 }
-}
-if (-not $runId) { throw 'Timed out waiting for the dispatched Actions run to appear.' }
+$savedPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+$dispatchOutput = & gh workflow run $workflow --repo $repo --ref $branch 2>&1
+$dispatchCode = $LASTEXITCODE
+$ErrorActionPreference = $savedPreference
+$dispatchText = $dispatchOutput -join "`n"
+$dispatchOutput | ForEach-Object { Write-Host $_ }
+if ($dispatchCode -ne 0) { throw 'GitHub Actions dispatch failed.' }
+$match = [regex]::Match($dispatchText, '/actions/runs/(\d+)')
+if (-not $match.Success) { throw 'GitHub CLI did not return a run URL.' }
+$runId = $match.Groups[1].Value
 Write-Host "Watching run $runId"
 gh run watch $runId --repo $repo --exit-status
 $runCode = $LASTEXITCODE
