@@ -789,7 +789,7 @@ private fun SearchResultsScreen(
         when (sortMode) {
             "时间" -> results.sortedWith(compareByDescending<MagnetResult> { parsePublishedDate(it.publishedAt) }.thenByDescending { it.title.length })
             "热度" -> results.sortedWith(compareByDescending<MagnetResult> { parseHeat(it.heat) }.thenBy { it.title })
-            else -> results.sortedWith(compareByDescending<MagnetResult> { item -> keyword.lowercase().split(' ').count { word -> word.isNotBlank() && item.title.lowercase().contains(word) } }.thenByDescending { it.title.length })
+            else -> results.sortedByDescending { item -> keyword.lowercase().split(' ').count { word -> word.isNotBlank() && item.title.lowercase().contains(word) } }
         }
     }
     val localPageCount = ((sortedResults.size + 9) / 10).coerceAtLeast(1)
