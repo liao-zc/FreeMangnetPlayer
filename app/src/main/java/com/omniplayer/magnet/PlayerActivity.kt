@@ -1,4 +1,5 @@
 package com.omniplayer.magnet
+import com.omniplayer.MainActivity
 import com.omniplayer.R
 import com.omniplayer.core.*
 import android.app.PictureInPictureParams

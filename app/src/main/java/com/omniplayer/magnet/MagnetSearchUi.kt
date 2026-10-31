@@ -64,7 +64,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.URLEncoder
 
-internal data class SearchProvider(
+data class SearchProvider(
     val name: String,
     val homepage: String,
     val queryUrl: String? = null
