@@ -378,3 +378,21 @@ Actions run 41208267640 已成功；更新流程专项检查、APK/instrumentati
 | 10 | 每个 Release 更新技术说明、全量需求表和点检报告，清理本次无用缓存/临时文件 | Markdown UTF-8/渲染 CI、报告与 Release 检查 | 阶段二点检 |
 
 历史需求仍保留在本清单 A–P 部分；本节补充本轮新增项，不覆盖过去的未通过项。真实公网种子是否可用、Peer 数量和用户设备播放速度仍需按已标记限制逐项区分，不能由受控种子测试推断。
+## 2026-10-31 本轮两阶段 Release 最终点检
+
+| # | 新增/本轮验收项 | 结果 | 验证证据 |
+|---:|---|---|---|
+| 1 | 磁力底栏仅保留播放、任务、收藏、历史，不出现首页/设置 | 通过 | v0.3.12 UI 回归，CI run 41218292844 |
+| 2 | 完整缓存再次播放时读取本地缓存数据 | 通过 | 完整且校验的缓存使用本地文件源；部分缓存使用 BT 校验分片；受控播放器回归通过 |
+| 3 | 历史记录为独立底栏入口，不塞入播放页 | 通过 | v0.3.12 导航回归 |
+| 4 | 搜索框右侧依次为搜索、历史、三点设置 | 通过 | v0.3.12 UI 回归 |
+| 5 | 磁力播放顶栏“设置”文字为黑色 | 通过 | v0.3.12 UI 回归 |
+| 6 | `:magnet`、`:live` 提升为独立 Gradle library modules | 通过 | `settings.gradle.kts`、模块构建和架构边界 CI |
+| 7 | 通用能力集中在 `:core`，两个 feature 之间无直接依赖 | 通过 | 架构静态检查与完整 Gradle build |
+| 8 | 未来网站视频、音乐 feature 可由 app 壳独立组合 | 通过（架构支持） | 通过独立 feature 与 core 的模块边界设计；未创建未要求的未来 feature |
+| 9 | 搜索分页、去重、大小排序和返回行为无回归 | 通过 | 受控分页 fixture：源站页码、BTIH 去重、排序、翻页、返回 |
+| 10 | Android API 35 仪器与 UI 回归 | 通过 | CI run 41220234864，instrumentation 和五项 UI 脚本均成功 |
+| 11 | v0.3.12 正式 Release | 通过 | [Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.12)，CI run 41218292844 success |
+| 12 | v0.4.0 正式 Release 及四 ABI APK | 通过 | [Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.4.0)，CI run 41220234864 success，四种 ABI 资产与 SHA256SUMS 已发布 |
+
+模拟器受控 fixture 的通过不代表用户给出的公网磁力在任意网络环境都有可用节点或保证速度；该限制不计作本轮代码回归失败，也没有伪报为公网实测通过。
