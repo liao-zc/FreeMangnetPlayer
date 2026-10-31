@@ -540,7 +540,7 @@ class PlayerActivity : ComponentActivity() {
             (android.view.LayoutInflater.from(context).inflate(R.layout.player_surface, null) as PlayerView).apply {
                 setShowBuffering(PlayerView.SHOW_BUFFERING_ALWAYS)
                 setShutterBackgroundColor(android.graphics.Color.BLACK)
-                controllerShowTimeoutMs = 15000
+                controllerShowTimeoutMs = 60000
                 setOnClickListener { showEmbeddedControls(this) }
                 setShowRewindButton(true); setShowFastForwardButton(true)
                 findViewById<View>(R.id.player_fullscreen).setOnClickListener { changeFullscreen(!fullscreen) }

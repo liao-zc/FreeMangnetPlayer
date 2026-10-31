@@ -33,7 +33,7 @@
     const current=currentPageNumber(), next=nextUrl();
     const explicitTotal=totalMatch?+(totalMatch[1]||totalMatch[2]):0;
     const visibleLastPage=Math.max(0,...pages.map(p=>p.page));
-    const totalPages=Math.max(explicitTotal,lastParam||0,visibleLastPage,next?current+1:current);
+    const totalPages=explicitTotal||lastParam||visibleLastPage||(next?current+1:current);
     window.FreeMagnetResults.onPageInfo(JSON.stringify({url:location.href,page:current,next:next,pending:pending,failures:failed.size,errors:[...failed],linkErrors:linkErrors,running:running,pages:pages,totalPages:totalPages,emitted:emitted.size,visited:visited.size,candidates:[...document.querySelectorAll('a[href]')].filter(a=>a.href.indexOf('detail')>=0).map(a=>({href:a.href,text:clean(a.textContent),origin:a.origin,locOrigin:location.origin,protocol:a.protocol,pagination:!!a.closest(pagerSelector),rel:a.rel})),complete:document.readyState==="complete"&&!running&&pending===0}));
   }
   function resourceTime(node, count) {
