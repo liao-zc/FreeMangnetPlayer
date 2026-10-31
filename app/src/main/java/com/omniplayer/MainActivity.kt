@@ -797,7 +797,7 @@ private fun SearchResultsScreen(
     val visibleResults = sortedResults.drop((localPage - 1) * 10).take(10)
     val canGoPrevious = localPage > 1 || page > 1
     val canGoNext = localPage < localPageCount || nextAvailable
-    LaunchedEffect(page, keyword) { list.scrollToItem(0) }
+    LaunchedEffect(page, keyword, localPage) { list.scrollToItem(0) }
     Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { if (localPage > 1) localPage-- else onPrevious() }, enabled = canGoPrevious, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }

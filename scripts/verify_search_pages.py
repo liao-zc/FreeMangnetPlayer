@@ -40,13 +40,13 @@ adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es'
 expected=json.loads(Path('search-pages-expected.json').read_text(encoding='utf-8'));checks=[]
 s=verify_page(1,3,4,expected['1'])
 texts=visible_node_texts();assert sum('哪吒资源文件' in t for t in texts)<=10,'More than 10 resource titles are visible on a page'
-adb('shell','input','swipe','500','1900','500','500','450');time.sleep(1);texts=visible_node_texts()
-assert any('哪吒资源文件 9' in t for t in texts),'Tenth result cannot be reached on page one'
-assert not any('哪吒资源文件 10' in t for t in texts),'Eleventh result leaked into page one'
-screenshot('pagination-local-page-1.png')
-require_visible('跳转结果页；当前第 1 页，共 4 页',s['results'][0]['title'])
+find_and_tap('下一页');require_visible('第 2 / 4 页','哪吒资源文件 10')
+time.sleep(1);texts=visible_node_texts()
+assert not any('哪吒资源文件 20' in t for t in texts),'Result from local page three leaked into page two'
+screenshot('pagination-local-page-2.png')
+require_visible('跳转结果页；当前第 2 页，共 4 页','哪吒资源文件 10')
 find_and_tap('排序：匹配度');require_visible('时间','热度');screenshot('sort-options.png');find_and_tap('时间');find_and_tap('排序：时间');find_and_tap('热度');find_and_tap('排序：热度');find_and_tap('匹配度')
-find_and_tap('下一页');require_visible('第 2 / 4 页');find_and_tap('下一页');find_and_tap('下一页');find_and_tap('下一页')
+find_and_tap('下一页');find_and_tap('下一页');find_and_tap('下一页')
 s=verify_page(2,3,2,expected['2'])
 find_and_tap('下一页');require_visible('第 2 / 2 页');find_and_tap('下一页')
 verify_page(3,3,1,expected['3'])
