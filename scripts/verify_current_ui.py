@@ -27,8 +27,8 @@ def main():
     capture.adb('shell', 'am', 'start', '-W', '-n', f'{capture.PACKAGE}/com.omniplayer.MainActivity')
     import time
     time.sleep(7)
-    shot('01-home.png', ('电视直播', '磁力播放', '统一设置'))
-    capture.find_and_tap('统一设置')
+    shot('01-home.png', ('电视直播', '磁力播放', '首页', '设置'))
+    capture.find_and_tap('设置')
     shot('03-settings.png', ('直播设置', '磁播设置', '通用设置', '软件说明'))
     capture.find_and_tap('磁播设置')
     capture.require_visible('默认搜索引擎：BD电影首发站')
@@ -54,7 +54,7 @@ def main():
     check_absent('下载目录', '缓存目录', '搜索引擎', '直播源名称', '软件信息', '版本：')
     capture.find_and_tap('返回设置分类')
     capture.find_and_tap('软件说明')
-    shot('06-about.png', ('OmniPlayer', '版本：', '最近更新：'))
+    shot('06-about.png', ('OmniPlayer', '版本：', '自动检查并提醒更新'))
     capture.find_and_tap('返回设置分类')
     capture.find_and_tap('直播设置')
     shot('08-live-source-settings.png', ('电视直播设置', 'IPTV_ALL', 'IPTV Org'))
@@ -105,7 +105,7 @@ def main():
     time.sleep(1)
     capture.require_visible('搜索关键词', 'OmniNavigationCheck')
     shot('14-search-system-back-returns-to-keyword.png', ('搜索关键词', 'OmniNavigationCheck'))
-    print('Current UI verification passed: home navigation, isolated settings pages, persisted magnet preferences across entry points, independent software info, shared live source editor, first-run IPTV source URLs, searchable engine manager, and toolbar/system back from results to keyword search.')
+    print('Current UI verification passed: home settings entry, isolated settings pages, persisted magnet preferences, update controls in software info, shared live source editor, first-run IPTV source URLs, searchable engine manager, and toolbar/system back from results to keyword search.')
 
 if __name__ == '__main__':
     main()
