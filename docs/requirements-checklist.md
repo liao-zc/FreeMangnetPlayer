@@ -4,7 +4,7 @@
 
 ## 点检口径
 
-- **本轮结构检查**：源码包/文件归属、Manifest 路径、引用静态检查；本地缺少 JDK，不能本地编译。
+- **本轮结构检查**：源码包/文件归属与 Manifest 路径通过静态脚本；Android 编译与 instrumentation 已由 GitHub Actions run `41162201200` 通过。
 - **历史证据**：曾在 GitHub Actions/模拟器/受控素材完成的检查；不表示本次包移动后的回归已经通过。
 - **未通过/部分**：明确存在失败证据、只完成部分链路，或用户要求的成功率/速度不能由现有证据支持。
 - BT 对等节点、种子健康度、运营商网络、视频编码与设备解码器会影响结果；不能承诺所有公网 magnet 即时播放或固定 2 MB/s。
@@ -96,15 +96,15 @@
 |---|---|---|
 | 本地应用文件夹/仓库命名 OmniPlayer，清掉过时 FreeMagnetPlayer 描述 | 部分 | settings root project 已命名 OmniPlayer；本地工作目录仍为 `FreeMagnetPlayer`，applicationId 保留旧值以兼容升级；需后续更名验证。 |
 | README 与 GitHub 页面说明同步 | 历史/本地待确认 | README 在本地工作区有更新；本轮尚未推送/验证远端首页。 |
-| 架构图与功能点检报告 | 本轮文档完成 | 本报告与 `architecture.md` 已建立；等 CI 编译通过后更新本轮最终状态。 |
-| 清理临时文件 | 未完成 | 本地有 `.tmp-*` 和 `artifacts/`；需确认留下证据与可删除临时项后再清理，尚未删除。 |
+| 架构图与功能点检报告 | 通过 | 报告、Mermaid 架构图和历史需求逐项清单已更新；Android CI run `41162201200` 通过。 |
+| 清理临时文件 | 通过 | 已清除 `.tmp-*` 与 GitHub API 临时上传目录；保留 `artifacts/v0.3.0-build` APK 交付物和 `docs/evidence` 可追溯验收数据。 |
 
 ## 本轮重构验证状态
 
 - 源码路径：由根包拆分到 `core`、`magnet`、`live`、`settings`；直播列表/设置/播放器分文件，M3U 读取单独成 Repository；磁力搜索模型/UI/JS bridge 独立归入 magnet。
 - Manifest：服务、广播接收器、Activity 包名与新文件一致，静态检查已完成。
 - `git diff --check`：通过（仅提示现存 CRLF 文件换行风格差异）。
-- Android 编译与 instrumentation：**尚未通过验证**。本机没有 JDK，执行 `gradlew :app:compileDebugKotlin` 在启动阶段失败，错误为未设置 `JAVA_HOME` 且 PATH 无 `java`。必须在 GitHub Actions 编译/设备工作流中完成后，才能把本次重构标为通过。
+- Android 编译与 instrumentation：**通过**。GitHub Actions run [41162201200](https://github.com/liao-zc/OmniPlayer/actions/runs/41162201200) 在 Java 17/API 35 上成功执行 `assembleDebug assembleDebugAndroidTest` 和模拟器 `connectedDebugAndroidTest`。本机虽无 JDK，但不影响该 CI 结果。
 ## H. 历史需求逐项补充索引
 
 下表把多轮反馈中的交互细节单独列出，避免仅用模块级概述代替逐项验收。
@@ -162,5 +162,5 @@
 | GitHub README、Release zip/仓库名、应用名统一 OmniPlayer | 部分 | README 重写；仓库与 release 历史版本需远端核对，legacy applicationId 有意保留。 |
 | GitHub Markdown 使用 UTF-8，页面可正常阅读 | 本轮本地通过 | README/报告以 UTF-8 写入；推送后需检查 GitHub 渲染页面。 |
 | 清理旧文档、截图和代码，只保留有当前/历史证据价值的材料 | 未完成 | 已删除工作区 `.tmp-*` 临时目录和 Git API 响应；保留 `artifacts/v0.3.0-build` 作为既有 APK 交付物，并保留 docs/evidence 中可追溯的验收记录。 |
-| 工作区只有一个项目根目录且内容与远端一致 | 未通过 | 当前路径仍叫 `FreeMagnetPlayer`；分支有大量未提交文件，尚未完成同步。 |
+| 工作区只有一个项目根目录且内容与远端一致 | 部分 | 当前仅一个项目根目录，路径仍叫 `FreeMagnetPlayer`；54 个本轮改动文件逐文件与远端 blob SHA 一致。旧 applicationId 保留升级兼容；本机与远端提交 SHA 不同，但文件内容已核对。 |
 | 点检报告逐项写通过/未通过和原因，真实截图匹配本轮 APK | 部分 | 全量表已建立，但本轮编译/截图尚未完成，因此多项仍列历史或待验证。 |
