@@ -32,6 +32,23 @@ object LibraryStore {
     fun readPlaybacks(context: Context): List<LibraryEntry> = read(context, PLAYBACKS)
 
     @Synchronized
+    fun playbackPosition(context: Context, taskId: String, fileIndex: Int): Long {
+        return playback(context, taskId, fileIndex)?.position?.coerceAtLeast(0) ?: 0L
+    }
+
+    @Synchronized
+    fun playbackDuration(context: Context, taskId: String, fileIndex: Int): Long =
+        playback(context, taskId, fileIndex)?.duration?.coerceAtLeast(0) ?: 0L
+
+    private fun playback(context: Context, taskId: String, fileIndex: Int): LibraryEntry? {
+        val idPattern = Regex("(?i)btih:${Regex.escape(taskId)}(?:[&#]|$)")
+        return read(context, PLAYBACKS).firstOrNull { entry ->
+            idPattern.containsMatchIn(entry.source) &&
+                Regex("(?i)(?:[?&])so=$fileIndex(?:&|$)").containsMatchIn(entry.source)
+        }
+    }
+
+    @Synchronized
     fun addPlayback(context: Context, title: String, source: String, position: Long = 0, duration: Long = 0) {
         HistoryStore.record(context,"播放",HistoryEntry(title,source,System.currentTimeMillis(),position=position,duration=duration))
         val values = read(context, PLAYBACKS).toMutableList()

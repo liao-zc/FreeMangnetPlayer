@@ -36,6 +36,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -43,6 +44,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -272,28 +275,38 @@ class IptvPlayerActivity : ComponentActivity() {
                             Icon(Icons.Default.PictureInPictureAlt, "悬浮播放", tint = Color.White)
                         }
                     }
-                    if (showChannels) AlertDialog(
+                    if (showChannels) Dialog(
                         onDismissRequest = { showChannels = false },
-                        containerColor = Color(0xFFF4F7F6),
-                        title = { Text("选择频道 · ${channelChoices.size}", color = Color(0xFF14202B)) },
-                        text = { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                channelGroups.forEach { item ->
-                                    FilterChip(selected = channelGroup == item, onClick = { channelGroup = item }, label = { Text(item) })
+                        properties = DialogProperties(usePlatformDefaultWidth = false)
+                    ) {
+                        Surface(
+                            Modifier.fillMaxWidth().widthIn(max = 720.dp)
+                                .heightIn(min = 260.dp, max = (LocalConfiguration.current.screenHeightDp * 0.78f).dp),
+                            color = Color(0xFFF4F7F6), shape = RoundedCornerShape(22.dp), shadowElevation = 18.dp
+                        ) {
+                            Column(Modifier.fillMaxSize().padding(horizontal = 18.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.weight(1f)) {
+                                        Text("选择频道", style = MaterialTheme.typography.titleLarge, color = Color(0xFF14202B))
+                                        Text("${filteredChannelChoices.size} 个频道 · ${channelGroup}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                    }
+                                    TextButton(onClick = { showChannels = false }) { Text("关闭") }
                                 }
-                            }
-                            LazyColumn(Modifier.heightIn(max = 420.dp)) {
-                                items(filteredChannelChoices, key = { it.id }) { item ->
-                                    TextButton(onClick = { currentChannel = item; showChannels = false }, modifier = Modifier.fillMaxWidth()) {
-                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                                            Text(if (item.id == currentChannel.id) "▶  ${item.name}" else item.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color(0xFF14202B))
+                                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                    channelGroups.forEach { item -> FilterChip(selected = channelGroup == item, onClick = { channelGroup = item }, label = { Text(item, maxLines = 1) }) }
+                                }
+                                LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                                    items(filteredChannelChoices, key = { it.id }) { item ->
+                                        TextButton(onClick = { currentChannel = item; showChannels = false }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                                            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+                                                Text(if (item.id == currentChannel.id) "▶  ${item.name}" else item.name, maxLines = 1, overflow = TextOverflow.Ellipsis, color = Color(0xFF14202B))
+                                            }
                                         }
                                     }
                                 }
                             }
-                        } },
-                        confirmButton = { TextButton(onClick = { showChannels = false }) { Text("关闭") } }
-                    )
+                        }
+                    }
                 }
             }
         }

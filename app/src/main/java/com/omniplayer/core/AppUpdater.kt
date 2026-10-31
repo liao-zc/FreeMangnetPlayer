@@ -35,8 +35,7 @@ object AppUpdater {
         val deviceAbis = if (Build.VERSION.SDK_INT >= 21) Build.SUPPORTED_ABIS.toList() else listOf(Build.CPU_ABI)
         val chosen = deviceAbis.firstNotNullOfOrNull { abi -> apks.firstOrNull { it.optString("name").contains(abi, true) } }
             ?: apks.firstOrNull { it.optString("name").contains("universal", true) }
-            ?: apks.firstOrNull { it.optString("name").matches(Regex("(?i).*OmniPlayer.*\\.apk")) }
-            ?: apks.firstOrNull()
+            ?: if (apks.isEmpty()) null else throw IllegalStateException("更新包没有与设备架构匹配的安装包（${deviceAbis.joinToString()}）")
         if (chosen == null || compareVersions(remote, current) <= 0) null
         else Release(remote, chosen.getString("browser_download_url"), json.optString("html_url"))
     }

@@ -452,7 +452,10 @@ class MainActivity : ComponentActivity() {
                                     } }, onPagination={ row -> runOnUiThread {
                                         if(debug) java.io.File(filesDir,"search-scan.json").writeText(row.toString())
                                         if(generation==searchTrigger && !searchComplete) {
-                                            scannerReady=row.optBoolean("complete");if(row.optInt("totalPages")>0) sourcePages=row.getInt("totalPages")
+                                            scannerReady=row.optBoolean("complete")
+                                            val observedTotal = row.optInt("totalPages")
+                                            if (observedTotal > 0) sourcePages = maxOf(sourcePages, observedTotal)
+                                            else if (row.optBoolean("complete") && row.optString("next").isBlank()) sourcePages = maxOf(sourcePages, pageNumber)
                                             row.optJSONArray("pages")?.let { array -> for(i in 0 until array.length()) {val link=array.getJSONObject(i);pageUrls[link.getInt("page")]=link.getString("url") } }
                                         }
                                      } }, onMagnet = { title, link ->

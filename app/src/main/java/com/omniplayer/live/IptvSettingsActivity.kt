@@ -82,6 +82,8 @@ class IptvSettingsActivity : ComponentActivity() {
             AppTheme(colorScheme = lightColorScheme(primary = iptvTeal)) {
                 var entries by remember { mutableStateOf(IptvStore.sources(this).toMutableList()) }
                 var message by remember { mutableStateOf("") }
+                var showPlaylistPickerPrompt by remember { mutableStateOf(false) }
+                BackHandler(enabled = showPlaylistPickerPrompt) { showPlaylistPickerPrompt = false }
                 Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(16.dp)) {
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         IconButton(onClick = { finish() }) { Icon(Icons.Default.ArrowBack, "返回") }
@@ -97,13 +99,23 @@ class IptvSettingsActivity : ComponentActivity() {
                                     OutlinedTextField(source.url, { value -> entries = entries.toMutableList().also { it[index] = it[index].copy(url = value) } }, Modifier.fillMaxWidth(), label = { Text("M3U / M3U8 地址") })
                                     OutlinedButton(onClick = {
                                         acceptPickedPlaylist = { localUrl -> entries = entries.toMutableList().also { it[index] = it[index].copy(url = localUrl) } }
-                                        playlistPicker.launch(arrayOf("application/x-mpegURL", "audio/x-mpegurl", "text/plain", "application/octet-stream"))
+                                        showPlaylistPickerPrompt = true
                                     }, modifier = Modifier.fillMaxWidth()) { Text("选择手机中的 M3U 文件") }
                                     if (entries.size > 1) TextButton(onClick = { entries = entries.toMutableList().also { it.removeAt(index) } }) { Text("删除此直播源") }
                                 }
                             }
                         }
                     }
+                    if (showPlaylistPickerPrompt) AlertDialog(
+                        onDismissRequest = { showPlaylistPickerPrompt = false },
+                        title = { Text("选择 M3U 文件") },
+                        text = { Text("将打开系统文件选择器。点“取消”或按系统返回键可回到直播源设置，不会更改当前文件。") },
+                        confirmButton = { TextButton(onClick = {
+                            showPlaylistPickerPrompt = false
+                            playlistPicker.launch(arrayOf("application/x-mpegURL", "audio/x-mpegurl", "text/plain", "application/octet-stream"))
+                        }) { Text("继续选择") },
+                        dismissButton = { TextButton(onClick = { showPlaylistPickerPrompt = false }) { Text("取消并返回") } }
+                    )
                     Button(onClick = {
                         val valid = entries.filter { it.name.isNotBlank() && (it.url.startsWith("https://") || it.url.startsWith("http://") || it.url.startsWith("file:")) }
                         if (valid.isEmpty()) message = "至少需要一个有效的 HTTP(S) 直播源"

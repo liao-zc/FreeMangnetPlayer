@@ -1,6 +1,7 @@
 package com.omniplayer.magnet
 import com.omniplayer.R
 import com.omniplayer.core.*
+import com.omniplayer.settings.SettingsActivity
 import android.app.PictureInPictureParams
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -22,6 +23,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,10 +32,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -93,7 +98,8 @@ class PlayerActivity : ComponentActivity() {
         requested = savedInstanceState?.getBoolean("play-requested") ?: (intent.getStringExtra("mode") == "play")
         if (requested) task?.let { if (it.paused || it.cancelled) TorrentTasks.resume(it) }
         autoPlay = savedInstanceState?.getBoolean("autoplay") ?: true
-        savedPosition = savedInstanceState?.getLong("position") ?: 0L
+        val requestedFileIndex = task?.playingIndex ?: Regex("(?i)(?:[?&])so=(\\d+)(?:&|$)").find(source)?.groupValues?.get(1)?.toIntOrNull() ?: -1
+        savedPosition = savedInstanceState?.getLong("position") ?: task?.let { LibraryStore.playbackPosition(this, it.id, requestedFileIndex) } ?: 0L
         speed = savedInstanceState?.getFloat("speed") ?: 1f
         fullscreen = savedInstanceState?.getBoolean("fullscreen") ?: false
         updateSystemBars()
@@ -103,6 +109,11 @@ class PlayerActivity : ComponentActivity() {
                 var playbackUiTick by remember(current) { mutableIntStateOf(0) }
                 LaunchedEffect(current) { while (true) { playbackUiTick++; delay(500) } }
                 val activeFile = remember(current, playbackUiTick) { current?.files?.firstOrNull { it.index == current.playingIndex } }
+                val cacheRanges = remember(current, activeFile, playbackUiTick) { if (current != null && activeFile != null) TorrentTasks.verifiedRanges(current, activeFile) else emptyList() }
+                val storedDuration = remember(current?.id, activeFile?.index) {
+                    if (current != null && activeFile != null) LibraryStore.playbackDuration(this, current.id, activeFile.index) else 0L
+                }
+                val cacheDuration = player?.duration?.takeIf { it > 0 } ?: storedDuration
                 var favorite by remember { mutableStateOf(LibraryStore.readFavorites(this).any { it.source == source }) }
                 var fileDialog by remember { mutableStateOf(false) }
                 var qualityDialog by remember { mutableStateOf(false) }
@@ -116,6 +127,7 @@ class PlayerActivity : ComponentActivity() {
                                     val file = current.files.firstOrNull { it.index == current.playingIndex && it.video && it.index !in current.deletedFiles }
                                         ?: current.files.filter { it.video && it.index !in current.deletedFiles }.sortedWith(compareByDescending<TaskFile> { it.index in current.selected }.thenByDescending { it.done >= it.size }.thenByDescending { it.size }).firstOrNull()
                                     if (file != null) {
+                                        if (savedPosition <= 0L) savedPosition = LibraryStore.playbackPosition(this@PlayerActivity, current.id, file.index)
                                         TorrentTasks.playFile(current, file.index)
                                         runCatching { startPlayback(current, file) }.onFailure { releasePlayer(); playerMessage = "播放器准备失败：${it.localizedMessage}"; retryAfter = System.currentTimeMillis() + 3000 }
                                     } else playerMessage = "该链接没有可识别的视频文件，可选择文件下载"
@@ -183,6 +195,8 @@ class PlayerActivity : ComponentActivity() {
                                 val fraction = (file.done.toFloat() / file.size.coerceAtLeast(1)).coerceIn(0f, 1f)
                                 Text(file.path.substringAfterLast('/'), color = Color.White, maxLines = 1)
                                 LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
+                                CacheCoverageTrack(cacheRanges, file.size, Modifier.fillMaxWidth())
+                                Text(CacheCoverage.describe(cacheRanges, file.size, cacheDuration), color = Color(0xFFBFEDE4), style = MaterialTheme.typography.labelSmall)
                                 Text("${bytes(file.done)} / ${bytes(file.size)} · ${current?.peers ?: 0} 个节点 · ${bytes(current?.payloadRate?.toLong() ?: 0L)}/秒", color = Color.LightGray, style = MaterialTheme.typography.bodySmall)
                                 Text("时长与分辨率将在首个完整分片可读后显示", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                             }
@@ -191,12 +205,12 @@ class PlayerActivity : ComponentActivity() {
                 } else {
                 Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).safeDrawingPadding().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(title, maxLines = 1, style = MaterialTheme.typography.titleLarge)
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = { finish() }, modifier = Modifier.weight(1f).height(52.dp)) { Text("返回搜索") }
-                        Button(onClick = {
-                            startActivity(AppNavigation.home(this@PlayerActivity, "门户"))
-                            finish()
-                        }, modifier = Modifier.weight(1f).height(52.dp)) { Text("返回主页") }
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { finish() }) { Icon(Icons.Default.ArrowBack, "返回上一级") }
+                        Text(title, modifier = Modifier.weight(1f), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.titleMedium)
+                        IconButton(onClick = { startActivity(Intent(this@PlayerActivity, SettingsActivity::class.java).putExtra("section", "magnet")) }) {
+                            Icon(Icons.Default.Settings, "设置")
+                        }
                     }
                     val compact = LocalConfiguration.current.screenHeightDp < 720
                     val bodyScroll = rememberScrollState()
@@ -218,6 +232,8 @@ class PlayerActivity : ComponentActivity() {
                                 Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(file.path.substringAfterLast('/'), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
                                     LinearProgressIndicator(progress = { fraction }, modifier = Modifier.fillMaxWidth())
+                                    CacheCoverageTrack(cacheRanges, file.size, Modifier.fillMaxWidth())
+                                    Text(CacheCoverage.describe(cacheRanges, file.size, cacheDuration), style = MaterialTheme.typography.labelSmall, color = Color(0xFF087F79), maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                                     Text("${bytes(file.done)} / ${bytes(file.size)}（${"%.1f".format(fraction * 100)}%） · ${current.peers} 个节点 · ${bytes(current.payloadRate.toLong())}/秒 · ${player?.duration?.takeIf { it > 0 }?.let(::formatTime) ?: "等待时长"} · ${player?.videoSize?.height?.takeIf { it > 0 }?.let { "${it}P" } ?: "等待分辨率"}", style = MaterialTheme.typography.labelSmall, color = Color(0xFF444444))
                                 }
                             }
@@ -352,10 +368,11 @@ class PlayerActivity : ComponentActivity() {
         if (player != null) { if (play) player?.play() else player?.pause() }
     }
     private fun switchVideo(task: TorrentTask, index: Int) {
-        releasePlayer(); savedPosition = 0; retryAfter = 0
+        releasePlayer(); savedPosition = LibraryStore.playbackPosition(this, task.id, index); retryAfter = 0
         TorrentTasks.switchStreamFile(task, index); requested = true; autoPlay = true
     }
     private fun startPlayback(task: TorrentTask, file: TaskFile, forceSoftware: Boolean = false) {
+        task.playbackFailed = false
         val realMedia = forceSoftware || MediaFormats.useSoftware(file.path)
         val media: Player = if (realMedia) VlcTorrentPlayer(this, task, file) else ExoPlayer.Builder(this)
             .setRenderersFactory(androidx.media3.exoplayer.DefaultRenderersFactory(this).setEnableDecoderFallback(true))
@@ -369,7 +386,7 @@ class PlayerActivity : ComponentActivity() {
                 if (player === media && task.renderedFrameAt == 0L) task.renderedFrameAt = System.currentTimeMillis()
             }
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                if (isPlaying) { playedOnce = true; if (task.playbackAt == 0L) task.playbackAt = System.currentTimeMillis(); playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, file.path.substringAfterLast('/'), StoredVideos.fileSource(task, file)) }
+                if (isPlaying) { playedOnce = true; if (task.playbackAt == 0L) task.playbackAt = System.currentTimeMillis(); playerMessage = "正在播放：${file.path}"; LibraryStore.addPlayback(this@PlayerActivity, file.path.substringAfterLast('/'), StoredVideos.fileSource(task, file), savedPosition, media.duration.coerceAtLeast(0)) }
             }
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (player === media && playedOnce && playbackState == Player.STATE_BUFFERING) task.rebufferCount++
@@ -387,6 +404,9 @@ class PlayerActivity : ComponentActivity() {
                         }
                         if (error.errorCode >= 3000 || media is VlcTorrentPlayer) requested = false
                         playerMessage = "播放失败：${error.errorCodeName}；可重试或查看网络诊断"
+                        task.playbackFailed = true
+                        if (!task.download) TorrentTasks.pause(task)
+                        TorrentTasks.schedule()
                         retryAfter = System.currentTimeMillis() + 3000
                         releasePlayer()
                     }
@@ -502,6 +522,9 @@ class PlayerActivity : ComponentActivity() {
         val old = player ?: return
         player = null
         savedPosition = old.currentPosition
+        task?.let { current -> current.files.firstOrNull { it.index == current.playingIndex }?.let { file ->
+            LibraryStore.addPlayback(this, file.path.substringAfterLast('/'), StoredVideos.fileSource(current, file), old.currentPosition, old.duration.coerceAtLeast(0))
+        } }
         old.stop()
         old.release()
     }
@@ -641,9 +664,13 @@ class PlayerActivity : ComponentActivity() {
                 text="${if(duration>0)historyTime(duration) else "读取时长"} · ${if(height>0) "${height}P" else "读取分辨率"} · ${bytes(f.size)} · ${"%.1f".format(percent)}%"
                 typeface=DisplaySettings.typeface(this@PlayerActivity)
             }
+            val ranges = TorrentTasks.verifiedRanges(t, f)
+            val rangeDescription = CacheCoverage.describe(ranges, f.size, duration)
+            view.findViewById<TextView>(R.id.player_cache_ranges)?.text = rangeDescription
+            view.findViewById<CacheCoverageView>(R.id.player_cache_coverage)?.submit(ranges, f.size, rangeDescription)
             if(player?.isPlaying==true && System.currentTimeMillis()-lastHistoryAt>5000) {lastHistoryAt=System.currentTimeMillis();LibraryStore.addPlayback(this,f.path.substringAfterLast('/'),link,player?.currentPosition ?: 0,duration)}
         }
-        for((id,size) in listOf(R.id.player_position to 12f,R.id.player_duration to 12f,R.id.player_speed to 13f,R.id.player_quality to 11f,R.id.player_resource_info to 11f)) view.findViewById<TextView>(id)?.apply { typeface=DisplaySettings.typeface(this@PlayerActivity);setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP,size*DisplaySettings.scale(this@PlayerActivity)) }
+        for((id,size) in listOf(R.id.player_position to 12f,R.id.player_duration to 12f,R.id.player_speed to 13f,R.id.player_quality to 11f,R.id.player_resource_info to 11f,R.id.player_cache_ranges to 10f)) view.findViewById<TextView>(id)?.apply { typeface=DisplaySettings.typeface(this@PlayerActivity);setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP,size*DisplaySettings.scale(this@PlayerActivity)) }
         val current=player ?: return
         if (scrubbing) return
         val duration = current.duration.takeIf { it > 0 } ?: 0L
@@ -675,5 +702,20 @@ class PlayerActivity : ComponentActivity() {
         value >= 1024 * 1024 -> "%.1f MB".format(value / (1024.0 * 1024))
         value >= 1024 -> "%.1f KB".format(value / 1024.0)
         else -> "$value B"
+    }
+}
+
+@Composable
+private fun CacheCoverageTrack(ranges: List<CacheRange>, totalBytes: Long, modifier: Modifier = Modifier) {
+    BoxWithConstraints(modifier.height(7.dp).clip(RoundedCornerShape(8.dp)).background(Color(0xFFE8DDF7))) {
+        if (totalBytes <= 0L) return@BoxWithConstraints
+        ranges.forEach { range ->
+            val start = (range.start.toDouble() / totalBytes).toFloat().coerceIn(0f, 1f)
+            val end = (range.endExclusive.toDouble() / totalBytes).toFloat().coerceIn(start, 1f)
+            Box(
+                Modifier.offset(x = maxWidth * start).fillMaxHeight().width(maxWidth * (end - start))
+                    .background(Color(0xFF0A8F82))
+            )
+        }
     }
 }

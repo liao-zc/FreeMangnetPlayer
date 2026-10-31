@@ -90,6 +90,7 @@ class TorrentTask(val id: String, var source: String, val title: String, folder:
     @Volatile var sequentialStartupActive = false
     @Volatile var tailRefillPending = false
     var viewers = 0
+    var playbackFailed = false
     @Volatile var handle: TorrentHandle? = null
     @Volatile var engine: TorrentSession? = null
     var job: Job? = null
@@ -212,12 +213,24 @@ object TorrentTasks {
             var active = TaskLanePolicy.activeCount(tasks.values, download)
             val limit = if (download) SettingsStore.maxDownloads(context) else SettingsStore.maxCaches(context)
             if (active > limit) {
-                for (task in tasks.values.filter { it.download == download && TaskLanePolicy.active(it) }.sortedBy { it.viewers > 0 }) {
+                for (task in tasks.values.filter { it.download == download && TaskLanePolicy.active(it) }
+                    .sortedWith(compareBy<TorrentTask> { TaskLanePolicy.playbackPriority(it) }.thenBy { it.lastUsed })) {
                     if (active <= limit) break
                     task.queued = true; task.engine?.pause(); task.status = "排队中：并发数量已调整"; active--
                 }
             }
-            for (task in tasks.values.filter { it.download == download }.sortedByDescending { it.viewers > 0 }) {
+            val lane = tasks.values.filter { it.download == download }
+            val waitingPlayback = lane.firstOrNull { TaskLanePolicy.playbackPriority(it) && it.queued && !it.stopping && !it.clearing }
+            if (active >= limit && waitingPlayback != null) {
+                val victim = lane.filter { TaskLanePolicy.active(it) && !TaskLanePolicy.playbackPriority(it) }.minByOrNull { it.lastUsed }
+                if (victim != null) {
+                    victim.queued = true
+                    victim.engine?.pause()
+                    victim.status = "播放任务优先，当前任务已排队"
+                    active--
+                }
+            }
+            for (task in lane.sortedWith(compareByDescending<TorrentTask> { TaskLanePolicy.playbackPriority(it) }.thenByDescending { it.lastUsed })) {
                 if (task.cancelled || task.stopping || task.clearing || task.paused || task.moving) continue
                 if (task.engine != null) {
                     if (task.queued && (active < limit || task.complete)) { task.queued = false; resumeEngine(task); if (!task.complete) active++ }
@@ -576,13 +589,25 @@ object TorrentTasks {
         // Decoder preparation or retry must not erase an explicit multi-file selection.
         // Temporary file switches set their own selection in switchStreamFile.
         if (!task.download && !task.retainedCache && task.selected.isEmpty()) task.selected = setOf(index)
-        task.streaming = true; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
+        task.streaming = true; task.playbackFailed = false; task.playingIndex = index; task.complete = allWantedFilesPresent(task); task.lastUsed = System.currentTimeMillis()
         task.tailRefillPending = false
         task.sequentialStartupActive = true
         applyPriorities(task)
         if (task.selectionPaused) { task.selectionPaused = false; resume(task) }
         persist()
     }
+    fun verifiedRanges(task: TorrentTask, file: TaskFile): List<CacheRange> = runCatching {
+        synchronized(task.nativeLock) {
+            val handle = task.handle?.takeIf { it.isValid } ?: return@runCatching emptyList()
+            val info = handle.torrentFile() ?: return@runCatching emptyList()
+            val pieceLength = info.pieceLength()
+            val bits = handle.status(TorrentHandle.QUERY_PIECES).pieces()
+            CacheCoverage.fileRanges(info.files().fileOffset(file.index), file.size, pieceLength) { piece ->
+                piece in 0 until bits.size() && bits.getBit(piece)
+            }
+        }
+    }.getOrDefault(emptyList())
+
     fun prioritizeSeek(task: TorrentTask, positionMs: Long, durationMs: Long) {
         if (durationMs <= 0 || positionMs <= 0) return
         val file = task.files.firstOrNull { it.index == task.playingIndex } ?: return

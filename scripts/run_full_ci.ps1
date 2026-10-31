@@ -60,7 +60,7 @@ $artifact = ($artifactResponse | ConvertFrom-Json).artifacts | Where-Object { $_
 if (-not $artifact) { throw "CI run $runId did not publish the expected APK/report artifact." }
 $apkPath = Join-Path (Get-Location) 'dist/OmniPlayer-debug.apk'
 $reportPath = Join-Path $out 'OmniPlayer-CI-Report.md'
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/download_ci_artifact.ps1 -ArtifactId $artifact.id -EntryPath 'app/build/outputs/apk/debug/app-debug.apk' -OutputFile $apkPath
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/download_ci_artifact.ps1 -ArtifactId $artifact.id -EntryPath 'ci-artifacts/OmniPlayer-debug-universal.apk' -OutputFile $apkPath
 if ($LASTEXITCODE -ne 0) { throw "Could not extract the APK from run $runId." }
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/download_ci_artifact.ps1 -ArtifactId $artifact.id -EntryPath 'manual-shots/OmniPlayer-CI-Report.md' -OutputFile $reportPath
 if ($LASTEXITCODE -ne 0) { throw "Could not extract the report from run $runId." }

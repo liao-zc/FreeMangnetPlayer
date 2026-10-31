@@ -34,6 +34,31 @@ class TaskLanePolicyTest {
         values.forEach { it.job?.cancel() }
     }
 
+    @Test fun activePlaybackGetsPriorityUntilPlaybackFails() {
+        val playing = task(false, 99).apply { viewers = 1 }
+        assertTrue(TaskLanePolicy.playbackPriority(playing))
+        playing.playbackFailed = true
+        assertEquals(false, TaskLanePolicy.playbackPriority(playing))
+        playing.playbackFailed = false
+        playing.paused = true
+        assertEquals(false, TaskLanePolicy.playbackPriority(playing))
+        playing.job?.cancel()
+    }
+
+    @Test fun playbackPositionIsStoredAndRestoredPerTorrentFile() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val hash = "fedcba9876543210fedcba9876543210fedcba98"
+        val source = "magnet:?xt=urn:btih:$hash&dn=episode.mkv&so=2"
+        try {
+            LibraryStore.addPlayback(context, "episode.mkv", source, 481_000, 1_200_000)
+            assertEquals(481_000L, LibraryStore.playbackPosition(context, hash, 2))
+            assertEquals(0L, LibraryStore.playbackPosition(context, hash, 1))
+        } finally {
+            LibraryStore.removeEntries(context, "播放", setOf(source))
+            HistoryStore.remove(context, "播放", source)
+        }
+    }
+
     @Test fun taskFoldersUseOmniPlayerNameAndMigrateLegacyData() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val root = File(context.cacheDir, "task-folder-migration-check").apply { deleteRecursively(); mkdirs() }

@@ -52,7 +52,7 @@ class SettingsActivity : ComponentActivity() {
         }.onFailure { android.widget.Toast.makeText(this,"字体导入失败：${it.localizedMessage}",android.widget.Toast.LENGTH_LONG).show() }
     }
 
-    private fun chooseStorageDirectory(onSelected: (String) -> Unit) {
+    private fun chooseStorageDirectory(onSelected: (String) -> Unit, confirmPicker: () -> Unit) {
         directorySelected = onSelected
         if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
             android.widget.Toast.makeText(this, "为让 BT 引擎写入所选目录，请在系统页面允许 OmniPlayer 管理文件；返回后再点一次选择目录。", android.widget.Toast.LENGTH_LONG).show()
@@ -62,7 +62,7 @@ class SettingsActivity : ComponentActivity() {
             }
             return
         }
-        directoryPicker.launch(null)
+        confirmPicker()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +89,9 @@ class SettingsActivity : ComponentActivity() {
                 var engine by remember { mutableStateOf(prefs.getString("search-name", "clg.im") ?: "clg.im") }
                 var message by remember { mutableStateOf("") }
                 var directoryMessage by remember { mutableStateOf("") }
+                var showDirectoryPickerPrompt by remember { mutableStateOf(false) }
+                var updateDownloadPercent by remember { mutableStateOf<Int?>(null) }
+                var updateDownloadDetail by remember { mutableStateOf("") }
                 var menu by remember { mutableStateOf(false) }
                 val lifecycleOwner = LocalLifecycleOwner.current
                 DisposableEffect(lifecycleOwner) {
@@ -98,6 +101,40 @@ class SettingsActivity : ComponentActivity() {
                     } }
                     lifecycleOwner.lifecycle.addObserver(observer)
                     onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+                }
+                LaunchedEffect(Unit) {
+                    val manager = getSystemService(android.app.DownloadManager::class.java)
+                    while (true) {
+                        val id = prefs.getLong("update-download-id", -1L)
+                        if (id >= 0L) {
+                            val cursor = manager.query(android.app.DownloadManager.Query().setFilterById(id))
+                            cursor?.use { row ->
+                                if (row.moveToFirst()) {
+                                    val status = row.getInt(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_STATUS))
+                                    val downloaded = row.getLong(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR)).coerceAtLeast(0)
+                                    val total = row.getLong(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+                                    updateDownloadPercent = when {
+                                        status == android.app.DownloadManager.STATUS_SUCCESSFUL -> 100
+                                        total > 0 -> (downloaded * 100 / total).toInt().coerceIn(0, 99)
+                                        status == android.app.DownloadManager.STATUS_RUNNING || status == android.app.DownloadManager.STATUS_PENDING -> null
+                                        else -> null
+                                    }
+                                    updateDownloadDetail = when (status) {
+                                        android.app.DownloadManager.STATUS_SUCCESSFUL -> "下载完成，正在等待系统安装确认。"
+                                        android.app.DownloadManager.STATUS_RUNNING -> "正在下载更新：${bytesForUpdate(downloaded)} / ${if (total > 0) bytesForUpdate(total) else "计算大小中"}"
+                                        android.app.DownloadManager.STATUS_PENDING -> "更新已排队，等待开始下载。"
+                                        android.app.DownloadManager.STATUS_PAUSED -> "更新下载暂停，系统恢复后会继续。"
+                                        android.app.DownloadManager.STATUS_FAILED -> "更新下载失败（${row.getInt(row.getColumnIndexOrThrow(android.app.DownloadManager.COLUMN_REASON))}），可重新检查并下载。"
+                                        else -> ""
+                                    }
+                                }
+                            }
+                        } else {
+                            updateDownloadPercent = null
+                            updateDownloadDetail = ""
+                        }
+                        kotlinx.coroutines.delay(750)
+                    }
                 }
                 val pkg = packageManager.getPackageInfo(packageName, 0)
                 @Suppress("DEPRECATION") val legacyVersion = pkg.versionCode
@@ -148,6 +185,13 @@ class SettingsActivity : ComponentActivity() {
                                 }
                             }, modifier = Modifier.fillMaxWidth().height(50.dp)) { Text(if (checkingUpdate) "检查中…" else "立即检查更新") }
                             Text(updateStatus, style = MaterialTheme.typography.bodySmall)
+                            if (updateDownloadDetail.isNotBlank()) {
+                                Text(updateDownloadDetail, style = MaterialTheme.typography.bodySmall)
+                                val progress = updateDownloadPercent
+                                if (progress == null) LinearProgressIndicator(Modifier.fillMaxWidth())
+                                else LinearProgressIndicator(progress = { progress / 100f }, modifier = Modifier.fillMaxWidth())
+                                if (progress != null) Text("${progress}%", style = MaterialTheme.typography.labelSmall)
+                            }
                             updateRelease?.let { release -> AlertDialog(
                                 onDismissRequest = { updateRelease = null },
                                 title = { Text("更新到 ${release.version}？") },
@@ -169,10 +213,17 @@ class SettingsActivity : ComponentActivity() {
                         "magnet" -> Column(Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("存储位置", style = MaterialTheme.typography.titleMedium)
                             OutlinedTextField(download, { download = it }, label = { Text("下载目录（绝对路径）") }, singleLine = true, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "下载目录输入框" })
-                            OutlinedButton(onClick = { chooseStorageDirectory { download = it; directoryMessage = "已选择下载目录" } }, modifier = Modifier.fillMaxWidth()) { Text("选择下载目录…") }
+                            OutlinedButton(onClick = { chooseStorageDirectory({ download = it; directoryMessage = "已选择下载目录" }) { showDirectoryPickerPrompt = true } }, modifier = Modifier.fillMaxWidth()) { Text("选择下载目录…") }
                             OutlinedTextField(cache, { cache = it }, label = { Text("缓存目录（绝对路径）") }, singleLine = true, modifier = Modifier.fillMaxWidth().semantics { contentDescription = "缓存目录输入框" })
-                            OutlinedButton(onClick = { chooseStorageDirectory { cache = it; directoryMessage = "已选择缓存目录" } }, modifier = Modifier.fillMaxWidth()) { Text("选择缓存目录…") }
+                            OutlinedButton(onClick = { chooseStorageDirectory({ cache = it; directoryMessage = "已选择缓存目录" }) { showDirectoryPickerPrompt = true } }, modifier = Modifier.fillMaxWidth()) { Text("选择缓存目录…") }
                             Text(directoryMessage, style = MaterialTheme.typography.bodySmall)
+                            if (showDirectoryPickerPrompt) AlertDialog(
+                                onDismissRequest = { showDirectoryPickerPrompt = false },
+                                title = { Text("选择存储文件夹") },
+                                text = { Text("即将打开系统文件夹选择器。点“取消”或按系统返回键可回到设置，不会修改当前路径。") },
+                                confirmButton = { TextButton(onClick = { showDirectoryPickerPrompt = false; directoryPicker.launch(null) }) { Text("继续选择") } },
+                                dismissButton = { TextButton(onClick = { showDirectoryPickerPrompt = false }) { Text("取消并返回") } }
+                            )
                             Text("可填写应用有权写入的真实路径。修改目录用于新任务，旧任务保留原地址。", style = MaterialTheme.typography.bodySmall)
                             getExternalFilesDirs(null).filterNotNull().forEach { base ->
                                 OutlinedButton(onClick = { download = "${base.absolutePath}/MyDownloads"; cache = "${base.absolutePath}/MyCache" }, modifier = Modifier.fillMaxWidth()) { Text("使用 ${base.absolutePath}") }
@@ -229,4 +280,11 @@ private fun SettingCategory(title: String, summary: String, onClick: () -> Unit)
             Text(summary, style = MaterialTheme.typography.bodySmall)
         }
     }
+}
+
+private fun bytesForUpdate(value: Long): String = when {
+    value >= 1024L * 1024 * 1024 -> "${"%.1f".format(value / (1024.0 * 1024 * 1024))} GB"
+    value >= 1024L * 1024 -> "${"%.1f".format(value / (1024.0 * 1024))} MB"
+    value >= 1024L -> "${"%.1f".format(value / 1024.0)} KB"
+    else -> "$value B"
 }

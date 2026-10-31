@@ -191,7 +191,7 @@ internal fun SearchResultsScreen(
     Column(Modifier.fillMaxSize().background(DisplaySettings.background(context)).padding(horizontal = 12.dp, vertical = 6.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { if (localPage > 1) localPage-- else onPrevious() }, enabled = canGoPrevious, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }
-            Text("第 $localPage / $localPageCount 页${if (totalPages > 0) " · 源站第 $page / $totalPages 页" else ""}", style = MaterialTheme.typography.bodySmall,
+            Text("结果第 $localPage / $localPageCount 页${if (totalPages > 0) " · 源站 $page / $totalPages" else " · 源站 $page 页"}", style = MaterialTheme.typography.bodySmall,
                 maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转结果页；当前第 $localPage 页，共 $localPageCount 页" })
             Box {
                 IconButton(onClick = { sortMenu = true }, modifier = Modifier.semantics { contentDescription = "排序：$sortMode" }) { Icon(Icons.Default.Sort, "排序") }
@@ -200,7 +200,7 @@ internal fun SearchResultsScreen(
                         text = { Text(if (sortMode == option) "✓ $option" else option) }, onClick = { sortMode = option; sortMenu = false }) }
                 }
             }
-            IconButton(onClick = { if (localPage < localPageCount) localPage++ else onNext() }, enabled = canGoNext, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
+            IconButton(onClick = { if (localPage < localPageCount) localPage++ else if (nextAvailable) { localPage++; onNext() } }, enabled = canGoNext, modifier = Modifier.size(48.dp).semantics { contentDescription = "下一页" }) { Icon(Icons.Default.ArrowForward, "下一页") }
         }
         if (state == "loading" || message == "搜索中") LinearProgressIndicator(Modifier.fillMaxWidth())
         if (state in listOf("error", "timeout") || message == "搜索未完成") Text("搜索未完成", color = MaterialTheme.colorScheme.error)
@@ -222,7 +222,7 @@ internal fun SearchResultsScreen(
                 OutlinedTextField(jumpPage, { jumpPage = it.filter(Char::isDigit).take(6) }, label = { Text("输入页码") }, singleLine = true,
                     modifier = Modifier.focusRequester(requester), keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
                 if (jumpError.isNotBlank()) Text(jumpError, color = MaterialTheme.colorScheme.error)
-                Text("结果页范围：1–$localPageCount", style = MaterialTheme.typography.bodySmall)
+                Text("已加载结果页：1–$localPageCount", style = MaterialTheme.typography.bodySmall)
                 Text("源站页：", style = MaterialTheme.typography.bodySmall)
                 Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     knownPages.sorted().forEach { sourcePage -> TextButton(onClick = { onJump(sourcePage); jumpDialog = false }, modifier = Modifier.semantics { contentDescription = "源站第 $sourcePage 页" }) { Text("$sourcePage") } }
@@ -231,7 +231,7 @@ internal fun SearchResultsScreen(
             confirmButton = { TextButton(onClick = {
                 val target = jumpPage.toIntOrNull()
                 if (target != null && target in 1..localPageCount) { localPage = target; jumpDialog = false }
-                else jumpError = "请输入当前结果页范围内的页码，或点击下方源站页码"
+                else jumpError = "请输入已加载的结果页，或点击下方的源站页码"
             }) { Text("跳转") } },
             dismissButton = { TextButton(onClick = { jumpDialog = false }) { Text("取消") } })
     }

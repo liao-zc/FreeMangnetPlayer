@@ -9,6 +9,7 @@ internal object TaskLanePolicy {
 
     fun active(task: TorrentTask) = (task.engine != null || task.job?.isActive == true) &&
         !task.queued && !task.paused && !task.complete && !task.cancelled && task.unplayableReason.isBlank()
+    fun playbackPriority(task: TorrentTask) = task.viewers > 0 && !task.playbackFailed && !task.paused && !task.cancelled
     fun activeCount(tasks: Collection<TorrentTask>, download: Boolean) =
         tasks.count { it.download == download && active(it) }
 }
