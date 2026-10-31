@@ -110,7 +110,7 @@ internal class VlcTorrentPlayer(context: Context, task: TorrentTask, file: TaskF
         if (released) return State.Builder().build()
         val duration = decoder.length
         val canPlay = ready && (decoder.videoTracksCount > 0 || decoder.audioTracksCount > 0)
-        val data = MediaItemData.Builder(item.mediaId.ifEmpty { stream.uri.toString() }).setMediaItem(item)
+        val data = MediaItemData.Builder(item.mediaId.ifEmpty { mediaUri.toString() }).setMediaItem(item)
             .setDurationUs(if (duration > 0) duration * 1000 else C.TIME_UNSET).setIsSeekable(true).build()
         val commands = Player.Commands.Builder().addAll(Player.COMMAND_PLAY_PAUSE, Player.COMMAND_PREPARE, Player.COMMAND_STOP,
             Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM, Player.COMMAND_SEEK_BACK, Player.COMMAND_SEEK_FORWARD,
