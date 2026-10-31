@@ -109,7 +109,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (savedInstanceState == null) UpdatePromptGate.promptedThisProcess = false
         TorrentTasks.initialize(this)
         val inbound = intent?.data?.takeIf { it.scheme.equals("magnet", true) }?.toString()?.let(::normalizeMagnetUri)
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)

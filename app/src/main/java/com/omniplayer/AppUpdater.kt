@@ -80,8 +80,8 @@ object PendingUpdateInstaller {
         val prefs = SettingsStore.prefs(activity)
         val apk = prefs.getString("pending-update-apk", null)?.let(::File)?.takeIf(File::isFile) ?: return
         launching = true
-        prefs.edit().remove("pending-update-apk").apply()
         runCatching { activity.startActivity(AppUpdater.installerIntent(activity, apk)) }
+            .onSuccess { prefs.edit().remove("pending-update-apk").apply() }
             .onFailure { launching = false }
         android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({ launching = false }, 3_000)
     }
