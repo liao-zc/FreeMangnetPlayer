@@ -26,6 +26,20 @@ def tree():
     adb('shell','uiautomator','dump','/sdcard/window.xml');return ET.fromstring(adb('shell','cat','/sdcard/window.xml'))
 def tap(n):
     b=list(map(int,re.findall(r'\d+',n.get('bounds',''))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
+def tap_action(label,timeout=15):
+    """Click the exact visible, enabled action rather than status text."""
+    end=time.monotonic()+timeout
+    while time.monotonic()<end:
+        root=tree();parents={child:parent for parent in root.iter() for child in parent}
+        for node in root.iter('node'):
+            if node.get('text')!=label and node.get('content-desc')!=label: continue
+            target=node
+            while target is not None:
+                if target.get('clickable')=='true' and actionable(target):
+                    tap(target);time.sleep(.5);return
+                target=parents.get(target)
+        time.sleep(.25)
+    raise AssertionError('Missing enabled action button with exact label '+label)
 def actionable(node):
     if node is None or node.get('visible-to-user') == 'false' or node.get('enabled') == 'false': return False
     b=list(map(int,re.findall(r'\d+',node.get('bounds',''))))
@@ -101,7 +115,7 @@ record('quality-control-inside-player-with-no-transcoding-claim')
 control('player_files');screenshot('library-selection-before.png');find_and_tap('全选');screenshot('library-selection-after.png');find_and_tap('完成')
 selection=wait(lambda s:len([f for f in s.get('files',[]) if f.get('selected') and f['path'].endswith(('Episode-01.mp4','Episode-02.mp4'))])==2,timeout=15)
 record('multi-file-selection-before-cache',state=selection)
-find_and_tap('缓存');poll(lambda:len(caches())>=2);screenshot('library-02-retained-files.png')
+tap_action('缓存');poll(lambda:len(caches())>=2);screenshot('library-02-retained-files.png')
 record('explicit-cache-records-files-before-completion',entries=caches())
 partial=wait(lambda s:any(f['path'].endswith('Episode-02.mp4') and 0<f['done']<f['size'] for f in s.get('files',[])))
 assert any(q['index']==next(f['index'] for f in partial['files'] if f['path'].endswith('Episode-02.mp4')) for q in partial['storedQueue'])
@@ -110,7 +124,7 @@ record('partial-downloaded-video-auto-enters-queue',state=partial)
 control('player_files');require_visible('已缓存 / 下载的视频','Episode-02.mp4');screenshot('library-03-stored-queue.png')
 find_and_tap('完成');control('player_next');switched=wait(lambda s:s.get('playing') and any(f['index']==s.get('currentFile') and f['path'].endswith('Episode-02.mp4') for f in s.get('files',[])))
 record('next-control-switches-to-partial-video',state=switched);screenshot('library-04-queue-playing.png')
-old_folder=state()['folder'];find_and_tap('下载');wait(lambda s:s.get('folder')!=old_folder and s.get('playing'));poll(lambda:len(entries('download-entries'))>=2);record('download-library-indexes-individual-files',entries=entries('download-entries'))
+old_folder=state()['folder'];tap_action('下载');wait(lambda s:s.get('folder')!=old_folder and s.get('playing'));poll(lambda:len(entries('download-entries'))>=2);record('download-library-indexes-individual-files',entries=entries('download-entries'))
 control('player_favorite');record('favorite-file-record',entries=entries('favorite-entries'))
 restart();require_visible('缓存视频');find_and_tap('缓存视频');require_visible('Episode-01.mp4','Episode-02.mp4');screenshot('library-05-cache-after-restart.png')
 record('cache-entry-discoverable-after-process-restart',entries=caches())

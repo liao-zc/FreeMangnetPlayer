@@ -17,3 +17,5 @@ public-baseline-data/
 public-network-baseline.json
 optimization-data/
 optimization-fixture.json
+
+artifacts/ci/

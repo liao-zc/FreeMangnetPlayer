@@ -29,37 +29,46 @@ def wait(fn,timeout=150):
         time.sleep(.5)
     raise AssertionError(state())
 def actionable(node):
-    if node is None or node.get('visible-to-user') != 'true': return False
+    if node is None or node.get('visible-to-user') == 'false' or node.get('enabled') == 'false': return False
     b=list(map(int,re.findall(r'\d+',node.get('bounds',''))))
     return len(b)==4 and b[2]>b[0] and b[3]>b[1]
 def control(name):
-    for _ in range(15):
+    end=time.monotonic()+10;tapped=False
+    while time.monotonic()<end:
         adb('shell','uiautomator','dump','/sdcard/window.xml');t=ET.fromstring(adb('shell','cat','/sdcard/window.xml'))
         node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
         if node is not None:
             b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
-        node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
-        if node is None: node=next((n for n in t.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
-        if node is not None:
-            b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
-        else: adb('shell','input','tap','540','450')
-        time.sleep(.3)
+        if name=='player_quality':
+            node=next((n for n in t.iter('node') if n.get('content-desc')=='画质设置' and actionable(n)),None)
+            if node is not None:
+                b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
+        if not tapped:
+            node=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
+            if node is None: node=next((n for n in t.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
+            if node is not None:
+                b=list(map(int,re.findall(r'\d+',node.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2))
+            else: adb('shell','input','tap','540','450')
+            tapped=True
+        time.sleep(.25)
     screenshot('preferences-failed-'+name+'.png')
     (OUT/'preferences-failed-ui.xml').write_text(adb('shell','cat','/sdcard/window.xml'),encoding='utf-8')
     (OUT/'preferences-failed-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
-    raise AssertionError(name)
+    raise AssertionError('Player control was not visible: '+name)
 def tap_exact(label):
-    for _ in range(12):
+    end=time.monotonic()+15
+    while time.monotonic()<end:
         adb('shell','uiautomator','dump','/sdcard/window.xml')
-        t=ET.fromstring(adb('shell','cat','/sdcard/window.xml'))
-        for n in t.iter('node'):
-            if n.get('text')!=label:continue
-            b=list(map(int,re.findall(r'\d+',n.get('bounds',''))))
-            if len(b)==4 and b[2]>b[0] and b[3]>b[1]:
-                adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
+        root=ET.fromstring(adb('shell','cat','/sdcard/window.xml'));parents={child:parent for parent in root.iter() for child in parent}
+        for node in root.iter('node'):
+            if node.get('text')!=label and node.get('content-desc')!=label:continue
+            target=node
+            while target is not None:
+                if target.get('clickable')=='true' and actionable(target):
+                    b=list(map(int,re.findall(r'\d+',target.get('bounds'))));adb('shell','input','tap',str((b[0]+b[2])//2),str((b[1]+b[3])//2));time.sleep(.5);return
+                target=parents.get(target)
         adb('shell','input','swipe','540','1900','540','900','400');time.sleep(.5)
-    raise AssertionError('Exact action unavailable: '+label)
-
+    raise AssertionError('Exact enabled action unavailable: '+label)
 adb('shell','wm','size','1080x2400')
 adb('shell','am','force-stop',PACKAGE);adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','--es','open-tab',shlex.quote('门户'))
 find_and_tap('统一设置');find_and_tap('通用设置');require_visible('显示与字体','小','✓ 标准','大','超大','黑体','宋体','楷体')
