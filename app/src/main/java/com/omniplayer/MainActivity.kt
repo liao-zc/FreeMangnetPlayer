@@ -801,7 +801,7 @@ private fun SearchResultsScreen(
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { if (localPage > 1) localPage-- else onPrevious() }, enabled = canGoPrevious, modifier = Modifier.size(48.dp).semantics { contentDescription = "上一页" }) { Icon(Icons.Default.KeyboardArrowLeft, "上一页") }
             Text("第 $localPage / $localPageCount 页${if (totalPages > 0) " · 源站 $page / $totalPages" else ""}", style = MaterialTheme.typography.bodySmall,
-                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转页面；当前第 $page 页" })
+                maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f).clickable { jumpPage = ""; jumpError = ""; jumpDialog = true }.semantics { contentDescription = "跳转结果页；当前第 $localPage 页，共 $localPageCount 页" })
             Box {
                 IconButton(onClick = { sortMenu = true }, modifier = Modifier.semantics { contentDescription = "排序：$sortMode" }) { Icon(Icons.Default.Sort, "排序") }
                 DropdownMenu(expanded = sortMenu, onDismissRequest = { sortMenu = false }) {
@@ -831,13 +831,16 @@ private fun SearchResultsScreen(
                 OutlinedTextField(jumpPage, { jumpPage = it.filter(Char::isDigit).take(6) }, label = { Text("输入页码") }, singleLine = true,
                     modifier = Modifier.focusRequester(requester), keyboardOptions = KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number))
                 if (jumpError.isNotBlank()) Text(jumpError, color = MaterialTheme.colorScheme.error)
-                Text("结果页 1–$localPageCount；源站页：${knownPages.sorted().joinToString().ifBlank { "暂无" }}", style = MaterialTheme.typography.bodySmall)
+                Text("结果页范围：1–$localPageCount", style = MaterialTheme.typography.bodySmall)
+                Text("源站页：", style = MaterialTheme.typography.bodySmall)
+                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    knownPages.sorted().forEach { sourcePage -> TextButton(onClick = { onJump(sourcePage); jumpDialog = false }) { Text("$sourcePage") } }
+                }
             } },
             confirmButton = { TextButton(onClick = {
                 val target = jumpPage.toIntOrNull()
                 if (target != null && target in 1..localPageCount) { localPage = target; jumpDialog = false }
-                else if (target != null && target in knownPages) { onJump(target); jumpDialog = false }
-                else jumpError = "请输入当前结果页范围内的页码，或已发现的源站页码"
+                else jumpError = "请输入当前结果页范围内的页码，或点击下方源站页码"
             }) { Text("跳转") } },
             dismissButton = { TextButton(onClick = { jumpDialog = false }) { Text("取消") } })
     }
