@@ -261,4 +261,4 @@ CI 生成的逐项截图与状态文件保存在 run 41220234864 的 `OmniPlayer
 
 ### 本地 v0.4.0 ARM64 APK 校验
 
-已下载并校验 Release 中的正式 APK：dist/OmniPlayer-0.4.0-arm64-v8a.apk，大小 114,751,818 bytes；SHA-256 $hash，与 GitHub Release 资产摘要一致。
+已下载并校验 Release 中的正式 APK：`dist/OmniPlayer-0.4.0-arm64-v8a.apk`，大小 114,751,818 bytes；SHA-256 `59fe9abc10d2b2b23dad49e10a448d8081422bf365ae33ec4ca24bb72f4759d6`，与 GitHub Release 资产摘要一致。
