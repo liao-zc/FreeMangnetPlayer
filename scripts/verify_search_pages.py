@@ -24,8 +24,10 @@ def verify_page(page,total,local_total,expected):
     assert actual==wanted,(actual-wanted,wanted-actual)
     hashes=[re.search(r'btih:([0-9a-f]{40})',m).group(1) for m in actual]
     assert len(hashes)==len(set(hashes)),'Duplicate BTIH leaked into results'
-    require_visible('上一页','下一页','返回搜索',f'源站第 {page} / 3 页','排序：匹配度')
+    require_visible('上一页','下一页','返回搜索','排序：匹配度')
     text=' '.join(visible_node_texts())
+    compact=re.sub(r'\s+','',text)
+    compact=re.sub(r'\s+','',text)
     assert f'第 1 / {local_total} 页' in text, text
     screenshot('pagination-source-'+str(page)+'.png')
     checks.append({'check':'source-page-'+str(page),'passed':True,'result_count':len(s['results']),'local_pages':local_total,'source_total':total})

@@ -66,7 +66,7 @@ def control(name):
     (OUT/'library-control-failure-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
     (OUT/'library-control-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
     screenshot('library-control-failure.png')
-    raise AssertionError('Missing visible built-in control '+name)
+    ui=tree(); raise AssertionError({'control':name,'state':state(),'ui':[n.attrib for n in ui.iter('node')]})
 
 def open_cache(title):
     root=tree();parents={child:parent for parent in root.iter() for child in parent}

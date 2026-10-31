@@ -27,7 +27,7 @@
 | 10 | 软件更新下载显示进度 | 已实现，待 CI | 查询 DownloadManager 的已下载/总字节并显示进度条、百分比、暂停/失败/完成状态；Android 真实下载需可访问 Release。 |
 | 11 | 解释/优化 APK 体积 | 已实现分 ABI 构建，待 CI 量包 | 原 universal APK 包含 4 种 libtorrent JNI 和 LibVLC ABI 原生库。CI 验证每个 split 仅含目标 ABI，并发布四个 APK、SHA256 与实际字节数。 |
 | 12 | 把新增需求纳入功能表、CI、报告并清理旧文件 | 文档/测试已加入，待 CI | instrumentation 覆盖分片区间、播放位置、播放优先级；全量架构/Android/UI/search CI 需完成。仅清理由本轮产生且确认无用的临时物，不删除用户历史报告。 |
-| 13 | 每次远端更新都发布新版本 | 已配置，待 CI | 本轮 versionName `0.3.2` / versionCode `30`；全量 CI 成功后创建 `v0.3.2` Release 并上传四 ABI APK。 |
+| 13 | 每次远端更新都发布新版本 | 已配置，待 CI | 本轮 versionName `0.3.3` / versionCode `31`；全量 CI 成功后创建 `v0.3.3` Release 并上传四 ABI APK。 |
 
 缓存区间使用已校验 BT piece 得出字节覆盖范围，因此“缓存了 18.2%”对应真实已校验字节比例；转换成视频时间只按文件字节比例估计。容器索引/关键帧映射尚未实现，报告不能把估算范围说成逐帧精确的时间戳。
 

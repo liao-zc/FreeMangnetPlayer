@@ -54,7 +54,7 @@ def control(name):
     screenshot('preferences-failed-'+name+'.png')
     (OUT/'preferences-failed-ui.xml').write_text(adb('shell','cat','/sdcard/window.xml'),encoding='utf-8')
     (OUT/'preferences-failed-state.json').write_text(json.dumps(state(),ensure_ascii=False,indent=2),encoding='utf-8')
-    raise AssertionError('Player control was not visible: '+name)
+    ui=ET.fromstring(adb('shell','cat','/sdcard/window.xml')); raise AssertionError({'control':name,'state':state(),'ui':[n.attrib for n in ui.iter('node')]})
 def tap_exact(label):
     end=time.monotonic()+15
     while time.monotonic()<end:
