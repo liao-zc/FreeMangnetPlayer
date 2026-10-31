@@ -1,0 +1,36 @@
+[
+  {
+    "check": "source-page-1",
+    "passed": true,
+    "result_count": 37,
+    "local_pages": 4,
+    "source_total": 3
+  },
+  {
+    "check": "source-page-2",
+    "passed": true,
+    "result_count": 17,
+    "local_pages": 2,
+    "source_total": 3
+  },
+  {
+    "check": "source-page-3",
+    "passed": true,
+    "result_count": 0,
+    "local_pages": 1,
+    "source_total": 3
+  },
+  {
+    "check": "previous-source-page",
+    "passed": true,
+    "result_count": 17
+  },
+  {
+    "check": "jump-to-source-page",
+    "passed": true
+  },
+  {
+    "check": "back-restores-search-not-home",
+    "passed": true
+  }
+]

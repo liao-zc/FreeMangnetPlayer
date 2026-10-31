@@ -1,5 +1,5 @@
-package com.omniplayer
-
+package com.omniplayer.magnet
+import com.omniplayer.core.*
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity

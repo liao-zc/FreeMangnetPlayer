@@ -1,5 +1,5 @@
-package com.omniplayer
-
+package com.omniplayer.magnet
+import com.omniplayer.core.*
 /** Downloads and cache/playback tasks never consume each other's slots. */
 internal object TaskLanePolicy {
     const val NO_DATA_WARNING_AFTER_MS = 180_000L

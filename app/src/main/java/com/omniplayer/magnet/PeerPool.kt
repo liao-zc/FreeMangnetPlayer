@@ -1,5 +1,5 @@
-package com.omniplayer
-
+package com.omniplayer.magnet
+import com.omniplayer.core.*
 import android.content.Context
 import org.libtorrent4j.TcpEndpoint
 import org.libtorrent4j.TorrentHandle

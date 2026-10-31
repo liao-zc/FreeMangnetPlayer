@@ -1,5 +1,5 @@
-package com.omniplayer
-
+package com.omniplayer.live
+import com.omniplayer.core.*
 import android.content.Context
 import org.json.JSONArray
 import org.json.JSONObject

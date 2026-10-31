@@ -1,5 +1,4 @@
-package com.omniplayer
-
+package com.omniplayer.core
 /** Container recognition is separate from whether an individual codec can decode. */
 internal object MediaFormats {
     val extensions = setOf("mp4", "m4v", "mkv", "webm", "avi", "mov", "qt", "ts", "mts", "m2ts", "m2t", "mpeg", "mpg", "mpe", "vob", "flv", "f4v", "wmv", "asf", "rm", "rmvb", "ogv", "ogg", "3gp", "3g2", "divx", "mxf", "mpv", "h264", "264", "h265", "265", "hevc")

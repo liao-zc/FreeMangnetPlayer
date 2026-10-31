@@ -1,5 +1,5 @@
-package com.omniplayer
-
+package com.omniplayer.magnet
+import com.omniplayer.core.*
 import android.net.Uri
 import androidx.media3.datasource.DataSpec
 import java.io.BufferedReader

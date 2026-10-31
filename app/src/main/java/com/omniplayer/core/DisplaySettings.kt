@@ -1,5 +1,4 @@
-package com.omniplayer
-
+package com.omniplayer.core
 import android.content.Context
 import android.graphics.Typeface
 import androidx.compose.material3.*

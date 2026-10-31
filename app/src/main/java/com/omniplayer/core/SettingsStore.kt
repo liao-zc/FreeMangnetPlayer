@@ -1,5 +1,4 @@
-package com.omniplayer
-
+package com.omniplayer.core
 import android.content.Context
 import android.os.Environment
 import java.io.File

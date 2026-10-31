@@ -1,5 +1,7 @@
-package com.omniplayer
-
+package com.omniplayer.settings
+import com.omniplayer.core.*
+import com.omniplayer.live.*
+import com.omniplayer.magnet.*
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle

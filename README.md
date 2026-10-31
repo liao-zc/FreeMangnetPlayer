@@ -1,21 +1,32 @@
 # OmniPlayer
 
-OmniPlayer is an Android IPTV and magnet media player. The latest published APK is [v0.3.0](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.0). Existing installations keep the Android application ID `com.freemangnetplayer` for in-place upgrades and app-data retention.
+OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，包含 IPTV 直播与 BitTorrent 磁力播放功能。应用保留本地数据；是否能获取公网 BT 资源取决于种子、Peer、Tracker、网络和设备解码能力。
 
-## Published app
+## 功能模块
 
-- IPTV channels, configurable playlists, favorites, history, fullscreen, and picture-in-picture.
-- Magnet search, torrent metadata/file selection, playback, caching, downloads, and a Media3/LibVLC player.
-- General appearance and update controls in Settings.
+- **电视直播**：添加多个 M3U/M3U8 地址或导入本地播放列表，按分组查看频道，收藏、观看历史、全屏和画中画。
+- **磁力播放**：在应用内搜索或粘贴 magnet，查看文件列表，播放、缓存、下载并管理收藏/历史。
+- **通用设置**：字体、背景、存储访问与软件更新入口。
 
-Playback depends on codec support and on the torrent having reachable peers. The latest public-resource acceptance report recorded **0/10 first frames**; local controlled-seed tests passed 16 format fixtures. Public magnet playback is still an open issue.
+## 架构和验收文档
 
-## Current development
+- [软件架构图与包职责](docs/architecture.md)
+- [完整历史需求清单和逐项点检报告](docs/requirements-checklist.md)
+- [本轮重构报告](docs/report.md)
+- [界面使用说明](docs/usage-zh.md)
 
-The `improve/modern-bt-engine` branch has passed Android APK compilation, the current UI walkthrough, a controlled search-pagination test (37/17/0 results across three source pages; at most 10 per local page), and an end-to-end playback run for the latest user-supplied magnet. That magnet rendered a video frame and played for 20 seconds while only about 0.2% of the video had downloaded, but first-frame startup took about 107 seconds and speed varied around 175–236 KB/s. See [playback run 41158983146](https://github.com/liao-zc/OmniPlayer/actions/runs/41158983146) and the [full checklist and evidence](docs/report.md). These development changes are not part of a newly published APK; the latest release remains v0.3.0.
+## 构建信息
 
-Search metadata (size, format, date) is shown when supplied by the source or torrent metadata; unavailable fields are marked `—` rather than fabricated. The latest test magnet declares `.srt` with `so=1`, while the torrent also contains an MKV; the app selected the MKV and achieved playback in the CI emulator. This does not establish fast startup or guarantee playback for other torrents.
+- Android application ID：`com.freemangnetplayer`（为覆盖旧版安装并保留数据而保留）
+- 显示名称：OmniPlayer
+- 当前发布版本：`v0.3.0`（versionCode `28`）
+- 模块：`:app`、`:ui-inspector`
+- 核心技术：Kotlin、Jetpack Compose、Media3、LibVLC、libtorrent4j
 
-## Build and download
+## 重要说明
 
-Use Android Studio with JDK 17, or build with Gradle. Download the current published APK from [GitHub Releases](https://github.com/liao-zc/OmniPlayer/releases).
+磁力文件列表出现并不代表已连接 Peer 或已经取得可播放视频分片。不同种子的首帧等待和速度可能差异很大；本项目不保证公网种子均可播放、不保证固定下载速度，也不声称支持所有编码组合。完整实测证据与未通过项请看全量点检报告。
+
+## 开源组件
+
+第三方组件与许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

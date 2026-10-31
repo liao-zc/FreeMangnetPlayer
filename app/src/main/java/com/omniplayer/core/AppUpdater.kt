@@ -1,5 +1,4 @@
-package com.omniplayer
-
+package com.omniplayer.core
 import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent

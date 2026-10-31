@@ -1,4 +1,8 @@
 package com.omniplayer
+import com.omniplayer.core.*
+import com.omniplayer.live.*
+import com.omniplayer.magnet.*
+
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertEquals
