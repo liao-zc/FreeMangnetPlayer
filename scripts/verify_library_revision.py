@@ -123,6 +123,15 @@ partial=wait(lambda s:any(f['path'].endswith('Episode-02.mp4') and 0<f['done']<f
 assert any(q['index']==next(f['index'] for f in partial['files'] if f['path'].endswith('Episode-02.mp4')) for q in partial['storedQueue'])
 assert all(q['done']>0 for q in partial['storedQueue'])
 record('partial-downloaded-video-auto-enters-queue',state=partial)
+adb('shell','am','start','-W','-n',PACKAGE+'/com.omniplayer.MainActivity','-a','android.intent.action.VIEW','-d',shlex.quote(source),'-f','0x14000000','--es','mode','play')
+def player_foreground():
+    activities=adb('shell','dumpsys','activity','activities')
+    return 'com.omniplayer.magnet.PlayerActivity' in activities and ('mResumedActivity' in activities or 'topResumedActivity' in activities)
+end=time.monotonic()+30
+while time.monotonic()<end and not player_foreground(): time.sleep(.25)
+assert player_foreground(),'Magnet VIEW intent did not bring PlayerActivity to foreground'
+reopened=wait(lambda s:s.get('playing') and s.get('position',0)>300)
+record('player-reopened-through-magnet-intent',state=reopened)
 control('player_files');require_visible('已缓存 / 下载的视频','Episode-02.mp4');screenshot('library-03-stored-queue.png')
 find_and_tap('完成');control('player_next');switched=wait(lambda s:s.get('playing') and any(f['index']==s.get('currentFile') and f['path'].endswith('Episode-02.mp4') for f in s.get('files',[])))
 record('next-control-switches-to-partial-video',state=switched);screenshot('library-04-queue-playing.png')
