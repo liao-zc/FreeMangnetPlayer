@@ -177,12 +177,17 @@ CI run [41204663746](https://github.com/liao-zc/OmniPlayer/actions/runs/41204663
 
 | 检查项 | 本地结果 |
 |---|---|
-| Range / `.part` 续传实现 | 静态代码检查待运行 |
-| 暂停与继续按钮、状态持久化 | 静态代码检查待运行 |
-| 安装确认通知、按钮与 APK 保留 | 静态代码检查待运行；实体 Android 安装器待设备验证 |
-| 已下载 APK 启动恢复 | 静态代码检查待运行 |
-| Release notes、隐藏 versionCode/来源描述 | 静态代码检查待运行 |
-| Android APK 构建及模拟器回归 | 待 GitHub Actions |
-| 本地 JDK/Gradle 可用性 | 待检查 |
+| Range / `.part` 续传实现 | CI 静态检查通过；未完成真实更新服务器断点传输演练 |
+| 暂停与继续按钮、状态持久化 | 静态检查通过；真机暂停后继续传输未演练 |
+| 安装确认通知、按钮与 APK 保留 | 构建与通知/安装入口代码检查通过；实体系统安装器交互未验证 |
+| 已下载 APK 启动恢复 | 持久化 APK 路径与启动恢复代码检查通过；未做真实覆盖安装重启演练 |
+| Release notes、隐藏 versionCode/来源描述 | 通过：Release notes 已发布；更新界面显示版本名，不显示 versionCode 或来源 |
+| Android APK 构建及模拟器回归 | 通过：Actions 41208267640；49/49 UI/静态检查、instrumentation、API 35 模拟器通过 |
+| 本地 JDK/Gradle 可用性 | 本机无 JDK/Gradle；远端 CI 构建成功，已发布 APK |
 
 安装本身受 Android 未知来源权限与系统确认页控制；App 可以主动打开系统流程，但不能绕过用户确认。CI 的静态更新检查脚本：`scripts/verify_update_flow.py`。
+### v0.3.11 更新功能 CI 验收
+
+GitHub Actions [run 41208267640](https://github.com/liao-zc/OmniPlayer/actions/runs/41208267640) 成功：更新流程静态回归、仓库与架构检查、APK/instrumentation 构建、API 35 模拟器测试全部通过。模拟器报告记录 49 项检查全部通过，其中 `verify_update_flow.py` 专项检查通过；见 [CI 报告 artifact](https://github.com/liao-zc/OmniPlayer/actions/runs/41208267640)。GitHub Release [OmniPlayer v0.3.11](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.11) 已发布 arm64-v8a、armeabi-v7a、x86、x86_64 APK 与 SHA-256 清单，Release notes 已写明续传、暂停/继续和安装确认变更。
+
+CI 验证覆盖编译、instrumentation 和静态更新流程检查；未在模拟器中对真实更新服务器进行限速/断网续传实传，也未实际安装自身更新包验证系统安装器交互。系统要求用户确认安装；这些未做的设备级动作没有标为通过。Android 更新 UI 只显示版本名，不显示 versionCode 或版本来源。
