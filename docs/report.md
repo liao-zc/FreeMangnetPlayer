@@ -30,3 +30,14 @@
 指定公网磁力的边下边播仍有明显首帧延迟。历史 Actions `41158983146` 测得一个指定资源约 0.1% 下载量时出首帧，但等待约 107 秒，有效速度约 175–736 KB/s。因此这不满足“快速起播”，也不能证明用户提供的十条资源达到 90% 成功率或最低 2 MB/s。可用 Peer/Tracker、做种状态、路由器和网络质量会改变结果，客户端无法凭算法为无种/无可用节点资源制造数据。
 
 全功能表将每项标成通过、部分或未通过，并注明本轮实测、历史证据或尚缺的设备/公网条件。重构后的编译与 instrumentation 已通过，但这不代表所有历史 UI、所有直播源、真实公网种子和多机型体验均在本轮逐项实测通过。
+## 2026-10-31 当前分支复核补记
+
+| 检查 | 结果 |
+|---|---|
+| 最新架构拆分代码构建与 API 35 instrumentation | 通过：Actions [41162813195](https://github.com/liao-zc/OmniPlayer/actions/runs/41162813195) |
+| GitHub Markdown 渲染 | 通过：Actions [41162813192](https://github.com/liao-zc/OmniPlayer/actions/runs/41162813192) |
+| 当前分支全量媒体库/设置/搜索分页回归 | 未通过：Actions [41163294809](https://github.com/liao-zc/OmniPlayer/actions/runs/41163294809)。受控视频播放到位，但自动化无法在播放器控件树中定位“画质”控件。当前控制探测在播放器页未找到控件；已给画质控件添加 clickable、focusable、contentDescription 和 importantForAccessibility，并将测试改为单次显示控制条，需修复后重跑确认。 |
+| 当前分支截图采集 | 未通过：Actions [41163335197](https://github.com/liao-zc/OmniPlayer/actions/runs/41163335197)。Player revision 自动化仍按旧版预期直接在首页找磁力输入框，当前入口先显示“磁力播放”卡片；应用首页成功打开，失败原因为测试脚本未进入磁力模块。已调整脚本先进入磁力模块，并修正播放器控件显示探测，再次采集需重跑。 |
+| 公网磁力快速起播 | 未通过：历史受控/公网证据仍显示启动慢，无法证明十条用户磁力达到 90% 成功或 2 MB/s。 |
+
+`41163294809` 已通过编译和 instrumentation 单元/组件测试，但后续综合脚本在播放器画质控件检查处停止，因此后续偏好与搜索分页阶段未执行。修复后的完整结果应以新的 CI run 为准。本地项目文件夹仍名为 `FreeMagnetPlayer`，安装包 ID `com.freemangnetplayer` 为兼容旧安装而保留；界面和仓库名称为 OmniPlayer。

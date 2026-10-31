@@ -43,22 +43,27 @@ def visible_action(node):
     return x2>x1 and y2>y1
 def controller(id=None):
     deadline=time.monotonic()+10
+    tapped=False
     while time.monotonic()<deadline:
         root=tree()
         target=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/'+(id or 'player_position')) and visible_action(n)),None)
         if target is not None: return root,target
-        surface=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface') and visible_action(n)),None)
-        if surface is None: surface=next((n for n in root.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
-        if surface is not None: tap(surface)
-        else: adb('shell','input','tap','540','450')
-        time.sleep(.2)
+        if not tapped:
+            surface=next((n for n in root.iter('node') if n.get('resource-id','').endswith('/video_surface') and visible_action(n)),None)
+            if surface is None: surface=next((n for n in root.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
+            if surface is not None: tap(surface)
+            else: adb('shell','input','tap','540','450')
+            tapped=True
+        time.sleep(.25)
     raise AssertionError('Video/controller did not become visible after orientation transition')
+
 def control(id):
     _, node = controller(id)
     tap(node)
     time.sleep(.4)
 
 def open_magnet(value):
+    find_and_tap('磁力播放')
     find_and_tap('磁力链接输入框')
     focused = next(n for n in tree().iter('node') if n.get('class')=='android.widget.EditText' and n.get('focused')=='true')
     adb('shell','input','keycombination','113','29')

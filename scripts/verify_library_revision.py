@@ -31,15 +31,26 @@ def actionable(node):
     b=list(map(int,re.findall(r'\d+',node.get('bounds',''))))
     return len(b)==4 and b[2]>b[0] and b[3]>b[1]
 def control(name):
-    for _ in range(15):
-        t=tree();n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
-        if n is not None:tap(n);time.sleep(.4);return
-        surface=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
-        if surface is None: surface=next((n for n in t.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
-        if surface is not None:tap(surface)
-        else: adb('shell','input','tap','540','450')
-        time.sleep(.3)
+    deadline=time.monotonic()+8
+    tapped=False
+    while time.monotonic()<deadline:
+        t=tree()
+        n=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/'+name) and actionable(n)),None)
+        if n is not None: tap(n);time.sleep(.4);return
+        if name == 'player_quality':
+            n=next((n for n in t.iter('node') if n.get('text') in ('画质','画质设置') and actionable(n)),None)
+            if n is not None: tap(n);time.sleep(.4);return
+        if not tapped:
+            surface=next((n for n in t.iter('node') if n.get('resource-id','').endswith('/video_surface') and actionable(n)),None)
+            if surface is None: surface=next((n for n in t.iter('node') if 'Show player controls' in n.get('content-desc','')),None)
+            if surface is not None: tap(surface)
+            else: adb('shell','input','tap','540','450')
+            tapped=True
+        time.sleep(.25)
+    (OUT/'library-control-failure-ui.xml').write_text(ET.tostring(tree(),encoding='unicode'),encoding='utf-8')
+    screenshot('library-control-failure.png')
     raise AssertionError('Missing visible built-in control '+name)
+
 def open_cache(title):
     root=tree();parents={child:parent for parent in root.iter() for child in parent}
     node=next(n for n in root.iter('node') if n.get('text')==title)
