@@ -13,7 +13,7 @@ OmniPlayer 是面向 Android 手机、平板和电视的本地媒体播放器，
 - [软件架构图与包职责](docs/architecture.md)
 - [完整历史需求清单和逐项点检报告](docs/requirements-checklist.md)
 - [本轮重构报告](docs/report.md)
-- [当前界面截图](docs/screenshots/current-ui/)
+- [当前主界面截图](docs/screenshots/current-ui/01-home.png)
 - [界面使用说明](docs/usage-zh.md)
 
 ## 构建信息
