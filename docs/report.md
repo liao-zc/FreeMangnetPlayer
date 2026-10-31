@@ -258,3 +258,7 @@ CI 验证覆盖编译、instrumentation 和静态更新流程检查；未在模�
 | 四 ABI Release APK | 通过 | v0.4.0 Release 附件、ABI 检查与 SHA256SUMS |
 
 CI 生成的逐项截图与状态文件保存在 run 41220234864 的 `OmniPlayer-CI-report-and-debug-APK` artifact；仓库内脚本 `scripts/run_android_regressions.sh`、`scripts/run_ui_regressions.sh` 和 `scripts/summarize_ci_results.py` 可重复运行同一回归流程。
+
+### 本地 v0.4.0 ARM64 APK 校验
+
+已下载并校验 Release 中的正式 APK：dist/OmniPlayer-0.4.0-arm64-v8a.apk，大小 114,751,818 bytes；SHA-256 $hash，与 GitHub Release 资产摘要一致。
