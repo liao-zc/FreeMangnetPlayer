@@ -165,3 +165,7 @@ GitHub Release [v0.3.8](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.
 ### 首轮 CI 反馈
 
 CI run [41204349316](https://github.com/liao-zc/OmniPlayer/actions/runs/41204349316) 的资源检查、需求脚本编译均通过；Kotlin 编译发现播放器布局删除缓存文字控件后仍引用旧 ID。已删除残余引用，版本保持 v0.3.10，修复后重新运行全量 CI，未将本次失败标为通过。
+
+### v0.3.10 全量 CI 与发布结果
+
+CI run [41204663746](https://github.com/liao-zc/OmniPlayer/actions/runs/41204663746) 全部通过：仓库/UTF-8 检查、Android APK 与 instrumentation 构建、API 35 模拟器回归、受控 BitTorrent fixture、搜索分页 fixture，以及本轮新增需求自动检查均通过。v0.3.10 已发布四种 ABI APK，见 [GitHub Release](https://github.com/liao-zc/OmniPlayer/releases/tag/v0.3.10)。新增需求的代码级点检均通过；真实公网直播源、多厂家遥控器/电视和真实磁力资源的播放体验未在这次受控 CI 中覆盖，不据此声称已在所有设备实测。
